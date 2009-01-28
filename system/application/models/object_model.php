@@ -20,15 +20,37 @@ class Object_model extends Model {
 
 
     // load the object and related fields
-	function load_object($id='')
+	function load_object()
     {
-        if($this->object_id == '' && is_numeric($id)) {
-			$this->object_id = $this->db->escape($id);
-		}
+
 		$query = $this->db->get_where('object', array('object_id' => $this->object_id));
 		
-		$this->fields = $this->db->get_where('r-object-field', array('object_id' => $this->object_id));
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			$this->name = $row['name'];
+			$this->fields = $this->db->get_where('r-object-field', array('object_id' => $this->object_id));
+			return TRUE;
+		} else {
+			$this->object_id = '';
+			return FALSE;
+		}
+
+		
     }
+
+	// update the object 
+    function update_object()
+    {
+        if($this->object_id != '') {
+
+			$this->db->where('object_id', $this->object_id);
+			$this->db->update('object', $this);
+
+		}
+		
+    }
+
 
 	// delete the object and all related fields info
     function delete_object()
@@ -47,6 +69,23 @@ class Object_model extends Model {
 
 
 
+	// related fields functions
+	function field_in_object($id)
+    {
+
+		$query = $this->db->get_where('r-object-field', array('object_id' => $this->object_id, 'field_id' => $id));
+				
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			return $row;
+		} else {
+			return FALSE;
+		}
+
+		
+    }
+
     function add_field($field_id,$required)
     {
 		$this->db->set('field_id', $field_id);
@@ -58,11 +97,13 @@ class Object_model extends Model {
     function update_field($id,$field_id,$required)
     {
 		$this->db->set('field_id', $field_id);
+		$this->db->set('object_id', $this->object_id);
 		$this->db->set('required', $required);
-        $this->db->insert('r-object-field', $this);
-
-        $this->db->update('r-object-field', $this, array('id' => $_POST['id']));
+		
+		$this->db->where('id', $id);
+        $this->db->update('r-object-field', $this);
     }
+
 
 }
 
