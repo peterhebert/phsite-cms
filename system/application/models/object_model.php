@@ -44,9 +44,15 @@ class Object_model extends Model {
     {
         if($this->object_id != '') {
 
+			$data = array('name' => $this->name);
 			$this->db->where('object_id', $this->object_id);
-			$this->db->update('object', $this);
+			$this->db->update('object', $data);
 
+		} else {
+
+			$data = array('name' => $this->name);
+			$this->db->insert('object', $data); 
+			$this->object_id = $this->db->insert_id();
 		}
 		
     }
@@ -86,22 +92,27 @@ class Object_model extends Model {
 		
     }
 
-    function add_field($field_id,$required)
+    function insert_field($field_id,$required)
     {
-		$this->db->set('field_id', $field_id);
-		$this->db->set('object_id', $this->object_id);
-		$this->db->set('required', $required);
-        $this->db->insert('r-object-field', $this);
+		
+		$data = array(
+		'field_id' => $field_id,
+		'object_id' => $this->object_id,
+		'required' => $required
+		);
+		$this->db->insert('r-object-field', $data); 
     }
 
     function update_field($id,$field_id,$required)
     {
-		$this->db->set('field_id', $field_id);
-		$this->db->set('object_id', $this->object_id);
-		$this->db->set('required', $required);
+		$data = array(
+		'field_id' => $field_id,
+		'object_id' => $this->object_id,
+		'required' => $required
+		);
 		
 		$this->db->where('id', $id);
-        $this->db->update('r-object-field', $this);
+        $this->db->update('r-object-field', $data);
     }
 
 

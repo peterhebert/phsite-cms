@@ -57,14 +57,13 @@ class Object extends Controller {
 
 				if ($this->form_validation->run())
 				{
-					$this->Object_model->object_id = $this->input->post('object_id');
+					if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
+						$this->Object_model->object_id = $this->input->post('object_id');
+					}
 					$this->Object_model->name = $this->input->post('name');
-					$this->Object_model->update();
+					$this->Object_model->update_object();
 
 				}
-		
-
-
 
 
 				// now do related fields
@@ -73,8 +72,28 @@ class Object extends Controller {
 				$form_array_required = $this->input->post('required', TRUE);
 
 				foreach ($field_list as $the_field) {
+					$zz_exist = FALSE;
+					$zz_required = FALSE;
+
 					if(is_array($form_array_exists) and in_array($the_field['field_id'],$form_array_exists)) {
 						echo "<p>field ".$the_field['name']." selected</p>\n";
+						$zz_exist = TRUE;
+					}
+
+					if(is_array($form_array_required) and in_array($the_field['field_id'],$form_array_required)) {
+						echo "<p>field ".$the_field['name']." is required</p>\n";
+						$zz_exist = TRUE;
+						$zz_required = TRUE;
+					}
+
+					if($zz_exist == TRUE) {
+						if( is_array($form_array) and in_array($the_field['field_id'],$form_array)) {
+							//update
+							$this->Object_model->update_field($form_array[$the_field['field_id']],$the_field['field_id'],$zz_required);
+						} else {
+							// insert
+							$this->Object_model->insert_field($the_field['field_id'],$zz_required);
+						}
 					}
 				
 				
@@ -82,17 +101,8 @@ class Object extends Controller {
 	
 
 
-
-
-
 			}
 			
-
-
-
-
-
-
 
 
 

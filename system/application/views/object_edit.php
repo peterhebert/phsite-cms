@@ -36,7 +36,7 @@ label.block {
 			'checked'     => $vals['exists']
 			);
 	
-			echo "<p><label class=\"block\">{$vals['name']}</label> <label>".form_checkbox($params)." avaiable?</label>";
+			echo "<p><label class=\"block\">{$vals['name']}</label> <label>".form_checkbox($params)." available?</label>";
 	
 			$params = array(
 			'name'        => 'required[]',
