@@ -76,12 +76,10 @@ class Object extends Controller {
 					$zz_required = FALSE;
 
 					if(is_array($form_array_exists) and in_array($the_field['field_id'],$form_array_exists)) {
-						echo "<p>field ".$the_field['name']." selected</p>\n";
 						$zz_exist = TRUE;
 					}
 
 					if(is_array($form_array_required) and in_array($the_field['field_id'],$form_array_required)) {
-						echo "<p>field ".$the_field['name']." is required</p>\n";
 						$zz_exist = TRUE;
 						$zz_required = TRUE;
 					}

@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>XHTML objects for embedding video</title>
+<style type="text/css">
+<!--
+/* object stuff here */
+
+/* hides the second object from all versions of IE */
+* html object.mov {
+	display: none;
+}
+
+/* displays the second object in all versions of IE apart from 5 on PC */
+* html object.mov/**/ {
+	display: inline;
+}
+
+/* hides the second object from all versions of IE >= 5.5 */
+* html object.mov {
+	display/**/: none;
+}
+
+-->
+</style>
+</head>
+<body>
+<h1>XHTML objects for embedding video</h1>
+<h2>DivX</h2>
+<!-- Start XHTML Divx Web Player -->
+<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616" codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab" height="240" width="320">
+<param name="src" value="http://localhost/phsite_ci/AVI_DivX.avi">
+<param name="custommode" value="none">
+<object type="video/divx" data="http://localhost/phsite_ci/" class="mov" height="" width="">
+<param name="src" value="AVI_DivX.avi">
+<param name="custommode" value="none">
+No video? Get the DivX Web Player for <a href="http://download.divx.com/player/DivXWebPlayerInstaller.exe">Windows</a> or <a href="http://download.divx.com/player/DivXWebPlayer.dmg">Mac</a>
+</object>
+<!-- End XHTML Divx Web Player -->
+
+
+	<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616" width="320" height="240" codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab" id="IE_divx">
+		<param name="custommode" value="none"/>
+		<param name="src" value="http://localhost/phsite_ci/AVI_DivX.avi"/>
+		<!--DivX Web Player code generator (divx.com)-->
+		<embed type="video/divx"
+		 id="MZ_divx" 
+		 src="http://localhost/AVI_DivX.avi" 
+		 custommode="none" 
+		 width="320" 
+		 height="240" 
+		 previewImage="http://localhost/test.png" 
+		 pluginspage="http://go.divx.com/plugin/download/"/>
+	</object>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2>Quicktime</h2>
+<!-- Start XHTML Quicktime -->
+<object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab" width="320" height="260">
+ <param name="src" value="the_leaves.mov" />
+ <param name="controller" value="true" />
+ <param name="autoplay" value="false" />
+ <object type="video/quicktime" data="the_leaves.mov" width="320" height="260" class="mov">
+ <param name="autoplay" value="false" />
+  <param name="controller" value="true" />
+		No video? <a href="http://www.apple.com/quicktime/download/">Get quicktime</a>
+ </object>
+</object>
+<!-- End XHTML Quicktime -->
+
+<h2>Flash</h2>
+<!-- Start XHTML Flash -->
+<object type="application/x-shockwave-flash" data="http://www.youtube.com/v/a0qMe7Z3EYg" height="280" width="480">
+	<param name="movie" value="http://www.youtube.com/v/a0qMe7Z3EYg" />
+	<param name="FlashVars" value="playerMode=embedded" />
+</object>
+<!-- FYI, that super small flash code works on everything from youtube / swf's / all other movie sites...-->
+<!-- End XHTML Flash -->
+</body>
+</html>
