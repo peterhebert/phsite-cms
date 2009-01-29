@@ -17,6 +17,7 @@ label.block {
 
 <body>
 	<h1>Object editor</h1>
+	<p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
 	<?php echo $msg;
 	echo form_open($action, $attributes, $hidden);
 	

@@ -6,34 +6,15 @@ class Object extends Controller {
             parent::Controller();
 
 			$this->load->model('Object_model');
+			$this->load->helper('url');
 
-		}
-
-		function view()
-		{
-
-			$this->Object_model->object_id = $this->uri->segment(3);
-			
-			if($this->Object_model->load_object()) {
-				$data['msg'] = '<p>object "'.$this->Object_model->name.'" exists</p>';
-				$data['msg'] .= '<p>object fields: </p>';
-
-				$this->load->library('table');
-				$data['msg'] .= $this->table->generate($this->Object_model->fields);
-				
-			} else {
-				$data['msg'] = '<p>object does not exist</p>';
-			}
-	
-			$this->load->view('object_view',$data);
 		}
 
 		function index()
 		{
 			$data['q'] = $this->Object_model->get_list();
-			$this->load->helper('url');
 	
-			$this->load->view('object_list',$data);
+			$this->load->view('cms/object_list',$data);
 		}
 
 		function edit()
@@ -113,7 +94,7 @@ class Object extends Controller {
 
 			$data['msg'] = '';
 			$data['hidden'] = '';
-			$data['action'] = 'object/edit';
+			$data['action'] = 'cms/object/edit';
 
 			if(is_numeric($this->uri->segment(3)) and $this->uri->segment(3) > 0) {
 				$obj_id = $this->uri->segment(3);
@@ -146,7 +127,7 @@ class Object extends Controller {
 				"required" => $required);
 			}
 
-			$this->load->view('object_edit',$data);
+			$this->load->view('cms/object_edit',$data);
 		}
 
 

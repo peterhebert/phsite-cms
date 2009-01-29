@@ -6,7 +6,6 @@ class Field extends Controller {
             parent::Controller();
 
 			$this->load->model('Field_model');
-			//$this->load->scaffolding('field');
 		}
 
 		function listing()
@@ -16,7 +15,7 @@ class Field extends Controller {
 			$this->table->set_heading('ID', 'Field name');
 			$data['table'] = $this->table->generate($data['q']);
 	
-			$this->load->view('field_list',$data);
+			$this->load->view('cms/field_list',$data);
 		}
 
 		function edit()
@@ -49,7 +48,7 @@ class Field extends Controller {
 			$this->Field_model->load();
 			$data['field_id'] = $this->Field_model->field_id;
 			$data['name'] = $this->Field_model->name;
-			$this->load->view('field_edit',$data);
+			$this->load->view('cms/field_edit',$data);
 		}
 
 
