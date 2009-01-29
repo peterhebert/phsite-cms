@@ -6,7 +6,10 @@
 </head>
 
 <body>
-	<h1>Object view</h1>
+	<h1>Object</h1>
+	<?php echo $msg;
+	
+	 ?>
 
 </body>
 </html>

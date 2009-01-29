@@ -72,9 +72,6 @@ class Object_model extends Model {
     }
 
 
-
-
-
 	// related fields functions
 	function field_in_object($id)
     {
@@ -113,6 +110,12 @@ class Object_model extends Model {
 		
 		$this->db->where('id', $id);
         $this->db->update('r-object-field', $data);
+    }
+    function remove_field($id)
+    {
+		
+		$this->db->where('id', $id);
+        $this->db->delete('r-object-field');
     }
 
 

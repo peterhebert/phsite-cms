@@ -6,7 +6,7 @@ class Object extends Controller {
             parent::Controller();
 
 			$this->load->model('Object_model');
-			$this->load->scaffolding('object');
+
 		}
 
 		function view()
@@ -28,9 +28,10 @@ class Object extends Controller {
 			$this->load->view('object_view',$data);
 		}
 
-		function listing()
+		function index()
 		{
 			$data['q'] = $this->Object_model->get_list();
+			$this->load->helper('url');
 	
 			$this->load->view('object_list',$data);
 		}
@@ -84,25 +85,31 @@ class Object extends Controller {
 						$zz_required = TRUE;
 					}
 
-					if($zz_exist == TRUE) {
-						if( is_array($form_array) and in_array($the_field['field_id'],$form_array)) {
-							//update
+					// is the field related?
+					if( is_array($form_array) and in_array($the_field['field_id'],$form_array)) {
+
+						// is the field selected in form?
+						if($zz_exist == TRUE) {
+							// yes, update
 							$this->Object_model->update_field($form_array[$the_field['field_id']],$the_field['field_id'],$zz_required);
 						} else {
-							// insert
+							// no, delete
+							$this->Object_model->remove_field($form_array[$the_field['field_id']]);
+						}
+
+					} else { // field not related
+
+						// is the field selected in form?
+						if($zz_exist == TRUE) {
+							// yes, insert
 							$this->Object_model->insert_field($the_field['field_id'],$zz_required);
 						}
+
 					}
 				
-				
 				}
-	
-
 
 			}
-			
-
-
 
 			$data['msg'] = '';
 			$data['hidden'] = '';
