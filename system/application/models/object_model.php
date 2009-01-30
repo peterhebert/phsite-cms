@@ -29,7 +29,7 @@ class Object_model extends Model {
 		{
 			$row = $query->row_array();
 			$this->name = $row['name'];
-			$this->fields = $this->db->get_where('r-object-field', array('object_id' => $this->object_id));
+			$this->fields = $this->db->get_where('r_object_field', array('object_id' => $this->object_id));
 			return TRUE;
 		} else {
 			$this->object_id = '';
@@ -63,7 +63,7 @@ class Object_model extends Model {
     {
         if($this->object_id != '') {
 
-			$tables = array('object', 'r-object-field');
+			$tables = array('object', 'r_object_field');
 			$this->db->where('object_id', $this->object_id);
 			$this->db->delete($tables);
 
@@ -73,10 +73,12 @@ class Object_model extends Model {
 
 
 	// related fields functions
+
+	// is field related to object?
 	function field_in_object($id)
     {
 
-		$query = $this->db->get_where('r-object-field', array('object_id' => $this->object_id, 'field_id' => $id));
+		$query = $this->db->get_where('r_object_field', array('object_id' => $this->object_id, 'field_id' => $id));
 				
 		if ($query->num_rows() > 0)
 		{
@@ -89,33 +91,39 @@ class Object_model extends Model {
 		
     }
 
-    function insert_field($field_id,$required)
+    // add related field to object
+	function insert_field($field_id,$required,$order=0)
     {
 		
 		$data = array(
 		'field_id' => $field_id,
 		'object_id' => $this->object_id,
-		'required' => $required
+		'required' => $required,
+		'order' => $order
 		);
-		$this->db->insert('r-object-field', $data); 
+		$this->db->insert('r_object_field', $data); 
     }
 
-    function update_field($id,$field_id,$required)
+    // update related field
+    function update_field($id,$field_id,$required,$order=0)
     {
 		$data = array(
 		'field_id' => $field_id,
 		'object_id' => $this->object_id,
-		'required' => $required
+		'required' => $required,
+		'order' => $order
 		);
 		
 		$this->db->where('id', $id);
-        $this->db->update('r-object-field', $data);
+        $this->db->update('r_object_field', $data);
     }
+
+    // remove related field
     function remove_field($id)
     {
 		
 		$this->db->where('id', $id);
-        $this->db->delete('r-object-field');
+        $this->db->delete('r_object_field');
     }
 
 

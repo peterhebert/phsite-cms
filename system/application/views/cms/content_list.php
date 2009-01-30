@@ -7,10 +7,36 @@
 
 <body>
 	<h1>Content</h1>
+	
 	<p>Here is a list of all content in the database. Click a link to edit the content.</p>
 
+<ul>
 <?php 
-	$this->table->set_heading('Content ID', 'Parent ID', 'Object ID', 'Created', 'Updated');
-	echo $this->table->generate($q); ?>
+	foreach ($q as $content) {
+		$this->Content_model->load($content['content_id']);
+			//print_r($this->Content_model->content_data);
+
+		if($langContent = $this->Content_model->getLang('eng')) {
+			?>
+				<li><?php
+		$uri = site_url("cms/content/edit/".$content['content_id']);
+		if(array_key_exists  ('title', $langContent)) {
+			$text = $langContent['title'];
+		} else {
+			$text = 'ID '.$content['field_id'];
+		}
+		$attr = array('title' => "edit '{$text}'");
+	
+		echo anchor($uri,$text,$attr);
+	?></li>
+
+			<?php
+		}
+	}
+	
+	?>
+</ul>	
+
+
 </body>
 </html>

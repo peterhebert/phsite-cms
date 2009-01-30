@@ -3,15 +3,30 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Field editor</title>
+<style type="text/css">
+<!--
+label.block {
+	float: left;
+	width: 10em;
+	margin-right: 1em;
+	font-weight:bold;
+}
+-->
+</style>
 </head>
 
 <body>
 	<h1>Field editor</h1>
-	<?php echo $msg; ?>
-	<form action="<?php echo $this->config->site_url("cms/field/edit/".$this->Field_model->field_id);?>" method="post" name="editor" id="editor">
-		<input name="field_id" type="hidden" id="field_id" value="<?php echo $field_id ?>" />
-		<input name="name" type="text" id="name" value="<?php echo $name ?>" />
-		<input name="submit" type="submit" id="submit" value="save" />
+	<p><?php echo anchor(site_url("cms/field"),"Back to Field list");  ?></p>
+	<?php echo $msg; 
+	
+	$action = "cms/field/edit/".$field_id;
+	?>
+	<form action="<?php echo $this->config->site_url($action);?>" method="post" name="editor" id="editor">
+		<?php echo form_hidden('field_id', $field_id); ?>
+		<p><label for="field_name" class="block">Field name</label><?php echo form_input('field_name',$field_name); ?></p>
+		<p><label for="input" class="block">Input type</label><?php echo form_dropdown('input', $types, $input); ?></p>
+		<p><input name="submit" type="submit" id="submit" value="save" /></p>
 	</form>
 
 </body>

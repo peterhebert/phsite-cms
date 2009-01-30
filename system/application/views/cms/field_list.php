@@ -9,14 +9,14 @@
 	<h1>Fields</h1>
 	<p>Here is a list of all fields in the database. Click a link to edit the field.</p>
 	<p><?php echo anchor(site_url("cms/field/edit"),"New field");  ?></p>
-	<ul><?php foreach($q as $index => $row) {?>
+	<ul><?php foreach($list as $row) {?>
 	
-	<li><?php
+	<li><?php 
 		$uri = site_url("cms/field/edit/".$row['field_id']);
-		$text = $row['name'];
-		$attr = array('title' => "edit '".$row['name']."' field");
+		$text = $row['field_name'];
+		$attr = array('title' => "edit '".$row['field_name']."' field");
 	
-		echo anchor($uri,$text,$attr);
+		 echo anchor($uri,$text,$attr);
 	?></li>
 	
 	

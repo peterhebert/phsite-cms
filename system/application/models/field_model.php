@@ -2,7 +2,8 @@
 class Field_model extends Model {
 
 	var $field_id;
-	var $name;
+	var $field_name;
+	var $input;
 
     function Field_model()
     {
@@ -23,8 +24,9 @@ class Field_model extends Model {
     {
 		$query = $this->db->get_where('field', array('field_id' => $this->field_id));
 		$row = $query->row_array();
-		$this->name = $row['name'];
-		
+		$this->field_id = $row['field_id'];
+		$this->field_name = $row['field_name'];
+		$this->input = $row['input'];
     }
 
 	// delete the field and all related object instances of field
@@ -32,7 +34,7 @@ class Field_model extends Model {
     {
         if($this->field_id != '') {
 
-			$tables = array('field', 'r-object-field');
+			$tables = array('field', 'r_object_field');
 			$this->db->where('field_id', $this->field_id);
 			$this->db->delete($tables);
 
@@ -40,9 +42,10 @@ class Field_model extends Model {
 		
     }
 
-    function new_field($name)
+    function new_field($name,$input)
     {
-		$this->db->set('name', $name);
+		$this->db->set('field_name', $name);
+		$this->db->set('input', $input);
         $this->db->insert('field', $this);
     }
 

@@ -9,9 +9,11 @@
 	<h1>Content editor</h1>
 	<p><?php echo anchor(site_url("cms/content"),"Back to Content list");  ?></p>
 <?php
-	echo "<p>". $content_id."</p>\n";
-	echo "<p>". $object_id."</p>\n";
-	echo "<p>". $updated."</p>\n";
+	echo "<p>Content ID: ". $content_id."</p>\n";
+	echo "<p>Object ID: ". $object_id."</p>\n";
+	echo "<p>Parent ID: ". $parent_id."</p>\n";
+	echo "<p>Created: ". $created."</p>\n";
+	echo "<p>Updated: ". $updated."</p>\n";
 	echo "<code>";
 	print_r( $content_data);
 	echo "</code>\n";
