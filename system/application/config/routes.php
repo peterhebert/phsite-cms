@@ -41,7 +41,7 @@
 */
 
 $route['default_controller'] = "home";
-$route['scaffolding_trigger'] = "bamboo";
+$route['scaffolding_trigger'] = "habs";
 
 
 /* End of file routes.php */
