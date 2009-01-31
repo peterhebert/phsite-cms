@@ -52,6 +52,7 @@ class Object extends Controller {
 				$form_array = $this->input->post('rel_id', TRUE);
 				$form_array_exists = $this->input->post('fields', TRUE);
 				$form_array_required = $this->input->post('required', TRUE);
+				$form_array_order = $this->input->post('order', TRUE);
 
 				foreach ($field_list as $the_field) {
 					$zz_exist = FALSE;
@@ -72,7 +73,8 @@ class Object extends Controller {
 						// is the field selected in form?
 						if($zz_exist == TRUE) {
 							// yes, update
-							$this->Object_model->update_field($form_array[$the_field['field_id']],$the_field['field_id'],$zz_required);
+							// update_field($id,$field_id,$required,$order=0)
+							$this->Object_model->update_field($form_array[$the_field['field_id']],$the_field['field_id'],$zz_required,$form_array_order[$the_field['field_id']]);
 						} else {
 							// no, delete
 							$this->Object_model->remove_field($form_array[$the_field['field_id']]);
@@ -83,21 +85,21 @@ class Object extends Controller {
 						// is the field selected in form?
 						if($zz_exist == TRUE) {
 							// yes, insert
-							$this->Object_model->insert_field($the_field['field_id'],$zz_required);
+							$this->Object_model->insert_field($the_field['field_id'],$zz_required,$form_array_order[$the_field['field_id']]);
 						}
 
 					}
 				
 				}
 
-			}
+			} // end form processing
 
 			$data['msg'] = '';
 			$data['hidden'] = '';
 			$data['action'] = 'cms/object/edit';
 
-			if(is_numeric($this->uri->segment(3)) and $this->uri->segment(3) > 0) {
-				$obj_id = $this->uri->segment(3);
+			if(is_numeric($this->uri->segment(4)) and $this->uri->segment(4) > 0) {
+				$obj_id = $this->uri->segment(4);
 			
 				$this->Object_model->object_id = $obj_id;
 				$data['hidden'] = array('object_id' => $obj_id);
@@ -108,8 +110,6 @@ class Object extends Controller {
 
 			$this->Object_model->load_object();
 			$data['name'] = $this->Object_model->name;
-			
-			$related_fields = $this->Object_model->fields;
 			
 			foreach ($field_list as $the_field) {
 				$checked = $this->Object_model->field_in_object($the_field['field_id']);
@@ -122,9 +122,12 @@ class Object extends Controller {
 				}
 				$data['fields'][$the_field['field_id']] = array(
 				"rel_id" => $checked['id'],
-				"name" => $the_field['name'], 
+				"name" => $the_field['field_name'], 
 				"exists" => $exists,
-				"required" => $required);
+				"required" => $required,
+				"order" => $checked['order'],
+
+				);
 			}
 
 			$this->load->view('cms/object_edit',$data);

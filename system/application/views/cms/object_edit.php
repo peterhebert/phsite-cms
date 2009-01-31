@@ -18,13 +18,43 @@ label.block {
 <body>
 	<h1>Object editor</h1>
 	<p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
+	
+	
+	
+	
 	<?php echo $msg;
+	
+	
+	
+	
 	echo form_open($action, $attributes, $hidden);
 	
 	 ?>
+	 
 		<p><label for="name" class="block">object name</label><input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" /></p>
-	 <fieldset><legend>Fields</legend>
+		 <fieldset><legend>Fields</legend>
+
+<table>
+<tr>
+<th scope="col" id="th-avail">available?</th>
+<th scope="col" id="th-req">required?</th>
+<th scope="col" id="th-order">order</th>
+<th scope="col">&nbsp;</th>
+</tr>
+
 		<?php foreach ($fields as $index => $vals) {
+		
+		echo "<tr>\n";
+
+//
+//<td></td>
+//<td>&nbsp;</td>
+//<td>&nbsp;</td>
+//<td>&nbsp;</td>
+//</tr>
+
+
+
 			if($vals['exists']) {
 				echo form_hidden('rel_id['.$index.']', $vals['rel_id']);
 			}
@@ -45,9 +75,24 @@ label.block {
 			'value'       => $index,
 			'checked'     => $vals['required']
 			);
-			echo " <label>".form_checkbox($params)." required?</label></p>\n";
+			echo " <label>".form_checkbox($params)." required?</label>";
+
+
+			$params = array(
+			'name'        => "order[{$index}]",
+			'id'          => "order[{$index}]",
+			'value'       => $vals['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			echo form_label('Order', 'order');
+			echo form_input($params);
+			
+		echo "</tr>\n";
 		
 		} ?>
+</table>
 	 </fieldset>
 
 		<input name="submit" type="submit" id="submit" value="save" />
