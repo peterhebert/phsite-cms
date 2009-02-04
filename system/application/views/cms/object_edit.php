@@ -13,16 +13,42 @@ label.block {
 }
 -->
 </style>
-</head>
+<script type="text/javascript" src="/phsite_ci/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function() {
+	$('#add').click(function() {
+		return !$('#select1 option:selected').remove().appendTo('#select2');
+	});
+	$('#remove').click(function() {
+		return !$('#select2 option:selected').remove().appendTo('#select1');
+	});
+});
 
+/* ]]> */
+</script>
+</head>
 <body>
-	<h1>Object editor</h1>
-	<p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
-	
-	
-	
-	
-	<?php echo $msg;
+<h1>Object editor</h1>
+
+<h2>Test of multi-select</h2>
+ <div style="float:left">
+  <select multiple id="select1">
+   <option value="1">Option 1</option>
+   <option value="2">Option 2</option>
+   <option value="3">Option 3</option>
+   <option value="4">Option 4</option>
+  </select>
+  <a href="#" id="add">add &gt;&gt;</a>
+ </div>
+ <div style="float:left">
+  <select multiple id="select2"></select>
+  <a href="#" id="remove">&lt;&lt; remove</a>
+ </div>
+
+<br clear="all" />
+<p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
+<?php echo $msg;
 	
 	
 	
@@ -30,19 +56,20 @@ label.block {
 	echo form_open($action, $attributes, $hidden);
 	
 	 ?>
-	 
-		<p><label for="name" class="block">object name</label><input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" /></p>
-		 <fieldset><legend>Fields</legend>
-
+<p>
+	<label for="name" class="block">object name</label>
+	<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
+</p>
+<fieldset>
+<legend>Fields</legend>
 <table>
-<tr>
-<th scope="col" id="th-avail">available?</th>
-<th scope="col" id="th-req">required?</th>
-<th scope="col" id="th-order">order</th>
-<th scope="col">&nbsp;</th>
-</tr>
-
-		<?php foreach ($fields as $index => $vals) {
+	<tr>
+		<th scope="col" id="th-avail">available?</th>
+		<th scope="col" id="th-req">required?</th>
+		<th scope="col" id="th-order">order</th>
+		<th scope="col">&nbsp;</th>
+	</tr>
+	<?php foreach ($fields as $index => $vals) {
 		
 		echo "<tr>\n";
 
@@ -93,11 +120,8 @@ label.block {
 		
 		} ?>
 </table>
-	 </fieldset>
-
-		<input name="submit" type="submit" id="submit" value="save" />
-	</form>
-
-
+</fieldset>
+<input name="submit" type="submit" id="submit" value="save" />
+</form>
 </body>
 </html>
