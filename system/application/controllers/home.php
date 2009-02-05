@@ -11,5 +11,6 @@ class Home extends Controller {
 	{
 		$this->load->view('home');
 	}
+
 }
 ?>

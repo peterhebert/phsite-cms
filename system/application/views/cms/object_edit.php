@@ -17,6 +17,25 @@ text-align: left;
 padding: 1ex 1em;
 }
 
+div.form-row { clear:both; }
+div.form-row label, div.form-row div {
+	float: left;
+	margin-right: 1em;
+	width: 4em;
+}
+div.form-row .field_name {
+	width: 6em;
+}
+div.form-row .in_object {
+}
+div.form-row .required {
+}
+div.form-row .order {
+}
+label span {
+	display:none;
+}
+
 -->
 </style>
 <script type="text/javascript" src="/phsite_ci/js/jquery-1.3.1.min.js"></script>
@@ -25,16 +44,20 @@ padding: 1ex 1em;
 $().ready(function() {
 	
 
-	$("form :checkbox[name='required[]'").click(function() {
+	$("form input[name='required[]']").click(function() {
 	
-		var ischecked = $(this).attr('checked');
-		var myname = $(this).attr('id');
-		var myval = $(this).val();
-		var parentEls = $(this).parents();
-		
-		if(ischecked == true and myname == 'required[]') {
-
+		if( $(this).attr('checked') == true ) {
+			$(this).parent().siblings(1).children(0).attr("checked",true)
 		}
+		
+	});
+
+	$("form input[name='fields[]']").click(function() {
+	
+		if( $(this).attr('checked') == false ) {
+			$(this).parent().siblings(1).children(0).attr("checked",false)
+		}
+		
 	});
 
 });
@@ -60,16 +83,16 @@ $().ready(function() {
 </p>
 <fieldset>
 <legend>Fields</legend>
-<table>
-	<tr>
-		<th scope="col" id="th-myname">Field name</th>
-		<th scope="col" id="th-avail">available?</th>
-		<th scope="col" id="th-req">required?</th>
-		<th scope="col" id="th-order">order</th>
-	</tr>
+
+	<div class="form-row">
+		<div class="field_name">field name</div>
+		<div class="in_object">in object?</div>
+		<div class="required">required?</div>
+		<div class="order">order</div>
+	</div>
 	<?php foreach ($fields as $index => $vals) {
 		
-			echo "<tr>\n";
+			echo "<div class=\"form-row\">\n";
 
 			if($vals['exists']) {
 				echo form_hidden('rel_id['.$index.']', $vals['rel_id']);
@@ -83,8 +106,8 @@ $().ready(function() {
 			'checked'     => $vals['exists']
 			);
 	
-			echo "<th id=\"name-{$index}\">{$vals['name']}</th>";
-			echo "<td headers=\"name-{$index} th-avail\">".form_checkbox($params)."</td>";
+			echo "<label class=\"field_name\">{$vals['name']}</label>";
+			echo "<label class=\"in_object\">".form_checkbox($params)." <span>in object?</span></label>";
 			
 			$params = array(
 			'name'        => 'required[]',
@@ -93,7 +116,7 @@ $().ready(function() {
 			'checked'     => $vals['required']
 			);
 
-			echo "<td headers=\"name-{$index} th-req\">".form_checkbox($params)."</td>";
+			echo "<label class=\"required\">".form_checkbox($params)." <span>required?</span></label>";
 
 			$params = array(
 			'name'        => "order[{$index}]",
@@ -103,12 +126,11 @@ $().ready(function() {
 			'size'        => '3'
 			);
 
-			echo "<td headers=\"name-{$index} th-order\">".form_input($params)."</td>";
+			echo "<label class=\"order\"><span>order</span> ".form_input($params)."</label>";
 			
-			echo "</tr>\n";
+			echo "</div>\n";
 		
 		} ?>
-</table>
 </fieldset>
 <input name="submit" type="submit" id="submit" value="save" />
 </form>
