@@ -11,18 +11,32 @@ label.block {
 	margin-right: 1em;
 	font-weight:bold;
 }
+
+fieldset table td, fieldset table th {
+text-align: left;
+padding: 1ex 1em;
+}
+
 -->
 </style>
 <script type="text/javascript" src="/phsite_ci/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function() {
-	$('#add').click(function() {
-		return !$('#select1 option:selected').remove().appendTo('#select2');
+	
+
+	$("form :checkbox[name='required[]'").click(function() {
+	
+		var ischecked = $(this).attr('checked');
+		var myname = $(this).attr('id');
+		var myval = $(this).val();
+		var parentEls = $(this).parents();
+		
+		if(ischecked == true and myname == 'required[]') {
+
+		}
 	});
-	$('#remove').click(function() {
-		return !$('#select2 option:selected').remove().appendTo('#select1');
-	});
+
 });
 
 /* ]]> */
@@ -31,22 +45,6 @@ $().ready(function() {
 <body>
 <h1>Object editor</h1>
 
-<h2>Test of multi-select</h2>
- <div style="float:left">
-  <select multiple id="select1">
-   <option value="1">Option 1</option>
-   <option value="2">Option 2</option>
-   <option value="3">Option 3</option>
-   <option value="4">Option 4</option>
-  </select>
-  <a href="#" id="add">add &gt;&gt;</a>
- </div>
- <div style="float:left">
-  <select multiple id="select2"></select>
-  <a href="#" id="remove">&lt;&lt; remove</a>
- </div>
-
-<br clear="all" />
 <p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
 <?php echo $msg;
 	
@@ -64,23 +62,14 @@ $().ready(function() {
 <legend>Fields</legend>
 <table>
 	<tr>
+		<th scope="col" id="th-myname">Field name</th>
 		<th scope="col" id="th-avail">available?</th>
 		<th scope="col" id="th-req">required?</th>
 		<th scope="col" id="th-order">order</th>
-		<th scope="col">&nbsp;</th>
 	</tr>
 	<?php foreach ($fields as $index => $vals) {
 		
-		echo "<tr>\n";
-
-//
-//<td></td>
-//<td>&nbsp;</td>
-//<td>&nbsp;</td>
-//<td>&nbsp;</td>
-//</tr>
-
-
+			echo "<tr>\n";
 
 			if($vals['exists']) {
 				echo form_hidden('rel_id['.$index.']', $vals['rel_id']);
@@ -94,16 +83,17 @@ $().ready(function() {
 			'checked'     => $vals['exists']
 			);
 	
-			echo "<p><label class=\"block\">{$vals['name']}</label> <label>".form_checkbox($params)." available?</label>";
-	
+			echo "<th id=\"name-{$index}\">{$vals['name']}</th>";
+			echo "<td headers=\"name-{$index} th-avail\">".form_checkbox($params)."</td>";
+			
 			$params = array(
 			'name'        => 'required[]',
 			'id'          => 'required[]',
 			'value'       => $index,
 			'checked'     => $vals['required']
 			);
-			echo " <label>".form_checkbox($params)." required?</label>";
 
+			echo "<td headers=\"name-{$index} th-req\">".form_checkbox($params)."</td>";
 
 			$params = array(
 			'name'        => "order[{$index}]",
@@ -113,10 +103,9 @@ $().ready(function() {
 			'size'        => '3'
 			);
 
-			echo form_label('Order', 'order');
-			echo form_input($params);
+			echo "<td headers=\"name-{$index} th-order\">".form_input($params)."</td>";
 			
-		echo "</tr>\n";
+			echo "</tr>\n";
 		
 		} ?>
 </table>
