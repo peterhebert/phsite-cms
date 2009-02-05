@@ -68,7 +68,7 @@ $().ready(function() {
 <body>
 <h1>Object editor</h1>
 
-<p><?php echo anchor(site_url("cms/object"),"Back to Object list");  ?></p>
+<p><?php echo anchor("cms/object","Back to Object list");  ?></p>
 <?php echo $msg;
 	
 	

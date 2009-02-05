@@ -3,11 +3,37 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Content editor</title>
+<style type="text/css">
+<!--
+.breadcrumb {
+	clear:both;
+}
+.breadcrumb ul {
+	list-style: none;
+	margin:0;
+}
+.breadcrumb ul li {
+	float:left;
+	margin:0 1ex 0 0;
+}
+.breadcrumb ul li:after {
+	content:"  :  ";
+}
+-->
+</style>
 </head>
 
 <body>
+<div class="breadcrumb"><?php
+$bc = array(
+anchor("cms/cms","CMS home"),
+anchor("cms/content","Content"),
+'Content editor'
+);
+
+echo ul($bc);
+?></div>
 	<h1>Content editor</h1>
-	<p><?php echo anchor(site_url("cms/content"),"Back to Content list");  ?></p>
 <?php
 	echo "<p>Content ID: ". $content_id."</p>\n";
 	echo "<p>Object ID: ". $object_id."</p>\n";

@@ -88,6 +88,10 @@ class Content_model extends Model {
         $this->db->insert('field', $data);
     }
 
+    // perform content search
+	function search()
+    {
+	}
 
 }
 
