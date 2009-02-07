@@ -14,7 +14,10 @@ class Content extends Controller {
 
 	function index()
 	{
-		$data['q'] = $this->Content_model->get_list(10);
+		if($this->uri->segment(3)) {
+		}
+		$data['list'] = $this->Content_model->get_list(10);
+		$data['title'] = "Recently Added";
 
 		$this->load->view('cms/content_list',$data);
 	}
