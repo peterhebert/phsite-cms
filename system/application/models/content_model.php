@@ -68,6 +68,32 @@ class Content_model extends Model {
     {
 	}
 
+    // return other languages than current language
+    function get_other_langs($lang = 'eng')
+    {
+		$mylang = $this->db->escape($lang);
+		
+		$otherlangs = array();
+
+		if($lang == '') {
+			$sql = "select count(data_id) as num, lang from content_data where lang != '' group by lang";
+		} else {
+			$sql = "select count(data_id) as num, lang from content_data where lang != $mylang and lang != '' group by lang";
+		}
+		
+		$query = $this->db->query($sql);
+		
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result_array() as $row)
+			{
+			   $otherlangs[] = $row['lang'];
+			}
+			return $otherlangs;
+		}
+		return FALSE;
+    }
+
 }
 
 ?>

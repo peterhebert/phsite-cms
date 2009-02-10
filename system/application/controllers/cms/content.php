@@ -51,6 +51,7 @@ class Content extends Controller {
 		$data['created'] = '';
 		$data['updated'] = '';
 		$data['content_data'] = array();
+		$mylang = '';
 		
 		$params = $this->uri->uri_to_assoc(4);
 		
@@ -58,6 +59,7 @@ class Content extends Controller {
 		if(array_key_exists('id',$params)) {
 			if(array_key_exists('lang',$params)) {
 				$this->Content_model->getContent($params['id'],$params['lang']);
+				$mylang = $params['lang'];
 			} else {
 				$this->Content_model->getContent($params['id']);
 			}
@@ -68,9 +70,11 @@ class Content extends Controller {
 			$data['created'] = $this->Content_model->created;
 			$data['updated'] = $this->Content_model->updated;
 			$data['content_data'] = $this->Content_model->content_data;
+
+			// get other langs
+			$data['otherlangs'] = $this->Content_model->get_other_langs();
 			
 		}
-
 
 		// load object template
 		$this->load->model('Object_model');
@@ -82,7 +86,6 @@ class Content extends Controller {
 			$data['fields'] = $this->Object_model->fields;
 			
 		}	
-
 		
 		// get all needed fields for object type
 		$objects = $this->Object_model->get_list();
@@ -90,6 +93,8 @@ class Content extends Controller {
 		foreach($objects as $object) {
 			$data['objects'][$object['object_id']] = $object['name'];
 		}
+		
+		
 		
 		$this->load->view('cms/content_edit',$data);
 	

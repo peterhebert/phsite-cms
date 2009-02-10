@@ -23,9 +23,10 @@
 </div>
 <div class="page-wrap block" id="breadcrumb"><a href="#">phSite CMS</a> : Content editor</div>
 <div class="page-wrap block" id="page">
-	<div class="column w3">
+	<div class="column w4">
 		<h1>Content editor</h1>
 		<?php
+		
 		$hidden = array();
 		if($content_id != '') {
 			$hidden['content_id'] = $content_id;
@@ -111,7 +112,14 @@
 		?>
 		</form>
 	</div>
-	<div class="float w2">
+	<div class="float w1">
+<?php
+if(is_array($otherlangs)) {
+	echo "<h2>Other Languages</h2>\n";
+	echo ul($otherlangs);
+}
+?>
+
 	</div>
 	
 </div>
