@@ -26,27 +26,46 @@ class Field extends Controller {
 
 	function edit()
 	{
-		
-		$data['msg'] = '';
 		$this->load->library('form_validation');
 		
-		$this->form_validation->set_rules('field_id', 'Field ID', 'required|integer');
-		$this->form_validation->set_rules('field_name', 'Field Name', 'required|xss_clean');
-		$this->form_validation->set_rules('input', 'Input Type', 'required|callback_valid_input|xss_clean');
+		$data['msg'] = '';
+		$data['field_id'] = '';
+		$data['field_name'] = '';
+		$data['input_type'] = '';
+		$data['types'] = $this->input_types;
 
-		if ($this->form_validation->run() == FALSE)
-		{
-			$data['msg'] = validation_errors(); 
-		}
-		else
-		{
-			$this->Field_model->field_id = $this->input->post('field_id');	
-			$this->Field_model->field_name = $this->input->post('field_name');	
-			$this->Field_model->input = $this->input->post('input');	
+		if($this->input->post('submit') != '') {
+			// do validation
 			
-			$updated = $this->Field_model->update_field();
-			if($updated == TRUE) {
-				$data['msg'] .= "<p><strong>field has been updated</strong></p>";
+			if($this->input->post('field_id') != '') {
+				$this->form_validation->set_rules('field_id', 'Field ID', 'required|integer');
+			}
+	
+			$this->form_validation->set_rules('field_name', 'Field Name', 'required|xss_clean');
+			$this->form_validation->set_rules('input_type', 'Input Type', 'required|callback_valid_input|xss_clean');
+	
+			if ($this->form_validation->run() == FALSE)
+			{
+				$data['msg'] = validation_errors(); 
+				$data['field_id'] = $this->input->post('field_id');
+				$data['field_name'] = $this->input->post('field_name');
+				$data['input_type'] = $this->input->post('input_type');	
+			}
+			else
+			{
+				
+				if($this->input->post('field_id') != '') {
+					$this->Field_model->field_id = $this->input->post('field_id');	
+					$this->Field_model->field_name = $this->input->post('field_name');	
+					$this->Field_model->input_type = $this->input->post('input_type');	
+					$updated = $this->Field_model->update_field();
+				} else {
+					$updated = $this->Field_model->new_field($this->input->post('field_name'),$this->input->post('input_type'));
+				}
+	
+				if($updated == TRUE) {
+					$data['msg'] .= "<p><strong>field has been updated</strong></p>";
+				}
 			}
 		}
 
@@ -54,11 +73,13 @@ class Field extends Controller {
 			$this->Field_model->field_id = $this->uri->segment(4);
 		}	
 
-		$this->Field_model->load();
-		$data['field_id'] = $this->Field_model->field_id;
-		$data['field_name'] = $this->Field_model->field_name;
-		$data['input'] = $this->Field_model->input;
-		$data['types'] = $this->input_types;
+		if($this->Field_model->field_id != '') {
+			$this->Field_model->load();
+			$data['field_id'] = $this->Field_model->field_id;
+			$data['field_name'] = $this->Field_model->field_name;
+			$data['input_type'] = $this->Field_model->input_type;
+		}	
+
 		$this->load->view('cms/field_edit',$data);
 	}
 

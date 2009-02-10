@@ -5,28 +5,25 @@ class Cms extends Controller {
 	{
 		parent::Controller();
 		$this->load->helper('url');
+		$this->load->helper('html');
+		// load objects
+		$this->load->model('Field_model');
+		$this->load->model('Object_model');
+		$this->load->model('Content_model');
 	}
 	
 	function index()
 	{
-	
 		// load list of fields
-		$this->load->model('Field_model');
 		$data['list'] = $this->Field_model->get_list();
-		$indexdata['fields'] = $this->load->view('cms/field_list',$data, true);
+		$index['fields'] = $this->load->view('cms/field_list',$data, true);
 	
 		// load list of objects
-		$this->load->model('Object_model');
 		$data2['q'] = $this->Object_model->get_list();
-		$indexdata['objects'] = $this->load->view('cms/object_list',$data2, true);
+		$index['objects'] = $this->load->view('cms/object_list',$data2, true);
 
-		if($num > 0) {
-			$recent = $this->Content_model->get_list($num);
-			$data['title'] = "Recently Added";
-		} else {
-			$recent = $this->Content_model->get_list();
-			$data['title'] = "All content";
-		}
+		$recent = $this->Content_model->get_list(10);
+		$contentdata['title'] = "Recently Added";
 
 		if(count($recent) > 0) {
 			$links = array();
@@ -37,7 +34,7 @@ class Cms extends Controller {
 		foreach ($recent as $content) {
 			$this->Content_model->load($content['content_id']);
 	
-			if($langContent = $this->Content_model->getLang($lang)) {
+			if($langContent = $this->Content_model->getLang('eng')) {
 			
 				$uri = "cms/content/edit/".$content['content_id'];
 				if(array_key_exists  ('title', $langContent)) {
@@ -52,18 +49,13 @@ class Cms extends Controller {
 
 		}
 		
-		$data['list'] = ul($links);
+		$contentdata['list'] = ul($links);
 
-		$this->load->view('cms/content_list',$data);
-
-
-
-
-
+		$index['content'] = $this->load->view('cms/content_list',$contentdata, true);
 
 	
 		// now load view
-		$this->load->view('cms/index',$indexdata);
+		$this->load->view('cms/index',$index);
 	}
 	
 

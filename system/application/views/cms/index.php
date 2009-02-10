@@ -24,16 +24,13 @@
 <div class="page-wrap block" id="breadcrumb"><a href="#">phSite CMS</a> : <a href="#">Section</a> : <a href="#">Page</a></div>
 <div class="page-wrap block" id="page">
 	<div class="column w3">
-		<h2 class="first">Recent Entries</h2>
-		<p>Nisl diam commodo ad eu dolor commodo esse in ut nulla aliquip te eu nulla facilisi dignissim velit. Nostrud quis, facilisis veniam vel nibh, sed vero eros consequat facilisi magna eros ad luptatum vel. Duis odio volutpat. Enim enim laoreet euismod et et facilisi autem ut iusto quis lobortis eu adipiscing. Dolore ad lobortis, quis dolore consequat qui, quis facilisis autem nulla ad. </p>
-		<p>Nisl consequat suscipit. Luptatum veniam velit. </p>
-		<p>Duis, eu vel. Dolore quis autem, dolor eros quis in augue aliquam hendrerit lobortis et vel hendrerit. Vero eu tation, dignissim iriure consectetuer iusto ullamcorper molestie te wisi esse ex qui, ut esse ut magna. Enim praesent in diam quis praesent lobortis lorem eros nibh consequat tation commodo suscipit, ad, ut augue duis sed. Enim tation duis ex. </p>
-		<p>Iusto duis consequat, ut. Vel aliquip, qui, feugiat odio odio exerci vero, illum duis dolor consectetuer eum, luptatum amet iusto ullamcorper odio iriure blandit. </p>
+		<?php echo $content; ?>
+		<p><?php echo anchor("cms/content/edit","New Content"); ?></p>
 	</div>
 	<div class="float w2">
 		<h2 class="first">Data Structure</h2>
 		<p>You can define what types of content your CMS stores. Your content types are called Objects, and the individual data fields are called Fields.</p>
-<p>Click on a link to edit the object or field.</p>
+		<p>Click on a link to edit the object or field.</p>
 		<div class="block">
 			<div class="column w1">
 				<?php echo $objects; ?>

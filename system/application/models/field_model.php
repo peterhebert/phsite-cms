@@ -3,7 +3,7 @@ class Field_model extends Model {
 
 	var $field_id;
 	var $field_name;
-	var $input;
+	var $input_type;
 
     function Field_model()
     {
@@ -26,7 +26,7 @@ class Field_model extends Model {
 		$row = $query->row_array();
 		$this->field_id = $row['field_id'];
 		$this->field_name = $row['field_name'];
-		$this->input = $row['input'];
+		$this->input_type = $row['input_type'];
     }
 
 	// delete the field and all related object instances of field
@@ -42,11 +42,17 @@ class Field_model extends Model {
 		
     }
 
-    function new_field($name,$input)
+    function new_field($name,$input_type)
     {
-		$this->db->set('field_name', $name);
-		$this->db->set('input', $input);
-        $this->db->insert('field', $this);
+
+		$insert_data = array('field_name' => $name, 'input_type' => $input_type);
+
+		if($this->db->insert('field', $insert_data)) {
+			$this->field_id = $this->db->insert_id();
+			return TRUE;
+		} else {
+			return FALSE;
+		}
     }
 
     function update_field()

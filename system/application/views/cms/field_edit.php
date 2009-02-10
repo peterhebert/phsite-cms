@@ -25,7 +25,7 @@ label.block {
 	<form action="<?php echo $this->config->site_url($action);?>" method="post" name="editor" id="editor">
 		<?php echo form_hidden('field_id', $field_id); ?>
 		<p><label for="field_name" class="block">Field name</label><?php echo form_input('field_name',$field_name); ?></p>
-		<p><label for="input" class="block">Input type</label><?php echo form_dropdown('input', $types, $input); ?></p>
+		<p><label for="input_type" class="block">Input type</label><?php echo form_dropdown('input_type', $types, $input_type); ?></p>
 		<p><input name="submit" type="submit" id="submit" value="save" /></p>
 	</form>
 

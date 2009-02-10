@@ -1,51 +1,121 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<title>Content editor | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Content editor</title>
-<style type="text/css">
-<!--
-.breadcrumb {
-	clear:both;
-}
-.breadcrumb ul {
-	list-style: none;
-	margin:0;
-}
-.breadcrumb ul li {
-	float:left;
-	margin:0 1ex 0 0;
-}
-.breadcrumb ul li:after {
-	content:"  :  ";
-}
--->
-</style>
+<link href="/css/base.css" rel="stylesheet" type="text/css" />
+<link href="/css/simple.css" rel="stylesheet" type="text/css" />
 </head>
-
 <body>
-<div class="breadcrumb"><?php
-$bc = array(
-anchor("cms/cms","CMS home"),
-anchor("cms/content","Content"),
-'Content editor'
-);
+<div id="masthead">
+	<div class="page-wrap block">
+		<div class="column">
+			<h2><a href="/">phSite</a></h2>
+		</div>
+		<div class="column lh">a content manager for the rest of us</div>
+		<div class="float-right lh">
+			<form action="<?php echo site_url("cms/content/search") ?>" method="post" id="site-search">
+				<input name="search-text" id="search-text" type="text" />
+				<input name="search-submit" type="submit" id="search-submit" value="Search" />
+			</form>
+		</div>
+	</div>
+</div>
+<div class="page-wrap block" id="breadcrumb"><a href="#">phSite CMS</a> : Content editor</div>
+<div class="page-wrap block" id="page">
+	<div class="column w3">
+		<h1>Content editor</h1>
+		<pre><?php print_r($params);  ?></pre>
+		<?php
+		$hidden = array();
+		if($content_id != '') {
+			$hidden['content_id'] = $content_id;
+		}
+		$attributes = array('id' => 'content_editor');
+		
+		echo form_open(site_url("cms/content/edit/".$content_id), $attributes, $hidden);
 
-echo ul($bc);
-?></div>
-	<h1>Content editor</h1>
-<?php
-	echo "<p>Content ID: ". $content_id."</p>\n";
-	echo "<p>Object ID: ". $object_id."</p>\n";
-	echo "<p>Parent ID: ". $parent_id."</p>\n";
-	echo "<p>Created: ". $created."</p>\n";
-	echo "<p>Updated: ". $updated."</p>\n";
-	echo "<code>";
-	print_r( $content_data);
-	echo "</code>\n";
+		echo "<p>";
+		echo form_label('Parent', 'parent_id');
+		echo form_dropdown('object_id', $objects, $object_id);
+		echo "</p>\n";
 
+		$field = array(
+		'name'        => 'parent_id',
+		'id'          => 'parent_id',
+		'value'       => $parent_id
+		);
+		echo "<p>";
+		echo form_label('Parent', 'parent_id');
+		echo form_input($field);
+		echo "</p>\n";
 
-?>
+		$field = array(
+		'name'        => 'created',
+		'id'          => 'created',
+		'value'       => $created
+		);
+		echo "<p>";
+		echo form_label('Created', 'created');
+		echo form_input($field);
+		echo "</p>\n";
 
+		foreach($content_data as $data) {
+			$values[$data['field_id']] = $data['value'];
+			$hiddenIDs[$data['field_id']] = $data['data_id'];
+		}
+
+		foreach($fields as $row) {
+			echo "<p>";
+			echo form_label($row['field_name']);
+	
+			$field = array(
+			'name'        => "field[{$row['field_id']}]",
+			'id'          => "field[{$row['field_id']}]",
+			);
+	
+			if(array_key_exists($row['field_id'], $hiddenIDs)) {
+				echo form_hidden('data_id[]', $hiddenIDs[$row['field_id']] );
+			}
+
+			if(array_key_exists($row['field_id'], $values)) {
+				$field['value'] = form_prep($values[$row['field_id']] );
+			}
+			
+			switch($row['input']) {
+			case 'text':
+				echo form_input($field);
+				break;
+			case 'textarea':
+				$field['rows'] = 5;
+				$field['cols'] = 40;
+				echo form_textarea($field);
+				break;
+			case 'richtext':
+				$field['rows'] = 10;
+				$field['cols'] = 40;
+				echo form_textarea($field);
+				break;
+			default:
+				echo form_input($field);
+			}
+			
+			echo "</p>\n";
+	
+		}
+		
+		echo "<p>";
+		echo form_submit('submit', 'Save');
+		echo "</p>\n";
+
+		
+		?>
+		</form>
+	</div>
+	<div class="float w2">
+	</div>
+	
+</div>
+<div class="page-wrap block" id="footer"> phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </body>
 </html>

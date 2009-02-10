@@ -45,7 +45,7 @@ class Content_model extends Model {
 			$this->updated = $row['updated'];
 			
 			$this->db->join('field', 'content_data.field_id = field.field_id', 'left');
-			$query = $this->db->get_where('content_data', array('content_id' => $this->content_id));
+			$query = $this->db->get_where('content_data', array('content_id' => $this->content_id, 'lang' => NULL));
 
 			$this->content_data = $query->result_array();
 			return TRUE;
