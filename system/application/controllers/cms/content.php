@@ -14,44 +14,32 @@ class Content extends Controller {
 
 	function index()
 	{
-		if($this->uri->segment(3)) {
-		}
-		
-		$recent = $this->Content_model->get_list(10);
-		$data['title'] = "Recently Added";
+		$data['title'] = 'Content';
+		$content = $this->Content_model->get_list();
 
-		if(count($recent) > 0) {
-			$links = array();
-		} else {
-			$links[] = 'No content found';
-		}
+		foreach($content as $row)
+		{
 
-		foreach ($recent as $content) {
-			$this->Content_model->load($content['content_id']);
-	
-			if($langContent = $this->Content_model->getLang('eng')) {
-			
-				$uri = "cms/content/edit/".$content['content_id'];
-				if(array_key_exists  ('title', $langContent)) {
-					$text = $langContent['title'];
-				} else {
-					$text = 'ID '.$content['field_id'];
-				}
-				$attr = array('title' => "edit '{$text}'");
-			
-				$links[] = anchor($uri,$text,$attr);
+			$this->Content_model->getContent($row['content_id']);
+
+			$details = array();
+			$content_data = $this->Content_model->content_data;
+			foreach($content_data as $field)
+			{
+				$details[$field['field_name']] = $field['value'];
+			}
+
+			if(array_key_exists('title', $details)) {
+				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], $details['title'], array('title' => "edit '{$details['title']}'"));
+			} else {
+				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], 'ID '.$row['content_id'], array('title' => "edit ID ".$row['content_id']));
 			}
 
 		}
 
-		$data['list'] = ul($links);
-
-
-
+		$data['list'] = ul($list);
 		$this->load->view('cms/content_list',$data);
 	}
-
-
 
 	function edit()
 	{
@@ -66,22 +54,25 @@ class Content extends Controller {
 		
 		$params = $this->uri->uri_to_assoc(4);
 		
-		if(array_key_exists('lang',$params) ) {
-			$data['lang'] = $params['lang'];
-		}
-
-		if(array_key_exists('id',$params) ) {
-			$this->Content_model->load($params['id']);
+		// if id supplied, load info
+		if(array_key_exists('id',$params)) {
+			if(array_key_exists('lang',$params)) {
+				$this->Content_model->getContent($params['id'],$params['lang']);
+			} else {
+				$this->Content_model->getContent($params['id']);
+			}
+			
 			$data['content_id'] = $this->Content_model->content_id;
+			$data['object_id'] = $this->Content_model->object_id;
 			$data['parent_id'] = $this->Content_model->parent_id;
 			$data['created'] = $this->Content_model->created;
 			$data['updated'] = $this->Content_model->updated;
 			$data['content_data'] = $this->Content_model->content_data;
 			
-		} else if ($this->uri->segment(4) == 'type') {
-			$this->Content_model->object_id = $this->uri->segment(5);
 		}
-		
+
+
+		// load object template
 		$this->load->model('Object_model');
 		if ($this->Content_model->object_id != '') {
 			$data['object_id'] = $this->Content_model->object_id;

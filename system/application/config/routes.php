@@ -43,6 +43,7 @@
 $route['default_controller'] = "home";
 $route['scaffolding_trigger'] = "habs";
 
+$route['cms'] = "cms/cms";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

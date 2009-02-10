@@ -22,6 +22,7 @@ class Cms extends Controller {
 		$data2['q'] = $this->Object_model->get_list();
 		$index['objects'] = $this->load->view('cms/object_list',$data2, true);
 
+		// get recently added pages
 		$recent = $this->Content_model->get_list(10);
 		$contentdata['title'] = "Recently Added";
 

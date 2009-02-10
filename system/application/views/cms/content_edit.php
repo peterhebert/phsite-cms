@@ -25,7 +25,6 @@
 <div class="page-wrap block" id="page">
 	<div class="column w3">
 		<h1>Content editor</h1>
-		<pre><?php print_r($params);  ?></pre>
 		<?php
 		$hidden = array();
 		if($content_id != '') {
@@ -36,7 +35,7 @@
 		echo form_open(site_url("cms/content/edit/".$content_id), $attributes, $hidden);
 
 		echo "<p>";
-		echo form_label('Parent', 'parent_id');
+		echo form_label('Content type', 'parent_id');
 		echo form_dropdown('object_id', $objects, $object_id);
 		echo "</p>\n";
 
@@ -65,7 +64,7 @@
 			$hiddenIDs[$data['field_id']] = $data['data_id'];
 		}
 
-		foreach($fields as $row) {
+/*		foreach($fields as $row) {
 			echo "<p>";
 			echo form_label($row['field_name']);
 	
@@ -103,7 +102,7 @@
 			echo "</p>\n";
 	
 		}
-		
+*/		
 		echo "<p>";
 		echo form_submit('submit', 'Save');
 		echo "</p>\n";

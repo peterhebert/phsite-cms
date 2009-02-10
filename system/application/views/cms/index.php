@@ -21,7 +21,7 @@
 		</div>
 	</div>
 </div>
-<div class="page-wrap block" id="breadcrumb"><a href="#">phSite CMS</a> : <a href="#">Section</a> : <a href="#">Page</a></div>
+<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : CMS Home</div>
 <div class="page-wrap block" id="page">
 	<div class="column w3">
 		<?php echo $content; ?>

@@ -29,10 +29,9 @@ class Content_model extends Model {
 		return $query->result_array();
 	}
 
-    // load the content and related data
-	function load($id)
+    // return content of specific language and with no assigned language
+    function getContent($id,$lang = 'eng')
     {
-
 		$query = $this->db->get_where('content', array('content_id' => $id));
 		
 		if ($query->num_rows() > 0)
@@ -45,35 +44,11 @@ class Content_model extends Model {
 			$this->updated = $row['updated'];
 			
 			$this->db->join('field', 'content_data.field_id = field.field_id', 'left');
-			$query = $this->db->get_where('content_data', array('content_id' => $this->content_id, 'lang' => NULL));
+			
+			$where = "content_id = {$this->content_id} AND (lang = '' OR lang = '{$lang}')";
+			$query = $this->db->get_where('content_data',$where);
 
 			$this->content_data = $query->result_array();
-			return TRUE;
-		} else {
-			$this->content_id = '';
-			$this->object_id = '';
-			$this->parent_id = '';
-			$this->updated = '';
-			$this->created = '';
-			return FALSE;
-		}
-		
-    }
-
-    // return text of specific language
-    function getLang($lang='')
-    {
-		$results = array();
-		foreach ($this->content_data as $row) {
-			if($row['lang'] == $lang) {
-				$results[$row['field_name']] = $row['value'];
-			}
-
-		}
-		if(count($results) > 0) {
-			return $results;
-		} else {
-			return FALSE;
 		}
 
     }
