@@ -53,21 +53,6 @@ class Content_model extends Model {
 
     }
 
-    // insert new content
-    function insert()
-    {
-		$data = array(
-		'parent_id' => $parent_id,
-		'object_id' => $object_id
-		);
-        $this->db->insert('field', $data);
-    }
-
-    // perform content search
-	function search()
-    {
-	}
-
     // return other languages than current language
     function get_other_langs($lang = 'eng')
     {
@@ -92,6 +77,48 @@ class Content_model extends Model {
 			return $otherlangs;
 		}
 		return FALSE;
+    }
+
+    // insert new content
+    function insert()
+    {
+		$data = array(
+		'parent_id' => $this->parent_id,
+		'object_id' => $this->object_id
+		);
+        $this->db->insert('content', $data);
+		$this->content_id = $this->db->insert_id();
+
+		// insert field data
+		foreach ($this->content_data as $field) {
+		}
+
+
+    }
+
+    // insert new field data
+    function insert_data($field_id,$value,$lang='eng')
+    {
+		$data = array(
+		'field_id' => $field_id,
+		'value' => $value,
+		'lang' => $lang;
+		);
+        $this->db->insert('content_data', $data);
+    }
+
+    // update field data
+    function update_data($data_id,$field_id,$value,$lang='eng')
+    {
+		$data = array(
+		'content_id' => $this->content_id;
+		'field_id' => $field_id,
+		'value' => $value,
+		'lang' => $lang;
+		);
+
+		$this->db->where('data_id', $data_id);
+		$this->db->update('mytable', $data); 
     }
 
 }

@@ -32,6 +32,7 @@ class Object_model extends Model {
 			
 			$this->db->join('field', 'r_object_field.field_id = field.field_id', 'left');
 			$this->db->order_by("order", "asc");
+			$this->db->order_by("field_name", "asc");
 
 			$field_query = $this->db->get_where('r_object_field', array('object_id' => $this->object_id));
 			$this->fields = $field_query->result_array();

@@ -1,43 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<title>Object editor | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Object editor</title>
-<style type="text/css">
-<!--
-label.block {
-	float: left;
-	width: 10em;
-	margin-right: 1em;
-	font-weight:bold;
-}
-
-fieldset table td, fieldset table th {
-text-align: left;
-padding: 1ex 1em;
-}
-
-div.form-row { clear:both; }
-div.form-row label, div.form-row div {
-	float: left;
-	margin-right: 1em;
-	width: 4em;
-}
-div.form-row .field_name {
-	width: 6em;
-}
-div.form-row .in_object {
-}
-div.form-row .required {
-}
-div.form-row .order {
-}
-label span {
-	display:none;
-}
-
--->
-</style>
+<link href="/css/base.css" rel="stylesheet" type="text/css" />
+<link href="/css/simple.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/phsite_ci/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
@@ -66,33 +33,43 @@ $().ready(function() {
 </script>
 </head>
 <body>
-<h1>Object editor</h1>
-
-<p><?php echo anchor("cms/object","Back to Object list");  ?></p>
-<?php echo $msg;
-	
-	
-	
-	
-	echo form_open($action, $attributes, $hidden);
-	
-	 ?>
-<p>
-	<label for="name" class="block">object name</label>
-	<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
-</p>
-<fieldset>
-<legend>Fields</legend>
-
-	<div class="form-row">
-		<div class="field_name">field name</div>
-		<div class="in_object">in object?</div>
-		<div class="required">required?</div>
-		<div class="order">order</div>
+<div id="masthead">
+	<div class="page-wrap block">
+		<div class="column">
+			<h2><a href="/">phSite</a></h2>
+		</div>
+		<div class="column lh">a content manager for the rest of us</div>
+		<div class="float-right lh">
+			<form action="<?php echo site_url("cms/content/search") ?>" method="post" id="site-search">
+				<input name="search-text" id="search-text" type="text" />
+				<input name="search-submit" type="submit" id="search-submit" value="Search" />
+			</form>
+		</div>
 	</div>
-	<?php foreach ($fields as $index => $vals) {
+</div>
+<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Object editor</div>
+<div class="page-wrap block" id="page">
+	<div class="column w4">
+		<h1 class="first">Object editor</h1>
+		<?php echo $msg;
+		echo form_open($action, $attributes, $hidden);
+		?>
+		<p>
+			<label for="name" class="block">object name</label>
+			<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
+		</p>
+		<fieldset>
+		<legend>Available Fields</legend>
+
+		<div class="row">
+			<div class="field_name">field name</div>
+			<div class="in_object">in object?</div>
+			<div class="required">required?</div>
+			<div class="order">order</div>
+		</div>
+		<?php foreach ($fields as $index => $vals) {
 		
-			echo "<div class=\"form-row\">\n";
+			echo "<div class=\"row\">\n";
 
 			if($vals['exists']) {
 				echo form_hidden('rel_id['.$index.']', $vals['rel_id']);
@@ -131,8 +108,14 @@ $().ready(function() {
 			echo "</div>\n";
 		
 		} ?>
-</fieldset>
-<input name="submit" type="submit" id="submit" value="save" />
-</form>
+		</fieldset>
+		<input name="submit" type="submit" id="submit" value="save" />
+		</form>
+	</div>
+	<div class="float w1">
+	</div>
+	
+</div>
+<div class="page-wrap block" id="footer">phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </body>
 </html>

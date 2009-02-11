@@ -21,11 +21,12 @@
 		</div>
 	</div>
 </div>
-<div class="page-wrap block" id="breadcrumb"><a href="#">phSite CMS</a> : Content editor</div>
+<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
 <div class="page-wrap block" id="page">
 	<div class="column w4">
 		<h1>Content editor</h1>
 		<?php
+		
 		
 		$hidden = array();
 		if($content_id != '') {
@@ -33,7 +34,7 @@
 		}
 		$attributes = array('id' => 'content_editor');
 		
-		echo form_open(site_url("cms/content/edit/".$content_id), $attributes, $hidden);
+		echo form_open(site_url("cms/content/edit/id/".$content_id), $attributes, $hidden);
 
 		echo "<p>";
 		echo form_label('Content type', 'parent_id');
@@ -60,12 +61,14 @@
 		echo form_input($field);
 		echo "</p>\n";
 
+		// get current values
 		foreach($content_data as $data) {
 			$values[$data['field_id']] = $data['value'];
 			$hiddenIDs[$data['field_id']] = $data['data_id'];
 		}
 
-/*		foreach($fields as $row) {
+		// generate form fields
+		foreach($fields as $row) {
 			echo "<p>";
 			echo form_label($row['field_name']);
 	
@@ -82,18 +85,17 @@
 				$field['value'] = form_prep($values[$row['field_id']] );
 			}
 			
-			switch($row['input']) {
+			switch($row['input_type']) {
 			case 'text':
+				$field['class'] = 'cms_input';
 				echo form_input($field);
 				break;
 			case 'textarea':
-				$field['rows'] = 5;
-				$field['cols'] = 40;
+				$field['class'] = 'cms_textarea';
 				echo form_textarea($field);
 				break;
 			case 'richtext':
-				$field['rows'] = 10;
-				$field['cols'] = 40;
+				$field['class'] = 'cms_rte';
 				echo form_textarea($field);
 				break;
 			default:
@@ -101,9 +103,8 @@
 			}
 			
 			echo "</p>\n";
-	
 		}
-*/		
+		
 		echo "<p>";
 		echo form_submit('submit', 'Save');
 		echo "</p>\n";
@@ -115,7 +116,7 @@
 	<div class="float w1">
 <?php
 if(is_array($otherlangs)) {
-	echo "<h2>Other Languages</h2>\n";
+	echo "<h4 class=\"first\">Other Languages</h4>\n";
 	echo ul($otherlangs);
 }
 ?>

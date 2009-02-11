@@ -9,6 +9,7 @@ class Content extends Controller {
 		$this->load->scaffolding('content');
 		$this->load->helper('url');
 		$this->load->helper('html');
+		$this->load->helper('test');
 
 	}
 
@@ -44,6 +45,7 @@ class Content extends Controller {
 	function edit()
 	{
 		$this->load->helper('form');
+		$this->load->helper('file');
 
 		$data['content_id'] = '';
 		$data['object_id'] = '';
@@ -52,12 +54,51 @@ class Content extends Controller {
 		$data['updated'] = '';
 		$data['content_data'] = array();
 		$mylang = '';
+
+
+		// if form submitted, process data
+		if($this->input->post('submit') != '') {
+			
+			// load form validation library
+			$this->load->library('form_validation');
+
+			if($this->input->post('content_id') != '') {
+				$this->form_validation->set_rules('content_id', 'Content ID', 'required|integer');
+			}
+			$this->form_validation->set_rules('object_id', 'Content Type', 'required|integer');
+			$this->form_validation->set_rules('parent_id', 'Parent', 'required|integer');
+
+				
+$this->form_validation->set_rules('password', 'Password', 'trim|required|matches[passconf]|md5');
+$this->form_validation->set_rules('passconf', 'Password Confirmation', 'trim|required');
+$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+
+				
+			if ($this->form_validation->run() == FALSE)
+			{
+				$this->load->view('myform');
+			}
+			else
+			{
+				$this->load->view('formsuccess');
+			}
+
+
+		
+		}
+
+
+
+
+
+
+
 		
 		$params = $this->uri->uri_to_assoc(4);
 		
 		// if id supplied, load info
 		if(array_key_exists('id',$params)) {
-			if(array_key_exists('lang',$params)) {
+			if(array_key_exists('lang',$params) && is_lang($params['lang'])) {
 				$this->Content_model->getContent($params['id'],$params['lang']);
 				$mylang = $params['lang'];
 			} else {

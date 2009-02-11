@@ -40,8 +40,8 @@ list-style-type: none;
 
 /*forms*/
 #page form p label {float:left; margin-right: 1em; width: 10em; }
-#page form p {margin-bottom:1em; clear:both;}
-#page form p:after {
+#page form p, #page form div.row {margin-bottom:1em; clear:both;}
+#page form p:after, #page form div.row:after {
 	 visibility: hidden;
 	 display: block;
 	 font-size: 0;
@@ -49,12 +49,32 @@ list-style-type: none;
 	 clear: both;
 	 height: 0;
 	 }
-#page form p { display: inline-block; }
+#page form p, #page form div.row { display: inline-block; }
 /* start commented backslash hack \*/
-* html #page form p { height: 1%; }
-#page form p { display: block; }
+* html #page form p, * html #page form div.row { height: 1%; }
+#page form p, #page form div.row { display: block; }
 /* close commented backslash hack */
 
+#page form fieldset { border: 1px solid #999; padding: 1ex 1em; margin-bottom: 1em;}
+#page form fieldset legend { padding: 0 1ex; }
+
+#page form .cms_input { width: 24em;}
+#page form .cms_rte { width: 24em; height: 14em; }
+
+#page form div.row label, div.row div {
+	float: left;
+	margin-right: 1em;
+	width: 5em;
+}
+#page form div.row div {
+	font-weight: bold;
+}
+#page form div.row .field_name {
+	width: 6em;
+}
+#page form label span {
+	display:none;
+}
 
 
 /* comments */

@@ -7,6 +7,7 @@ class Tests extends Controller {
 		parent::Controller();	
 		$this->load->helper('file');
 		$this->load->helper('url');
+		$this->load->helper('test');
 	}
 	
 	function index()
@@ -22,7 +23,7 @@ class Tests extends Controller {
 		
 		if($lang != '') {
 			$data['result'] = "'$lang' is ";
-			if($this->is_lang($lang) == false) {
+			if(is_lang($lang) == false) {
 				$data['result'] .= "NOT ";
 			} 
 			$data['result'] .= "a language";
@@ -34,38 +35,34 @@ class Tests extends Controller {
 
 	}
 
-
-	function is_lang($value)
+	function date()
 	{
-		
-		
-		// read tab-delimited file of ISO 639 lang codes
-		$iso_all = read_file('system/application/language/iso-639-3.tab');
-		//Id	Part2B	Part2T	Part1	Scope	Language_Type	Ref_Name	Comment
-		$iso_639 = preg_replace('/\r\n|\r/', "\n", $iso_all);
-		$langs = explode("\n",$iso_639);
-		
-		foreach($langs as $line) {
-			$temp = explode("\t",$line);
-			/*$langArray[] = array(
-			'iso_639_3'  => $temp[0],
-			'iso_639_2b' => $temp[1],
-			'iso_639_2t' => $temp[2],
-			'iso_639_1'  => $temp[3],
-			'Scope'  => $temp[4],
-			'Language_Type'  => $temp[5],
-			'Ref_Name'  => $temp[6],
-			'Comment'  => $temp[7],
-			);*/
-			if(in_array($value, $temp)) {
-				return true;
-			}
+		$dates = array(
+		'Thursday, February 12, 2009',
+		'20 Jun 1972',
+		'Oct 2, 2009',
+		'29/01/72',
+		'1972\1\01 1:42 pm',
+		'1478\1\01 1:42 a.m.',
+		'2009-01-29 16:44:11',
+		'2009-01-29',
+		);
+		$data['result'] = '';
+		foreach($dates as $theDate) {
+			$data['result'] .= "<p>'$theDate' ";
+			if($newDate = convert_date($theDate)) {
+				$data['result'] .= "is a valid date";
+				$data['result'] .= " - converts to : ".$newDate;
+			
+			} else {
+				$data['result'] .= " IS NOT a valid date";
+			} 
+			$data['result'] .= "</p>\n";
 		}
-		return false;
-		
+
+		$this->load->view('test',$data);
+
 	}
-
-
 
 
 }
