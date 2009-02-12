@@ -1,4 +1,5 @@
 @charset "UTF-8";
+/* html */
 body {
 font-family:Georgia, "Times New Roman", Times, serif;
 }
@@ -9,11 +10,34 @@ a { color:#000099; text-decoration:underline}
 a:visited { color:#006699; text-decoration:underline; }
 a:hover { color:#990000; text-decoration:none; }
 
-/* logical blocks */
-#masthead { padding:1ex 0; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; }
+/* fluid grid */
+/* em-based block sizes, 'normal' page width equivalent to 945px, 5 columns (165px each) with 30px gutter  */
+/* entire page and containing blocks will enlarge or shrink with browser text size */
+
+#masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; text-align:center; }
+#page {
+	padding: 0 2em;
+	text-align:center;
+}
+.page-wrap {
+	margin: 1ex auto;
+	text-align:left;
+	width:63em;
+}
+
+/* columns */
+.column { float: left; margin-right: 2em; }
+.w1 { width: 11em; }
+.w2 { width: 24em; }
+.w3 { width: 37em; }
+.w4 { width: 50em; }
+.w5 { width: 63em; }
+.nomargin { margin: 0; }
+.padded { padding: 0.5em }
+
+/* masthead styles */
 #masthead a, #masthead a:visited { color:#eeeeee; text-decoration:none; }
 #masthead a:hover { color:#FFCC66; text-decoration:underline }
-
 #masthead h2 { margin: 0; }
 #masthead #site-search #search-text { margin-right: 1ex; width: 11em;}
 #masthead #site-search #search-submit { padding: 0.125ex 1ex; }
@@ -57,6 +81,20 @@ list-style-type: none;
 
 #page form fieldset { border: 1px solid #999; padding: 1ex 1em; margin-bottom: 1em;}
 #page form fieldset legend { padding: 0 1ex; }
+#page form fieldset p label { width: 8.5em; }
+
+#page form .radiogroup {
+	line-height:2em;
+	float:left;
+	display:inline-block;
+}
+#page form .radiogroup label,
+#page form label.inline {
+float: none;
+display: inline;
+margin: 0 1ex; width: auto;
+white-space:nowrap;
+}
 
 #page form .cms_input { width: 24em;}
 #page form .cms_rte { width: 24em; height: 14em; }

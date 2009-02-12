@@ -21,109 +21,105 @@
 		</div>
 	</div>
 </div>
-<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
-<div class="page-wrap block" id="page">
-	<div class="column w4">
-		<h1>Content editor</h1>
-		<?php
-		
-		
-		$hidden = array();
-		if($content_id != '') {
-			$hidden['content_id'] = $content_id;
-		}
-		$attributes = array('id' => 'content_editor');
-		
-		echo form_open(site_url("cms/content/edit/id/".$content_id), $attributes, $hidden);
-
-		echo "<p>";
-		echo form_label('Content type', 'parent_id');
-		echo form_dropdown('object_id', $objects, $object_id);
-		echo "</p>\n";
-
-		$field = array(
-		'name'        => 'parent_id',
-		'id'          => 'parent_id',
-		'value'       => $parent_id
-		);
-		echo "<p>";
-		echo form_label('Parent', 'parent_id');
-		echo form_input($field);
-		echo "</p>\n";
-
-		$field = array(
-		'name'        => 'created',
-		'id'          => 'created',
-		'value'       => $created
-		);
-		echo "<p>";
-		echo form_label('Created', 'created');
-		echo form_input($field);
-		echo "</p>\n";
-
-		// get current values
-		foreach($content_data as $data) {
-			$values[$data['field_id']] = $data['value'];
-			$hiddenIDs[$data['field_id']] = $data['data_id'];
-		}
-
-		// generate form fields
-		foreach($fields as $row) {
+<div id="page">
+	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
+	<div class="page-wrap block">
+		<div class="column w4">
+			<h1>Content editor</h1>
+			<?php
+			$hidden = array();
+			if($content_id != '') {
+				$hidden['content_id'] = $content_id;
+			}
+			$attributes = array('id' => 'content_editor');
+			
+			echo form_open(site_url("cms/content/edit/id/".$content_id), $attributes, $hidden);
+	
 			echo "<p>";
-			echo form_label($row['field_name']);
+			echo form_label('Content type', 'parent_id');
+			echo form_dropdown('object_id', $objects, $object_id);
+			echo "</p>\n";
 	
 			$field = array(
-			'name'        => "field[{$row['field_id']}]",
-			'id'          => "field[{$row['field_id']}]",
+			'name'        => 'parent_id',
+			'id'          => 'parent_id',
+			'value'       => $parent_id
 			);
-	
-			if(array_key_exists($row['field_id'], $hiddenIDs)) {
-				echo form_hidden('data_id[]', $hiddenIDs[$row['field_id']] );
-			}
-
-			if(array_key_exists($row['field_id'], $values)) {
-				$field['value'] = form_prep($values[$row['field_id']] );
-			}
-			
-			switch($row['input_type']) {
-			case 'text':
-				$field['class'] = 'cms_input';
-				echo form_input($field);
-				break;
-			case 'textarea':
-				$field['class'] = 'cms_textarea';
-				echo form_textarea($field);
-				break;
-			case 'richtext':
-				$field['class'] = 'cms_rte';
-				echo form_textarea($field);
-				break;
-			default:
-				echo form_input($field);
-			}
-			
+			echo "<p>";
+			echo form_label('Parent', 'parent_id');
+			echo form_input($field);
 			echo "</p>\n";
-		}
-		
-		echo "<p>";
-		echo form_submit('submit', 'Save');
-		echo "</p>\n";
-
-		
-		?>
-		</form>
-	</div>
-	<div class="float w1">
-<?php
-if(is_array($otherlangs)) {
-	echo "<h4 class=\"first\">Other Languages</h4>\n";
-	echo ul($otherlangs);
-}
-?>
-
-	</div>
 	
+			$field = array(
+			'name'        => 'created',
+			'id'          => 'created',
+			'value'       => $created
+			);
+			echo "<p>";
+			echo form_label('Created', 'created');
+			echo form_input($field);
+			echo "</p>\n";
+	
+			// get current values
+			foreach($content_data as $data) {
+				$values[$data['field_id']] = $data['value'];
+				$hiddenIDs[$data['field_id']] = $data['data_id'];
+			}
+	
+			// generate form fields
+			foreach($fields as $row) {
+				echo "<p>";
+				echo form_label($row['field_name']);
+		
+				$field = array(
+				'name'        => "field[{$row['field_id']}]",
+				'id'          => "field[{$row['field_id']}]",
+				);
+		
+				if(array_key_exists($row['field_id'], $hiddenIDs)) {
+					echo form_hidden('data_id[]', $hiddenIDs[$row['field_id']] );
+				}
+	
+				if(array_key_exists($row['field_id'], $values)) {
+					$field['value'] = form_prep($values[$row['field_id']] );
+				}
+				
+				switch($row['input_type']) {
+				case 'text':
+					$field['class'] = 'cms_input';
+					echo form_input($field);
+					break;
+				case 'textarea':
+					$field['class'] = 'cms_textarea';
+					echo form_textarea($field);
+					break;
+				case 'richtext':
+					$field['class'] = 'cms_rte';
+					echo form_textarea($field);
+					break;
+				default:
+					echo form_input($field);
+				}
+				
+				echo "</p>\n";
+			}
+			
+			echo "<p>";
+			echo form_submit('submit', 'Save');
+			echo "</p>\n";
+			?>
+			</form>
+		</div>
+		<div class="float w1">
+			<?php
+			if(is_array($otherlangs)) {
+				echo "<h4 class=\"first\">Other Languages</h4>\n";
+				echo ul($otherlangs);
+			}
+			?>
+		</div>
+	</div>
+	<div class="page-wrap block" id="footer"> phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>
-<div class="page-wrap block" id="footer"> phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </body>
 </html>

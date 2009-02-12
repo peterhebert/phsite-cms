@@ -37,6 +37,23 @@ class MY_Form_validation extends CI_Form_validation {
 	// --------------------------------------------------------------------
 	
 	/**
+	 * Windows/UNIX file path
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+	function file_path($str)
+	{
+		$pattern = '^([A-Z]:){0,1}[A-Za-z0-9\\\-_\./ ]+$';
+		$valid = ereg($pattern, $str);
+		return $valid;
+
+	}
+
+	// --------------------------------------------------------------------
+	
+	/**
 	 * Valid date format
 	 *
 	 * @access	public

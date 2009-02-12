@@ -64,6 +64,33 @@ class Tests extends Controller {
 
 	}
 
+	function is_path ()
+	{
+		$pattern = '^([A-Z]:){0,1}[A-Za-z0-9\\\-_\./ ]+$';
+
+		$values = array(
+		'C:\system files\file\path',
+		'\\\\folder\\path\\system',
+		'/test/this/path',
+		'./system/path/file.ext',
+		'C:\system files\file\path.extension',
+		);
+
+		$data['result'] = '';
+
+
+		foreach($values as $value) {
+			if(ereg($pattern, $value) == true)
+			{
+				$data['result'] .= "<p>'$value' is a valid path</p>";
+			} else {
+				$data['result'] .= "<p>'$value' is NOT a valid path</p>";
+			}
+		}
+
+		$this->load->view('test',$data);
+
+	}
 
 }
 ?>

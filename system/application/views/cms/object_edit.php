@@ -47,27 +47,27 @@ $().ready(function() {
 		</div>
 	</div>
 </div>
-<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Object editor</div>
-<div class="page-wrap block" id="page">
-	<div class="column w4">
-		<h1 class="first">Object editor</h1>
-		<?php echo $msg;
+<div id="page">
+	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Object editor</div>
+	<div class="page-wrap block">
+		<div class="column w4">
+			<h1 class="first">Object editor</h1>
+			<?php echo $msg;
 		echo form_open($action, $attributes, $hidden);
 		?>
-		<p>
-			<label for="name" class="block">object name</label>
-			<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
-		</p>
-		<fieldset>
-		<legend>Available Fields</legend>
-
-		<div class="row">
-			<div class="field_name">field name</div>
-			<div class="in_object">in object?</div>
-			<div class="required">required?</div>
-			<div class="order">order</div>
-		</div>
-		<?php foreach ($fields as $index => $vals) {
+			<p>
+				<label for="name" class="block">object name</label>
+				<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
+			</p>
+			<fieldset>
+			<legend>Available Fields</legend>
+			<div class="row">
+				<div class="field_name">field name</div>
+				<div class="in_object">in object?</div>
+				<div class="required">required?</div>
+				<div class="order">order</div>
+			</div>
+			<?php foreach ($fields as $index => $vals) {
 		
 			echo "<div class=\"row\">\n";
 
@@ -108,14 +108,13 @@ $().ready(function() {
 			echo "</div>\n";
 		
 		} ?>
-		</fieldset>
-		<input name="submit" type="submit" id="submit" value="save" />
-		</form>
+			</fieldset>
+			<input name="submit" type="submit" id="submit" value="save" />
+			</form>
+		</div>
+		<div class="float w1"> </div>
 	</div>
-	<div class="float w1">
-	</div>
-	
+	<div class="page-wrap block" id="footer">phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>
-<div class="page-wrap block" id="footer">phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </body>
 </html>

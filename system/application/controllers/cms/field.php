@@ -32,11 +32,27 @@ class Field extends Controller {
 		$data['field_id'] = '';
 		$data['field_name'] = '';
 		$data['input_type'] = '';
-		$data['validation'] = '';
+		$data['string'] = '';
 		$data['types'] = $this->input_types;
 
+		$data['string_rules'] = array(
+		'' => 'any value',
+		'alpha' => 'Alphabetical',
+		'alpha_numeric' => 'Alpha-numeric',
+		'alpha_dash' => 'Alpha-numeric &amp; dashes',
+		'alpha_num_spaces' => 'Alpha-numeric, dashes &amp; spaces',
+		'is_date' => 'Date',
+		'valid_email' => 'Email address',
+		'integer' => 'Integer',
+		'numeric' => 'Numeric',
+		'is_natural' => 'Natural numbers (0, 1, 2, 3, etc.)',
+		'is_natural_no_zero' => 'Natural numbers/no zeroes (1, 2, 3, etc.)',
+		'file_path' => 'file path',
+		'valid_ip' => 'Internet Protocol (IP) address'
+		);
+
+		// do validation if form submitted
 		if($this->input->post('submit') != '') {
-			// do validation
 			
 			if($this->input->post('field_id') != '') {
 				$this->form_validation->set_rules('field_id', 'Field ID', 'required|integer');

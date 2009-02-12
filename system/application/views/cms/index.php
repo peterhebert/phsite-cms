@@ -21,27 +21,23 @@
 		</div>
 	</div>
 </div>
-<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : CMS Home</div>
-<div class="page-wrap block" id="page">
-	<div class="column w3">
-		<?php echo $content; ?>
-		<p><?php echo anchor("cms/content/edit","New Content"); ?></p>
-	</div>
-	<div class="float w2">
-		<h2 class="first">Data Structure</h2>
-		<p>You can define what types of content your CMS stores. Your content types are called Objects, and the individual data fields are called Fields.</p>
-		<p>Click on a link to edit the object or field.</p>
-		<div class="block">
-			<div class="column w1">
-				<?php echo $objects; ?>
-			</div>
-			<div class="float w1">
-				<?php echo $fields; ?>
+<div id="page">
+	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : CMS Home</div>
+	<div class="page-wrap block">
+		<div class="column w3"> <?php echo $content; ?>
+			<p><?php echo anchor("cms/content/edit","New Content"); ?></p>
+		</div>
+		<div class="float w2">
+			<h2 class="first">Data Structure</h2>
+			<p>You can define what types of content your CMS stores. Your content types are called Objects, and the individual data fields are called Fields.</p>
+			<p>Click on a link to edit the object or field.</p>
+			<div class="block">
+				<div class="column w1"> <?php echo $objects; ?> </div>
+				<div class="float w1"> <?php echo $fields; ?> </div>
 			</div>
 		</div>
 	</div>
-	
+	<div class="page-wrap block" id="footer"> phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>
-<div class="page-wrap block" id="footer"> phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </body>
 </html>
