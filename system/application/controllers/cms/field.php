@@ -32,6 +32,7 @@ class Field extends Controller {
 		$data['field_id'] = '';
 		$data['field_name'] = '';
 		$data['input_type'] = '';
+		$data['validation'] = '';
 		$data['types'] = $this->input_types;
 
 		if($this->input->post('submit') != '') {
