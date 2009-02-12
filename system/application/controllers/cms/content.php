@@ -5,8 +5,11 @@ class Content extends Controller {
    {
 		parent::Controller();
 
+		// load models
 		$this->load->model('Content_model');
-		$this->load->scaffolding('content');
+		$this->load->model('Object_model');
+		
+		// load helpers
 		$this->load->helper('url');
 		$this->load->helper('html');
 		$this->load->helper('test');
@@ -62,18 +65,40 @@ class Content extends Controller {
 			// load form validation library
 			$this->load->library('form_validation');
 
+			// set rules for content
 			if($this->input->post('content_id') != '') {
 				$this->form_validation->set_rules('content_id', 'Content ID', 'required|integer');
 			}
 			$this->form_validation->set_rules('object_id', 'Content Type', 'required|integer');
 			$this->form_validation->set_rules('parent_id', 'Parent', 'required|integer');
+			$this->form_validation->set_rules('created', 'Date Created', 'is_date|convert_date');
 
-				
-$this->form_validation->set_rules('password', 'Password', 'trim|required|matches[passconf]|md5');
-$this->form_validation->set_rules('passconf', 'Password Confirmation', 'trim|required');
-$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+			// set rules for content data based upon object template
 
-				
+				// load object template
+				if ($this->input->post('object_id') != '') {
+					$this->Object_model->object_id = $this->input->post('object_id');
+					$this->Object_model->load_object();
+					
+					$myfields = $this->Object_model->fields;
+
+					// set field validation rules
+					foreach($myfields as $row) {
+						$validation = $row['validation'];
+						$field_name = "field[{$row['field_id']}]";
+						$field_title = $row['field_name'];
+
+						$this->form_validation->set_rules($field_name, $field_title, 'is_date|convert_date');
+
+					}
+
+
+
+
+					
+				}	
+		
+			// run validation
 			if ($this->form_validation->run() == FALSE)
 			{
 				$this->load->view('myform');
@@ -118,7 +143,6 @@ $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email')
 		}
 
 		// load object template
-		$this->load->model('Object_model');
 		if ($this->Content_model->object_id != '') {
 			$data['object_id'] = $this->Content_model->object_id;
 			$this->Object_model->object_id = $this->Content_model->object_id;

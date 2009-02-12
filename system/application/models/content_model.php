@@ -102,7 +102,7 @@ class Content_model extends Model {
 		$data = array(
 		'field_id' => $field_id,
 		'value' => $value,
-		'lang' => $lang;
+		'lang' => $lang
 		);
         $this->db->insert('content_data', $data);
     }
@@ -111,10 +111,10 @@ class Content_model extends Model {
     function update_data($data_id,$field_id,$value,$lang='eng')
     {
 		$data = array(
-		'content_id' => $this->content_id;
+		'content_id' => $this->content_id,
 		'field_id' => $field_id,
 		'value' => $value,
-		'lang' => $lang;
+		'lang' => $lang
 		);
 
 		$this->db->where('data_id', $data_id);
