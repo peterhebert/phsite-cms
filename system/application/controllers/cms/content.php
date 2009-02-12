@@ -84,17 +84,20 @@ class Content extends Controller {
 
 					// set field validation rules
 					foreach($myfields as $row) {
-						$validation = $row['validation'];
+						
+						$validArray = explode('|',$row['validation']);
+						
+						// add rule if required
+						if($row['required'] == 1) {
+							array_unshift($validArray, 'required');
+						}
+						$newValid = array_unique($validArray);
+						$validation = implode('|',$validArray);
+						
 						$field_name = "field[{$row['field_id']}]";
 						$field_title = $row['field_name'];
-
-						$this->form_validation->set_rules($field_name, $field_title, 'is_date|convert_date');
-
+						$this->form_validation->set_rules($field_name, $field_title, $validation);
 					}
-
-
-
-
 					
 				}	
 		
