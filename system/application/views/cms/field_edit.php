@@ -5,6 +5,80 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
+
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function(){
+
+	$("#exact_length").blur(function () {
+	
+		if( $(this).val() != '' ) {
+			$("#min_length").val("");
+			$("#max_length").val("");
+		}
+		
+	});
+
+	$("#max_length").blur(function () {
+	
+		if( $(this).val() != '' ) {
+			$("#exact_length").val("");
+		}
+		
+		if( $(this).val() == $("#min_length").val() ) {
+			var myval = $(this).val();
+			$("#exact_length").val(myval);
+			$("#min_length").val("");
+			$(this).val("");
+		}
+
+		var themax = $(this).val();
+		var themin = $("#min_length").val();
+
+		var intmin = parseInt(themin);
+		var intmax = parseInt(themax);
+		
+		var newmax = intmin +1;
+
+
+		if( intmax < intmin ) {
+			alert('maximum cannot be less than minimum');
+			$(this).val(newmax);
+		}
+
+	});
+
+	$("#min_length").blur(function () {
+
+		if( $(this).val() != '' ) {
+			$("#exact_length").val("");
+		}
+
+		var themin = $(this).val();
+		var themax = $("#max_length").val();
+
+		var intmin = parseInt(themin);
+		var intmax = parseInt(themax);
+		
+		var newmin = intmax -1;
+
+		if (newmin < 0 ) {
+			newmin = 0;
+		}
+
+		if( intmin > intmax) {
+			alert('minimum cannot be more than maximum');
+			$(this).val(newmin);
+		}
+		
+	});
+
+
+});
+/* ]]> */
+</script>
+
 </head>
 <body>
 <div id="masthead">
@@ -40,12 +114,12 @@
 			<legend>Validation rules</legend>
 			<p>
 				<label>Length</label>
-				<label for="max_length" class="inline">Exact</label>
-				<input type="text" name="exact_length" size="3" />
+				<label for="exact_length" class="inline">Exact</label>
+				<input type="text" name="exact_length" id="exact_length" size="3" />
 				<label for="min_length" class="inline">Minimum</label>
-				<input type="text" name="min_length" size="3" />
+				<input type="text" name="min_length" id="min_length" size="3" />
 				<label for="max_length" class="inline">Maximum</label>
-				<input type="text" name="max_length" size="3" />
+				<input type="text" name="max_length" id="max_length" size="3" />
 			</p>
 			<p>
 				<label>Content of field is</label>
