@@ -92,5 +92,21 @@ class Tests extends Controller {
 
 	}
 
+	function parseme ()
+	{
+		$validation = 'john|doe|integer|numeric|exact_length[2]|max_length[7]';
+		
+$data['result'] = '';
+
+				if(ereg ( 'exact_length\[([0-9]+)\]', $validation)) {
+					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
+					$data['result'] = ereg_replace($pattern,'\\2',$validation);
+				}
+
+		$this->load->view('test',$data);
+
+	}
+
+
 }
 ?>

@@ -115,11 +115,11 @@ $().ready(function(){
 			<p>
 				<label>Length</label>
 				<label for="exact_length" class="inline">Exact</label>
-				<input type="text" name="exact_length" id="exact_length" size="3" />
+				<input type="text" name="exact_length" id="exact_length" value="<?php echo $exact_length; ?>" size="3" />
 				<label for="min_length" class="inline">Minimum</label>
-				<input type="text" name="min_length" id="min_length" size="3" />
+				<input type="text" name="min_length" id="min_length" value="<?php echo $min_length; ?>" size="3" />
 				<label for="max_length" class="inline">Maximum</label>
-				<input type="text" name="max_length" id="max_length" size="3" />
+				<input type="text" name="max_length" id="max_length" value="<?php echo $max_length; ?>" size="3" />
 			</p>
 			<p>
 				<label>Content of field is</label>
