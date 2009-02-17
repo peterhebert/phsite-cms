@@ -125,10 +125,10 @@ class Object_model extends Model {
     }
 
     // remove related field
-    function remove_field($id)
+    function remove_field($field_id)
     {
 		
-		$this->db->where('id', $id);
+		$this->db->where('field_id', $field_id);
         $this->db->delete('r_object_field');
     }
 

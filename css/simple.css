@@ -97,7 +97,8 @@ white-space:nowrap;
 }
 
 #page form .cms_input { width: 24em;}
-#page form .cms_rte { width: 24em; height: 14em; }
+#page form .cms_textarea { width: 24em; height: 14em; }
+#page form .cms_rte { width: 24em; height: 18em; }
 
 #page form div.row label, div.row div {
 	float: left;
@@ -113,7 +114,6 @@ white-space:nowrap;
 #page form label span {
 	display:none;
 }
-
 
 /* comments */
 .comments p {margin-bottom: .333em; }

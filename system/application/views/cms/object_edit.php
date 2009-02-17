@@ -14,17 +14,22 @@ $().ready(function() {
 	$("form input[name='required[]']").click(function() {
 	
 		if( $(this).attr('checked') == true ) {
-			$(this).parent().siblings(1).children(0).attr("checked",true)
+			$(this).parent().siblings(1).children(0).attr("checked",true);
 		}
 		
 	});
 
-	$("form input[name='fields[]']").click(function() {
-	
+	$("form input[name='exists[]']").click(function() {
+
 		if( $(this).attr('checked') == false ) {
-			$(this).parent().siblings(1).children(0).attr("checked",false)
+			$(this).parent().siblings(1).children(0).attr("checked",false);
+
+			var myIndex = $(this).parent().siblings(1).children(0).val();
+			var OrderMatch = "form input[name='order["+myIndex+"]']";
+			$(OrderMatch).val("");
+
 		}
-		
+
 	});
 
 });
@@ -52,8 +57,9 @@ $().ready(function() {
 	<div class="page-wrap block">
 		<div class="column w4">
 			<h1 class="first">Object editor</h1>
-			<?php echo $msg;
-		echo form_open($action, $attributes, $hidden);
+			<?php 
+			echo $msg;
+			echo form_open($action, $attributes, $hidden);
 		?>
 			<p>
 				<label for="name" class="block">object name</label>
@@ -68,22 +74,27 @@ $().ready(function() {
 				<div class="order">order</div>
 			</div>
 			<?php foreach ($fields as $index => $vals) {
-		
+
 			echo "<div class=\"row\">\n";
 
-			if($vals['exists']) {
-				echo form_hidden('rel_id['.$index.']', $vals['rel_id']);
+			echo form_hidden('fields[]', $index);
+
+			if($vals['data_id'] != '') {
+				echo form_hidden('data_id['.$index.']', $vals['data_id']);
+				$exists = true;
+			} else {
+				$exists = false;
 			}
 		
 
 			$params = array(
-			'name'        => 'fields[]',
-			'id'          => 'fields[]',
+			'name'        => 'exists[]',
+			'id'          => 'exists[]',
 			'value'       => $index,
-			'checked'     => $vals['exists']
+			'checked'     => $exists
 			);
 	
-			echo "<label class=\"field_name\">{$vals['name']}</label>";
+			echo "<label class=\"field_name\">{$vals['field_name']}</label>";
 			echo "<label class=\"in_object\">".form_checkbox($params)." <span>in object?</span></label>";
 			
 			$params = array(

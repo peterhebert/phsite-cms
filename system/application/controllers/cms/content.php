@@ -56,6 +56,8 @@ class Content extends Controller {
 		$data['created'] = '';
 		$data['updated'] = '';
 		$data['content_data'] = array();
+		$data['fields'] = array();
+		$data['otherlangs'] = array();
 		$mylang = '';
 
 
@@ -113,7 +115,7 @@ class Content extends Controller {
 
 
 		
-		}
+		} // end form processing
 
 
 
@@ -146,14 +148,19 @@ class Content extends Controller {
 		}
 
 		// load object template
-		if ($this->Content_model->object_id != '') {
+		if (array_key_exists('type',$params)) {
+			$data['object_id'] = $params['type'];
+			$this->Object_model->object_id = $params['type'];
+		} else if ($this->Content_model->object_id != '') {
 			$data['object_id'] = $this->Content_model->object_id;
 			$this->Object_model->object_id = $this->Content_model->object_id;
-			$this->Object_model->load_object();
-			
-			$data['fields'] = $this->Object_model->fields;
-			
-		}	
+		} else {
+			$data['object_id'] = 1;
+			$this->Object_model->object_id = 1;
+		}
+		
+		$this->Object_model->load_object();
+		$data['fields'] = $this->Object_model->fields;
 		
 		// get all needed fields for object type
 		$objects = $this->Object_model->get_list();
@@ -161,8 +168,6 @@ class Content extends Controller {
 		foreach($objects as $object) {
 			$data['objects'][$object['object_id']] = $object['name'];
 		}
-		
-		
 		
 		$this->load->view('cms/content_edit',$data);
 	

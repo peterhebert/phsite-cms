@@ -1,137 +1,150 @@
 <?php
 class Object extends Controller {
 
-       function Object()
-       {
-            parent::Controller();
+   function Object()
+   {
+		parent::Controller();
 
-			$this->load->model('Object_model');
-			$this->load->helper('url');
+		$this->load->model('Object_model');
+		$this->load->helper('url');
 
-		}
+	}
 
-		function index()
-		{
-			$data['q'] = $this->Object_model->get_list();
-	
-			$this->load->view('cms/object_list',$data);
-		}
+	function index()
+	{
+		$data['q'] = $this->Object_model->get_list();
 
-		function edit()
-		{
-			$this->load->model('Field_model');
-			$this->load->helper('form');
+		$this->load->view('cms/object_list',$data);
+	}
+
+	function edit()
+	{
+		$this->load->model('Field_model');
+		$this->load->helper('form');
+		
+		$data['msg'] = '';
+
+		// process form
+		
+		if($this->input->post('submit')) {
 			
-			$field_list = $this->Field_model->get_list();
+			$this->load->library('form_validation');
+			// first do object
 
-			// process form
+			/* if 'object_id' supplied, update */
+			if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
+				$this->form_validation->set_rules('object_id', '', 'required|is_natural_no_zero');
+			}
+			$this->form_validation->set_rules('name', 'Object name', 'required|xss_clean');
+
+			if ($this->form_validation->run())
+			{
+				if($this->input->post('object_id') != '') {
+					$this->Object_model->object_id = $this->input->post('object_id');
+				}
+				$this->Object_model->name = $this->input->post('name');
+				$this->Object_model->update_object();
+
+			} // end object update
 			
-			if($this->input->post('submit')) {
-				
-				$this->load->library('form_validation');
-				// first do object
-				
-				/* if 'object_id' supplied, update */
-				if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
-					$this->form_validation->set_rules('object_id', '', 'required|is_natural_no_zero');
-				}
-				$this->form_validation->set_rules('name', 'Object name', 'required|xss_clean');
+			// now update field relationships
+			
+			// get data from form
+			$my_fields = $this->input->post('fields', TRUE);
+			$my_data = $this->input->post('data_id', TRUE);
+			$my_required = $this->input->post('required', TRUE);
+			$my_exists = $this->input->post('exists', TRUE);
+			$my_order = $this->input->post('order', TRUE);
+			
+			foreach ($my_fields as $field_id) {
+				$zz_exist = FALSE;
+				$zz_required = FALSE;
+				$data_id = '';
+				$order = '';
 
-				if ($this->form_validation->run())
-				{
-					if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
-						$this->Object_model->object_id = $this->input->post('object_id');
-					}
-					$this->Object_model->name = $this->input->post('name');
-					$this->Object_model->update_object();
-
-				}
-
-
-				// now do related fields
-				$form_array = $this->input->post('rel_id', TRUE);
-				$form_array_exists = $this->input->post('fields', TRUE);
-				$form_array_required = $this->input->post('required', TRUE);
-				$form_array_order = $this->input->post('order', TRUE);
-
-				foreach ($field_list as $the_field) {
-					$zz_exist = FALSE;
-					$zz_required = FALSE;
-
-					if(is_array($form_array_exists) and in_array($the_field['field_id'],$form_array_exists)) {
-						$zz_exist = TRUE;
-					}
-
-					if(is_array($form_array_required) and in_array($the_field['field_id'],$form_array_required)) {
-						$zz_exist = TRUE;
-						$zz_required = TRUE;
-					}
-
-					// is the field related?
-					if( is_array($form_array) and in_array($the_field['field_id'],$form_array)) {
-
-						// is the field selected in form?
-						if($zz_exist == TRUE) {
-							// yes, update
-							// update_field($id,$field_id,$required,$order=0)
-							$this->Object_model->update_field($form_array[$the_field['field_id']],$the_field['field_id'],$zz_required,$form_array_order[$the_field['field_id']]);
-						} else {
-							// no, delete
-							$this->Object_model->remove_field($form_array[$the_field['field_id']]);
-						}
-
-					} else { // field not related
-
-						// is the field selected in form?
-						if($zz_exist == TRUE) {
-							// yes, insert
-							$this->Object_model->insert_field($the_field['field_id'],$zz_required,$form_array_order[$the_field['field_id']]);
-						}
-
-					}
-				
+				if(is_array($my_exists) and in_array($field_id,$my_exists)) {
+					$zz_exist = TRUE;
 				}
 
-			} // end form processing
+				if(is_array($my_required) and in_array($field_id,$my_required)) {
+					$zz_exist = TRUE;
+					$zz_required = TRUE;
+				}
 
-			$data['msg'] = '';
-			$data['hidden'] = '';
-			$data['action'] = 'cms/object/edit';
+				if(is_array($my_data) and in_array($field_id,$my_data)) {
+					$data_id = $my_data[$field_id];
+				}
 
-			if(is_numeric($this->uri->segment(4)) and $this->uri->segment(4) > 0) {
-				$obj_id = $this->uri->segment(4);
-			
-				$this->Object_model->object_id = $obj_id;
-				$data['hidden'] = array('object_id' => $obj_id);
-				$data['action'] .= '/'.$obj_id;
-			}	
+				if(is_array($my_order) and in_array($field_id,$my_order)) {
+					$order = $my_order[$field_id];
+				}
 
-			$data['attributes'] = array('id' => 'editor');
-
-			$this->Object_model->load_object();
-			$data['name'] = $this->Object_model->name;
-			
-			foreach ($field_list as $the_field) {
-				$checked = $this->Object_model->field_in_object($the_field['field_id']);
-				if($checked) {
-					$exists = TRUE;
-					$required = $checked['required'];
+				if($zz_exist) {
+					//exists, now insert or update
+					if($data_id != '') {
+						$this->Object_model->update_field($data_id,$field_id,$zz_required,$order);
+					} else {
+						$this->Object_model->insert_field($field_id,$zz_required,$order);
+					}
 				} else {
-					$exists = FALSE;
-					$required = FALSE;
+					// does not exist, please remove all instances of related field
+					$this->Object_model->remove_field($field_id);
 				}
-				$data['fields'][$the_field['field_id']] = array(
-				"rel_id" => $checked['id'],
-				"name" => $the_field['field_name'], 
-				"exists" => $exists,
-				"required" => $required,
-				"order" => $checked['order'],
 
+			}
+			// end update field relationships
+
+		} // end form processing
+
+		// get all available fields
+		$complete_field_list = $this->Field_model->get_list();
+		foreach ($complete_field_list as $the_field) {
+			$obj_fields[$the_field['field_id']] = array(
+			'field_name' => $the_field['field_name'],
+			'input_type' => $the_field['input_type'],
+			'validation' => $the_field['validation'],
+
+			'data_id' => '',
+			'object_id' => $this->Object_model->object_id,
+			'required' => '',
+			'order' => '',
+			'fieldset' => '',
+			);
+		}
+
+
+		// get list of related fields
+		$params = $this->uri->uri_to_assoc(4);
+		if(array_key_exists('id',$params)) {
+			$this->Object_model->object_id = $params['id'];
+			$this->Object_model->load_object();
+			$data['action'] = 'cms/object/edit/id/'.$params['id'];
+			$data['hidden'] = array('object_id' => $params['id']);
+
+			foreach ($this->Object_model->fields as $the_field) {
+				$obj_fields[$the_field['field_id']] = array(
+				'field_name' => $the_field['field_name'],
+				'input_type' => $the_field['input_type'],
+				'validation' => $the_field['validation'],
+
+				'data_id' => $the_field['id'],
+				'object_id' => $this->Object_model->object_id,
+				'required' => $the_field['required'],
+				'order' => $the_field['order'],
+				'fieldset' => $the_field['fieldset']
 				);
 			}
 
-			$this->load->view('cms/object_edit',$data);
+			$data['name'] = $this->Object_model->name;
+
 		}
+
+		$data['attributes'] = array('id' => 'editor');
+		$data['fields'] = $obj_fields;
+
+		$this->load->view('cms/object_edit',$data);
+
+	} // end edit()
 
 
 

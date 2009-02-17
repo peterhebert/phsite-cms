@@ -5,6 +5,24 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
+
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function(){
+
+	$("form select[name='object_id']").change(function () {
+	
+		var myloc = $("form input[name='my_url']").val();
+		var myval = $(this).val();
+		var newloc = myloc + '/type/' + myval;
+		window.location = newloc ;
+		
+	});
+
+});
+/* ]]> */
+</script>
 </head>
 <body>
 <div id="masthead">
@@ -28,12 +46,20 @@
 			<h1>Content editor</h1>
 			<?php
 			$hidden = array();
+			$form = array();
+
 			if($content_id != '') {
 				$hidden['content_id'] = $content_id;
 			}
 			$attributes = array('id' => 'content_editor');
 			
 			echo form_open(site_url("cms/content/edit/id/".$content_id), $attributes, $hidden);
+			
+			if($content_id != '') {
+				echo form_hidden('my_url', site_url("cms/content/edit/id/".$content_id));
+			} else {
+				echo form_hidden('my_url', site_url("cms/content/edit/"));
+			}
 	
 			echo "<p>";
 			echo form_label('Content type', 'parent_id');
@@ -60,28 +86,42 @@
 			echo form_input($field);
 			echo "</p>\n";
 	
+			// get object fields
+			foreach($fields as $row) {
+				$form[$row['field_id']] = array(
+					'value' => '',
+					'input_type' => $row['input_type'],
+					'field_name' => $row['field_name'],
+					'data_id' => '',
+				);
+			}
+			
 			// get current values
-			foreach($content_data as $data) {
-				$values[$data['field_id']] = $data['value'];
-				$hiddenIDs[$data['field_id']] = $data['data_id'];
+			foreach($content_data as $row) {
+				$form[$row['field_id']] = array(
+					'value' => $row['value'],
+					'input_type' => $row['input_type'],
+					'field_name' => $row['field_name'],
+					'data_id' => $row['data_id'],
+				);
 			}
 	
 			// generate form fields
-			foreach($fields as $row) {
+			foreach($form as $key => $row) {
 				echo "<p>";
 				echo form_label($row['field_name']);
 		
 				$field = array(
-				'name'        => "field[{$row['field_id']}]",
-				'id'          => "field[{$row['field_id']}]",
+				'name'        => "field[{$key}]",
+				'id'          => "field[{$key}]",
 				);
 		
-				if(array_key_exists($row['field_id'], $hiddenIDs)) {
-					echo form_hidden('data_id[]', $hiddenIDs[$row['field_id']] );
+				if($row['data_id'] != '') {
+					echo form_hidden('data_id[]', $row['data_id']);
 				}
 	
-				if(array_key_exists($row['field_id'], $values)) {
-					$field['value'] = form_prep($values[$row['field_id']] );
+				if($row['value'] != '') {
+					$field['value'] = form_prep($row['value']);
 				}
 				
 				switch($row['input_type']) {
@@ -90,10 +130,12 @@
 					echo form_input($field);
 					break;
 				case 'textarea':
+					$field['cols'] = 40;
 					$field['class'] = 'cms_textarea';
 					echo form_textarea($field);
 					break;
 				case 'richtext':
+					$field['cols'] = 40;
 					$field['class'] = 'cms_rte';
 					echo form_textarea($field);
 					break;
@@ -103,7 +145,7 @@
 				
 				echo "</p>\n";
 			}
-			
+
 			echo "<p>";
 			echo form_submit('submit', 'Save');
 			echo "</p>\n";
@@ -112,7 +154,7 @@
 		</div>
 		<div class="float w1">
 			<?php
-			if(is_array($otherlangs)) {
+			if(is_array($otherlangs) && count($otherlangs) > 0) {
 				echo "<h4 class=\"first\">Other Languages</h4>\n";
 				echo ul($otherlangs);
 			}
