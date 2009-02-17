@@ -77,51 +77,45 @@ class Content extends Controller {
 
 			// set rules for content data based upon object template
 
-				// load object template
-				if ($this->input->post('object_id') != '') {
-					$this->Object_model->object_id = $this->input->post('object_id');
-					$this->Object_model->load_object();
-					
-					$myfields = $this->Object_model->fields;
+			// load object template
+			if ($this->input->post('object_id') != '') {
+				$this->Object_model->object_id = $this->input->post('object_id');
+				$this->Object_model->load_object();
+				
+				$myfields = $this->Object_model->fields;
 
-					// set field validation rules
-					foreach($myfields as $row) {
-						
-						$validArray = explode('|',$row['validation']);
-						
-						// add rule if required
-						if($row['required'] == 1) {
-							array_unshift($validArray, 'required');
-						}
-						$newValid = array_unique($validArray);
-						$validation = implode('|',$validArray);
-						
-						$field_name = "field[{$row['field_id']}]";
-						$field_title = $row['field_name'];
-						$this->form_validation->set_rules($field_name, $field_title, $validation);
-					}
+				// set field validation rules
+				foreach($myfields as $row) {
 					
-				}	
+					$validArray = explode('|',$row['validation']);
+					
+					// add rule if required
+					if($row['required'] == 1) {
+						array_unshift($validArray, 'required');
+					}
+					$newValid = array_unique($validArray);
+					$validation = implode('|',$validArray);
+					
+					$field_name = "field[{$row['field_id']}]";
+					$field_title = $row['field_name'];
+					$this->form_validation->set_rules($field_name, $field_title, $validation);
+				}
+				
+			}	
 		
 			// run validation
 			if ($this->form_validation->run() == FALSE)
 			{
-				$this->load->view('myform');
+				$data['msg'] = validation_errors();
 			}
 			else
 			{
-				$this->load->view('formsuccess');
+				//$this->load->view('formsuccess');
 			}
 
 
 		
 		} // end form processing
-
-
-
-
-
-
 
 		
 		$params = $this->uri->uri_to_assoc(4);

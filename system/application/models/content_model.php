@@ -79,20 +79,34 @@ class Content_model extends Model {
 		return FALSE;
     }
 
-    // insert new content
-    function insert()
+    // update main content info
+    function update_content()
     {
-		$data = array(
-		'parent_id' => $this->parent_id,
-		'object_id' => $this->object_id
-		);
-        $this->db->insert('content', $data);
-		$this->content_id = $this->db->insert_id();
 
-		// insert field data
-		foreach ($this->content_data as $field) {
+		if($this->content_id == '') {
+			// insert
+			$data = array(
+			'parent_id' => $this->parent_id,
+			'object_id' => $this->object_id
+			);
+			if($this->db->insert('content', $data)){
+				$this->content_id = $this->db->insert_id();
+				return TRUE;
+			}
+		} else {
+			// update
+			$data = array(
+			'parent_id' => $this->parent_id,
+			'object_id' => $this->object_id,
+			'created' => $this->created
+			);
+			$this->db->where('content_id', $this->content_id);
+			if($this->db->update('content', $data)){
+				return TRUE;
+			}
 		}
 
+		return FALSE;
 
     }
 
@@ -104,7 +118,11 @@ class Content_model extends Model {
 		'value' => $value,
 		'lang' => $lang
 		);
-        $this->db->insert('content_data', $data);
+		if($this->db->insert('content_data', $data)){
+			return TRUE;
+		} else {
+			return FALSE;
+		}
     }
 
     // update field data
@@ -118,7 +136,11 @@ class Content_model extends Model {
 		);
 
 		$this->db->where('data_id', $data_id);
-		$this->db->update('mytable', $data); 
+		if($this->db->update('content_data', $data)){
+			return TRUE;
+		} else {
+			return FALSE;
+		}
     }
 
 }

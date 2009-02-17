@@ -45,6 +45,9 @@ $().ready(function(){
 		<div class="column w4">
 			<h1>Content editor</h1>
 			<?php
+			if(isset($msg)) {
+				echo "<div class=\"msg\">{$msg}</div>";
+			}
 			$hidden = array();
 			$form = array();
 
@@ -109,38 +112,37 @@ $().ready(function(){
 			// generate form fields
 			foreach($form as $key => $row) {
 				echo "<p>";
+				echo form_hidden('field_id[]', $key);
+				echo form_hidden('data_id[]', $row['data_id']);
+
 				echo form_label($row['field_name']);
 		
-				$field = array(
-				'name'        => "field[{$key}]",
-				'id'          => "field[{$key}]",
+				$field_params = array(
+				'name'        => "field[]",
+				'id'          => "field[]",
 				);
-		
-				if($row['data_id'] != '') {
-					echo form_hidden('data_id[]', $row['data_id']);
-				}
 	
 				if($row['value'] != '') {
-					$field['value'] = form_prep($row['value']);
+					$field_params['value'] = form_prep($row['value']);
 				}
 				
 				switch($row['input_type']) {
 				case 'text':
-					$field['class'] = 'cms_input';
-					echo form_input($field);
+					$field_params['class'] = 'cms_input';
+					echo form_input($field_params);
 					break;
 				case 'textarea':
-					$field['cols'] = 40;
-					$field['class'] = 'cms_textarea';
-					echo form_textarea($field);
+					$field_params['cols'] = 40;
+					$field_params['class'] = 'cms_textarea';
+					echo form_textarea($field_params);
 					break;
 				case 'richtext':
-					$field['cols'] = 40;
-					$field['class'] = 'cms_rte';
-					echo form_textarea($field);
+					$field_params['cols'] = 40;
+					$field_params['class'] = 'cms_rte';
+					echo form_textarea($field_params);
 					break;
 				default:
-					echo form_input($field);
+					echo form_input($field_params);
 				}
 				
 				echo "</p>\n";
