@@ -27,6 +27,7 @@ class Object extends Controller {
 		// process form
 		
 		if($this->input->post('submit')) {
+			$success = TRUE;
 			
 			$this->load->library('form_validation');
 			// first do object
@@ -45,6 +46,8 @@ class Object extends Controller {
 				$this->Object_model->name = $this->input->post('name');
 				$this->Object_model->update_object();
 
+			} else {
+				$success = FALSE;
 			} // end object update
 			
 			// now update field relationships
@@ -56,7 +59,7 @@ class Object extends Controller {
 			$my_exists = $this->input->post('exists', TRUE);
 			$my_order = $this->input->post('order', TRUE);
 			
-			foreach ($my_fields as $field_id) {
+			foreach ($my_fields as $index => $field_id) {
 				$zz_exist = FALSE;
 				$zz_required = FALSE;
 				$data_id = '';
@@ -71,28 +74,36 @@ class Object extends Controller {
 					$zz_required = TRUE;
 				}
 
-				if(is_array($my_data) and in_array($field_id,$my_data)) {
-					$data_id = $my_data[$field_id];
-				}
-
-				if(is_array($my_order) and in_array($field_id,$my_order)) {
-					$order = $my_order[$field_id];
-				}
+				$data_id = $my_data[$index];
+				$order = $my_order[$index];
 
 				if($zz_exist) {
 					//exists, now insert or update
 					if($data_id != '') {
-						$this->Object_model->update_field($data_id,$field_id,$zz_required,$order);
+						if(!$this->Object_model->update_field($data_id,$field_id,$zz_required,$order)) {
+							$success = FALSE;
+						}
 					} else {
-						$this->Object_model->insert_field($field_id,$zz_required,$order);
+						if(!$this->Object_model->insert_field($field_id,$zz_required,$order)) {
+							$success = FALSE;
+						}
 					}
 				} else {
 					// does not exist, please remove all instances of related field
-					$this->Object_model->remove_field($field_id);
+					if(!$this->Object_model->remove_field($field_id)) {
+						$success = FALSE;
+					}
 				}
+
 
 			}
 			// end update field relationships
+
+			if($success == true) {
+				$data['msg'] .= "<p>Object updated successfully</p>";
+			} else {
+				$data['msg'] .= "<p>Object not updated</p>";
+			}
 
 		} // end form processing
 

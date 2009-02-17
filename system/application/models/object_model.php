@@ -107,7 +107,11 @@ class Object_model extends Model {
 		'required' => $required,
 		'order' => $order
 		);
-		$this->db->insert('r_object_field', $data); 
+		if($this->db->insert('r_object_field', $data)) {
+			return TRUE;
+		} else {
+			return FALSE;
+		} 
     }
 
     // update related field
@@ -121,15 +125,24 @@ class Object_model extends Model {
 		);
 		
 		$this->db->where('id', $id);
-        $this->db->update('r_object_field', $data);
-    }
+ 		if($this->db->update('r_object_field', $data)) {
+			return TRUE;
+		} else {
+			return FALSE;
+		} 
+   }
 
     // remove related field
     function remove_field($field_id)
     {
 		
 		$this->db->where('field_id', $field_id);
-        $this->db->delete('r_object_field');
+ 		if($this->db->delete('r_object_field')) {
+			return TRUE;
+		} else {
+			return FALSE;
+		} 
+
     }
 
 

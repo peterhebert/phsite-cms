@@ -58,7 +58,9 @@ $().ready(function() {
 		<div class="column w4">
 			<h1 class="first">Object editor</h1>
 			<?php 
-			echo $msg;
+			if ($msg != ''){
+				echo "<div class=\"msg\">{$msg}</div>";
+			}
 			echo form_open($action, $attributes, $hidden);
 		?>
 			<p>
@@ -80,12 +82,11 @@ $().ready(function() {
 			echo form_hidden('fields[]', $index);
 
 			if($vals['data_id'] != '') {
-				echo form_hidden('data_id['.$index.']', $vals['data_id']);
 				$exists = true;
 			} else {
 				$exists = false;
 			}
-		
+			echo form_hidden('data_id[]', $vals['data_id']);
 
 			$params = array(
 			'name'        => 'exists[]',
@@ -107,15 +108,14 @@ $().ready(function() {
 			echo "<label class=\"required\">".form_checkbox($params)." <span>required?</span></label>";
 
 			$params = array(
-			'name'        => "order[{$index}]",
-			'id'          => "order[{$index}]",
+			'name'        => "order[]",
+			'id'          => "order[]",
 			'value'       => $vals['order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
 
 			echo "<label class=\"order\"><span>order</span> ".form_input($params)."</label>";
-			
 			echo "</div>\n";
 		
 		} ?>

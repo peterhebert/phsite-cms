@@ -117,3 +117,12 @@ white-space:nowrap;
 
 /* comments */
 .comments p {margin-bottom: .333em; }
+
+/* error messages */
+div.msg {
+	padding-left: 1em;
+	border-left: 2px double #999;
+	font-weight: bold;
+	font-style:italic;
+	margin-bottom:1em;
+}
