@@ -57,7 +57,7 @@ CREATE TABLE `content_data` (
   `lang` varchar(3) DEFAULT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`data_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -66,7 +66,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (1,1,1,'my first page','eng','2009-01-30 00:47:21'),(2,1,3,'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque porttitor molestie ipsum. Cras luctus, magna at commodo elementum, nisi mauris porta purus, eget congue risus ipsum sit amet urna. Integer commodo. Ut in est. Nulla ut pede eu odio iaculis egestas. Praesent volutpat. Nulla blandit nunc at felis. Praesent nec nibh a sapien placerat tincidunt. Vestibulum eros sapien, pretium egestas, mollis non, fermentum rhoncus, mi. Mauris mattis nibh gravida tortor. Phasellus condimentum rhoncus neque. Proin feugiat augue fermentum metus. Aliquam erat volutpat. Nam pellentesque.','eng','2009-01-30 00:47:21');
+INSERT INTO `content_data` VALUES (1,1,1,'','','2009-02-18 00:30:05'),(2,1,3,'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque porttitor molestie ipsum. Cras luctus, magna at commodo elementum, nisi mauris porta purus, ','','2009-02-18 00:29:50'),(3,1,4,'Quisque porttitor molestie ipsum.','','2009-02-18 00:13:33');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -159,7 +159,7 @@ CREATE TABLE `r_object_field` (
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   `fieldset` smallint(5) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -168,7 +168,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,1,1,1,0),(2,2,1,0,2,0),(3,3,1,1,3,0),(4,1,2,1,0,0),(5,3,2,1,0,0),(6,4,2,0,0,0),(7,2,2,0,0,0);
+INSERT INTO `r_object_field` VALUES (1,1,2,1,1,NULL),(2,3,2,1,0,NULL),(3,3,2,1,3,NULL),(4,2,2,0,2,NULL);
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -181,4 +181,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-02-14  1:04:58
+-- Dump completed on 2009-02-18  1:24:20

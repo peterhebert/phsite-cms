@@ -48,115 +48,16 @@ $().ready(function(){
 			if(isset($msg)) {
 				echo "<div class=\"msg\">{$msg}</div>";
 			}
-			$hidden = array();
-			$form = array();
 
-			if($content_id != '') {
-				$hidden['content_id'] = $content_id;
-			}
-			$attributes = array('id' => 'content_editor');
-			
-			echo form_open(site_url("cms/content/edit/id/".$content_id), $attributes, $hidden);
-			
-			if($content_id != '') {
-				echo form_hidden('my_url', site_url("cms/content/edit/id/".$content_id));
-			} else {
-				echo form_hidden('my_url', site_url("cms/content/edit/"));
-			}
-	
-			echo "<p>";
-			echo form_label('Content type', 'parent_id');
-			echo form_dropdown('object_id', $objects, $object_id);
-			echo "</p>\n";
-	
-			$field = array(
-			'name'        => 'parent_id',
-			'id'          => 'parent_id',
-			'value'       => $parent_id
-			);
-			echo "<p>";
-			echo form_label('Parent', 'parent_id');
-			echo form_input($field);
-			echo "</p>\n";
-	
-			$field = array(
-			'name'        => 'created',
-			'id'          => 'created',
-			'value'       => $created
-			);
-			echo "<p>";
-			echo form_label('Created', 'created');
-			echo form_input($field);
-			echo "</p>\n";
-	
-			// get object fields
-			foreach($fields as $row) {
-				$form[$row['field_id']] = array(
-					'value' => '',
-					'input_type' => $row['input_type'],
-					'field_name' => $row['field_name'],
-					'data_id' => '',
-				);
+			if(isset($form)) {
+				echo $form;
 			}
 			
-			// get current values
-			foreach($content_data as $row) {
-				$form[$row['field_id']] = array(
-					'value' => $row['value'],
-					'input_type' => $row['input_type'],
-					'field_name' => $row['field_name'],
-					'data_id' => $row['data_id'],
-				);
-			}
-	
-			// generate form fields
-			foreach($form as $key => $row) {
-				echo "<p>";
-				echo form_hidden('field_id[]', $key);
-				echo form_hidden('data_id[]', $row['data_id']);
-
-				echo form_label($row['field_name']);
-		
-				$field_params = array(
-				'name'        => "field[]",
-				'id'          => "field[]",
-				);
-	
-				if($row['value'] != '') {
-					$field_params['value'] = form_prep($row['value']);
-				}
-				
-				switch($row['input_type']) {
-				case 'text':
-					$field_params['class'] = 'cms_input';
-					echo form_input($field_params);
-					break;
-				case 'textarea':
-					$field_params['cols'] = 40;
-					$field_params['class'] = 'cms_textarea';
-					echo form_textarea($field_params);
-					break;
-				case 'richtext':
-					$field_params['cols'] = 40;
-					$field_params['class'] = 'cms_rte';
-					echo form_textarea($field_params);
-					break;
-				default:
-					echo form_input($field_params);
-				}
-				
-				echo "</p>\n";
-			}
-
-			echo "<p>";
-			echo form_submit('submit', 'Save');
-			echo "</p>\n";
 			?>
-			</form>
 		</div>
 		<div class="float w1">
 			<?php
-			if(is_array($otherlangs) && count($otherlangs) > 0) {
+			if(isset($otherlangs) && count($otherlangs) > 0) {
 				echo "<h4 class=\"first\">Other Languages</h4>\n";
 				echo ul($otherlangs);
 			}

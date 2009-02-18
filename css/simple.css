@@ -122,7 +122,10 @@ white-space:nowrap;
 div.msg {
 	padding-left: 1em;
 	border-left: 2px double #999;
-	font-weight: bold;
 	font-style:italic;
 	margin-bottom:1em;
+}
+div.msg strong {
+	font-style: normal;
+	font-weight: bold;
 }

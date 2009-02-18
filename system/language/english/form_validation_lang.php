@@ -19,10 +19,5 @@ $lang['matches']			= "The %s field does not match the %s field.";
 $lang['is_natural']			= "The %s field must contain only positive numbers.";
 $lang['is_natural_no_zero']	= "The %s field must contain a number greater than zero.";
 
-/* custom values */
-$lang['is_date']	= "The %s field must contain a valid date.";
-$lang['alpha_num_spaces']	= "The %s field may only contain alpha-numeric characters, spaces, underscores, and dashes.";
-$lang['file_path'] = "The %s field must contain a valid file path.";
-
 /* End of file form_validation_lang.php */
 /* Location: ./system/language/english/form_validation_lang.php */
