@@ -55,11 +55,11 @@ $().ready(function() {
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Object editor</div>
 	<div class="page-wrap block">
-		<div class="column w4">
+
 			<h1 class="first">Object editor</h1>
 			<?php 
 			if ($msg != ''){
-				echo "<div class=\"msg\">{$msg}</div>";
+				echo "<div class=\"msg\">{$msg}</div>\n";
 			}
 			echo form_open($action, $attributes, $hidden);
 		?>
@@ -69,61 +69,109 @@ $().ready(function() {
 			</p>
 			<fieldset>
 			<legend>Available Fields</legend>
-			<div class="row">
-				<div class="field_name">field name</div>
-				<div class="in_object">in object?</div>
-				<div class="required">required?</div>
-				<div class="order">order</div>
-			</div>
-			<?php foreach ($fields as $index => $vals) {
-
-			echo "<div class=\"row\">\n";
-
-			echo form_hidden('fields[]', $index);
-
-			if($vals['data_id'] != '') {
-				$exists = true;
-			} else {
-				$exists = false;
-			}
-			echo form_hidden('data_id[]', $vals['data_id']);
-
-			$params = array(
-			'name'        => 'exists[]',
-			'id'          => 'exists[]',
-			'value'       => $index,
-			'checked'     => $exists
-			);
-	
-			echo "<label class=\"field_name\">{$vals['field_name']}</label>";
-			echo "<label class=\"in_object\">".form_checkbox($params)." <span>in object?</span></label>";
+			<table id="object_field_props">
+			<thead>
+				<tr>
+					<th scope="col" id="hd_name">field name</th>
+					<th scope="col" id="hd_exists">in object?</th>
+					<th scope="col" id="hd_req">required?</th>
+					<th scope="col" id="hd_order">order</th>
+					<th scope="col" id="hd_val">value is</th>
+					<th scope="col" id="hd_exact">Exact Length</th>
+					<th scope="col" id="hd_min">Minimum Length</th>
+					<th scope="col" id="hd_max">Maximum Length</th>
+				</tr>
+			</thead>
+			<tbody>
 			
-			$params = array(
-			'name'        => 'required[]',
-			'id'          => 'required[]',
-			'value'       => $index,
-			'checked'     => $vals['required']
-			);
+			<?php
+			$fieldCount = count($fields);
+			$fieldNo = 1;
+			foreach ($fields as $index => $vals) {
 
-			echo "<label class=\"required\">".form_checkbox($params)." <span>required?</span></label>";
-
-			$params = array(
-			'name'        => "order[]",
-			'id'          => "order[]",
-			'value'       => $vals['order'],
-			'maxlength'   => '3',
-			'size'        => '3'
-			);
-
-			echo "<label class=\"order\"><span>order</span> ".form_input($params)."</label>";
-			echo "</div>\n";
+				if($fieldNo < $fieldCount) {
+				echo "<tr>\n";
+				} else {
+				echo "<tr class=\"last\">\n";
+				}
+				$fieldNo = $fieldNo + 1;
+	
+				echo form_hidden('field_id[]', $index);
+	
+				if($vals['rel_id'] != '') {
+					$exists = true;
+				} else {
+					$exists = false;
+				}
+				echo form_hidden('rel_id[]', $vals['rel_id']);
+	
+				$params = array(
+				'name'        => 'exists[]',
+				'id'          => 'exists[]',
+				'value'       => $index,
+				'checked'     => $exists
+				);
 		
-		} ?>
+				echo "<th headers=\"hd_name\" id=\"{$vals['field_name']}\" scope=\"row\">{$vals['field_name']}</th>\n";
+				echo "<td headers=\"hd_exists\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+	
+				$params = array(
+				'name'        => 'required[]',
+				'id'          => 'required[]',
+				'value'       => $index,
+				'checked'     => $vals['required']
+				);
+	
+				echo "<td headers=\"{$vals['field_name']} hd_req\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+	
+				$params = array(
+				'name'        => "order[$index]",
+				'id'          => "order[$index]",
+				'value'       => $vals['order'],
+				'maxlength'   => '3',
+				'size'        => '3'
+				);
+	
+				echo "<td headers=\"{$vals['field_name']} hd_order\">".form_input($params)."</td>\n";
+
+				echo "<td headers=\"{$vals['field_name']} hd_val\">".form_dropdown("string[]", $string_rules, $string)."</td>\n";
+	
+				$params = array(
+				'name'        => "exact_length[$index]",
+				'id'          => "exact_length[$index]",
+				'value'       => $vals['exact_length'],
+				'maxlength'   => '3',
+				'size'        => '3'
+				);
+				echo "<td headers=\"{$vals['field_name']} hd_exact\">".form_input($params)."</td>\n";
+	
+				$params = array(
+				'name'        => "min_length[$index]",
+				'id'          => "min_length[$index]",
+				'value'       => $vals['min_length'],
+				'maxlength'   => '3',
+				'size'        => '3'
+				);
+				echo "<td headers=\"{$vals['field_name']} hd_min\">".form_input($params)."</td>\n";
+	
+				$params = array(
+				'name'        => "max_length[$index]",
+				'id'          => "max_length[$index]",
+				'value'       => $vals['max_length'],
+				'maxlength'   => '3',
+				'size'        => '3'
+				);
+				echo "<td headers=\"{$vals['field_name']} hd_max\">".form_input($params)."</td>\n";
+	
+				echo "</tr>\n";
+			
+			} ?>
+			</tbody></table>
 			</fieldset>
+
 			<input name="submit" type="submit" id="submit" value="save" />
 			</form>
-		</div>
-		<div class="float w1"> </div>
+
 	</div>
 	<div class="page-wrap block" id="footer">phSite &copy; 2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>

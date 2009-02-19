@@ -4,7 +4,6 @@ class Field_model extends Model {
 	var $field_id;
 	var $field_name;
 	var $input_type;
-	var $validation;
 
     function Field_model()
     {
@@ -28,7 +27,6 @@ class Field_model extends Model {
 		$this->field_id = $row['field_id'];
 		$this->field_name = $row['field_name'];
 		$this->input_type = $row['input_type'];
-		$this->validation = $row['validation'];
     }
 
 	// delete the field and all related object instances of field
@@ -47,7 +45,7 @@ class Field_model extends Model {
     function new_field($name,$input_type,$validation)
     {
 
-		$insert_data = array('field_name' => $name, 'input_type' => $input_type, 'validation' => $validation);
+		$insert_data = array('field_name' => $name, 'input_type' => $input_type);
 
 		if($this->db->insert('field', $insert_data)) {
 			$this->field_id = $this->db->insert_id();

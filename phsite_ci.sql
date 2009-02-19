@@ -81,9 +81,8 @@ CREATE TABLE `field` (
   `field_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
   `field_name` text NOT NULL,
   `input_type` varchar(8) NOT NULL,
-  `validation` text NOT NULL,
   PRIMARY KEY (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -92,7 +91,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
-INSERT INTO `field` VALUES (1,'title','text','integer|exact_length[5]'),(2,'subtitle','text',''),(3,'full text','richtext',''),(4,'description','textarea',''),(5,'path','text','');
+INSERT INTO `field` VALUES (1,'title','text'),(2,'subtitle','text'),(3,'full text','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text');
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -121,30 +120,6 @@ INSERT INTO `object` VALUES (1,'static page'),(2,'blog entry'),(3,'image');
 UNLOCK TABLES;
 
 --
--- Table structure for table `r_fieldset`
---
-
-DROP TABLE IF EXISTS `r_fieldset`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-CREATE TABLE `r_fieldset` (
-  `fieldset_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
-  `object_id` mediumint(11) DEFAULT NULL,
-  `fieldset_name` text NOT NULL,
-  PRIMARY KEY (`fieldset_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
-SET character_set_client = @saved_cs_client;
-
---
--- Dumping data for table `r_fieldset`
---
-
-LOCK TABLES `r_fieldset` WRITE;
-/*!40000 ALTER TABLE `r_fieldset` DISABLE KEYS */;
-/*!40000 ALTER TABLE `r_fieldset` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `r_object_field`
 --
 
@@ -157,9 +132,9 @@ CREATE TABLE `r_object_field` (
   `object_id` mediumint(9) unsigned NOT NULL,
   `required` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `fieldset` smallint(5) unsigned DEFAULT NULL,
+  `validation` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -168,7 +143,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,2,1,1,NULL),(2,3,2,1,0,NULL),(3,3,2,1,3,NULL),(4,2,2,0,2,NULL);
+INSERT INTO `r_object_field` VALUES (1,1,1,1,1,'alpha'),(2,3,1,3,3,'alpha'),(3,2,1,0,2,NULL);
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -181,4 +156,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-02-18  1:24:20
+-- Dump completed on 2009-02-19  1:17:33

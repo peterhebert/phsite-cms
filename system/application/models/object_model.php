@@ -98,14 +98,15 @@ class Object_model extends Model {
     }
 
     // add related field to object
-	function insert_field($field_id,$required,$order=0)
+	function insert_field($field_id,$required,$order=0,$validation='')
     {
 		
 		$data = array(
 		'field_id' => $field_id,
 		'object_id' => $this->object_id,
 		'required' => $required,
-		'order' => $order
+		'order' => $order,
+		'validation' => $validation
 		);
 		if($this->db->insert('r_object_field', $data)) {
 			return TRUE;
@@ -115,13 +116,14 @@ class Object_model extends Model {
     }
 
     // update related field
-    function update_field($id,$field_id,$required,$order=0)
+    function update_field($id,$field_id,$required,$order=0,$validation='')
     {
 		$data = array(
 		'field_id' => $field_id,
 		'object_id' => $this->object_id,
 		'required' => $required,
-		'order' => $order
+		'order' => $order,
+		'validation' => $validation
 		);
 		
 		$this->db->where('id', $id);
@@ -133,10 +135,10 @@ class Object_model extends Model {
    }
 
     // remove related field
-    function remove_field($field_id)
+    function remove_field($rel_id)
     {
 		
-		$this->db->where('field_id', $field_id);
+		$this->db->where('id', $rel_id);
  		if($this->db->delete('r_object_field')) {
 			return TRUE;
 		} else {

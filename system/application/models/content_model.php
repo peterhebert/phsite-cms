@@ -43,10 +43,17 @@ class Content_model extends Model {
 			$this->created = $row['created'];
 			$this->updated = $row['updated'];
 			
-			$this->db->join('field', 'content_data.field_id = field.field_id', 'left');
-			
-			$where = "content_id = {$this->content_id} AND (lang = '' OR lang = '{$lang}')";
-			$query = $this->db->get_where('content_data',$where);
+			$sql = "SELECT content.content_id, r_object_field.*, 
+			content_data.data_id, content_data.value, content_data.lang, content_data.updated, 
+			field.field_name, field.input_type
+			FROM (
+			(r_object_field LEFT JOIN content ON r_object_field.object_id = content.object_id ) 
+			LEFT JOIN content_data ON r_object_field.field_id = content_data.field_id
+			)
+			LEFT JOIN field ON r_object_field.field_id = field.field_id
+			WHERE r_object_field.object_id = ".$this->object_id." AND content.content_id = ".$this->content_id;
+
+			$query = $this->db->query($sql);
 
 			$this->content_data = $query->result_array();
 		}

@@ -103,17 +103,54 @@ white-space:nowrap;
 #page form div.row label, div.row div {
 	float: left;
 	margin-right: 1em;
-	width: 5em;
+	width: auto;
+	min-width:6em;
 }
 #page form div.row div {
 	font-weight: bold;
 }
-#page form div.row .field_name {
-	width: 6em;
+#page form div.row select {
+	font-size:0.8em;
 }
+
 #page form label span {
 	display:none;
 }
+
+
+/* object fields table */
+#page form #object_field_props td,
+#page form #object_field_props thead th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+	text-align: center;
+}
+#page form #object_field_props tbody tr.last td,
+#page form #object_field_props tbody tr.last th
+{
+	border-bottom:0px none;
+}
+#page form #object_field_props tbody th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+}
+#page form #object_field_props td input,
+#page form #object_field_props td select
+{
+margin:0;
+padding:0;
+text-align:left;
+}
+
+#page form #object_field_props td select
+{
+font-size:0.9em;
+}
+
 
 /* comments */
 .comments p {margin-bottom: .333em; }
