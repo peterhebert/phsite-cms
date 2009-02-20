@@ -152,7 +152,11 @@ class Object extends Controller {
 			'object_id' => $this->Object_model->object_id,
 			'required' => '',
 			'order' => '',
-			'validation' => '',
+
+			'string' => '',
+			'exact_length' => '',
+			'min_length' => '',
+			'max_length' => '',
 			);
 
 		}
@@ -171,7 +175,12 @@ class Object extends Controller {
 				$obj_fields[$row['field_id']]['order'] = $row['order'];
 				
 				// process validation
-				$obj_fields[$row['field_id']]['validation'] = $row['validation'];
+				$validation = $this->parseValidation($row['validation']);
+				
+				$obj_fields[$row['field_id']]['string'] = $validation['string'];
+				$obj_fields[$row['field_id']]['exact_length'] = $validation['exact'];
+				$obj_fields[$row['field_id']]['min_length'] = $validation['min'];
+				$obj_fields[$row['field_id']]['max_length'] = $validation['max'];
 			}
 
 		}
@@ -183,7 +192,52 @@ class Object extends Controller {
 
 	} // end edit()
 
+	function parseValidation($raw)
+	{
+		$data = array( 'string' => '', 'exact' => '', 'min' => '', 'max' => '' );
 
+		$string_rules = array(
+		'alpha',
+		'alpha_numeric',
+		'alpha_dash',
+		'alpha_num_spaces',
+		'is_date',
+		'valid_email',
+		'integer',
+		'numeric',
+		'is_natural',
+		'is_natural_no_zero',
+		'file_path',
+		'valid_ip'
+		);
+		
+		$valid = explode('|',$raw);
+		if ( is_array($valid) && count($valid > 0) ) {
+			foreach($valid as $rule) {
+				if(in_array($rule,$string_rules,true)){
+					$data['string'] = $rule;
+				}
+				if(ereg ( 'exact_length\[([0-9]+)\]', $rule)) {
+					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
+					$data['exact'] = ereg_replace($pattern,'\\2',$rule);
+				}
+		
+				if(ereg ( 'min_length\[([0-9]+)\]', $rule)) {
+					$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
+					$data['min'] = ereg_replace($pattern,'\\2',$rule);
+				}
+		
+				if(ereg ( 'max_length\[([0-9]+)\]', $rule)) {
+					$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
+					$data['max'] = ereg_replace($pattern,'\\2',$rule);
+				}
+				
+			}
+		}
+		
+
+		return $data;
+	}
 
 }
 ?>

@@ -88,6 +88,9 @@ $().ready(function() {
 			$fieldCount = count($fields);
 			$fieldNo = 1;
 			foreach ($fields as $index => $vals) {
+				/*echo "<tr><td colspan=\"8\"><pre>";
+				print_r($vals);
+				echo "</pre></td></tr>\n";*/
 
 				if($fieldNo < $fieldCount) {
 				echo "<tr>\n";
@@ -134,7 +137,7 @@ $().ready(function() {
 	
 				echo "<td headers=\"{$vals['field_name']} hd_order\">".form_input($params)."</td>\n";
 
-				echo "<td headers=\"{$vals['field_name']} hd_val\">".form_dropdown("string[]", $string_rules, $string)."</td>\n";
+				echo "<td headers=\"{$vals['field_name']} hd_val\">".form_dropdown("string[]", $string_rules, $vals['string'])."</td>\n";
 	
 				$params = array(
 				'name'        => "exact_length[$index]",

@@ -94,14 +94,52 @@ class Tests extends Controller {
 
 	function parseme ()
 	{
-		$validation = 'john|doe|integer|numeric|exact_length[2]|max_length[7]';
+		$raw = 'john|doe|bob|exact_length[2]|max_length[7]';
 		
-$data['result'] = '';
+		$data['main'] = '';
+		$data['exact'] = '';
+		$data['min'] = '';
+		$data['max'] = '';
 
-				if(ereg ( 'exact_length\[([0-9]+)\]', $validation)) {
-					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
-					$data['result'] = ereg_replace($pattern,'\\2',$validation);
+		$string_rules = array(
+		'alpha',
+		'alpha_numeric',
+		'alpha_dash',
+		'alpha_num_spaces',
+		'is_date',
+		'valid_email',
+		'integer',
+		'numeric',
+		'is_natural',
+		'is_natural_no_zero',
+		'file_path',
+		'valid_ip'
+		);
+		
+		$valid = explode('|',$raw);
+		if ( is_array($valid) && count($valid > 0) ) {
+			foreach($valid as $rule) {
+				if(in_array($rule,$string_rules,true)){
+					$data['main'] = $rule;
 				}
+				
+			}
+		}
+		
+		if(ereg ( 'exact_length\[([0-9]+)\]', $raw)) {
+			$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
+			$data['exact'] = ereg_replace($pattern,'\\2',$raw);
+		}
+
+		if(ereg ( 'min_length\[([0-9]+)\]', $raw)) {
+			$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
+			$data['min'] = ereg_replace($pattern,'\\2',$raw);
+		}
+
+		if(ereg ( 'max_length\[([0-9]+)\]', $raw)) {
+			$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
+			$data['max'] = ereg_replace($pattern,'\\2',$raw);
+		}
 
 		$this->load->view('test',$data);
 
