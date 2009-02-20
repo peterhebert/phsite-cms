@@ -96,10 +96,10 @@ class Tests extends Controller {
 	{
 		$raw = 'john|doe|bob|exact_length[2]|max_length[7]';
 		
-		$data['main'] = '';
-		$data['exact'] = '';
-		$data['min'] = '';
-		$data['max'] = '';
+		$string = '';
+		$exact = '';
+		$min = '';
+		$max = '';
 
 		$string_rules = array(
 		'alpha',
@@ -120,7 +120,7 @@ class Tests extends Controller {
 		if ( is_array($valid) && count($valid > 0) ) {
 			foreach($valid as $rule) {
 				if(in_array($rule,$string_rules,true)){
-					$data['main'] = $rule;
+					$string = $rule;
 				}
 				
 			}
@@ -128,19 +128,20 @@ class Tests extends Controller {
 		
 		if(ereg ( 'exact_length\[([0-9]+)\]', $raw)) {
 			$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
-			$data['exact'] = ereg_replace($pattern,'\\2',$raw);
+			$exact = ereg_replace($pattern,'\\2',$raw);
 		}
 
 		if(ereg ( 'min_length\[([0-9]+)\]', $raw)) {
 			$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
-			$data['min'] = ereg_replace($pattern,'\\2',$raw);
+			$min = ereg_replace($pattern,'\\2',$raw);
 		}
 
 		if(ereg ( 'max_length\[([0-9]+)\]', $raw)) {
 			$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
-			$data['max'] = ereg_replace($pattern,'\\2',$raw);
+			$max = ereg_replace($pattern,'\\2',$raw);
 		}
 
+		$data['result'] = "String: $string, Exact: $exact, Min: $min, Max: $max";
 		$this->load->view('test',$data);
 
 	}
