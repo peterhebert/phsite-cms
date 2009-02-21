@@ -84,6 +84,12 @@ class Object extends Controller {
 				// loop through arrays
 				foreach($field_id as $index => $my_id) {
 				
+					if(array_key_exists($index, $required)) {
+						$req = 1;
+					} else {
+						$req = 0;
+					}
+				
 				
 					$validArray = array();
 	
@@ -119,7 +125,7 @@ class Object extends Controller {
 	
 						if(in_array($my_id,$exists)) {
 							// exists, update
-							$this->Object_model->update_field($rel_id[$index],$my_id,$required[$index],$order[$my_id],$val_for_db);
+							$this->Object_model->update_field($rel_id[$index],$my_id,$req,$order[$my_id],$val_for_db);
 						} else {
 							// does not exist, delete
 							$this->Object_model->remove_field($rel_id[$index]);
@@ -129,7 +135,7 @@ class Object extends Controller {
 	
 						if(in_array($my_id,$exists)) {
 							// insert
-							$this->Object_model->insert_field($my_id,$required[$index],$order[$my_id],$val_for_db);
+							$this->Object_model->insert_field($my_id,$req,$order[$my_id],$val_for_db);
 						}
 	
 					}

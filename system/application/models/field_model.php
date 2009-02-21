@@ -14,6 +14,7 @@ class Field_model extends Model {
     // get all fields
 	function get_list()
     {
+		$this->db->order_by("field_name", "asc");
 		$query = $this->db->get('field');
 		return $query->result_array();
 	}

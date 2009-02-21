@@ -127,6 +127,11 @@ white-space:nowrap;
 	vertical-align: top;
 	text-align: center;
 }
+#page form #object_field_props thead th
+{
+	font-weight: bold;
+	vertical-align:bottom;
+}
 #page form #object_field_props tbody tr.last td,
 #page form #object_field_props tbody tr.last th
 {
