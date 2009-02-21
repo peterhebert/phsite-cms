@@ -82,7 +82,7 @@ CREATE TABLE `field` (
   `field_name` text NOT NULL,
   `input_type` varchar(8) NOT NULL,
   PRIMARY KEY (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -91,7 +91,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
-INSERT INTO `field` VALUES (1,'title','text'),(2,'subtitle','text'),(3,'full text','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text');
+INSERT INTO `field` VALUES (1,'title','text'),(2,'subtitle','text'),(3,'full text','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text'),(7,'teaser','text');
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -134,7 +134,7 @@ CREATE TABLE `r_object_field` (
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   `validation` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -143,7 +143,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,1,1,1,'alpha'),(2,3,1,3,3,'alpha'),(3,2,1,0,2,NULL);
+INSERT INTO `r_object_field` VALUES (1,1,1,1,1,''),(2,3,1,0,3,''),(3,2,1,1,2,''),(6,5,1,0,0,'');
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -156,4 +156,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-02-19  1:17:33
+-- Dump completed on 2009-02-21  0:13:28
