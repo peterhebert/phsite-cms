@@ -4,6 +4,7 @@ class Content_model extends Model {
 	var $content_id;
 	var $parent_id;
 	var $object_id;
+	var $user_id;
 	var $created;
 	var $updated;
 	var $content_data;
@@ -40,6 +41,7 @@ class Content_model extends Model {
 			$this->content_id = $row['content_id'];
 			$this->parent_id = $row['parent_id'];
 			$this->object_id = $row['object_id'];
+			$this->user_id = $row['user_id'];
 			$this->created = $row['created'];
 			$this->updated = $row['updated'];
 			
@@ -94,7 +96,8 @@ class Content_model extends Model {
 			// insert
 			$data = array(
 			'parent_id' => $this->parent_id,
-			'object_id' => $this->object_id
+			'object_id' => $this->object_id,
+			'user_id' => $this->user_id
 			);
 			if($this->db->insert('content', $data)){
 				$this->content_id = $this->db->insert_id();
@@ -105,6 +108,7 @@ class Content_model extends Model {
 			$data = array(
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
+			'user_id' => $this->user_id,
 			'created' => $this->created
 			);
 			$this->db->where('content_id', $this->content_id);
