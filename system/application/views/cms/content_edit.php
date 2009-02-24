@@ -52,11 +52,6 @@ $().ready(function(){
 			if(isset($form)) {
 				echo($form);
 			}
-			if(isset($content)) {
-				echo "<pre>";
-				print_r($content);
-				echo"</pre>";
-			}
 			
 			?>
 		</div>

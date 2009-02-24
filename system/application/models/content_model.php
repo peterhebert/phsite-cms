@@ -120,35 +120,50 @@ class Content_model extends Model {
     // insert new field data
     function insert_data($field_id,$value,$lang='eng')
     {
-		$data = array(
-		'field_id' => $field_id,
-		'value' => $value,
-		'lang' => $lang
-		);
-		if($this->db->insert('content_data', $data)){
-			return TRUE;
-		} else {
-			return FALSE;
-		}
     }
 
     // update field data
-    function update_data($data_id,$field_id,$value,$lang='eng')
+    function update_data($field_id,$value,$data_id = '',$lang='eng')
     {
-		$data = array(
-		'content_id' => $this->content_id,
-		'field_id' => $field_id,
-		'value' => $value,
-		'lang' => $lang
-		);
+		if($data_id != '') {
 
-		$this->db->where('data_id', $data_id);
-		if($this->db->update('content_data', $data)){
-			return TRUE;
+			if($value != '') {
+				// update
+				$data = array(
+				'content_id' => $this->content_id,
+				'field_id' => $field_id,
+				'value' => $value,
+				'lang' => $lang
+				);
+		
+				$this->db->where('data_id', $data_id);
+				if($this->db->update('content_data', $data)){
+					return TRUE;
+				}
+			} else {
+				// delete
+				$this->db->where('data_id', $data_id);
+				if($this->db->delete('content_data')){
+					return TRUE;
+				}
+			}
+			
 		} else {
-			return FALSE;
+			// insert
+			$data = array(
+			'field_id' => $field_id,
+			'value' => $value,
+			'lang' => $lang
+			);
+			if($this->db->insert('content_data', $data)){
+				return TRUE;
+			}
 		}
+
+		return FALSE;
+
     }
+
 
 }
 

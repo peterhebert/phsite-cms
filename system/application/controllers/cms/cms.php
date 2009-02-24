@@ -6,6 +6,7 @@ class Cms extends Controller {
 		parent::Controller();
 		$this->load->helper('url');
 		$this->load->helper('html');
+		$this->load->helper('form');
 		// load objects
 		$this->load->model('Field_model');
 		$this->load->model('Object_model');
@@ -20,30 +21,37 @@ class Cms extends Controller {
 	
 		// load list of objects
 		$data2['q'] = $this->Object_model->get_list();
+		$index['new_objects'] = $data2['q'];
 		$index['objects'] = $this->load->view('cms/object_list',$data2, true);
 
 		// get recently added pages
 		$contentdata['title'] = "Recently Added";
 		$content = $this->Content_model->get_list(10,'desc');
 
+		$list = array();
 		foreach($content as $row)
 		{
 
 			$this->Content_model->getContent($row['content_id']);
 
-			$details = array();
 			$content_data = $this->Content_model->content_data;
+
+			$mytitle = '';
 			foreach($content_data as $field)
 			{
-				$details[$field['field_name']] = $field['value'];
+				if($field['field_name'] == 'title') {
+					$mytitle = $field['value'];
+				}
+
 			}
 
-			if(array_key_exists('title', $details)) {
-				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], $details['title'], array('title' => "edit '{$details['title']}'"));
+			if($mytitle != '') {
+				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], $mytitle, array('title' => "edit '{$mytitle}'"));
 			} else {
 				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], 'ID '.$row['content_id'], array('title' => "edit ID ".$row['content_id']));
 			}
 
+	
 		}
 
 		$contentdata['list'] = ul($list);

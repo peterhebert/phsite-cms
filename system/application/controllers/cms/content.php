@@ -47,8 +47,59 @@ class Content extends Controller {
 
 	function edit()
 	{
+		$this->load->model('Field_model');
+		$this->load->library('form_validation');		
 		// if form submitted, process data
 		if($this->input->post('submit') != '') {
+			$form_ids = $this->input->post('field_id');
+			$form_validation = $this->input->post('valid');
+			$form_data_ids = $this->input->post('data_id');
+			$form_values = $this->input->post('value');
+			$data['content'] = $form_validation;
+			
+			// set validation rules
+			$this->form_validation->set_rules('object_id', 'Content Type', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('parent_id', 'Parent', 'required|is_natural');
+			$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
+			foreach($form_ids as $index => $id) {
+				$this->Field_model->field_id = $id;
+				$this->Field_model->load();
+				$this->form_validation->set_rules("value[{$index}]", $this->Field_model->field_name, $form_validation[$index]);
+			}
+
+			// validate and process if all valid
+			if ($this->form_validation->run() == FALSE)
+			{
+				$data['msg'] = validation_errors();
+			} else {
+				$success = TRUE;
+
+				$this->Content_model->parent_id = $this->input->post('parent_id');
+				$this->Content_model->object_id = $this->input->post('object_id');
+				$this->Content_model->created = $this->input->post('created');
+
+				if($this->input->post('content_id') != '') {
+					$this->Content_model->content_id = $this->input->post('content_id');
+				}
+
+				if(!$this->Content_model->update_content()) {
+					$success = FALSE;
+				}
+
+				foreach($form_ids as $index => $id) {
+					if(!$this->Content_model->update_data($id, $form_values[$index],$form_data_ids[$index])) {
+						$success = FALSE;
+					}
+				}
+				
+				if($success === TRUE) {
+					$data['msg'] = "content updated successfully";
+				} else {
+					$data['msg'] = "content could not be updated";
+				}
+
+			} // end validation
+					
 		}
 		// end form processing
 
@@ -58,11 +109,12 @@ class Content extends Controller {
 			$this->Content_model->getContent($params['id']);
 		}
 
-$this->load->library('table');
-		
-		$data['content'] = $this->Content_model->content_data;
-		//$data['form'] = $this->render_form('eng');
-		$this->load->view('cms/content_test',$data);
+		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
+			$this->Content_model->object_id = $params['type']; 
+		}
+
+		$data['form'] = $this->render_form('eng');
+		$this->load->view('cms/content_edit',$data);
 	
 	}
 	
@@ -153,13 +205,6 @@ $this->load->library('table');
 			$form_html .=  form_hidden('field_id[]', $field_id);
 			$form_html .=  form_hidden('data_id[]', $data_id);
 
-
-/*
-'field_id'
-'data_id'
-'valid'
-'value'
-*/
 			$val = array();
 
 			if($row['required'] == 1) {

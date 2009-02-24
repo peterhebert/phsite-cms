@@ -3,7 +3,7 @@
 	<ul><?php foreach($list as $row) {?>
 	
 	<li><?php 
-	$uri = "cms/field/edit/".$row['field_id'];
+	$uri = "cms/field/edit/id/".$row['field_id'];
 	$text = $row['field_name'];
 	$attr = array('title' => "edit '".$row['field_name']."' field");
 	

@@ -84,7 +84,7 @@ class Object extends Controller {
 				// loop through arrays
 				foreach($field_id as $index => $my_id) {
 				
-					if(array_key_exists($index, $required)) {
+					if(in_array($my_id, $required,true)) {
 						$req = 1;
 					} else {
 						$req = 0;
