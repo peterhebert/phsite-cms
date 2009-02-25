@@ -6,8 +6,6 @@ class Object extends Controller {
 		parent::Controller();
 
 		$this->load->model('Object_model');
-		$this->load->helper('url');
-
 	}
 
 	function index()

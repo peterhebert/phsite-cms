@@ -4,9 +4,8 @@ class Cms extends Controller {
 	function Cms()
 	{
 		parent::Controller();
-		$this->load->helper('url');
-		$this->load->helper('html');
 		$this->load->helper('form');
+
 		// load objects
 		$this->load->model('Field_model');
 		$this->load->model('Object_model');

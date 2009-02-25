@@ -8,12 +8,6 @@ class Content extends Controller {
 		// load models
 		$this->load->model('Content_model');
 		$this->load->model('Object_model');
-		
-		// load helpers
-		$this->load->helper('url');
-		$this->load->helper('html');
-		$this->load->helper('test');
-
 	}
 
 	function index()
@@ -49,6 +43,7 @@ class Content extends Controller {
 	{
 		$this->load->model('Field_model');
 		$this->load->library('form_validation');		
+
 		// if form submitted, process data
 		if($this->input->post('submit') != '') {
 			$form_ids = $this->input->post('field_id');

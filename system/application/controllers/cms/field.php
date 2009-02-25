@@ -6,7 +6,6 @@ class Field extends Controller {
 		parent::Controller();
 
 		$this->load->model('Field_model');
-		$this->load->helper('url');
 		$this->input_types = array(
 		'text' => 'text',
 		'textarea' => 'textarea',

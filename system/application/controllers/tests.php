@@ -35,6 +35,14 @@ class Tests extends Controller {
 
 	}
 
+	function iso_lang()
+	{
+		$this->load->helper('iso-639-lang');
+		$data['list'] = get_lang_list();
+		$this->load->view('lang-list',$data);
+
+	}
+
 	function date()
 	{
 		$dates = array(

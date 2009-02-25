@@ -6,13 +6,10 @@ class User extends Controller {
 		parent::Controller();
 
 		$this->load->model('User_model');
-		$this->load->helper('url');
-
 	} // end constructor
 
 	function index()
 	{
-		$this->load->helper('html');
 		$data['list'] = $this->User_model->get_list();
 
 		$this->load->view('cms/user_list',$data);
@@ -36,6 +33,7 @@ class User extends Controller {
 		$data = array(
 		'action' => 'cms/user/edit/',
 		'hidden' => '',
+		'user_id' => '',
 		'name_first' => '',
 		'name_last' => '',
 		'username' => '',
@@ -54,6 +52,7 @@ class User extends Controller {
 			$data = array(
 			'action' => 'cms/user/edit/id/'.$params['id'],
 			'hidden' => array('user_id' => $this->User_model->id),
+			'user_id' => $this->User_model->id,
 			'name_first' => $this->User_model->name_first,
 			'name_last' => $this->User_model->name_last,
 			'username' => $this->User_model->username,

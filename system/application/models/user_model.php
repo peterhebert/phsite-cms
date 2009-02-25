@@ -46,6 +46,37 @@ class User_model extends Model {
 		$this->email = $row['email'];
     }
 
+    // update user
+	function update_user()
+    {
+
+		if($this->username != '' && $this->password != '') {
+			$data['username'] = $this->username;
+			$data['password'] = $this->password;
+		}
+		$data['name_first'] = $this->name_first;
+		$data['name_last'] = $this->name_last;
+		$data['timezone'] = $this->timezone;
+		$data['admin'] = $this->admin;
+		$data['lang'] = $this->lang;
+		$data['email'] = $this->email;
+
+
+		if($this->user_id != '') {
+			$this->db->where('user_id', $this->user_id);
+			if($this->db->update('users', $data)) {
+				return TRUE;
+			}
+		} else {
+			if($this->db->insert('users', $data)) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+
+    }
+
 }
 
 ?>
