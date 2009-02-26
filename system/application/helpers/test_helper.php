@@ -43,5 +43,14 @@ if ( ! function_exists('convert_date'))
 
 }
 
+if ( ! function_exists('sort_compare'))
+{	
+	function sort_compare($a, $b) {
+		if ($a == $b) {
+			return 0;
+		}
+		return ($a < $b) ? -1 : 1;
+	}
+}
 /* End of file test_helper.php */
 /* Location: ./system/application/helpers/test_helper.php */
