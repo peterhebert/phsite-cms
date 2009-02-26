@@ -1,6 +1,6 @@
 	<h3 class="first">Objects</h3>
 	<p><?php echo anchor("cms/object/edit","New Object");  ?></p>
-	<ul><?php foreach($q as $index => $row) {?>
+	<ul><?php foreach($list as $index => $row) {?>
 	<li><?php
 		$uri = "cms/object/edit/id/".$row['object_id'];
 		$text = $row['name'];

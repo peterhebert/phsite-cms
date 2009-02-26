@@ -81,20 +81,7 @@ $().ready(function(){
 
 </head>
 <body>
-<div id="masthead">
-	<div class="page-wrap block">
-		<div class="column">
-			<h2><a href="/">Peter Hebert</a></h2>
-		</div>
-		<div class="column lh">web, film, etc...</div>
-		<div class="float-right lh">
-			<form action="../../../../css/search.php" method="post" id="site-search">
-				<input name="search-text" id="search-text" type="text" />
-				<input name="search-submit" type="submit" id="search-submit" value="Search" />
-			</form>
-		</div>
-	</div>
-</div>
+<?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Field editor</div>
 	<div class="page-wrap block">
@@ -115,7 +102,7 @@ $().ready(function(){
 			</p>
 		</form>
 	</div>
-	<div class="page-wrap block" id="footer"> &copy; 1996-2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
+	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
 </body>
 </html>

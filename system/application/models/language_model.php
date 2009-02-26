@@ -34,6 +34,21 @@ class Language_model extends Model {
 		return $query->result_array();
 	}
 
+    // find matching languages
+	function find_matches($str)
+    {
+		$match = $this->input->xss_clean($str);
+		
+		$sql = "SELECT * FROM `ISO_639_LANG` WHERE (
+		`Ref_Name` LIKE '%{$match}%' OR
+		`Inverted_Name` LIKE '%{$match}%' OR
+		`Native_Name` LIKE '%{$match}%' 
+		) AND `activated` = 0";
+
+		$query = $this->db->query($sql);
+		return $query->result_array();
+	}
+
     // load the language based upon 639-3 key
 	function load($key)
     {
@@ -62,8 +77,6 @@ class Language_model extends Model {
 		if($this->db->update('ISO_639_LANG', $data)) {
 			$this->activated = $val;
 		} 
-
-
     }
 
 }
