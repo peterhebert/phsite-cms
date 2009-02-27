@@ -25,7 +25,6 @@ class Field_model extends Model {
     {
 		$query = $this->db->get_where('field', array('field_id' => $this->field_id));
 		$row = $query->row_array();
-		$this->field_id = $row['field_id'];
 		$this->field_name = $row['field_name'];
 		$this->input_type = $row['input_type'];
     }

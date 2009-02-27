@@ -26,6 +26,7 @@ class Field extends Controller {
 	function edit()
 	{
 		$this->load->library('form_validation');
+		$params = $this->uri->uri_to_assoc(4);
 		
 		$data['msg'] = '';
 		$data['field_id'] = '';
@@ -66,18 +67,19 @@ class Field extends Controller {
 				}
 	
 				if($updated == TRUE) {
-					$data['msg'] .= "<p><strong>field has been updated</strong></p>";
+					$data['msg'] = "field has been updated";
 				}
 			}
 		}
 
-		if($this->Field_model->field_id == '') {
-			$this->Field_model->field_id = $this->uri->segment(4);
+		if($this->Field_model->field_id == '' && array_key_exists('id',$params)) {
+			$this->Field_model->field_id = $params['id'];
 		}	
 
+		$data['field_id'] = $this->Field_model->field_id;
+		
 		if($this->Field_model->field_id != '') {
 			$this->Field_model->load();
-			$data['field_id'] = $this->Field_model->field_id;
 			$data['field_name'] = $this->Field_model->field_name;
 			$data['input_type'] = $this->Field_model->input_type;
 		}
