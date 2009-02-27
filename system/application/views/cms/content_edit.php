@@ -6,7 +6,6 @@
 <link href="/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/css/simple.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
-
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
@@ -29,27 +28,105 @@ $().ready(function(){
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
 	<div class="page-wrap block">
-		<div class="column w4">
-			<h1>Content editor</h1>
-			<?php
-			if(isset($msg)) {
-				echo "<div class=\"msg\">{$msg}</div>";
+		<h1>Content editor</h1>
+		<?php
+		if(isset($msg)) {
+			echo"<div class=\"msg\">";
+			echo $msg;
+			echo"</div>\n";
+		}
+
+		// open form
+		echo form_open($action);
+
+		echo form_hidden('content_id', $content_id);
+		echo form_hidden('my_url', $action);
+
+		// do main content fields
+
+		echo"<p>";
+		echo form_label('Author', 'user_id');
+		echo form_dropdown('user_id', $userArray, $user_id);
+		echo"</p>\n";
+
+		echo"<p>";
+		echo form_label('Content type', 'object_id');
+		echo form_dropdown('object_id', $objArray, $object_id);
+		echo"</p>\n";
+	
+		echo"<p>";
+		echo form_label('Parent', 'parent_id');
+		echo form_dropdown('parent_id', $parentArray, $parent_id);
+		echo"</p>\n";
+	
+		$field_params = array(
+		'name'        => 'created',
+		'id'          => 'created',
+		'value'       => $created
+		);
+		echo"<p>";
+		echo form_label('Created', 'created');
+		echo form_input($field_params);
+		echo"</p>\n";
+		
+		foreach($fields as $fd) {
+			$field_params = array();
+
+			$field_params['name'] = "value[]";
+			$field_params['id'] = "value[]";
+
+			$value = '';
+			$data_id = '';
+
+			foreach($content_data as $dt) {
+				if($dt['field_id'] == $fd['field_id']) {
+					$value = $dt['value'];
+					$data_id = $dt['data_id'];
+					$required = $dt['required'];
+					$valid = $dt['validation'];
+				}
+			}
+			if($value != '') {
+				$field_params['value'] = $value;
 			}
 
-			if(isset($form)) {
-				echo($form);
+			echo form_hidden('field_id[]', $fd['field_id']);
+			echo form_hidden('required[]', $fd['required']);
+			echo form_hidden('valid[]', $fd['validation']);
+			echo form_hidden('data_id[]', $data_id);
+
+			echo "<p>";
+			echo form_label($fd['field_name']);
+
+			switch($fd['input_type']) {
+			case 'text':
+				$field_params['class'] = 'cms_input';
+				echo form_input($field_params);
+				break;
+			case 'textarea':
+				$field_params['cols'] = 40;
+				$field_params['class'] = 'cms_textarea';
+				echo form_textarea($field_params);
+				break;
+			case 'richtext':
+				$field_params['cols'] = 40;
+				$field_params['class'] = 'cms_rte';
+				echo form_textarea($field_params);
+				break;
+			default:
+				echo form_input($field_params);
 			}
-			
-			?>
-		</div>
-		<div class="float w1">
-			<?php
-			if(isset($otherlangs) && count($otherlangs) > 0) {
-				echo "<h4 class=\"first\">Other Languages</h4>\n";
-				echo ul($otherlangs);
-			}
-			?>
-		</div>
+			echo "</p>\n";
+						
+		}
+
+		// close form
+		echo "<p>";
+		echo form_submit('submit', 'Save');
+		echo "</p>\n";
+
+		echo form_close();
+		?>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

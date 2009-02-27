@@ -60,16 +60,19 @@ class Content_model extends Model {
 			$this->user_id = $row['user_id'];
 			$this->created = $row['created'];
 			$this->updated = $row['updated'];
-			
-			$sql = "SELECT content.content_id, r_object_field.*, 
-			content_data.data_id, content_data.value, content_data.lang, content_data.updated, 
-			field.field_name, field.input_type
-			FROM (
-			(r_object_field LEFT JOIN content ON r_object_field.object_id = content.object_id ) 
-			LEFT JOIN content_data ON r_object_field.field_id = content_data.field_id
-			)
-			LEFT JOIN field ON r_object_field.field_id = field.field_id
-			WHERE r_object_field.object_id = ".$this->object_id." AND content.content_id = ".$this->content_id;
+
+			$sql = "SELECT content_data.*, 
+			r_object_field.required, 
+			r_object_field.order,
+			r_object_field.validation,
+			field.field_name,
+			field.input_type
+			FROM ( 
+			(content LEFT JOIN content_data ON content.content_id = content_data. content_id)
+			LEFT JOIN r_object_field ON content.object_id = r_object_field. object_id AND content_data.field_id = r_object_field.field_id
+			) 
+			LEFT JOIN field ON content_data.field_id = field.field_id
+			WHERE content.content_id = ".$this->content_id." AND content_data.lang = '{$lang}'";
 
 			$query = $this->db->query($sql);
 
@@ -138,11 +141,38 @@ class Content_model extends Model {
     }
 
     // update field data
-    function update_data($field_id,$value,$data_id = '',$lang='eng')
+    function update_data($field_id,$value,$data_id,$lang='eng')
     {
-		if($data_id != '') {
+
+		if($data_id == '') {
 
 			if($value != '') {
+				// insert
+				$data = array(
+				'content_id' => $this->content_id,
+				'field_id' => $field_id,
+				'value' => $value,
+				'lang' => $lang
+				);
+				if($this->db->insert('content_data', $data)){
+					return TRUE;
+				} else {
+					return FALSE;
+				}
+			} else {
+				return TRUE;
+			}
+			
+		} else {
+
+			if($value == '') {
+				// delete
+				$this->db->where('data_id', $data_id);
+				if($this->db->delete('content_data')){
+					return TRUE;
+				}
+
+			} else {
 				// update
 				$data = array(
 				'content_id' => $this->content_id,
@@ -155,29 +185,29 @@ class Content_model extends Model {
 				if($this->db->update('content_data', $data)){
 					return TRUE;
 				}
-			} else {
-				// delete
-				$this->db->where('data_id', $data_id);
-				if($this->db->delete('content_data')){
-					return TRUE;
-				}
 			}
-			
-		} else {
-			// insert
-			$data = array(
-			'field_id' => $field_id,
-			'value' => $value,
-			'lang' => $lang
-			);
-			if($this->db->insert('content_data', $data)){
-				return TRUE;
-			}
+
+
+
 		}
 
 		return FALSE;
 
     }
+
+    // return list of possible parents
+    function getParents()
+    {
+
+		$sql = "SELECT content.content_id, content_data.value as title FROM content LEFT JOIN
+		(content_data LEFT JOIN field ON content_data.field_id = field.field_id ) ON content.content_id = content_data. content_id
+		WHERE content.content_id != ".$this->content_id." 
+		AND content.parent_id != ".$this->content_id." 
+		AND content_data.field_id = 1";
+				
+		$query = $this->db->query($sql);
+		return $query->result_array();
+	}
 
 
 }
