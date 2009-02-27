@@ -30,6 +30,22 @@ class Content_model extends Model {
 		return $query->result_array();
 	}
 
+    // search for content
+	function search($str)
+    {
+		$match = $this->input->xss_clean($str);
+
+		$sql = "SELECT `content_id`, AVG( MATCH(`value`) AGAINST ('{$match}') ) AS `score` 
+		FROM `content_data` 
+		WHERE MATCH(value) AGAINST ('{$match}') 
+		GROUP BY content_id 
+		ORDER BY score desc
+		";
+		
+		$query = $this->db->query($sql);
+		return $query->result_array();
+	}
+
     // return content of specific language and with no assigned language
     function getContent($id,$lang = 'eng')
     {
@@ -119,11 +135,6 @@ class Content_model extends Model {
 
 		return FALSE;
 
-    }
-
-    // insert new field data
-    function insert_data($field_id,$value,$lang='eng')
-    {
     }
 
     // update field data

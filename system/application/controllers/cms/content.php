@@ -44,7 +44,9 @@ class Content extends Controller {
 		$this->load->model('Field_model');
 		$this->load->library('form_validation');		
 
-		// if form submitted, process data
+		$params = $this->uri->uri_to_assoc(4);
+
+/*		// if form submitted, process data
 		if($this->input->post('submit') != '') {
 			$form_ids = $this->input->post('field_id');
 			$form_validation = $this->input->post('valid');
@@ -75,6 +77,8 @@ class Content extends Controller {
 
 				if($this->input->post('content_id') != '') {
 					$this->Content_model->content_id = $this->input->post('content_id');
+				} else if (array_key_exists('id',$params) ) {
+					$this->Content_model->content_id = intval($params['id']);
 				}
 
 				if(!$this->Content_model->update_content()) {
@@ -98,8 +102,7 @@ class Content extends Controller {
 		}
 		// end form processing
 
-		$params = $this->uri->uri_to_assoc(4);
-
+*/
 		if(array_key_exists('id',$params)) {
 			$this->Content_model->getContent($params['id']);
 		}
@@ -225,6 +228,7 @@ class Content extends Controller {
 				$field_params['value'] = '';
 			}
 
+
 			switch($row['input_type']) {
 			case 'text':
 				$field_params['class'] = 'cms_input';
@@ -260,7 +264,9 @@ class Content extends Controller {
 
 	function search()
 	{
-		$data['term'] = $this->input->post('search-text');	
+
+		$data['term'] = $this->input->post('search-text');
+		$data['matches'] = 	$this->Content_model->search($this->input->post('search-text'));
 		$this->load->view('cms/search_results',$data);
 	}
 
