@@ -33,7 +33,8 @@ if ( ! function_exists('convert_date'))
 		$delim = array('\\', '/');
 		$newstr = str_replace($delim, '-', $str);
 
-		if ($timestamp = strtotime($newstr)) {
+		if ($timestamp = strtotime($newstr))
+		{
 			$date = date('Y-m-d H:i:s', $timestamp);
 			return $date;
 		} else {
@@ -46,11 +47,59 @@ if ( ! function_exists('convert_date'))
 if ( ! function_exists('sort_compare'))
 {	
 	function sort_compare($a, $b) {
-		if ($a == $b) {
+		if ($a == $b)
+		{
 			return 0;
 		}
 		return ($a < $b) ? -1 : 1;
 	}
 }
-/* End of file test_helper.php */
-/* Location: ./system/application/helpers/test_helper.php */
+
+if ( ! function_exists('checkPassword'))
+{
+	function checkPassword($plainText,$pwd)
+	{
+	
+		//extract the salt from the password
+		$salt = substr ( $pwd, 0, SALT_LENGTH );
+	
+		$checkPwd = $salt.sha1($salt.$plainText);
+	
+		if ($checkPwd == $pwd)
+		{
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+if ( ! function_exists('generateHash'))
+{
+	function generateHash($plainText, $salt = NULL)
+	{
+		if ($salt === NULL)
+		{
+			$salt = substr(md5(uniqid(rand(), true)), 0, SALT_LENGTH);
+		}
+		else
+		{
+			$salt = substr($salt, 0, SALT_LENGTH);
+		}
+	
+		return $salt . sha1($salt . $plainText);
+	}
+}
+
+if ( ! function_exists('gen_md5_password'))
+{
+	function gen_md5_password($len = 8)
+	{
+		// function calculates 32-digit hexadecimal md5 hash
+		// of some random data
+		return substr(md5(rand().rand()), 0, $len);
+	}
+}
+
+/* End of file phsite_helper.php */
+/* Location: ./system/application/helpers/phsite_helper.php */
