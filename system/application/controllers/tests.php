@@ -7,7 +7,6 @@ class Tests extends Controller {
 		parent::Controller();	
 		$this->load->helper('file');
 		$this->load->helper('url');
-		$this->load->helper('test');
 	}
 	
 	function index()
