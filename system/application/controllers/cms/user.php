@@ -44,10 +44,76 @@ class User extends Controller {
 		);
 
 		$params = $this->uri->uri_to_assoc(4);
-
 		if($this->User_model->user_id == '' && array_key_exists('id',$params)) {
 			$this->User_model->user_id = $params['id'];
 		}
+
+		// if form submitted, process data
+		if($this->input->post('submit') != '')
+		{
+			if($this->User_model->user_id == '' && $this->input->post('user_id') != '') {
+				$this->User_model->user_id = $this->input->post('user_id');
+			}
+
+			// set validation rules
+			$this->form_validation->set_rules('name_first', 'First Name', 'required');
+			$this->form_validation->set_rules('name_last', 'Last Name', 'required');
+			$this->form_validation->set_rules('username', 'Username', 'required|min_length[8]|alpha_dash');
+
+			if($this->input->post('password') != '' || $this->User_model->user_id == '') {
+				$this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|alpha_dash');
+				$this->form_validation->set_rules('password_confirm', 'Password confirm', 'required|min_length[8]|alpha_dash|matches[password]');
+			}
+
+			$this->form_validation->set_rules('timezone', 'Time Zone', 'required|is_timezone');
+			$this->form_validation->set_rules('admin', 'User Type', 'required|is_natural');
+			$this->form_validation->set_rules('lang', 'Default language', 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('email', 'Email address', 'required|valid_email');
+
+			// validate and process if all valid
+			if ($this->form_validation->run() == FALSE)
+			{
+				$data['msg'] = validation_errors();
+			} else {
+
+				if($this->input->post('user_id') != '') {
+					$this->User_model->user_id = $this->input->post('user_id');
+				}
+				$this->User_model->name_first = $this->input->post('name_first');
+				$this->User_model->name_last = $this->input->post('name_last');
+				$this->User_model->username = $this->input->post('username');
+				$this->User_model->timezone = $this->input->post('timezone');
+				$this->User_model->admin = $this->input->post('admin');
+				$this->User_model->lang = $this->input->post('lang');
+				$this->User_model->email = $this->input->post('email');
+
+				if($this->input->post('password') != '') {
+					$success = $this->User_model->update_user($this->input->post('password'));
+				} else {
+					$success = $this->User_model->update_user();
+				}
+
+				if($success) {
+					$data['msg'] = "<p>User updated successfully</p>\n";
+
+					if($this->input->post('user_id') == '') {
+						if($this->User_model->email_user_info($this->input->post('password'),'new')) {
+							$data['msg'] .= "<p>Confirmation email sent</p>\n";
+						}
+						
+					} else if ($this->input->post('user_id') != '') {
+						if($this->User_model->email_user_info($this->input->post('password'))) {
+							$data['msg'] .= "<p>Confirmation email sent</p>\n";
+						}
+					}
+
+				} else {
+					$data['msg'] = "User could not be updated";
+				}
+			}
+
+		}
+
 
 		if($this->User_model->user_id != '') {
 			$this->User_model->load();
@@ -71,68 +137,45 @@ class User extends Controller {
 
 	} // end edit()
 
-    function update_password($new='') {
+	function forgot_password()
+	{
+		$this->load->helper('form');
+		$data['username'] = '';
+		$data['email'] = '';
+		$data['showform'] = TRUE;
 
-		// generate new password here if not supplied
-		if($new == '') {
-			$new = gen_md5_password();
-		}
-		// hash password for database
-		$hpwd = generateHash($password_new);
-		
-		$data = array(
-		'password' => $hpwd,
-		);
-		
-		$this->db->where('user_id', $this->User_model->id);
+		// if form submitted, process data
+		if($this->input->post('submit') != '')
+		{
+			$data['username'] = $this->input->post('username');
+			$data['email'] = $this->input->post('email');
+			
+			// set validation rules
+			$this->form_validation->set_rules('username', 'Username', 'required|min_length[8]|alpha_dash');
+			$this->form_validation->set_rules('email', 'Email address', 'required|valid_email');
 
-		if ($this->db->update('users', $data)) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
+			// validate and process if all valid
+			if ($this->form_validation->run() == FALSE)
+			{
+				$data['msg'] = validation_errors();
+			} else {
 
-	} // end update_password()
+				$this->User_model->username = $this->input->post('username');
+				$this->User_model->email = $this->input->post('email');
+				if($this->User_model->reset_password()) {
+					$data['msg'] = "Your reset password has been emailed to you";
+					$data['showform'] = FALSE;
+				} else {
+					$data['msg'] = "Could not find a user matching the info provided";
+				}
+			}
 
-    function email_user_info($pwd,$action='') {
-		$this->load->library('email');
-
-		switch ($action) {
-		case 'new':
-			$subject = "New phSite account";
-			$message = "You have created a new account for phSite\n";
-			$message .= "Your login info is:\n";
-			$message .= "Username: ".$this->User_model->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
-		case 'reset':
-			$subject = "Password reset for phSite installation";
-			$message = "Your password has been reset.\n";
-			$message .= "Your new login info is:\n";
-			$message .= "Username: ".$this->User_model->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
-		default:
-			$subject = "Your login info for phSite";
-			$message = "You have changed your login password for phSite\n";
-			$message .= "Your new login info is:\n";
-			$message .= "Username: ".$this->User_model->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
 		}
 
-		$this->email->from('phsite@host.com', 'phSite CMS');
-		$this->email->to($this->User_model_email); 
-		$this->email->subject($subject);
-		$this->email->message($message);	
-				
-		if($this->email->send()) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
+		$this->load->view('cms/user_forgot_pwd',$data);
 
-	} // end email_user_info()
+	} // end forgot_password()
+
 
 }
 ?>

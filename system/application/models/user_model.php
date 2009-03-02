@@ -47,20 +47,20 @@ class User_model extends Model {
     }
 
     // update user
-	function update_user()
+	function update_user($newpwd='')
     {
 
-		if($this->username != '' && $this->password != '') {
-			$data['username'] = $this->username;
-			$data['password'] = $this->password;
+		if($this->user_id == '' || $newpwd != '') {
+			$tmpwd = $this->hash_password($newpwd);
+			$data['password'] = $tmpwd[0];
 		}
 		$data['name_first'] = $this->name_first;
 		$data['name_last'] = $this->name_last;
+		$data['username'] = $this->username;
 		$data['timezone'] = $this->timezone;
 		$data['admin'] = $this->admin;
 		$data['lang'] = $this->lang;
 		$data['email'] = $this->email;
-
 
 		if($this->user_id != '') {
 			$this->db->where('user_id', $this->user_id);
@@ -76,6 +76,87 @@ class User_model extends Model {
 		return FALSE;
 
     }
+
+    function hash_password($str='') {
+
+		// generate new password here if not supplied
+		if($str == '') {
+			$str = gen_md5_password();
+		}
+		// hash password for database
+		$hpwd = generateHash($str);
+		
+		return array($hpwd,$str);
+	} // end hash_password()
+
+    // reset password
+	function reset_password()
+    {
+		// first find user
+		$this->db->where('username' => $this->username);
+		$this->db->where('email' => $this->email);
+		$this->db->from('users');
+		$query = $this->db->get();
+
+		if($this->db->count_all_results() > 0) {
+			$row = $query->row_array();
+			$this->user_id = $row['user_id'];
+			$pwdArray = $this->hash_password();
+			
+			$data = array('password' => $pwdArray[0]);
+			$this->db->where('user_id', $this->user_id);
+			if($this->db->update('users', $data)) {
+				$this->email_user_info($pwdArray[0],'reset');
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+
+    }
+
+    function email_user_info($pwd,$action='') {
+		$this->load->library('email');
+
+		switch ($action) {
+		case 'new':
+			$subject = "New phSite account";
+			$message = "You have created a new account for phSite at the following address:\n";
+			$message .= $config['base_url']."\n";
+			$message .= "Your login info is:\n";
+			$message .= "Username: ".$this->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		case 'reset':
+			$subject = "Password reset for phSite installation";
+			$message = "Your password has been reset for phSite at the following address:\n";
+			$message .= $config['base_url']."\n";
+			$message .= "Your new login info is:\n";
+			$message .= "Username: ".$this->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		default:
+			$subject = "Your login info for phSite";
+			$message = "You have changed your login password for phSite at the following address:\n";
+			$message .= $config['base_url']."\n";
+			$message .= "Your new login info is:\n";
+			$message .= "Username: ".$this->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		}
+
+		$this->email->from('phsite@host.com', 'phSite CMS');
+		$this->email->to($this->email); 
+		$this->email->subject($subject);
+		$this->email->message($message);	
+				
+		if($this->email->send()) {
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+
+	} // end email_user_info()
 
 }
 

@@ -93,8 +93,24 @@ class MY_Form_validation extends CI_Form_validation {
 			return FALSE;
 		}		
 	}
+
+	// --------------------------------------------------------------------
 	
+	/**
+	 * is a valid timezone?
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	string
+	 */	
+	function is_timezone($str)
+	{
+		$timezone_identifiers = DateTimeZone::listIdentifiers();
+		$valid = in_array($str, $timezone_identifiers);
+		return $valid;
+	}
 }
+
 // END Form Validation Class
 
 /* End of file MY_Form_validation.php */
