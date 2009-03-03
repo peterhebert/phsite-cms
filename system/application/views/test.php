@@ -7,7 +7,7 @@
 
 <body>
 	<h1>Test</h1>
-<p><?php echo $result; ?></p>
+<pre><?php print_r( $result ); ?></pre>
 
 </body>
 </html>

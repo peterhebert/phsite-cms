@@ -34,7 +34,7 @@ class User_model extends Model {
     // load user
 	function load()
     {
-		$query = $this->db->get_where('users', array('field_id' => $this->user_id));
+		$query = $this->db->get_where('users', array('user_id' => $this->user_id));
 		$row = $query->row_array();
 		$this->name_first = $row['name_first'];
 		$this->name_last = $row['name_last'];
@@ -93,11 +93,8 @@ class User_model extends Model {
 	function reset_password()
     {
 		// first find user
-		$this->db->where('username' => $this->username);
-		$this->db->where('email' => $this->email);
-		$this->db->from('users');
-		$query = $this->db->get();
-
+		$where = array('username' => $this->username, 'email' => $this->email);
+		$query = $this->db->get_where('users', $where);
 		if($this->db->count_all_results() > 0) {
 			$row = $query->row_array();
 			$this->user_id = $row['user_id'];
@@ -114,49 +111,6 @@ class User_model extends Model {
 		return FALSE;
 
     }
-
-    function email_user_info($pwd,$action='') {
-		$this->load->library('email');
-
-		switch ($action) {
-		case 'new':
-			$subject = "New phSite account";
-			$message = "You have created a new account for phSite at the following address:\n";
-			$message .= $config['base_url']."\n";
-			$message .= "Your login info is:\n";
-			$message .= "Username: ".$this->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
-		case 'reset':
-			$subject = "Password reset for phSite installation";
-			$message = "Your password has been reset for phSite at the following address:\n";
-			$message .= $config['base_url']."\n";
-			$message .= "Your new login info is:\n";
-			$message .= "Username: ".$this->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
-		default:
-			$subject = "Your login info for phSite";
-			$message = "You have changed your login password for phSite at the following address:\n";
-			$message .= $config['base_url']."\n";
-			$message .= "Your new login info is:\n";
-			$message .= "Username: ".$this->username."\n";
-			$message .= "Password: ".$pwd."\n";
-			break;
-		}
-
-		$this->email->from('phsite@host.com', 'phSite CMS');
-		$this->email->to($this->email); 
-		$this->email->subject($subject);
-		$this->email->message($message);	
-				
-		if($this->email->send()) {
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-
-	} // end email_user_info()
 
 }
 

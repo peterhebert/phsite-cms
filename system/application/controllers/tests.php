@@ -153,6 +153,71 @@ class Tests extends Controller {
 
 	}
 
+	function time_zones()
+	{
 
+/*		$zones = timezone_identifiers_list();
+		
+		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
+
+		foreach ($zones as $zone)
+		{
+
+			$parts = explode('/', $zone);
+		   
+			// Only use "friendly" continent names
+			if (in_array($parts[0],$continents,true) )
+			{       
+	
+				if(array_key_exists(2,$parts)) {
+					$country = $parts[0].'/'.$parts[1];
+				
+					//$locations[$parts[0]][$parts[1]][$parts[2]] = $zone;
+					$locations[$parts[0]][$country][$zone] = $parts[2];
+				
+				} else {
+
+					if (isset($parts[1])) {
+						//$locations[$parts[0]][$parts[1]] = $zone;
+						$locations[$parts[0]][$zone] = $parts[1];
+					}
+
+				}
+				
+			}
+		}
+
+*/
+		$abbreviations = DateTimeZone::listAbbreviations();
+		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
+		foreach ($abbreviations as $abbr)
+		{
+			
+			
+			foreach($abbr as $zone) {
+				$parts = explode('/', $zone['timezone_id']);
+
+				// Only use "friendly" continent names
+				if (in_array($parts[0],$continents,true) )
+				{       
+					if(array_key_exists(2,$parts)) {
+						$country = $parts[0].'/'.$parts[1];
+						$locations[$zone['offset']][$parts[0]][$country][$zone['timezone_id']] = $parts[2];
+					
+					} else {
+	
+						if (isset($parts[1])) {
+							$locations[$zone['offset']][$parts[0]][$zone['timezone_id']] = $parts[1];
+						}
+	
+					}
+				}
+
+			}
+		}
+		ksort($locations);
+		$data['result'] = $locations;
+		$this->load->view('test',$data);
+	}
 }
 ?>

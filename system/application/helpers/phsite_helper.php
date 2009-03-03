@@ -101,5 +101,40 @@ if ( ! function_exists('gen_md5_password'))
 	}
 }
 
+if ( ! function_exists('listTimeZones'))
+{
+	function listTimeZones()
+	{
+		$zones = timezone_identifiers_list();
+		
+		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
+		
+		foreach ($zones as $zone)
+		{
+		
+			$parts = explode('/', $zone);
+		   
+			// Only use "friendly" continent names
+			if (in_array($parts[0],$continents,true) )
+			{       
+		
+				if(array_key_exists(2,$parts)) {
+					$country = $parts[0].'/'.$parts[1];
+					$locations[$parts[0]][$country][$zone] = $parts[2];
+				
+				} else {
+		
+					if (isset($parts[1])) {
+						$locations[$parts[0]][$zone] = $parts[1];
+					}
+		
+				}
+				
+			}
+		}
+		return $locations;
+	}
+
+}
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

@@ -30,6 +30,8 @@ class User extends Controller {
 	function edit()
 	{
 		$this->load->helper('form');
+		$this->load->library('form_validation');
+
 		$data = array(
 		'action' => 'cms/user/edit/',
 		'hidden' => '',
@@ -96,17 +98,17 @@ class User extends Controller {
 				if($success) {
 					$data['msg'] = "<p>User updated successfully</p>\n";
 
-					if($this->input->post('user_id') == '') {
-						if($this->User_model->email_user_info($this->input->post('password'),'new')) {
+					/*if($this->input->post('user_id') == '') {
+						if($this->email_user_info($this->input->post('password'),'new')) {
 							$data['msg'] .= "<p>Confirmation email sent</p>\n";
 						}
 						
 					} else if ($this->input->post('user_id') != '') {
-						if($this->User_model->email_user_info($this->input->post('password'))) {
+						if($this->email_user_info($this->input->post('password'))) {
 							$data['msg'] .= "<p>Confirmation email sent</p>\n";
 						}
 					}
-
+*/
 				} else {
 					$data['msg'] = "User could not be updated";
 				}
@@ -117,20 +119,40 @@ class User extends Controller {
 
 		if($this->User_model->user_id != '') {
 			$this->User_model->load();
+			
+			$data['action'] = 'cms/user/edit/id/'.$params['id'];
+			$data['hidden'] = array('user_id' => $this->User_model->user_id);
+			$data['user_id'] = $this->User_model->user_id;
+			$data['name_first'] = $this->User_model->name_first;
+			$data['name_last'] = $this->User_model->name_last;
+			$data['username'] = $this->User_model->username;
+			$data['timezone'] = $this->User_model->timezone;
+			$data['admin'] = $this->User_model->admin;
+			$data['lang'] = $this->User_model->lang;
+			$data['email'] = $this->User_model->email;
 
-			$data = array(
-			'action' => 'cms/user/edit/id/'.$params['id'],
-			'hidden' => array('user_id' => $this->User_model->user_id),
-			'user_id' => $this->User_model->id,
-			'name_first' => $this->User_model->name_first,
-			'name_last' => $this->User_model->name_last,
-			'username' => $this->User_model->username,
-			'timezone' => $this->User_model->timezone,
-			'admin' => $this->User_model->admin,
-			'lang' => $this->User_model->lang,
-			'email' => $this->User_model->email,
-			);
 		}
+
+		$zones = timezone_identifiers_list();
+		
+		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
+
+		foreach ($zones as $zone)
+		{
+
+			$parts = explode('/', $zone);
+		   
+			// Only use "friendly" continent names
+			if (in_array($parts[0],$continents,true) )
+			{       
+	
+					$locations[$zone] = str_replace('_',' ',$zone);
+				
+			}
+		}
+
+		$data['zones'] = $locations;
+
 
 		$this->load->view('cms/user_edit',$data);
 
@@ -140,6 +162,7 @@ class User extends Controller {
 	function forgot_password()
 	{
 		$this->load->helper('form');
+		$this->load->library('form_validation');
 		$data['username'] = '';
 		$data['email'] = '';
 		$data['showform'] = TRUE;
@@ -175,6 +198,67 @@ class User extends Controller {
 		$this->load->view('cms/user_forgot_pwd',$data);
 
 	} // end forgot_password()
+
+	function match_zones($str)
+	{
+		$zones = timezone_identifiers_list();
+		$locations =  array();
+		
+		foreach ($zones as $zone)
+		{
+
+			if (preg_match($str, $zone)) {
+				$locations[] = $zone;
+			}
+		
+		}
+		return $locations;
+	} // end list_zones()
+
+    function email_user_info($pwd,$action='') {
+		$this->load->library('email');
+		
+		switch ($action) {
+		case 'new':
+			$subject = "New phSite account";
+			$message = "You have created a new account for phSite at the following address:\n";
+			$message .= $this->config->item('base_url')."\n";
+			$message .= "Your login info is:\n";
+			$message .= "Username: ".$this->User_model->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		case 'reset':
+			$subject = "Password reset for phSite installation";
+			$message = "Your password has been reset for phSite at the following address:\n";
+			$message .= $this->config->item('base_url')."\n";
+			$message .= "Your new login info is:\n";
+			$message .= "Username: ".$this->User_model->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		default:
+			$subject = "Your login info for phSite";
+			$message = "You have changed your login password for phSite at the following address:\n";
+			$message .= $this->config->item('base_url')."\n";
+			$message .= "Your new login info is:\n";
+			$message .= "Username: ".$this->User_model->username."\n";
+			$message .= "Password: ".$pwd."\n";
+			break;
+		}
+		$host = str_replace('http://','',$this->config->item('base_url'));
+
+		$this->email->from("phsite@{$host}", 'phSite CMS');
+		$this->email->to($this->User_model->email); 
+		$this->email->subject($subject);
+		$this->email->message($message);	
+				
+		if($this->email->send()) {
+			return TRUE;
+		} else {
+			echo $this->email->print_debugger();
+			return FALSE;
+		}
+
+	} // end email_user_info()
 
 
 }

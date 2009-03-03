@@ -5,6 +5,19 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function(){
+
+	var dateObj = new Date()
+	var currentTimeZoneOffset = dateObj.getTimezoneOffset();
+
+	//$("form select[name='timezone']").val(currentTimeZoneOffset);
+
+});
+/* ]]> */
+</script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
@@ -73,9 +86,8 @@
 					?></p>
 
 					<p><?php
-					$options = DateTimeZone::listIdentifiers();
 					echo form_label('Time Zone', 'timezone');
-					echo form_dropdown('timezone', $options, $timezone);		
+					echo form_dropdown('timezone', $zones, $timezone);		
 					?></p>
 
 					<p><?php
