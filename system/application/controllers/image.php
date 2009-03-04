@@ -83,14 +83,14 @@ class Image extends Controller {
 			}
 
 			$success = 0;
-			if(is_array($config)) {
+			if(isset($config) && is_array($config)) {
 				if(!file_exists($config['new_image'])) {
 					$this->load->library('image_lib');
 					$this->image_lib->initialize($config);
 					if($this->image_lib->resize()) {
 						$success = 1;
 					} else {
-						echo $this->image_lib->display_errors('<p>', '</p>');
+						//echo $this->image_lib->display_errors('<p>', '</p>');
 					}
 				} else {
 					$success = 1;
@@ -100,12 +100,39 @@ class Image extends Controller {
 			if($success === 1) {
 				$img_tag_prop['src'] = $config['new_image'];
 				$size = getimagesize($config['new_image']);
+				$img_tag_prop['width'] = $size[0];
+				$img_tag_prop['height'] = $size[1];
 			} else {
 				$size = getimagesize($image['src']);
-				echo "resized image not found";
+				$orig_w = $size[0];
+				$orig_h = $size[1];
+				
+				if ($orig_w > $orig_h) { 
+					$orig_max = $orig_w;
+				} else {
+					$orig_max = $orig_h;
+				}
+
+				$aspect_ratio = $orig_w / $orig_h;
+
+				if(array_key_exists('size',$image)) {
+					if ($aspect_ratio > 1) { // landscape
+						$new_w = $image['size'];
+						$new_h = round( $image['size'] * (1/$aspect_ratio) );
+					} else if ($aspect_ratio < 1) { // portrait
+						$new_w = round( $image['size'] * $aspect_ratio );
+						$new_h = $image['size'];
+					} else { // square
+						$new_w = $image['size'];
+						$new_h = $image['size'];
+					}
+	
+					$img_tag_prop['width'] = $new_w;
+					$img_tag_prop['height'] = $new_h;
+				}
+				
+				
 			}
-			$img_tag_prop['width'] = $size[0];
-			$img_tag_prop['height'] = $size[1];
 
 			// print image
 			echo img($img_tag_prop);
