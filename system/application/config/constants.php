@@ -44,7 +44,12 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 | These constants are custom to the phSite CMS application
 |
 */
+// salt length for password hashes - DO NOT CHANGE!
 define('SALT_LENGTH', 10);
+
+// root relative path to media files
+define('MEDIA_PATH_ORIG', '/media/originals');
+define('MEDIA_PATH_CACHE', '/media/cache');
 
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */
