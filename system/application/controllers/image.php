@@ -61,6 +61,10 @@ class Image extends Controller {
 
 		$image_html = view_image($src,$size,$ratio,$attr);
 		echo $image_html;
+		$metadata = get_metadata($src);
+		echo "<br />\n<pre>";
+		print_r ($metadata);
+		echo "</pre>";
 	}
 
 }

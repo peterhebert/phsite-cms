@@ -105,6 +105,35 @@ INSERT INTO `content_data` VALUES (2,1,3,'why not?','eng','2009-02-27 20:12:58')
 UNLOCK TABLES;
 
 --
+-- Table structure for table `content_titles`
+--
+
+DROP TABLE IF EXISTS `content_titles`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `content_titles` (
+  `title_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `content_id` mediumint(9) unsigned NOT NULL,
+  `title` mediumtext NOT NULL,
+  `uri_title` mediumtext NOT NULL,
+  `lang` varchar(3) NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`title_id`),
+  FULLTEXT KEY `value` (`title`)
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `content_titles`
+--
+
+LOCK TABLES `content_titles` WRITE;
+/*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
+INSERT INTO `content_titles` VALUES (1,2,'peanut butter rocks','peanut_butter_rocks','eng','2009-03-06 00:30:47');
+/*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `field`
 --
 
@@ -125,7 +154,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
-INSERT INTO `field` VALUES (1,'title','text'),(2,'subtitle','text'),(3,'full text','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text'),(7,'author','text'),(8,'teaser','text');
+INSERT INTO `field` VALUES (1,'uri_title','text'),(2,'title','text'),(3,'body','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text'),(7,'author','text'),(8,'subtitle','text');
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -221,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-04 18:23:38
+-- Dump completed on 2009-03-06  0:34:12

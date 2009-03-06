@@ -129,7 +129,7 @@ if ( ! function_exists('view_image'))
 				// CONFIGURE IMAGE LIBRARY
 				$config['source_image']		= $orig_image_path;
 				$config['new_image']		= $scaled_image_path;
-				
+
 				if($offset_x == 0 && $offset_y == 0 ) {
 					// no cropping
 					$config['width']			= $new_width;
@@ -180,5 +180,23 @@ if ( ! function_exists('view_image'))
 	} // end view_image()
 }
 
+if ( ! function_exists('get_metadata'))
+{
+
+	function get_metadata($path) {
+		$server_path = $_SERVER["DOCUMENT_ROOT"].$path;
+		$size = getimagesize($server_path, $info);
+		if(isset($info['APP13']))
+		{
+			$iptc = iptcparse($info['APP13']);
+		} else {
+			$iptc = FALSE;
+		}
+		$exif = exif_read_data($server_path);
+		$metadata = array('iptc' =>$iptc,'exif' => $exif);
+		return $metadata;
+	}
+
+}
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

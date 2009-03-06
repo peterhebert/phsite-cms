@@ -41,7 +41,7 @@
 */
 
 $route['default_controller'] = "home";
-$route['scaffolding_trigger'] = "habs";
+$route['scaffolding_trigger'] = "";
 
 $route['cms'] = "cms/cms";
 

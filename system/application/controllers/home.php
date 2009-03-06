@@ -2,7 +2,7 @@
 
 class Home extends Controller {
 
-	function Welcome()
+	function Home()
 	{
 		parent::Controller();	
 	}
