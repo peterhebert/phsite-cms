@@ -42,7 +42,7 @@ class Field_model extends Model {
 		
     }
 
-    function new_field($name,$input_type,$validation)
+    function new_field($name,$input_type)
     {
 
 		$insert_data = array('field_name' => $name, 'input_type' => $input_type);

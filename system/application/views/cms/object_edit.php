@@ -56,7 +56,7 @@ $().ready(function() {
 			</p>
 			<fieldset>
 			<legend>Available Fields</legend>
-			<table id="object_field_props">
+			<table id="properties">
 			<thead>
 				<tr>
 					<th scope="col" id="hd_name">field name</th>

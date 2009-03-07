@@ -62,7 +62,7 @@ CREATE TABLE `content` (
   `created` datetime NOT NULL,
   `user_id` mediumint(9) unsigned DEFAULT '1',
   PRIMARY KEY (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -71,7 +71,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content` WRITE;
 /*!40000 ALTER TABLE `content` DISABLE KEYS */;
-INSERT INTO `content` VALUES (1,0,1,'2009-02-27 20:38:42','2009-01-29 16:44:11',0),(2,0,2,'2009-02-27 22:14:23','2009-01-29 16:44:11',0);
+INSERT INTO `content` VALUES (1,0,2,'2009-03-07 00:55:12','2009-03-06 16:55:12',1);
 /*!40000 ALTER TABLE `content` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -91,7 +91,7 @@ CREATE TABLE `content_data` (
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`data_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (2,1,3,'why not?','eng','2009-02-27 20:12:58'),(19,2,5,'peanuts,food','eng','2009-02-27 22:27:18'),(13,1,2,'the real inside story','eng','2009-02-27 20:55:41'),(16,2,1,'peanut butter rocks','eng','2009-02-27 22:14:23'),(5,1,1,'Why I love peanut butter','eng','2009-02-27 20:56:42'),(18,2,3,'It\'s yummy!','eng','2009-02-27 22:14:23'),(17,2,2,'because it does','eng','2009-02-27 22:14:23'),(15,1,5,'peanuts, food, scoop','eng','2009-02-27 20:58:31'),(20,2,7,'It\'s yummy!','eng','2009-02-27 22:27:35');
+INSERT INTO `content_data` VALUES (1,1,1,'I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Check it out!','eng','2009-03-07 00:55:12'),(2,1,3,'film, RED, short, credits','eng','2009-03-07 00:55:12');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,7 +120,7 @@ CREATE TABLE `content_titles` (
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`title_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -129,7 +129,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_titles` WRITE;
 /*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
-INSERT INTO `content_titles` VALUES (1,2,'peanut butter rocks','peanut_butter_rocks','eng','2009-03-06 00:30:47');
+INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09');
 /*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -145,7 +145,7 @@ CREATE TABLE `field` (
   `field_name` text NOT NULL,
   `input_type` varchar(8) NOT NULL,
   PRIMARY KEY (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -154,7 +154,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
-INSERT INTO `field` VALUES (1,'uri_title','text'),(2,'title','text'),(3,'body','richtext'),(4,'description','textarea'),(5,'keywords','text'),(6,'email','text'),(7,'author','text'),(8,'subtitle','text');
+INSERT INTO `field` VALUES (1,'body','richtext'),(2,'description','textarea'),(3,'keywords','text'),(4,'email','text'),(5,'author','text'),(6,'subtitle','text'),(7,'teaser','textarea');
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -197,7 +197,7 @@ CREATE TABLE `r_object_field` (
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   `validation` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -206,7 +206,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,1,1,1,''),(2,3,1,1,3,''),(3,2,1,0,2,''),(7,3,2,1,4,''),(6,5,1,0,4,''),(8,5,2,0,5,''),(9,2,2,0,2,''),(10,7,2,0,3,''),(11,1,2,1,1,'');
+INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,3,''),(7,7,2,0,2,''),(5,3,2,1,4,''),(6,6,2,0,1,'');
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -250,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-06  0:34:12
+-- Dump completed on 2009-03-07  1:47:23

@@ -54,6 +54,20 @@ class Content_model extends Model {
     function getContent($id,$lang = '')
     {
 
+		// get title
+		$title_where['content_id'] = $id;
+		if($lang != '') {
+			$title_where['lang'] = $lang;
+		}
+		$title_query = $this->db->get_where('content_titles', $title_where);
+		if ($title_query->num_rows() > 0)
+		{
+		   $trow = $title_query->row();
+		   $this->title_id = $trow->title_id;
+		   $this->title = $trow->title;
+		   $this->uri_title = $trow->uri_title;
+		}
+
 		$query = $this->db->get_where('content', array('content_id' => $id));
 		
 		if ($query->num_rows() > 0)
@@ -66,19 +80,6 @@ class Content_model extends Model {
 			$this->created = $row['created'];
 			$this->updated = $row['updated'];
 
-			// get title
-			$title_where['content_id'] = $id;
-			if($lang != '') {
-				$title_where['lang'] = $lang;
-			}
-			$title_query = $this->db->get_where('content_titles', $title_where);
-			if ($title_query->num_rows() > 0)
-			{
-			   $trow = $title_query->row();
-			   $this->title_id = $trow->title_id;
-			   $this->title = $trow->title;
-			   $this->uri_title = $trow->uri_title;
-			}
 			// get content data
 			$sql = "SELECT content_data.*, 
 			r_object_field.required, 
@@ -88,7 +89,9 @@ class Content_model extends Model {
 			field.input_type
 			FROM ( 
 			(content LEFT JOIN content_data ON content.content_id = content_data. content_id)
-			LEFT JOIN r_object_field ON content.object_id = r_object_field. object_id AND content_data.field_id = r_object_field.field_id
+			LEFT JOIN r_object_field 
+			ON content.object_id = r_object_field. object_id 
+			AND content_data.field_id = r_object_field.field_id
 			) 
 			LEFT JOIN field ON content_data.field_id = field.field_id
 			WHERE content.content_id = ".$this->content_id;
@@ -166,7 +169,8 @@ class Content_model extends Model {
     // update field data
     function update_data($field_id,$value,$data_id,$lang='eng')
     {
-
+		$success = TRUE;
+		
 		if($data_id == '') {
 
 			if($value != '') {
@@ -214,7 +218,7 @@ class Content_model extends Model {
 
 		}
 
-		return FALSE;
+		return $success;
 
     }
 
@@ -296,14 +300,17 @@ class Content_model extends Model {
     }
 
     // return list of possible parents
-    function getParents()
+    function getParents($lang = 'eng')
     {
-
-		$sql = "SELECT content.content_id, content_data.value as title FROM content LEFT JOIN
-		(content_data LEFT JOIN field ON content_data.field_id = field.field_id ) ON content.content_id = content_data. content_id
-		WHERE content.content_id != ".$this->content_id." 
-		AND content.parent_id != ".$this->content_id." 
-		AND content_data.field_id = 1";
+		$sql = "SELECT * FROM content LEFT JOIN content_titles
+		ON content.content_id = content_titles.content_id
+		WHERE content_titles.lang = '{$lang}'";
+		
+		if ($this->content_id != '')
+		{
+			$sql .= " AND content.content_id != ".$this->content_id." 
+			AND content.parent_id != ".$this->content_id;
+		}
 				
 		$query = $this->db->query($sql);
 		return $query->result_array();

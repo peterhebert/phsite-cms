@@ -43,6 +43,7 @@ class Content extends Controller {
 	{
 		$this->load->model('User_model');
 		$this->load->model('Field_model');
+		$this->load->model('Language_model');
 		$this->load->library('form_validation');		
 
 		$params = $this->uri->uri_to_assoc(4);
@@ -50,7 +51,7 @@ class Content extends Controller {
 		// if form submitted, process data
 		if($this->input->post('submit') != '') {
 
-			$form['content_id'] = $this->input->post('content_id');
+			/*$form['content_id'] = $this->input->post('content_id');
 			$form['parent_id'] = $this->input->post('parent_id');
 			$form['object_id'] = $this->input->post('object_id');
 			$form['user_id'] = $this->input->post('user_id');
@@ -60,13 +61,18 @@ class Content extends Controller {
 			$form['valid'] = $this->input->post('valid');
 			$form['required'] = $this->input->post('required');
 			$form['data_ids'] = $this->input->post('data_id');
-			$form['values'] = $this->input->post('value');
+			$form['values'] = $this->input->post('value');*/
 			
 			// set validation rules
 			$this->form_validation->set_rules('object_id', 'Content Type', 'required|is_natural_no_zero');
-			//$this->form_validation->set_rules('user_id', 'Author', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('user_id', 'Author', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('parent_id', 'Parent', 'required|is_natural');
-			$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
+			$this->form_validation->set_rules('title', 'Title', 'required');
+
+			if($this->input->post('content_id') != '') {
+				$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
+			}
+
 			foreach($form['field_ids'] as $index => $id) {
 				$this->Field_model->field_id = $id;
 				$this->Field_model->load();
@@ -93,18 +99,27 @@ class Content extends Controller {
 				$this->Content_model->object_id = $this->input->post('object_id');
 				$this->Content_model->user_id = $this->input->post('user_id');
 				$this->Content_model->created = $this->input->post('created');
+				$this->Content_model->title = $this->input->post('title');
+				$lang = $this->input->post('lang');
 
 				if(!$this->Content_model->update_content()) {
 					$success = FALSE;
-					$msg_update = "<p>Content model could not be updated</p>\n";
-				}
-
-				foreach($form['field_ids'] as $index => $id) {
-					if(!$this->Content_model->update_data($id,$form['values'][$index],$form['data_ids'][$index])) {
+					$msg_update = "<p>Content could not be updated</p>\n";
+				} else {
+					// update title
+					if(!$this->Content_model->update_title($lang)) {
 						$success = FALSE;
-						$msg_update .= "<p>Field '$id' could not be updated</p>\n";
+						$msg_update = "<p>Content could not be updated</p>\n";
+					}
+					// update data
+					foreach($form['field_ids'] as $index => $id) {
+						if(!$this->Content_model->update_data($id,$form['values'][$index],$form['data_ids'][$index],$lang)) {
+							$success = FALSE;
+							$msg_update .= "<p>Field '$id' could not be updated</p>\n";
+						}
 					}
 				}
+
 				
 				if($success == 1) {
 					$data['msg'] = "content updated successfully";
@@ -117,14 +132,21 @@ class Content extends Controller {
 		}
 		// end form processing
 
-
 		// read database and populate form
-		if(array_key_exists('id',$params)) {
-			$this->Content_model->getContent($params['id']);
+		if(array_key_exists('lang',$params)) {
+			$lang = $params['lang'];
+		} else {
+			$lang = '';
 		}
+		$data['lang'] = $lang;
 
-		if(array_key_exists('type',$params)) {
-			$this->Content_model->object_id = $params['type']; 
+		if(array_key_exists('id',$params)) {
+			$this->Content_model->getContent($params['id'],$lang);
+		} else {
+			if(array_key_exists('type',$params)) {
+				$this->Content_model->object_id = $params['type']; 
+			}
+
 		}
 
 		$data['content_id'] = $this->Content_model->content_id;
@@ -133,6 +155,19 @@ class Content extends Controller {
 		$data['user_id'] = $this->Content_model->user_id;
 		$data['created'] = $this->Content_model->created;
 		$data['updated'] = $this->Content_model->updated;
+		$data['title_id'] = $this->Content_model->title_id;
+		$data['title'] = $this->Content_model->title;
+
+		// get list of enabled languages
+		$languages = $this->Language_model->get_list();
+		foreach($languages as $row) {
+			if($row['Native_Name'] != '') {
+				$langArray[$row['ISO_639_3']] = $row['Native_Name'];
+			} else {
+				$langArray[$row['ISO_639_3']] = $row['Inverted_Name'];
+			}
+		}
+		$data['langArray'] = $langArray;
 
 		// get list of object types
 		$objects = $this->Object_model->get_list();
@@ -143,7 +178,7 @@ class Content extends Controller {
 
 		// get list of possible parent content
 		$parents = $this->Content_model->getParents();
-		$parentArray[0] = "none - top level content";
+		$parentArray[0] = "site root";
 		if(is_array($parents) && count($parents) > 0) {
 			foreach($parents as $row) {
 				if(array_key_exists('title',$row) && $row['title'] != '') {

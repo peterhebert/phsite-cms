@@ -35,6 +35,13 @@ a:hover { color:#990000; text-decoration:none; }
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
 
+/* image containers */
+.placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }
+.image { margin-bottom: 1em;}
+.image .image-left { float: left; margin-right: 1em; }
+.image .image-right { float: right; margin-left: 1em; }
+.image img { border: 1px solid #000000; }
+
 /* masthead styles */
 #masthead a, #masthead a:visited { color:#eeeeee; text-decoration:none; }
 #masthead a:hover { color:#FFCC66; text-decoration:underline }
@@ -43,7 +50,6 @@ a:hover { color:#990000; text-decoration:none; }
 #masthead #site-search #search-submit { padding: 0.125ex 1ex; }
 #masthead .lh { line-height:30px; }
 
-.placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }
 .first {margin-top: 0;}
 
 p img { vertical-align: baseline; }
@@ -95,10 +101,13 @@ display: inline;
 margin: 0 1ex; width: auto;
 white-space:nowrap;
 }
-
-#page form .cms_input { width: 24em;}
-#page form .cms_textarea { width: 24em; height: 14em; }
-#page form .cms_rte { width: 24em; height: 18em; }
+/*
+form input types 
+text,textarea,richtext,checkbox,radio,password,file
+*/
+#page form .text, #page form .password { width: 24em;}
+#page form .textarea { width: 24em; height: 10em; }
+#page form .richtext { width: 24em; height: 18em; }
 
 #page form div.row label, div.row div {
 	float: left;
@@ -117,47 +126,8 @@ white-space:nowrap;
 	display:none;
 }
 
-
-/* object fields table */
-#page form #object_field_props td,
-#page form #object_field_props thead th
-{
-	padding: 1ex;
-	border-bottom:1px dotted #999999;
-	vertical-align: top;
-	text-align: center;
-}
-#page form #object_field_props thead th
-{
-	font-weight: bold;
-	vertical-align:bottom;
-}
-#page form #object_field_props tbody tr.last td,
-#page form #object_field_props tbody tr.last th
-{
-	border-bottom:0px none;
-}
-#page form #object_field_props tbody th
-{
-	padding: 1ex;
-	border-bottom:1px dotted #999999;
-	vertical-align: top;
-}
-#page form #object_field_props td input,
-#page form #object_field_props td select
-{
-margin:0;
-padding:0;
-text-align:left;
-}
-
-#page form #object_field_props td select
-{
-font-size:0.9em;
-}
-
-
-/* comments */
+/* post details, comments */
+.post-details p,
 .comments p {margin-bottom: .333em; }
 
 /* error messages */
@@ -170,4 +140,43 @@ div.msg {
 div.msg strong {
 	font-style: normal;
 	font-weight: bold;
+}
+
+
+/* CMS only - properties table */
+#page form table#properties td,
+#page form table#properties thead th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+	text-align: center;
+}
+#page form table#properties thead th
+{
+	font-weight: bold;
+	vertical-align:bottom;
+}
+#page form table#properties tbody tr.last td,
+#page form table#properties tbody tr.last th
+{
+	border-bottom:0px none;
+}
+#page form table#properties tbody th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+}
+#page form table#properties td input,
+#page form table#properties td select
+{
+margin:0;
+padding:0;
+text-align:left;
+}
+
+#page form table#properties td select
+{
+font-size:0.9em;
 }

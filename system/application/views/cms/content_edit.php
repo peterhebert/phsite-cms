@@ -40,10 +40,80 @@ $().ready(function(){
 		echo form_open($action);
 
 		echo form_hidden('content_id', $content_id);
+		echo form_hidden('title_id', $title_id);
 		echo form_hidden('my_url', $action);
 
 		// do main content fields
+?>
+<div class="column w3"><fieldset><legend>Content</legend>
+<?php
+		$field_params = array(
+		'class'        => 'text',
+		'name'        => 'title',
+		'id'          => 'title',
+		'value'       => $title
+		);
+		echo"<p>";
+		echo form_label('Title', 'title');
+		echo form_input($field_params);
+		echo"</p>\n";
+		
+		foreach($fields as $fd) {
+			$field_params = array();
 
+			$field_params['name'] = "value[]";
+			$field_params['id'] = "value[]";
+
+			$value = '';
+			$data_id = '';
+
+			if(is_array($content_data) && count($content_data) > 0) {
+				foreach($content_data as $dt) {
+					if($dt['field_id'] == $fd['field_id']) {
+						$value = $dt['value'];
+						$data_id = $dt['data_id'];
+						$required = $dt['required'];
+						$valid = $dt['validation'];
+					}
+				}
+			}
+			if($value != '') {
+				$field_params['value'] = $value;
+			}
+
+			echo form_hidden('field_id[]', $fd['field_id']);
+			echo form_hidden('required[]', $fd['required']);
+			echo form_hidden('valid[]', $fd['validation']);
+			echo form_hidden('data_id[]', $data_id);
+
+			echo "<p>";
+			echo form_label($fd['field_name']);
+
+
+			switch($fd['input_type']) {
+			case 'text':
+				$field_params['class'] = $fd['input_type'];
+				echo form_input($field_params);
+				break;
+			case 'textarea':
+				$field_params['class'] = $fd['input_type'];
+				$field_params['cols'] = 40;
+				echo form_textarea($field_params);
+				break;
+			case 'richtext':
+				$field_params['class'] = $fd['input_type'];
+				$field_params['cols'] = 40;
+				echo form_textarea($field_params);
+				break;
+			default:
+				echo form_input($field_params);
+			}
+			echo "</p>\n";
+						
+		}
+?></fieldset></div>
+<div class="float w2"><fieldset><legend>Meta</legend>
+<?php 
 		echo"<p>";
 		echo form_label('Author', 'user_id');
 		echo form_dropdown('user_id', $userArray, $user_id);
@@ -68,57 +138,14 @@ $().ready(function(){
 		echo form_label('Created', 'created');
 		echo form_input($field_params);
 		echo"</p>\n";
-		
-		foreach($fields as $fd) {
-			$field_params = array();
 
-			$field_params['name'] = "value[]";
-			$field_params['id'] = "value[]";
+		echo"<p>";
+		echo form_label('Language', 'lang');
+		echo form_dropdown('lang', $langArray, $lang);
+		echo"</p>\n";
+?></fieldset></div>
+<?php
 
-			$value = '';
-			$data_id = '';
-
-			foreach($content_data as $dt) {
-				if($dt['field_id'] == $fd['field_id']) {
-					$value = $dt['value'];
-					$data_id = $dt['data_id'];
-					$required = $dt['required'];
-					$valid = $dt['validation'];
-				}
-			}
-			if($value != '') {
-				$field_params['value'] = $value;
-			}
-
-			echo form_hidden('field_id[]', $fd['field_id']);
-			echo form_hidden('required[]', $fd['required']);
-			echo form_hidden('valid[]', $fd['validation']);
-			echo form_hidden('data_id[]', $data_id);
-
-			echo "<p>";
-			echo form_label($fd['field_name']);
-
-			switch($fd['input_type']) {
-			case 'text':
-				$field_params['class'] = 'cms_input';
-				echo form_input($field_params);
-				break;
-			case 'textarea':
-				$field_params['cols'] = 40;
-				$field_params['class'] = 'cms_textarea';
-				echo form_textarea($field_params);
-				break;
-			case 'richtext':
-				$field_params['cols'] = 40;
-				$field_params['class'] = 'cms_rte';
-				echo form_textarea($field_params);
-				break;
-			default:
-				echo form_input($field_params);
-			}
-			echo "</p>\n";
-						
-		}
 
 		// close form
 		echo "<p>";
