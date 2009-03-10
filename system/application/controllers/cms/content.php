@@ -12,26 +12,22 @@ class Content extends Controller {
 
 	function index()
 	{
+		$params = $this->uri->uri_to_assoc(4);
+
 		$data['title'] = 'Content';
 		$content = $this->Content_model->get_list();
 
 		foreach($content as $row)
 		{
 
-			$this->Content_model->getContent($row['content_id']);
-
-			$details = array();
-			$content_data = $this->Content_model->content_data;
-			foreach($content_data as $field)
-			{
-				$details[$field['field_name']] = $field['value'];
+			$this->Content_model->content_id = $row['content_id'];
+			$this->Content_model->get_content();
+			$link = "cms/content/edit/id/".$this->Content_model->content_id;
+			if($this->Content_model->lang != '') {
+				$link .= "/lang/".$this->Content_model->lang;
 			}
 
-			if(array_key_exists('title', $details)) {
-				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], $details['title'], array('title' => "edit '{$details['title']}'"));
-			} else {
-				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], 'ID '.$row['content_id'], array('title' => "edit ID ".$row['content_id']));
-			}
+			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
 
 		}
 
@@ -51,7 +47,7 @@ class Content extends Controller {
 		// if form submitted, process data
 		if($this->input->post('submit') != '') {
 
-			/*$form['content_id'] = $this->input->post('content_id');
+			$form['content_id'] = $this->input->post('content_id');
 			$form['parent_id'] = $this->input->post('parent_id');
 			$form['object_id'] = $this->input->post('object_id');
 			$form['user_id'] = $this->input->post('user_id');
@@ -61,17 +57,18 @@ class Content extends Controller {
 			$form['valid'] = $this->input->post('valid');
 			$form['required'] = $this->input->post('required');
 			$form['data_ids'] = $this->input->post('data_id');
-			$form['values'] = $this->input->post('value');*/
+			//$form['values'] = $this->input->post('value');
 			
 			// set validation rules
+			if($this->input->post('content_id') != '') {
+				$this->form_validation->set_rules('content_id', 'Content ID', 'required|is_natural_no_zero');
+				$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
+			}
+
 			$this->form_validation->set_rules('object_id', 'Content Type', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('user_id', 'Author', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('parent_id', 'Parent', 'required|is_natural');
 			$this->form_validation->set_rules('title', 'Title', 'required');
-
-			if($this->input->post('content_id') != '') {
-				$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
-			}
 
 			foreach($form['field_ids'] as $index => $id) {
 				$this->Field_model->field_id = $id;
@@ -81,9 +78,13 @@ class Content extends Controller {
 				if($form['required'][$index] == 1) {
 					$treq[] = "required";
 				}
-				$treq[] = $form['valid'][$index];
-				$validation = implode('|',$treq);
-				$this->form_validation->set_rules("value[{$index}]", $this->Field_model->field_name, $validation);
+				if($form['valid'][$index] != '') {
+					$treq[] = $form['valid'][$index];
+				}
+				if(count($treq) > 0 ) {
+					$validation = implode('|',$treq);
+					$this->form_validation->set_rules("value_{$id}", $this->Field_model->field_name, $validation);
+				}
 			}
 
 			// validate and process if all valid
@@ -100,20 +101,21 @@ class Content extends Controller {
 				$this->Content_model->user_id = $this->input->post('user_id');
 				$this->Content_model->created = $this->input->post('created');
 				$this->Content_model->title = $this->input->post('title');
-				$lang = $this->input->post('lang');
+				$this->Content_model->lang = $this->input->post('lang');
 
 				if(!$this->Content_model->update_content()) {
 					$success = FALSE;
 					$msg_update = "<p>Content could not be updated</p>\n";
 				} else {
 					// update title
-					if(!$this->Content_model->update_title($lang)) {
+					if(!$this->Content_model->update_title()) {
 						$success = FALSE;
 						$msg_update = "<p>Content could not be updated</p>\n";
 					}
 					// update data
 					foreach($form['field_ids'] as $index => $id) {
-						if(!$this->Content_model->update_data($id,$form['values'][$index],$form['data_ids'][$index],$lang)) {
+						$form_fd_name = 'value_'.$id;
+						if(!$this->Content_model->update_data($id,$this->input->post($form_fd_name),$form['data_ids'][$index])) {
 							$success = FALSE;
 							$msg_update .= "<p>Field '$id' could not be updated</p>\n";
 						}
@@ -133,22 +135,21 @@ class Content extends Controller {
 		// end form processing
 
 		// read database and populate form
-		if(array_key_exists('lang',$params)) {
-			$lang = $params['lang'];
-		} else {
-			$lang = '';
-		}
-		$data['lang'] = $lang;
-
 		if(array_key_exists('id',$params)) {
-			$this->Content_model->getContent($params['id'],$lang);
+			$this->Content_model->content_id = $params['id'];
+		}
+		if($this->Content_model->lang == '' && array_key_exists('lang',$params)) {
+			$this->Content_model->lang = $params['lang'];
 		} else {
-			if(array_key_exists('type',$params)) {
-				$this->Content_model->object_id = $params['type']; 
-			}
-
+			$this->Content_model->lang = '';
 		}
 
+		$this->Content_model->get_content();
+
+		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
+			$this->Content_model->object_id = $params['type']; 
+		}
+		$data['lang'] = $this->Content_model->lang;
 		$data['content_id'] = $this->Content_model->content_id;
 		$data['parent_id'] = $this->Content_model->parent_id;
 		$data['object_id'] = $this->Content_model->object_id;
@@ -208,7 +209,12 @@ class Content extends Controller {
 
 		$data['content_data'] = $this->Content_model->content_data;
 		
-		$this->Object_model->object_id = $this->Content_model->object_id;
+		if($this->Content_model->object_id != '') {
+			$this->Object_model->object_id = $this->Content_model->object_id;
+		} else {
+			$this->Object_model->object_id = 1;
+		}
+
 		$this->Object_model->load_object();
 		$data['fields'] = $this->Object_model->fields;
 		

@@ -106,8 +106,8 @@ form input types
 text,textarea,richtext,checkbox,radio,password,file
 */
 #page form .text, #page form .password { width: 24em;}
-#page form .textarea { width: 24em; height: 10em; }
-#page form .richtext { width: 24em; height: 18em; }
+#page form .textarea { width: 24em; height: 8em; }
+#page form .richtext { width: 24em; height: 22em; }
 
 #page form div.row label, div.row div {
 	float: left;

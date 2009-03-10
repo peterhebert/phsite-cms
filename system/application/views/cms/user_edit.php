@@ -22,7 +22,11 @@ $().ready(function(){
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : User editor</div>
+	<div class="page-wrap block" id="breadcrumb">
+	<?php echo anchor("cms","phSite CMS"); ?> : 
+	<?php echo anchor("cms/setup","Setup"); ?> : 
+	User editor
+	</div>
 	<div class="page-wrap block">
 
 			<h1 class="first">User editor</h1>

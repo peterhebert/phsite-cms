@@ -14,6 +14,12 @@ class Cms extends Controller {
 	
 	function index()
 	{
+		$params = $this->uri->uri_to_assoc(3);
+
+		if(array_key_exists('lang',$params)) {
+			$this->Content_model->lang = $params['lang'];
+		}
+
 		// load list of fields
 		$data['list'] = $this->Field_model->get_list();
 		$index['fields'] = $this->load->view('cms/field_list',$data, true);
@@ -26,37 +32,18 @@ class Cms extends Controller {
 		// get recently added pages
 		$contentdata['title'] = "Recently Added";
 		$content = $this->Content_model->get_list(10,'desc');
-
-		$list = array();
 		foreach($content as $row)
 		{
-
-			$this->Content_model->getContent($row['content_id']);
-
-			$content_data = $this->Content_model->content_data;
-
-			$mytitle = '';
-			foreach($content_data as $field)
-			{
-				if($field['field_name'] == 'title') {
-					$mytitle = $field['value'];
-				}
-
+			$this->Content_model->content_id = $row['content_id'];
+			$this->Content_model->get_content();
+			$link = "cms/content/edit/id/".$this->Content_model->content_id;
+			if($this->Content_model->lang != '') {
+				$link .= "/lang/".$this->Content_model->lang;
 			}
-
-			if($mytitle != '') {
-				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], $mytitle, array('title' => "edit '{$mytitle}'"));
-			} else {
-				$list[$row['content_id']] = anchor("cms/content/edit/id/".$row['content_id'], 'ID '.$row['content_id'], array('title' => "edit ID ".$row['content_id']));
-			}
-
-	
+			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
 		}
-
 		$contentdata['list'] = ul($list);
-
 		$index['content'] = $this->load->view('cms/content_list',$contentdata, true);
-
 	
 		// now load view
 		$this->load->view('cms/index',$index);

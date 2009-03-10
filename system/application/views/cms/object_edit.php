@@ -40,7 +40,11 @@ $().ready(function() {
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Object editor</div>
+	<div class="page-wrap block" id="breadcrumb">
+	<?php echo anchor("cms","phSite CMS"); ?> : 
+	<?php echo anchor("cms/setup","Setup"); ?> : 
+	Object editor
+	</div>
 	<div class="page-wrap block">
 
 			<h1 class="first">Object editor</h1>

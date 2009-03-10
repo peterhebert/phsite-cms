@@ -22,7 +22,11 @@
 	</div>
 </div>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Languages</div>
+	<div class="page-wrap block" id="breadcrumb">
+	<?php echo anchor("cms","phSite CMS"); ?> : 
+	<?php echo anchor("cms/setup","Setup"); ?> : 
+	Languages
+	</div>
 	<div class="page-wrap block">
 		<h1>Languages</h1>
 		<?php

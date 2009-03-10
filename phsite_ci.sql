@@ -91,7 +91,7 @@ CREATE TABLE `content_data` (
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`data_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (1,1,1,'I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Check it out!','eng','2009-03-07 00:55:12'),(2,1,3,'film, RED, short, credits','eng','2009-03-07 00:55:12');
+INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please fo and vote for this film!</p>','eng','2009-03-10 00:19:56');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,7 +120,7 @@ CREATE TABLE `content_titles` (
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`title_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -129,7 +129,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_titles` WRITE;
 /*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
-INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09');
+INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09'),(2,1,'The Green Film','the_green_film','eng','2009-03-09 23:21:42'),(3,1,'The Green Film','the_green_film','eng','2009-03-09 23:33:39');
 /*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -206,7 +206,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,3,''),(7,7,2,0,2,''),(5,3,2,1,4,''),(6,6,2,0,1,'');
+INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,2,''),(7,7,2,0,3,''),(5,3,2,1,4,''),(6,6,2,0,1,'');
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -250,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-07  1:47:23
+-- Dump completed on 2009-03-10  0:20:42
