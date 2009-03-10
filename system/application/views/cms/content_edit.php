@@ -22,7 +22,7 @@ $().ready(function(){
 });
 /* ]]> */
 </script>
-<script type="text/javascript" src="/js/tinymce/jscripts/tiny_mce/tiny_mce_gzip.js"></script>
+<script type="text/javascript" src="/js/tiny_mce/tiny_mce_gzip.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 
@@ -38,8 +38,8 @@ tinyMCE.init({
 	mode : "textareas",
 	theme : "advanced",
 	plugins : "safari,xhtmlxtras,table,fullscreen",
-	theme_advanced_buttons1 : "formatselect,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull|,|,hr,image,charmap",
-	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,sub,sup,|,blockquote,cite,abbr,acronym,ins,del",
+	theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,image,charmap",
+	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,blockquote,cite,abbr,acronym,ins,del",
 	theme_advanced_buttons3 : "tablecontrols",
 	theme_advanced_buttons4 : "cut,copy,paste,|,undo,redo,|,link,unlink,anchor,|,code,removeformat,cleanup,fullscreen",
 	theme_advanced_toolbar_align : "left",
@@ -135,12 +135,12 @@ function toggleEditor(id) {
 				break;
 			case 'textarea':
 				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 40;
+				$field_params['cols'] = 38;
 				echo form_textarea($field_params);
 				break;
 			case 'richtext':
 				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 40;
+				$field_params['cols'] = 38;
 				echo form_textarea($field_params);
 				break;
 			default:

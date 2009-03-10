@@ -11,8 +11,10 @@ a:visited { color:#006699; text-decoration:underline; }
 a:hover { color:#990000; text-decoration:none; }
 
 /* fluid grid */
-/* em-based block sizes, 'normal' page width equivalent to 945px, 5 columns (165px each) with 30px gutter  */
+/* em-based block sizes, 'normal' page width equivalent to 870px, 5 columns (150px each) with 30px gutter  */
 /* entire page and containing blocks will enlarge or shrink with browser text size */
+/* optimal line length of approx 76 characters achieved in 3-column width */
+/* designed to approximate golden ratio when using 3/2 layout */
 
 #masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; text-align:center; }
 #page {
@@ -22,16 +24,15 @@ a:hover { color:#990000; text-decoration:none; }
 .page-wrap {
 	margin: 1ex auto;
 	text-align:left;
-	width:63em;
+	width:58em;
 }
 
-/* columns */
 .column { float: left; margin-right: 2em; }
-.w1 { width: 11em; }
-.w2 { width: 24em; }
-.w3 { width: 37em; }
-.w4 { width: 50em; }
-.w5 { width: 63em; }
+.w1 { width: 10em; }
+.w2 { width: 22em; }
+.w3 { width: 34em; }
+.w4 { width: 46em; }
+.w5 { width: 58em; }
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
 
@@ -105,9 +106,9 @@ white-space:nowrap;
 form input types 
 text,textarea,richtext,checkbox,radio,password,file
 */
-#page form .text, #page form .password { width: 24em;}
-#page form .textarea { width: 24em; height: 8em; }
-#page form .richtext { width: 24em; height: 22em; }
+#page form .text, #page form .password { width: 21em;}
+#page form .textarea { width: 22em; height: 8em; }
+#page form .richtext { width: 22em; height: 18em; }
 
 #page form div.row label, div.row div {
 	float: left;
