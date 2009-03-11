@@ -82,7 +82,7 @@ function toggleEditor(id) {
 
 		// do main content fields
 ?>
-<div class="column w3"><fieldset><legend>Content</legend>
+<div class="column g1"><fieldset><legend>Content</legend>
 <?php
 		$field_params = array(
 		'class'        => 'text',
@@ -150,7 +150,7 @@ function toggleEditor(id) {
 						
 		}
 ?></fieldset></div>
-<div class="float w2"><fieldset><legend>Meta</legend>
+<div class="float g2"><fieldset><legend>Meta</legend>
 <?php 
 		echo"<p>";
 		echo form_label('Author', 'user_id');

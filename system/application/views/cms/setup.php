@@ -11,26 +11,24 @@
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Setup</div>
 	<div class="page-wrap block">
-		<h1>Setup</h1>
-		<div class="column w1">
-			<h2 class="first">Site Preferences</h2>
-			<p><?php echo anchor("cms/site_prefs","Site preferences"); ?></p>
-		</div>
-		<div class="column w2">
-			<h2 class="first">Data Structure</h2>
-			<p>You can define what types of content your CMS stores. Your content types are called Objects, and the individual data fields are called Fields. Fields can be assinged to any object.</p>
-			<div class="block">
-				<div class="column w1"><?php echo $objects; ?></div>
-				<div class="float w1"><?php echo $fields; ?></div>
-			</div>
-		</div>
-		<div class="column w1">
-			<?php echo $languages; ?>
-		</div>
-		<div class="float w1">
-			<?php echo $users; ?>
-		</div>
+		<h1 class="first">Setup</h1>
+		<div class="column w3">
+			<h2>Site preferences</h2>
+			<p>This is where you can change site-wide prefrences, such as designating a home page, choosing default languages, designating a Webmaster and Editor users, and selecting a site theme.</p>
+			<p><?php echo anchor("cms/setup/site_prefs","Edit site preferences"); ?></p>
+			<h2>Data Structure</h2>
+			<p>You can define what types of content your site has, and add as many custom fields as you want.</p>
+			<p><?php echo anchor("cms/setup/structure","Edit data structure"); ?></p>
 
+		</div>
+		<div class="float w3">
+			<h2>Languages</h2>
+			<p>Choose what languages you want to use on your site.</p>
+			<p><?php echo anchor("cms/setup/languages","Edit languages"); ?></p>
+			<h2>Users</h2>
+			<p>Manage the users of your site</p>
+			<p><?php echo anchor("cms/setup/users","Edit users"); ?></p>
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

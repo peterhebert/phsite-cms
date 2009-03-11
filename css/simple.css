@@ -10,11 +10,15 @@ a { color:#000099; text-decoration:underline}
 a:visited { color:#006699; text-decoration:underline; }
 a:hover { color:#990000; text-decoration:none; }
 
-/* fluid grid */
-/* em-based block sizes, 'normal' page width equivalent to 870px, 5 columns (150px each) with 30px gutter  */
-/* entire page and containing blocks will enlarge or shrink with browser text size */
-/* optimal line length of approx 76 characters achieved in 3-column width */
-/* designed to approximate golden ratio when using 3/2 layout */
+/*
+fluid grid  / 'normal' text size at 15px
+Page designed to approximate golden ratio in 2-column split (using .g1 and .g2 classes),
+with the larger section having a optimal line length of approximately 
+70 characters, which is longest size for comfortable reading
+Page width at 'normal' will be 795px
+can also have 7-column grid (120px each) with 15px gutter
+em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
+*/
 
 #masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; text-align:center; }
 #page {
@@ -24,15 +28,19 @@ a:hover { color:#990000; text-decoration:none; }
 .page-wrap {
 	margin: 1ex auto;
 	text-align:left;
-	width:58em;
+	width:53em;
 }
 
 .column { float: left; margin-right: 2em; }
-.w1 { width: 10em; }
-.w2 { width: 22em; }
-.w3 { width: 34em; }
-.w4 { width: 46em; }
-.w5 { width: 58em; }
+.g1 { width: 32em; }
+.g2 { width: 19em; }
+.w1 { width: 8em; }
+.w2 { width: 17em; }
+.w3 { width: 26em; }
+.w4 { width: 35em; }
+.w5 { width: 44em; }
+.w6 { width: 53em; }
+.w7 { width: 62em; }
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
 
@@ -86,9 +94,9 @@ list-style-type: none;
 #page form p, #page form div.row { display: block; }
 /* close commented backslash hack */
 
-#page form fieldset { border: 1px solid #999; padding: 1ex 1em; margin-bottom: 1em;}
+#page form fieldset { border: 1px solid #999; padding: 1ex .666em; margin-bottom: 1em;}
 #page form fieldset legend { padding: 0 1ex; }
-#page form fieldset p label { width: 8em; }
+#page form fieldset p label { width: 7em; margin-right: 1ex; }
 
 #page form .radiogroup {
 	line-height:2em;
@@ -106,7 +114,7 @@ white-space:nowrap;
 form input types 
 text,textarea,richtext,checkbox,radio,password,file
 */
-#page form .small_input { width: 10em;}
+#page form .small_input { width: 9.5em;}
 #page form .text, #page form .password { width: 22em;}
 #page form .textarea { width: 22em; height: 8em; }
 #page form .richtext { width: 22em; height: 18em; }
