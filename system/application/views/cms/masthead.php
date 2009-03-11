@@ -1,7 +1,7 @@
 <div id="masthead">
 	<div class="page-wrap block">
 		<div class="column">
-			<!--<h2><a href="/">phSite</a></h2>-->
+			<h2><!--<a href="/">phSite</a>--></h2>
 		</div>
 		<div class="column lh"><!--a content manager for the rest of us--></div>
 		<div class="float-right lh">

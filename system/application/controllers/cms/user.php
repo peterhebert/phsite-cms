@@ -10,7 +10,16 @@ class User extends Controller {
 
 	function index()
 	{
-		$data['list'] = $this->User_model->get_list();
+
+		$build_list = array();
+		$userlist = $this->User_model->get_list();
+		foreach($userlist as $user) {
+			$user_edit_link = "cms/user/edit/id/".$user['user_id'];
+			$name = $user['name_last'].", ".$user['name_first'];
+			$build_list[] = anchor($user_edit_link,$name);
+		}
+
+		$data['list'] = $build_list;
 
 		$this->load->view('cms/user_list',$data);
 	} // end index()

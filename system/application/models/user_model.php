@@ -18,8 +18,11 @@ class User_model extends Model {
     }
 
     // list users
-	function get_list($limit='')
+	function get_list($admin = 0,$limit='')
     {
+		if($admin === 1) {
+			$this->db->where('admin', 1);
+		}
 		if($limit != '' && intval($limit) > 0) {
 			$this->db->limit(intval($limit));
 		}

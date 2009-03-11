@@ -170,7 +170,8 @@ function toggleEditor(id) {
 		$field_params = array(
 		'name'        => 'created',
 		'id'          => 'created',
-		'value'       => $created
+		'class'	=> 'small_input',
+		'value' => $created,
 		);
 		echo"<p>";
 		echo form_label('Created', 'created');
