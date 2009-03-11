@@ -10,7 +10,7 @@ class Object extends Controller {
 
 	function index()
 	{
-		$data['q'] = $this->Object_model->get_list();
+		$data['list'] = $this->Object_model->get_list();
 
 		$this->load->view('cms/object_list',$data);
 	}

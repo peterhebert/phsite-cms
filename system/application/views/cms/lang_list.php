@@ -16,6 +16,6 @@ if(count($list) > 0) {
 } else {
 	echo "<p>No languages are currently active</p>\n";
 }
-	echo "<p>".anchor("cms/language","Edit Languages")."</p>\n";
+	echo "<p>".anchor("cms/setup/languages","Edit Languages")."</p>\n";
 
 		?>

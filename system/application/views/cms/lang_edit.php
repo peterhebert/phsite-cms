@@ -32,8 +32,6 @@
 		<?php
 			
 			// search for matches
-			$action = site_url('cms/language');
-			$attributes = array('name' => 'search_langs');
 			echo form_open($action, $attributes);
 
 			echo "<p>";
