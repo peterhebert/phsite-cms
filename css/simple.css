@@ -16,7 +16,7 @@ Page designed to approximate golden ratio in 2-column split (using .g1 and .g2 c
 with the larger section having a optimal line length of approximately 
 70 characters, which is longest size for comfortable reading
 Page width at 'normal' will be 795px
-can also have 7-column grid (120px each) with 15px gutter
+can also have 6-column grid (120px each) with 15px gutter
 em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
 */
 
@@ -31,7 +31,8 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 	width:53em;
 }
 
-.column { float: left; margin-right: 2em; }
+.column { float: left; margin-right: 1em; }
+.golden .column { margin-right: 2em; }
 .g1 { width: 32em; }
 .g2 { width: 19em; }
 .w1 { width: 8em; }
@@ -40,7 +41,6 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .w4 { width: 35em; }
 .w5 { width: 44em; }
 .w6 { width: 53em; }
-.w7 { width: 62em; }
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
 

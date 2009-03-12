@@ -6,7 +6,6 @@
 <link href="/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/css/simple.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
-
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
@@ -36,7 +35,7 @@ $().ready(function(){
 			?>
 			<p>Create New <?php echo form_dropdown('new_content',$dropdown); ?> <input id="new_go" name="new_go" type="button" value="Go" /></p>
 		</div>
-		<div class="float w1"><?php require_once('setup_menu.php'); ?></div>
+		<div class="float w2"><?php require_once('setup_menu.php'); ?></div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

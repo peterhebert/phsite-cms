@@ -64,7 +64,7 @@ function toggleEditor(id) {
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
-	<div class="page-wrap block">
+	<div class="page-wrap golden block">
 		<h1>Content editor</h1>
 		<?php
 		if(isset($msg)) {
