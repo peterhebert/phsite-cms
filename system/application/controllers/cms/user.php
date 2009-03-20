@@ -23,11 +23,20 @@ class User extends Controller {
 	{
 
 		$build_list = array();
-		$userlist = $this->User_model->get_list();
-		foreach($userlist as $user) {
-			$user_edit_link = "cms/user/edit/id/".$user['user_id'];
-			$name = $user['name_last'].", ".$user['name_first'];
+
+		if($this->session->userdata('admin') != 1)
+		{
+			$user_edit_link = "cms/user/edit/id/".$this->session->userdata('user_id');
+			$name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
 			$build_list[] = anchor($user_edit_link,$name);
+		} else {
+
+			$userlist = $this->User_model->get_list();
+			foreach($userlist as $user) {
+				$user_edit_link = "cms/user/edit/id/".$user['user_id'];
+				$name = $user['name_last'].", ".$user['name_first'];
+				$build_list[] = anchor($user_edit_link,$name);
+			}
 		}
 
 		$this->data['list'] = $build_list;

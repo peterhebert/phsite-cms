@@ -237,7 +237,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Peter','Hebert','peterhebert','8c3cd213466378f4129647c7de1a43203fc4b58c62f836cb8b','America/Vancouver',0,'eng','mail@peterhebert.com');
+INSERT INTO `users` VALUES (1,'Peter','Hebert','peterhebert','8c3cd213466378f4129647c7de1a43203fc4b58c62f836cb8b','America/Vancouver',1,'eng','mail@peterhebert.com');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -250,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-20 22:09:27
+-- Dump completed on 2009-03-20 23:45:45

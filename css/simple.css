@@ -117,7 +117,7 @@ text,textarea,richtext,checkbox,radio,password,file
 #page form .small_input { width: 9.5em;}
 #page form .text, #page form .password { width: 22em;}
 #page form .textarea { width: 22em; height: 8em; }
-#page form .richtext { width: 22em; height: 18em; }
+#page form .richtext { width: 22em; height: 24em; }
 
 #page form div.row label, div.row div {
 	float: left;
