@@ -1,11 +1,22 @@
 <?php
 class User extends Controller {
+	var $data = array();
 
-   function User()
-   {
+	function User()
+	{
 		parent::Controller();
 
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+		}
 		$this->load->model('User_model');
+
 	} // end constructor
 
 	function index()
@@ -19,9 +30,9 @@ class User extends Controller {
 			$build_list[] = anchor($user_edit_link,$name);
 		}
 
-		$data['list'] = $build_list;
+		$this->data['list'] = $build_list;
 
-		$this->load->view('cms/user_list',$data);
+		$this->load->view('cms/user_list',$this->data);
 	} // end index()
 
 	function load()
@@ -41,7 +52,7 @@ class User extends Controller {
 		$this->load->helper('form');
 		$this->load->library('form_validation');
 
-		$data = array(
+		$this->data = array(
 		'action' => 'cms/user/edit/',
 		'hidden' => '',
 		'user_id' => '',
@@ -84,7 +95,7 @@ class User extends Controller {
 			// validate and process if all valid
 			if ($this->form_validation->run() == FALSE)
 			{
-				$data['msg'] = validation_errors();
+				$this->data['msg'] = validation_errors();
 			} else {
 
 				if($this->input->post('user_id') != '') {
@@ -105,7 +116,7 @@ class User extends Controller {
 				}
 
 				if($success) {
-					$data['msg'] = "<p>User updated successfully</p>\n";
+					$this->data['msg'] = "<p>User updated successfully</p>\n";
 
 					/*if($this->input->post('user_id') == '') {
 						if($this->email_user_info($this->input->post('password'),'new')) {
@@ -119,7 +130,7 @@ class User extends Controller {
 					}
 */
 				} else {
-					$data['msg'] = "User could not be updated";
+					$this->data['msg'] = "User could not be updated";
 				}
 			}
 
@@ -129,16 +140,16 @@ class User extends Controller {
 		if($this->User_model->user_id != '') {
 			$this->User_model->load();
 			
-			$data['action'] = 'cms/user/edit/id/'.$params['id'];
-			$data['hidden'] = array('user_id' => $this->User_model->user_id);
-			$data['user_id'] = $this->User_model->user_id;
-			$data['name_first'] = $this->User_model->name_first;
-			$data['name_last'] = $this->User_model->name_last;
-			$data['username'] = $this->User_model->username;
-			$data['timezone'] = $this->User_model->timezone;
-			$data['admin'] = $this->User_model->admin;
-			$data['lang'] = $this->User_model->lang;
-			$data['email'] = $this->User_model->email;
+			$this->data['action'] = 'cms/user/edit/id/'.$params['id'];
+			$this->data['hidden'] = array('user_id' => $this->User_model->user_id);
+			$this->data['user_id'] = $this->User_model->user_id;
+			$this->data['name_first'] = $this->User_model->name_first;
+			$this->data['name_last'] = $this->User_model->name_last;
+			$this->data['username'] = $this->User_model->username;
+			$this->data['timezone'] = $this->User_model->timezone;
+			$this->data['admin'] = $this->User_model->admin;
+			$this->data['lang'] = $this->User_model->lang;
+			$this->data['email'] = $this->User_model->email;
 
 		}
 
@@ -160,10 +171,10 @@ class User extends Controller {
 			}
 		}
 
-		$data['zones'] = $locations;
+		$this->data['zones'] = $locations;
 
 
-		$this->load->view('cms/user_edit',$data);
+		$this->load->view('cms/user_edit',$this->data);
 
 
 	} // end edit()
@@ -172,15 +183,15 @@ class User extends Controller {
 	{
 		$this->load->helper('form');
 		$this->load->library('form_validation');
-		$data['username'] = '';
-		$data['email'] = '';
-		$data['showform'] = TRUE;
+		$this->data['username'] = '';
+		$this->data['email'] = '';
+		$this->data['showform'] = TRUE;
 
 		// if form submitted, process data
 		if($this->input->post('submit') != '')
 		{
-			$data['username'] = $this->input->post('username');
-			$data['email'] = $this->input->post('email');
+			$this->data['username'] = $this->input->post('username');
+			$this->data['email'] = $this->input->post('email');
 			
 			// set validation rules
 			$this->form_validation->set_rules('username', 'Username', 'required|min_length[8]|alpha_dash');
@@ -189,22 +200,22 @@ class User extends Controller {
 			// validate and process if all valid
 			if ($this->form_validation->run() == FALSE)
 			{
-				$data['msg'] = validation_errors();
+				$this->data['msg'] = validation_errors();
 			} else {
 
 				$this->User_model->username = $this->input->post('username');
 				$this->User_model->email = $this->input->post('email');
 				if($this->User_model->reset_password()) {
-					$data['msg'] = "Your reset password has been emailed to you";
-					$data['showform'] = FALSE;
+					$this->data['msg'] = "Your reset password has been emailed to you";
+					$this->data['showform'] = FALSE;
 				} else {
-					$data['msg'] = "Could not find a user matching the info provided";
+					$this->data['msg'] = "Could not find a user matching the info provided";
 				}
 			}
 
 		}
 
-		$this->load->view('cms/user_forgot_pwd',$data);
+		$this->load->view('cms/user_forgot_pwd',$this->data);
 
 	} // end forgot_password()
 

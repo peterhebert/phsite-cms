@@ -115,6 +115,50 @@ class User_model extends Model {
 
     }
 
+    // authenticate user
+	function authenticate($usr = NULL,$pwd = NULL)
+    {
+		if(!isset($usr) || !isset($pwd))
+		{
+			return FALSE;
+		}
+		$query = $this->db->get_where('users', array('username' => $usr));
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			
+			if($this->checkPassword($pwd,$row['password']))
+			{
+				$this->user_id = $row['user_id'];
+				$this->name_first = $row['name_first'];
+				$this->name_last = $row['name_last'];
+				$this->username = $row['username'];
+				$this->password = $row['password'];
+				$this->timezone = $row['timezone'];
+				$this->admin = $row['admin'];
+				$this->lang = $row['lang'];
+				$this->email = $row['email'];
+				return TRUE;
+			}
+		}
+    }
+
+	function checkPassword($plainText,$pwd) {
+	
+		//extract the salt from the password
+		$salt = substr ( $pwd, 0, SALT_LENGTH );
+	
+		$checkPwd = $salt.sha1($salt.$plainText);
+	
+		if ($checkPwd == $pwd) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
 }
 
 ?>

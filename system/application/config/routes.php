@@ -44,6 +44,8 @@ $route['default_controller'] = "home";
 $route['scaffolding_trigger'] = "";
 
 $route['cms'] = "cms/cms";
+$route['cms/login'] = "cms/cms/login";
+$route['cms/logout'] = "cms/cms/logout";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

@@ -25,6 +25,7 @@ $().ready(function(){
 	<div class="page-wrap block" id="breadcrumb">
 	<?php echo anchor("cms","phSite CMS"); ?> : 
 	<?php echo anchor("cms/setup","Setup"); ?> : 
+	<?php echo anchor("cms/setup/users","Users"); ?> : 
 	User editor
 	</div>
 	<div class="page-wrap block">

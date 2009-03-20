@@ -1,9 +1,21 @@
 <?php
 class Setup extends Controller {
+	var $data = array();
 
 	function Setup()
 	{
 		parent::Controller();
+
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+		}
+
 		$this->load->helper('form');
 
 		// load objects
@@ -17,48 +29,22 @@ class Setup extends Controller {
 	
 	function index()
 	{
-		// load list of fields
-		$data['list'] = $this->Field_model->get_list();
-		$index['fields'] = $this->load->view('cms/field_list',$data, true);
-	
-		// load list of objects
-		$data['list'] = $this->Object_model->get_list();
-		$index['new_objects'] = $data['list'];
-		$index['objects'] = $this->load->view('cms/object_list',$data, true);
-
-		// load list of activated languages
-		$data['list'] = $this->Language_model->get_list();
-		$index['languages'] = $this->load->view('cms/lang_list',$data, true);
-
-		// load list of users
-		$build_list = array();
-		$userlist = $this->User_model->get_list();
-		foreach($userlist as $user) {
-			$user_edit_link = "cms/user/edit/id/".$user['user_id'];
-			$name = $user['name_last'].", ".$user['name_first'];
-			$build_list[] = anchor($user_edit_link,$name);
-		}
-
-		$data['list'] = $build_list;
-		$index['users'] = $this->load->view('cms/user_list',$data, true);
-
-		// now load view
-		$this->load->view('cms/setup',$index);
+		$this->load->view('cms/setup',$this->data);
 	}
 
 	function structure()
 	{
 		// load list of fields
-		$data['list'] = $this->Field_model->get_list();
-		$index['fields'] = $this->load->view('cms/field_list',$data, true);
+		$d2['list'] = $this->Field_model->get_list();
+		$this->data['fields'] = $this->load->view('cms/field_list',$d2, true);
 	
 		// load list of objects
-		$data['list'] = $this->Object_model->get_list();
-		$index['new_objects'] = $data['list'];
-		$index['objects'] = $this->load->view('cms/object_list',$data, true);
+		$d2['list'] = $this->Object_model->get_list();
+		$this->data['new_objects'] = $d2['list'];
+		$this->data['objects'] = $this->load->view('cms/object_list',$d2, true);
 
 		// now load view
-		$this->load->view('cms/setup_structure',$index);
+		$this->load->view('cms/setup_structure',$this->data);
 	}
 	
 	function languages()
@@ -91,15 +77,15 @@ class Setup extends Controller {
 
 		}
 		if($this->input->post('search_submit')) {
-			$data['matches_label'] = "Matches for '".$this->input->post('find')."'";
-			$data['matches'] = $this->Language_model->find_matches($this->input->post('find'));
+			$this->data['matches_label'] = "Matches for '".$this->input->post('find')."'";
+			$this->data['matches'] = $this->Language_model->find_matches($this->input->post('find'));
 		}
 
-		$data['enabled'] = $this->Language_model->get_list();
-		$data['action'] = site_url('cms/setup/languages');
-		$data['attributes'] = array('name' => 'search_langs');
+		$this->data['enabled'] = $this->Language_model->get_list();
+		$this->data['action'] = site_url('cms/setup/languages');
+		$this->data['attributes'] = array('name' => 'search_langs');
 		
-		$this->load->view('cms/lang_edit',$data);
+		$this->load->view('cms/lang_edit',$this->data);
 	
 	} // end languages()
 
@@ -122,7 +108,7 @@ class Setup extends Controller {
 			// on valid, write config file
 			if ($this->form_validation->run() == FALSE)
 			{
-				$data['msg'] = validation_errors();
+				$this->data['msg'] = validation_errors();
 			} else {
 				$this->Site_model->home_page_id = $this->input->post('home_page_id');
 				$this->Site_model->theme = $this->input->post('theme');
@@ -136,10 +122,10 @@ class Setup extends Controller {
 
 		// now load config
 		$this->Site_model->load_prefs();
-		$data['home_page_id'] =  $this->Site_model->home_page_id;
-		$data['theme'] = $this->Site_model->theme;
-		$data['default_lang'] =  $this->Site_model->default_lang;
-		$data['webmaster_id'] =  $this->Site_model->webmaster_id;
+		$this->data['home_page_id'] =  $this->Site_model->home_page_id;
+		$this->data['theme'] = $this->Site_model->theme;
+		$this->data['default_lang'] =  $this->Site_model->default_lang;
+		$this->data['webmaster_id'] =  $this->Site_model->webmaster_id;
 
 		// get list of enabled languages
 		$languages = $this->Language_model->get_list();
@@ -150,7 +136,7 @@ class Setup extends Controller {
 				$langArray[$row['ISO_639_3']] = $row['Inverted_Name'];
 			}
 		}
-		$data['langArray'] = $langArray;
+		$this->data['langArray'] = $langArray;
 
 		// get list of admin users for webmaster contact
 		$userArray = array();
@@ -158,7 +144,7 @@ class Setup extends Controller {
 		foreach($users as $row) {
 			$userArray[$row['user_id']] = $row['name_last'].', '.$row['name_first'];
 		}
-		$data['userArray'] = $userArray;
+		$this->data['userArray'] = $userArray;
 
 		// get list of top level pages for home page
 		$homeArray = array();
@@ -170,7 +156,7 @@ class Setup extends Controller {
 			$this->Content_model->get_content();
 			$homeArray[$row['content_id']] = $this->Content_model->title;
 		}
-		$data['homeArray'] = $homeArray;
+		$this->data['homeArray'] = $homeArray;
 		
 		// get list of themes
 		$themeArray = array();
@@ -190,13 +176,13 @@ class Setup extends Controller {
 		}
 		asort($themeArray);
 
-		$data['themeArray'] = $themeArray;
+		$this->data['themeArray'] = $themeArray;
 
-		$data['action'] = site_url('cms/setup/site_prefs');
-		$data['hidden'] = array();
-		$data['attributes'] = array('name' => 'site_prefs','id' => 'site_prefs');
+		$this->data['action'] = site_url('cms/setup/site_prefs');
+		$this->data['hidden'] = array();
+		$this->data['attributes'] = array('name' => 'site_prefs','id' => 'site_prefs');
 
-		$this->load->view('cms/site_prefs',$data);
+		$this->load->view('cms/site_prefs',$this->data);
 	}
     // end site prefs
 
@@ -205,16 +191,26 @@ class Setup extends Controller {
 	{
 
 		$build_list = array();
-		$userlist = $this->User_model->get_list();
-		foreach($userlist as $user) {
-			$user_edit_link = "cms/user/edit/id/".$user['user_id'];
-			$name = $user['name_last'].", ".$user['name_first'];
+
+		if($this->session->userdata('admin') != 1)
+		{
+			$this->data['msg'] = "You are not an admin user and cannot access other user accounts or create new users";
+			$user_edit_link = "cms/user/edit/id/".$this->session->userdata('user_id');
+			$name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
 			$build_list[] = anchor($user_edit_link,$name);
+		} else {
+
+			$userlist = $this->User_model->get_list();
+			foreach($userlist as $user) {
+				$user_edit_link = "cms/user/edit/id/".$user['user_id'];
+				$name = $user['name_last'].", ".$user['name_first'];
+				$build_list[] = anchor($user_edit_link,$name);
+			}
 		}
 
-		$data['list'] = $build_list;
+		$this->data['list'] = $build_list;
 
-		$this->load->view('cms/user_list',$data);
+		$this->load->view('cms/user_list',$this->data);
 	} // end users()
 }
 ?>

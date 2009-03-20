@@ -1,9 +1,21 @@
 <?php
 class Field extends Controller {
 
-   function Field()
-   {
+	var $data = array();
+	
+	function Field()
+	{
 		parent::Controller();
+
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+		}
 
 		$this->load->model('Field_model');
 		$this->input_types = array(
@@ -18,9 +30,9 @@ class Field extends Controller {
 
 	function index()
 	{
-		$data['list'] = $this->Field_model->get_list();
+		$this->data['list'] = $this->Field_model->get_list();
 
-		$this->load->view('cms/field_list',$data);
+		$this->load->view('cms/field_list',$this->data);
 	}
 
 	function edit()
@@ -28,11 +40,11 @@ class Field extends Controller {
 		$this->load->library('form_validation');
 		$params = $this->uri->uri_to_assoc(4);
 		
-		$data['msg'] = '';
-		$data['field_id'] = '';
-		$data['field_name'] = '';
-		$data['input_type'] = '';
-		$data['types'] = $this->input_types;
+		$this->data['msg'] = '';
+		$this->data['field_id'] = '';
+		$this->data['field_name'] = '';
+		$this->data['input_type'] = '';
+		$this->data['types'] = $this->input_types;
 
 		// do validation if form submitted
 		if($this->input->post('submit') != '') {
@@ -46,10 +58,10 @@ class Field extends Controller {
 	
 			if ($this->form_validation->run() == FALSE)
 			{
-				$data['msg'] = validation_errors(); 
-				$data['field_id'] = $this->input->post('field_id');
-				$data['field_name'] = $this->input->post('field_name');
-				$data['input_type'] = $this->input->post('input_type');	
+				$this->data['msg'] = validation_errors(); 
+				$this->data['field_id'] = $this->input->post('field_id');
+				$this->data['field_name'] = $this->input->post('field_name');
+				$this->data['input_type'] = $this->input->post('input_type');	
 
 
 			}
@@ -67,7 +79,7 @@ class Field extends Controller {
 				}
 	
 				if($updated == TRUE) {
-					$data['msg'] = "field has been updated";
+					$this->data['msg'] = "field has been updated";
 				}
 			}
 		}
@@ -76,15 +88,15 @@ class Field extends Controller {
 			$this->Field_model->field_id = $params['id'];
 		}	
 
-		$data['field_id'] = $this->Field_model->field_id;
+		$this->data['field_id'] = $this->Field_model->field_id;
 		
 		if($this->Field_model->field_id != '') {
 			$this->Field_model->load();
-			$data['field_name'] = $this->Field_model->field_name;
-			$data['input_type'] = $this->Field_model->input_type;
+			$this->data['field_name'] = $this->Field_model->field_name;
+			$this->data['input_type'] = $this->Field_model->input_type;
 		}
 
-		$this->load->view('cms/field_edit',$data);
+		$this->load->view('cms/field_edit',$this->data);
 	}
 
 	function valid_input($value)

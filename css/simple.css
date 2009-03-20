@@ -52,8 +52,8 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .image img { border: 1px solid #000000; }
 
 /* masthead styles */
-#masthead a, #masthead a:visited { color:#eeeeee; text-decoration:none; }
-#masthead a:hover { color:#FFCC66; text-decoration:underline }
+#masthead a, #masthead a:visited { color: #eeeeee; text-decoration:underline; }
+#masthead a:hover { color:#ffcc66; text-decoration:underline }
 #masthead h2 { margin: 0; }
 #masthead #site-search #search-text { margin-right: 1ex; width: 11em;}
 #masthead #site-search #search-submit { padding: 0.125ex 1ex; }

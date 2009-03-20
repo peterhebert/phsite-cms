@@ -1,18 +1,29 @@
 <?php
 class Object extends Controller {
+	var $data = array();
 
    function Object()
    {
 		parent::Controller();
 
-		$this->load->model('Object_model');
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+		}
+
+		$this->load->model('Object_model',$this->data);
 	}
 
 	function index()
 	{
-		$data['list'] = $this->Object_model->get_list();
+		$this->data['list'] = $this->Object_model->get_list();
 
-		$this->load->view('cms/object_list',$data);
+		$this->load->view('cms/object_list',$this->data);
 	}
 
 	function edit()
@@ -20,10 +31,10 @@ class Object extends Controller {
 		$this->load->model('Field_model');
 		$this->load->helper('form');
 		
-		$data['msg'] = '';
-		$data['hidden'] = array();
-		$data['fields'] = array();
-		$data['string_rules'] = array(
+		$this->data['msg'] = '';
+		$this->data['hidden'] = array();
+		$this->data['fields'] = array();
+		$this->data['string_rules'] = array(
 		'' => 'any value',
 		'alpha' => 'Alphabetical',
 		'alpha_numeric' => 'Alpha-numeric',
@@ -41,9 +52,9 @@ class Object extends Controller {
 
 		$params = $this->uri->uri_to_assoc(4);
 		if(array_key_exists('id',$params)) {
-			$data['action'] = 'cms/object/edit/id/'.$params['id'];
+			$this->data['action'] = 'cms/object/edit/id/'.$params['id'];
 		} else {
-			$data['action'] = 'cms/object/edit/';
+			$this->data['action'] = 'cms/object/edit/';
 		}
 
 		// process form
@@ -170,8 +181,8 @@ class Object extends Controller {
 			$this->Object_model->object_id = $params['id'];
 			$this->Object_model->load_object();
 
-			$data['name'] = $this->Object_model->name;
-			$data['hidden'] = array('object_id' => $params['id']);
+			$this->data['name'] = $this->Object_model->name;
+			$this->data['hidden'] = array('object_id' => $params['id']);
 
 			foreach ($this->Object_model->fields as $row) {
 				$obj_fields[$row['field_id']]['rel_id'] = $row['id'];
@@ -189,16 +200,16 @@ class Object extends Controller {
 
 		}
 
-		$data['attributes'] = array('id' => 'editor');
-		$data['fields'] = $obj_fields;
+		$this->data['attributes'] = array('id' => 'editor');
+		$this->data['fields'] = $obj_fields;
 
-		$this->load->view('cms/object_edit',$data);
+		$this->load->view('cms/object_edit',$this->data);
 
 	} // end edit()
 
 	function parseValidation($raw)
 	{
-		$data = array( 'string' => '', 'exact' => '', 'min' => '', 'max' => '' );
+		$parse = array( 'string' => '', 'exact' => '', 'min' => '', 'max' => '' );
 
 		$string_rules = array(
 		'alpha',
@@ -219,28 +230,28 @@ class Object extends Controller {
 		if ( is_array($valid) && count($valid > 0) ) {
 			foreach($valid as $rule) {
 				if(in_array($rule,$string_rules,true)){
-					$data['string'] = $rule;
+					$parse['string'] = $rule;
 				}
 				if(ereg ( 'exact_length\[([0-9]+)\]', $rule)) {
 					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
-					$data['exact'] = ereg_replace($pattern,'\\2',$rule);
+					$parse['exact'] = ereg_replace($pattern,'\\2',$rule);
 				}
 		
 				if(ereg ( 'min_length\[([0-9]+)\]', $rule)) {
 					$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
-					$data['min'] = ereg_replace($pattern,'\\2',$rule);
+					$parse['min'] = ereg_replace($pattern,'\\2',$rule);
 				}
 		
 				if(ereg ( 'max_length\[([0-9]+)\]', $rule)) {
 					$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
-					$data['max'] = ereg_replace($pattern,'\\2',$rule);
+					$parse['max'] = ereg_replace($pattern,'\\2',$rule);
 				}
 				
 			}
 		}
 		
 
-		return $data;
+		return $parse;
 	}
 
 }

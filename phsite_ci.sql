@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please fo and vote for this film!</p>','eng','2009-03-10 00:19:56');
+INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film!</p>','eng','2009-03-10 17:59:29');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -237,7 +237,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Peter','Hebert','peterhebert','8c3cd213466378f4129647c7de1a43203fc4b58c62f836cb8b','America/Vancouver',1,'fra','mail@peterhebert.com');
+INSERT INTO `users` VALUES (1,'Peter','Hebert','peterhebert','8c3cd213466378f4129647c7de1a43203fc4b58c62f836cb8b','America/Vancouver',0,'eng','mail@peterhebert.com');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -250,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-10  0:20:42
+-- Dump completed on 2009-03-20 22:09:27
