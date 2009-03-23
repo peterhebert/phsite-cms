@@ -20,7 +20,7 @@ class Content_model extends Model {
     }
 
     // list content
-	function get_list($limit='',$order='',$parent='')
+	function get_list($limit=0,$order='',$parent='',$page=1)
     {
 		if($this->lang != '') {
 			$this->db->where = array('lang' => $this->lang);
@@ -28,8 +28,13 @@ class Content_model extends Model {
 		if($parent != '' && is_numeric($parent)) {
 			$this->db->where = array('parent_id' => intval($parent));
 		}
-		if($limit != '' && intval($limit) > 0) {
-			$this->db->limit(intval($limit));
+		if($limit > 0) {
+			if($page > 1) {
+				$start = ($page * $limit) -1;
+				$this->db->limit($limit,$start);
+			} else {
+				$this->db->limit($limit);
+			}
 		}
 
 		if($order == 'asc' or $order == 'desc') {

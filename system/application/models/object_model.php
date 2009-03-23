@@ -3,6 +3,7 @@ class Object_model extends Model {
 
 	var $object_id;
 	var $name;
+	var $name_uri;
 	var $fields;
 
     function Object_model()
@@ -29,6 +30,7 @@ class Object_model extends Model {
 		{
 			$row = $query->row_array();
 			$this->name = $row['name'];
+			$this->name_uri = $row['name_uri'];
 			
 			$this->db->join('field', 'r_object_field.field_id = field.field_id', 'left');
 			$this->db->order_by("r_object_field.order", "asc");
@@ -47,15 +49,20 @@ class Object_model extends Model {
 	// update the object 
     function update_object()
     {
+        if($this->name_uri == '') {
+			$this->name_uri = convert_uri($this->name);
+		}
+
+
         if($this->object_id != '') {
 
-			$data = array('name' => $this->name);
+			$data = array('name' => $this->name,'name_uri' => $this->name_uri);
 			$this->db->where('object_id', $this->object_id);
 			$this->db->update('object', $data);
 
 		} else {
 
-			$data = array('name' => $this->name);
+			$data = array('name' => $this->name,'name_uri' => $this->name_uri);
 			$this->db->insert('object', $data); 
 			$this->object_id = $this->db->insert_id();
 		}

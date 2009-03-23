@@ -9,7 +9,11 @@
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : <?php echo anchor("cms/setup","Setup"); ?> : Field editor</div>
+	<div class="page-wrap block" id="breadcrumb">
+	<?php echo anchor("cms","phSite CMS"); ?> : 
+	<?php echo anchor("cms/setup","Setup"); ?> : 
+	<?php echo anchor("cms/setup/structure","Data Structure"); ?> : 
+	Field editor</div>
 	<div class="page-wrap block">
 		<h1 class="first">Field editor</h1>
 		<?php 

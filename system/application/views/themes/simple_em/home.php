@@ -1,29 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><?php echo $site_name ?></title>
+<title><?php //echo $site_name ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="/css/base.css" rel="stylesheet" type="text/css" />
-<link href="/css/simple.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $theme_path; ?>simple_em.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<div id="masthead">
-	<div class="page-wrap block">
-		<div class="column">
-			<h2><?php echo anchor("",$site_name); ?></h2>
-		</div>
-		<div class="column lh">web, film, etc...</div>
-		<div class="float-right lh">
-			<form action="../../../../../css/search.php" method="post" id="site-search">
-				<input name="search-text" id="search-text" type="text" />
-				<input name="search-submit" type="submit" id="search-submit" value="Search" />
-			</form>
-		</div>
-	</div>
-</div>
+<?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block">
-		<div class="column w3">
+		Home
+		<!--<div class="column w3">
 			<h1>Featured Media</h1>
 			<div class="placeholder" style="height:315px;">Placeholder image</div>
 			<p>Nisl diam commodo ad eu dolor commodo esse in ut nulla aliquip te eu nulla facilisi dignissim velit. Nostrud quis, facilisis veniam vel nibh, sed vero eros consequat facilisi magna eros ad luptatum vel. Duis odio volutpat. Enim enim laoreet euismod et et facilisi autem ut iusto quis lobortis eu adipiscing. Dolore ad lobortis, quis dolore consequat qui, quis facilisis autem nulla ad. </p>
@@ -54,7 +42,7 @@
 					</ul>
 				</div>
 			</div>
-		</div>
+		</div>-->
 	</div>
 	<div class="page-wrap block" id="footer"> &copy; 1996-2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>

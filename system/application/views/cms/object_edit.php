@@ -43,6 +43,7 @@ $().ready(function() {
 	<div class="page-wrap block" id="breadcrumb">
 	<?php echo anchor("cms","phSite CMS"); ?> : 
 	<?php echo anchor("cms/setup","Setup"); ?> : 
+	<?php echo anchor("cms/setup/structure","Data Structure"); ?> : 
 	Object editor
 	</div>
 	<div class="page-wrap block">
@@ -55,8 +56,15 @@ $().ready(function() {
 			echo form_open($action, $attributes, $hidden);
 		?>
 			<p>
-				<label for="name" class="block">object name</label>
+				<label for="name">object name</label>
 				<input name="name" type="text" id="name" value="<?php if(isset($name)) {echo $name;} ?>" />
+			</p>
+			<p class="nomargin">
+				<label for="name">object URI</label>
+				<input name="name_uri" type="text" id="name_uri" value="<?php if(isset($name_uri)) {echo $name_uri;} ?>" />
+			</p>
+			<p class="indent">
+				Note: changing this URI will mean you need to change the names of your template file for this object as well.
 			</p>
 			<fieldset>
 			<legend>Available Fields</legend>

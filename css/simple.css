@@ -79,6 +79,7 @@ list-style-type: none;
 
 /*forms*/
 #page form p label {float:left; margin-right: 1em; width: 10em; }
+#page form .indent {padding-left: 11em; margin-top: 0;}
 #page form p, #page form div.row {margin-bottom:1em; clear:both;}
 #page form p:after, #page form div.row:after {
 	 visibility: hidden;

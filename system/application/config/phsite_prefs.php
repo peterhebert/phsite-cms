@@ -14,5 +14,11 @@ $config['default_lang'] = 'eng';
 // user ID of the site webmaster (used for contact info and RSS feeds)
 $config['webmaster_id'] = 1;
 
+// limit for queries on blog entries per page
+$config['limit_posts'] = 10;
+
+// limit for queries on thumbnails per page in galleries
+$config['limit_thumbs'] = 30;
+
 /* End of file phsite_prefs.php */
 /* Location: ./system/application/config/phsite_prefs.php */

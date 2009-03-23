@@ -1,6 +1,20 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('removeEmptyArrayElements'))
+{	
+	function removeEmptyArrayElements($array) {
+		settype($cleanArray,"array");
+	
+		foreach ($array as $value) {
+			if (!empty($value)) {
+				$cleanArray[] = $value;
+			}
+		}
+		return $cleanArray;
+	}
+}	
+
 if ( ! function_exists('is_lang'))
 {	
 	function is_lang($value)

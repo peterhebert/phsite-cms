@@ -1,23 +1,39 @@
 <?php
 
 class Home extends Controller {
-
+	var $data = array();
+	
 	function Home()
 	{
 		parent::Controller();	
 		$this->load->model('Content_model');
 		$this->load->model('Object_model');
 		$this->load->model('Site_model');
+		$this->load->model('User_model');
 		$this->Site_model->load_prefs();
+
+		$base_raw = base_url();
+		$base_array = explode('/',$base_raw);
+		$base_array = removeEmptyArrayElements($base_array);	
+		array_shift($base_array);	
+		array_shift($base_array);	
+		$base = implode('/',$base_array);
+		
+		if($base != '') {
+			$base = '/'.$base;
+		}
+		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
+
 	}
 	
 	function index()
 	{
 		$uri_raw = $this->uri->uri_string();
 		$uri = preg_replace('|^/home/index/(.*)$|','$1',$uri_raw);
-		//echo $uri;
+
 		if($uri == '') {
-			$this->load->view('home');
+			$view = 'themes/'.$this->Site_model->theme.'/home';
+			$this->load->view($view,$this->data);
 		} else {
 			$this->process_uri($uri);
 		}
@@ -27,6 +43,14 @@ class Home extends Controller {
 	function process_uri($uri)
 	{
 		$errors = FALSE;
+
+		// get page num if exists
+		$page = 1;
+		$pcount = $this->uri->total_segments();
+		$params = $this->uri->uri_to_assoc($pcount-2);
+		if(array_key_exists('page',$params)) {
+			$page = $params['page'];
+		}
 
 		$uri_array = explode('/',$uri);
 		
@@ -64,29 +88,87 @@ class Home extends Controller {
 		}
 
 		if(!$errors) {
-			$data['breadcrumb'] = implode(' : ', $blinks);
+			$this->data['breadcrumb'] = implode(' : ', $blinks);
 	
 			$this->Content_model->content_id = $temp_parent;
 			$this->Content_model->get_content();
-	
-			$data['created'] = $this->Content_model->created;
-			$data['updated'] = $this->Content_model->updated;
-			$data['title'] = $this->Content_model->title;
-			$data['content_data'] = $this->Content_model->content_data;
 
+			$this->data['content_id'] = $this->Content_model->content_id;
+			$this->data['parent_id'] = $this->Content_model->parent_id;
+			$this->data['object_id'] = $this->Content_model->object_id;
+			$this->data['user_id'] = $this->Content_model->user_id;
+			$this->data['created'] = $this->Content_model->created;
+			$this->data['updated'] = $this->Content_model->updated;
+			$this->data['title'] = $this->Content_model->title;
+
+			
+			foreach($this->Content_model->content_data as $field) {
+				$this->data['content_data'][$field['field_name']] = $field['value'];
+				if($field['updated'] > $this->data['updated']) {
+					$this->data['updated'] = $field['updated'];
+				}
+			}
+
+			// get author info
+			$this->User_model->user_id = $this->Content_model->user_id;
+			$this->User_model->load();
+			$this->data['author']['name_first'] = $this->User_model->name_first;
+			$this->data['author']['name_last'] = $this->User_model->name_last;
+			$this->data['author']['username'] = $this->User_model->username;
+			$this->data['author']['email'] = $this->User_model->email;
+
+			// get object info
 			$this->Object_model->object_id = $this->Content_model->object_id;
 			$this->Object_model->load_object();
 
-			$view = 'themes/'.$this->Site_model->theme.'/'.$this->Object_model->name;
+			// prepare child content for display
+			$children = $this->Content_model->get_list(10,'',$this->Content_model->content_id,$page);
+			if(count($children) > 0 )
+			{
+				$this->data['children'] = $this->get_child_data($children);
+				
+			}
+			
+			$view = 'themes/'.$this->Site_model->theme.'/'.$this->Object_model->name_uri;
 
-			$this->load->view($view,$data);
+			$this->load->view($view,$this->data);
 		} else {
-			$data['message'] = implode(', ',$msg);
+			$this->data['message'] = implode(', ',$msg);
 
 			$this->output->set_status_header('404');
-			$this->load->view('error_404',$data);
+			$this->load->view('error_404',$this->data);
 		}
 
+	}
+
+	function get_child_data($child_array)
+	{
+		foreach($child_array as $child)
+		{
+			$this->Content_model->content_id = $child['content_id'];
+			$this->Content_model->get_content();
+			
+			$updated = $this->Content_model->updated;
+
+			foreach($this->Content_model->content_data as $field) {
+				$content_data[$field['field_name']] = $field['value'];
+				if($field['updated'] > $updated) {
+					$updated = $field['updated'];
+				}
+			}
+			
+			$child_data[] = array(
+			'content_id' => $this->Content_model->content_id,
+			'object_id' => $this->Content_model->object_id,
+			'user_id' => $this->Content_model->user_id,
+			'created' => $this->Content_model->created,
+			'updated' => $updated,
+			'title' => $this->Content_model->title,
+			'content_data' => $content_data,
+			);
+			unset($content_data);
+		}
+		return $child_data;
 	}
 
 }

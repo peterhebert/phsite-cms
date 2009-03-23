@@ -2,8 +2,8 @@
 class Object extends Controller {
 	var $data = array();
 
-   function Object()
-   {
+	function Object()
+	{
 		parent::Controller();
 
 		// if not logged in, redirect to login form
@@ -16,7 +16,7 @@ class Object extends Controller {
 			$this->data['userdata'] = $this->session->userdata;
 		}
 
-		$this->load->model('Object_model',$this->data);
+		$this->load->model('Object_model');
 	}
 
 	function index()
@@ -65,11 +65,13 @@ class Object extends Controller {
 			// get post data for object
 			$this->Object_model->object_id = $this->input->post('object_id');
 			$this->Object_model->name = $this->input->post('name');
+			$this->Object_model->name_uri = $this->input->post('name_uri');
 
 			if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
 				$this->form_validation->set_rules('object_id', '', 'required|is_natural_no_zero');
 			}
 			$this->form_validation->set_rules('name', 'Object name', 'required|xss_clean');
+			$this->form_validation->set_rules('name_uri', 'Object URI', 'alpha_num_spaces|xss_clean');
 
 			if ($this->form_validation->run())
 			{
@@ -182,6 +184,7 @@ class Object extends Controller {
 			$this->Object_model->load_object();
 
 			$this->data['name'] = $this->Object_model->name;
+			$this->data['name_uri'] = $this->Object_model->name_uri;
 			$this->data['hidden'] = array('object_id' => $params['id']);
 
 			foreach ($this->Object_model->fields as $row) {

@@ -1,9 +1,9 @@
 <div id="masthead">
 	<div class="page-wrap block">
 		<div class="column">
-			<h2>phSite</h2>
+			<h2>Site name</h2>
 		</div>
-		<div class="column lh">a content manager for the rest of us</div>
+		<div class="column lh">Site subtitle</div>
 		<div class="float-right lh">
 			<form action="<?php echo site_url("cms/content/search") ?>" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />
