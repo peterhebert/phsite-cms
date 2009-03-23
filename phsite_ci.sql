@@ -211,6 +211,34 @@ INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,2,'')
 UNLOCK TABLES;
 
 --
+-- Table structure for table `site_meta`
+--
+
+DROP TABLE IF EXISTS `site_meta`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `site_meta` (
+  `site_meta_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `name` mediumtext NOT NULL,
+  `description` mediumtext NOT NULL,
+  `keywords` mediumtext NOT NULL,
+  `copyright` mediumtext NOT NULL,
+  `lang` varchar(3) DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`site_meta_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `site_meta`
+--
+
+LOCK TABLES `site_meta` WRITE;
+/*!40000 ALTER TABLE `site_meta` DISABLE KEYS */;
+/*!40000 ALTER TABLE `site_meta` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -250,4 +278,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-20 23:45:45
+-- Dump completed on 2009-03-23 18:32:08

@@ -6,6 +6,9 @@ class Display extends Controller {
 	{
 		parent::Controller();	
 		$this->load->model('Content_model');
+		$this->load->model('Object_model');
+		$this->load->model('Site_model');
+		$this->Site_model->load_prefs();
 	}
 	
 	function index()
@@ -51,13 +54,19 @@ class Display extends Controller {
 		if(!$errors) {
 			$data['breadcrumb'] = implode(' : ', $blinks);
 	
-			$this->Content_model->getContent($temp_parent,$lang);
+			$this->Content_model->content_id = $temp_parent;
+			$this->Content_model->get_content();
 	
 			$data['created'] = $this->Content_model->created;
 			$data['updated'] = $this->Content_model->updated;
 			$data['title'] = $this->Content_model->title;
 			$data['content_data'] = $this->Content_model->content_data;
-	
+
+			$this->Object_model->object_id = $this->Content_model->object_id;
+			$this->Object_model->load_object();
+
+			$view = 'themes/'.$this->Site_model->theme.'/'.$this->Object_model->name;
+
 			$this->load->view('display',$data);
 		} else {
 			$data['message'] = implode(', ',$msg);

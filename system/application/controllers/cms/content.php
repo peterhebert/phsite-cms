@@ -6,6 +6,14 @@ class Content extends Controller {
 	{
 		parent::Controller();
 
+		// load models
+		$this->load->model('Content_model');
+		$this->load->model('Object_model');
+
+	}
+
+	function authenticate()
+	{
 		// if not logged in, redirect to login form
 		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
@@ -16,14 +24,12 @@ class Content extends Controller {
 			$this->data['userdata'] = $this->session->userdata;
 		}
 
-		// load models
-		$this->load->model('Content_model');
-		$this->load->model('Object_model');
-
 	}
 
 	function index()
 	{
+		$this->authenticate();
+
 		$params = $this->uri->uri_to_assoc(4);
 
 		$this->data['title'] = 'Content';
@@ -49,6 +55,8 @@ class Content extends Controller {
 
 	function edit()
 	{
+		$this->authenticate();
+
 		$this->load->model('User_model');
 		$this->load->model('Field_model');
 		$this->load->model('Language_model');
@@ -236,10 +244,20 @@ class Content extends Controller {
 	
 	function search()
 	{
-
 		$this->data['term'] = $this->input->post('search-text');
-		$this->data['matches'] = 	$this->Content_model->search($this->input->post('search-text'));
-		$this->load->view('cms/search_results',$this->data);
+		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
+
+		if($this->uri->segment(4) == 'admin')) {
+			$view = 'cms/search_results';
+		} else {
+			$this->load->model('Site_model');
+			$this->Site_model->load_prefs();
+			$view = 'themes/'.$this->Site_model->theme.'/search_results';
+			
+			$this->load->view('cms/search_results',$this->data);
+		}
+
+		$this->load->view($view,$this->data);
 	}
 
 

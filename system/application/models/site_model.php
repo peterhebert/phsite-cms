@@ -12,6 +12,15 @@ class Site_model extends Model {
 	// path to phsite folder
 	var $install_path;
 
+	// site metadata (language-specific)
+	var $site_meta_id;
+	var $name;
+	var $description;
+	var $keywords;
+	var $copyright;
+	var $lang;
+	var $updated;
+
     function Site_model()
     {
         // Call the Model constructor
@@ -80,6 +89,7 @@ class Site_model extends Model {
 	
 		}
 	}
+
 
 }
 
