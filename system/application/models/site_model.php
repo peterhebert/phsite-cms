@@ -24,7 +24,8 @@ class Site_model extends Model {
 
 	// site metadata (language-specific)
 	var $site_meta_id;
-	var $name;
+	var $title;
+	var $subtitle;
 	var $description;
 	var $keywords;
 	var $copyright;
@@ -112,6 +113,56 @@ class Site_model extends Model {
 		}
 	}
 
+	function load_meta($lang='eng')
+    {
+		if($this->site_meta_id != '') {
+			$query = $this->db->get_where('site_meta', array('site_meta_id' => $this->site_meta_id));
+		} else {
+			$query = $this->db->get_where('site_meta', array('lang' => $lang));
+		}
+
+		if($row = $query->row_array()) {
+			$this->site_meta_id = $row['site_meta_id'];
+			$this->title = $row['title'];
+			$this->subtitle = $row['subtitle'];
+			$this->description = $row['description'];
+			$this->keywords = $row['keywords'];
+			$this->copyright = $row['copyright'];
+			$this->lang = $row['lang'];
+			$this->updated = $row['updated'];
+		}
+    }
+
+    function update_meta()
+    {
+		$site_metadata = array(
+		'title' => $this->title,
+		'subtitle' => $this->subtitle,
+		'description' => $this->description,
+		'keywords' => $this->keywords,
+		'copyright' => $this->copyright,
+		'lang' => $this->lang
+		);
+
+		if($this->site_meta_id == '')
+		{
+			// insert metadata for this language
+	
+			if($this->db->insert('site_meta', $site_metadata)) {
+				$this->site_meta_id = $this->db->insert_id();
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		} else {
+			// update metadata for this language
+			if( $this->db->update('site_meta', $site_metadata, array('site_meta_id' => $this->site_meta_id)) ) {
+				return TRUE;
+			} else {
+				return FALSE;
+			}
+		}
+    }
 
 }
 

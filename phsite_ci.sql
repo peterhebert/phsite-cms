@@ -168,6 +168,7 @@ SET character_set_client = utf8;
 CREATE TABLE `object` (
   `object_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
   `name` text NOT NULL,
+  `name_uri` text NOT NULL,
   PRIMARY KEY (`object_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
@@ -178,7 +179,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `object` WRITE;
 /*!40000 ALTER TABLE `object` DISABLE KEYS */;
-INSERT INTO `object` VALUES (1,'static page'),(2,'blog entry'),(3,'image');
+INSERT INTO `object` VALUES (1,'static page','static_page'),(2,'blog entry','blog_entry'),(3,'image','');
 /*!40000 ALTER TABLE `object` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -219,14 +220,15 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `site_meta` (
   `site_meta_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
-  `name` mediumtext NOT NULL,
+  `title` mediumtext NOT NULL,
+  `subtitle` mediumtext,
   `description` mediumtext NOT NULL,
-  `keywords` mediumtext NOT NULL,
-  `copyright` mediumtext NOT NULL,
-  `lang` varchar(3) DEFAULT NULL,
+  `keywords` mediumtext,
+  `copyright` mediumtext,
+  `lang` varchar(3) DEFAULT 'eng',
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`site_meta_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -235,6 +237,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `site_meta` WRITE;
 /*!40000 ALTER TABLE `site_meta` DISABLE KEYS */;
+INSERT INTO `site_meta` VALUES (1,'Peter Hebert','','descksdlkd','web, development','1997-2009 Peter Hebert','eng','2009-03-24 00:06:14');
 /*!40000 ALTER TABLE `site_meta` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -278,4 +281,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-23 18:32:08
+-- Dump completed on 2009-03-24  0:07:37

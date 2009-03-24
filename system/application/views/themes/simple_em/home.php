@@ -11,7 +11,7 @@
 <div id="page">
 	<div class="page-wrap block">
 		Home
-		<!--<div class="column w3">
+		<div class="column w3">
 			<h1>Featured Media</h1>
 			<div class="placeholder" style="height:315px;">Placeholder image</div>
 			<p>Nisl diam commodo ad eu dolor commodo esse in ut nulla aliquip te eu nulla facilisi dignissim velit. Nostrud quis, facilisis veniam vel nibh, sed vero eros consequat facilisi magna eros ad luptatum vel. Duis odio volutpat. Enim enim laoreet euismod et et facilisi autem ut iusto quis lobortis eu adipiscing. Dolore ad lobortis, quis dolore consequat qui, quis facilisis autem nulla ad. </p>
@@ -42,7 +42,7 @@
 					</ul>
 				</div>
 			</div>
-		</div>-->
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"> &copy; 1996-2009 Peter Hebert. All rights reserved unless stated otherwise.</div>
 </div>
