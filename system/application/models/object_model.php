@@ -58,15 +58,19 @@ class Object_model extends Model {
 
 			$data = array('name' => $this->name,'name_uri' => $this->name_uri);
 			$this->db->where('object_id', $this->object_id);
-			$this->db->update('object', $data);
+			if($this->db->update('object', $data)){
+				return TRUE;
+			}
 
 		} else {
 
 			$data = array('name' => $this->name,'name_uri' => $this->name_uri);
-			$this->db->insert('object', $data); 
-			$this->object_id = $this->db->insert_id();
+			if($this->db->insert('object', $data)) { 
+				$this->object_id = $this->db->insert_id();
+				return TRUE;
+			}
 		}
-		
+		return FALSE;
     }
 
 

@@ -247,7 +247,7 @@ class Content extends Controller {
 		$this->data['term'] = $this->input->post('search-text');
 		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
 
-		if($this->uri->segment(4) == 'admin')) {
+		if($this->uri->segment(4) == 'admin') {
 			$view = 'cms/search_results';
 		} else {
 			$this->load->model('Site_model');

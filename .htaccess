@@ -6,6 +6,9 @@
 	RewriteRule ^cms(.*)$ index.php/cms$1 [L]
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^image/(.*)$ index.php/image/$1 [L]
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^(.*)$ index.php/home/index/$1 [L]
 </IfModule>
  

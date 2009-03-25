@@ -129,6 +129,9 @@ function toggleEditor(id) {
 
 
 			switch($fd['input_type']) {
+			case 'file':
+				echo form_upload($field_params);
+				break;
 			case 'text':
 				$field_params['class'] = $fd['input_type'];
 				echo form_input($field_params);
@@ -145,6 +148,9 @@ function toggleEditor(id) {
 				break;
 			default:
 				echo form_input($field_params);
+			}
+			if($fd['input_type'] == 'file') {
+			echo "</p>\n<p class=\"indent\">Maximum file size: ";
 			}
 			echo "</p>\n";
 						

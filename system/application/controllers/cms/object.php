@@ -61,6 +61,7 @@ class Object extends Controller {
 		
 		if($this->input->post('submit')) {
 			$this->load->library('form_validation');
+			
 
 			// get post data for object
 			$this->Object_model->object_id = $this->input->post('object_id');
@@ -75,11 +76,14 @@ class Object extends Controller {
 
 			if ($this->form_validation->run())
 			{
+				$errors = 0;
 				if($this->input->post('object_id') != '' and $this->input->post('object_id') > 0) {
 					$this->Object_model->object_id = $this->input->post('object_id');
 				}
 				$this->Object_model->name = $this->input->post('name');
-				$this->Object_model->update_object();
+				if(!$this->Object_model->update_object()) {
+					$errors = $errors + 1;
+				}
 
 				// put post field data into arrays
 				$field_id = $this->input->post('field_id');
@@ -95,7 +99,7 @@ class Object extends Controller {
 				// loop through arrays
 				foreach($field_id as $index => $my_id) {
 				
-					if(in_array($my_id, $required,true)) {
+					if(is_array($required) && in_array($my_id, $required,true)) {
 						$req = 1;
 					} else {
 						$req = 0;
@@ -134,21 +138,33 @@ class Object extends Controller {
 	
 					if($rel_id[$index] != '') {
 	
-						if(in_array($my_id,$exists)) {
+						if(is_array($exists) && in_array($my_id,$exists)) {
 							// exists, update
-							$this->Object_model->update_field($rel_id[$index],$my_id,$req,$order[$my_id],$val_for_db);
+							if( !$this->Object_model->update_field($rel_id[$index],$my_id,$req,$order[$my_id],$val_for_db) ) {
+								$errors = $errors + 1;
+							}
 						} else {
 							// does not exist, delete
-							$this->Object_model->remove_field($rel_id[$index]);
+							if( !$this->Object_model->remove_field($rel_id[$index]) ) {
+								$errors = $errors + 1;
+							}
 						}
 	
 					} else {
 	
-						if(in_array($my_id,$exists)) {
+						if(is_array($exists) && in_array($my_id,$exists)) {
 							// insert
-							$this->Object_model->insert_field($my_id,$req,$order[$my_id],$val_for_db);
+							if( !$this->Object_model->insert_field($my_id,$req,$order[$my_id],$val_for_db) ) {
+								$errors = $errors + 1;
+							}
 						}
 	
+					}
+					if($errors === 0)
+					{
+						$this->data['msg'] = 'Object updated successfully';
+					} else {
+						$this->data['msg'] = 'Object could not be updated successfully';
 					}
 				}
 

@@ -198,5 +198,31 @@ if ( ! function_exists('get_metadata'))
 	}
 
 }
+
+if ( ! function_exists('list_media_dirs'))
+{
+
+	function list_media_dirs() {
+
+		/* 
+		parameters for function
+		
+		src	web root absolute path to image
+		size	size to fit image to by largest dimension
+		ratio	force ratio of resized image
+		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text, 'id' => 'image tag id')
+		
+		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
+		*/
+
+		// Path to original image and to resized version
+		$orig_image_path = $_SERVER["DOCUMENT_ROOT"].$path;
+		$orig_image_path_rel = trim($path,'/');
+		
+		$dest_dir = str_replace(MEDIA_PATH_ORIG,MEDIA_PATH_CACHE,$pi['dirname']);
+	
+	} // end view_image()
+}
+
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

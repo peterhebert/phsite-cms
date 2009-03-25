@@ -120,6 +120,11 @@ class Home extends Controller {
 			// get object info
 			$this->Object_model->object_id = $this->Content_model->object_id;
 			$this->Object_model->load_object();
+			
+			// if image, generate image tag and get metadata
+			if($this->Object_model->name == 'image')
+			{
+			}
 
 			// prepare child content for display
 			$children = $this->Content_model->get_list(10,'',$this->Content_model->content_id,$page);
@@ -169,6 +174,22 @@ class Home extends Controller {
 			unset($content_data);
 		}
 		return $child_data;
+	}
+
+	function view_image($src,$size,$ratio,$attr)
+	{
+
+		$this->load->helper('file');
+		$this->load->helper('image');
+
+		$image_html = view_image($src,$size,$ratio,$attr);
+		echo $image_html;
+		$metadata = get_metadata($src);
+		echo "<br />\n<pre>";
+		print_r ($metadata);
+		echo "</pre>";
+
+
 	}
 
 }
