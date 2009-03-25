@@ -1,7 +1,7 @@
 <?php
-class Content extends Controller {
+class Content extends Controller
+{
 
-	var $data = array();
 	function Content()
 	{
 		parent::Controller();

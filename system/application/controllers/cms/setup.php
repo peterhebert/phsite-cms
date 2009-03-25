@@ -1,6 +1,6 @@
 <?php
-class Setup extends Controller {
-	var $data = array();
+class Setup extends Controller
+{
 
 	function Setup()
 	{

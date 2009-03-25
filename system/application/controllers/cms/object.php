@@ -1,6 +1,6 @@
 <?php
-class Object extends Controller {
-	var $data = array();
+class Object extends Controller
+{
 
 	function Object()
 	{

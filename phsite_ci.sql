@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film!</p>','eng','2009-03-10 17:59:29');
+INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film! Now!</p>','eng','2009-03-25 19:13:26');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -145,7 +145,7 @@ CREATE TABLE `field` (
   `field_name` text NOT NULL,
   `input_type` varchar(8) NOT NULL,
   PRIMARY KEY (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -154,7 +154,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
-INSERT INTO `field` VALUES (1,'body','richtext'),(2,'description','textarea'),(3,'keywords','text'),(4,'email','text'),(5,'author','text'),(6,'subtitle','text'),(7,'teaser','textarea');
+INSERT INTO `field` VALUES (1,'body','richtext'),(2,'description','textarea'),(3,'keywords','text'),(4,'email','text'),(5,'author','text'),(6,'subtitle','text'),(7,'teaser','textarea'),(8,'file','text'),(9,'upload','file');
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +179,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `object` WRITE;
 /*!40000 ALTER TABLE `object` DISABLE KEYS */;
-INSERT INTO `object` VALUES (1,'static page','static_page'),(2,'blog entry','blog_entry'),(3,'image','');
+INSERT INTO `object` VALUES (1,'static page','static_page'),(2,'blog entry','blog_entry'),(3,'image','image');
 /*!40000 ALTER TABLE `object` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -198,7 +198,7 @@ CREATE TABLE `r_object_field` (
   `order` smallint(5) unsigned NOT NULL DEFAULT '0',
   `validation` text,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -207,7 +207,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
-INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,2,''),(7,7,2,0,3,''),(5,3,2,1,4,''),(6,6,2,0,1,'');
+INSERT INTO `r_object_field` VALUES (1,1,1,1,0,''),(2,3,1,0,0,''),(3,1,2,1,2,''),(7,7,2,0,3,''),(5,3,2,1,4,''),(6,6,2,0,1,''),(8,2,3,0,0,''),(9,8,3,0,1,'file_path'),(10,3,3,0,0,''),(11,9,3,0,2,'');
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -281,4 +281,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-24  0:07:37
+-- Dump completed on 2009-03-25 19:13:47

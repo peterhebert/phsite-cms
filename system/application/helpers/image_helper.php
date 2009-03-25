@@ -10,9 +10,9 @@ if ( ! function_exists('view_image'))
 		/* 
 		parameters for function
 		
-		src	web root absolute path to image
-		size	size to fit image to by largest dimension
-		ratio	force ratio of resized image
+		src				path to image
+		size			size to fit image to by largest dimension
+		ratio			force ratio of resized image
 		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text, 'id' => 'image tag id')
 		
 		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
@@ -21,7 +21,7 @@ if ( ! function_exists('view_image'))
 		if($img_tag_attr == '') {
 			$img_tag_attr = array();
 		}
-		
+
 		// Path to original image and to resized version
 		$orig_image_path = $_SERVER["DOCUMENT_ROOT"].$path;
 		$orig_image_path_rel = trim($path,'/');

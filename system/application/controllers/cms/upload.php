@@ -1,52 +1,105 @@
 <?php
 
 class Upload extends Controller {
-	
+		
 	function Upload()
 	{
 		parent::Controller();
 		$this->load->helper(array('form','url','file','image'));
+		$this->load->library('session');
 	}
 	
 	function index()
 	{	
 
+		// if not logged in, redirect to login form
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+		}
+
+		$success = FALSE;
+		
+		//get list of directories in media folder
 		$media_root = $_SERVER["DOCUMENT_ROOT"].MEDIA_PATH_ORIG;
 		$dir_array[$media_root] = MEDIA_PATH_ORIG;
-
-		
 		$subdirs = $this->findSubDirs($media_root);
-		
-		
 		foreach($subdirs as $dir) {
 			$dest_dir = str_replace($_SERVER["DOCUMENT_ROOT"],'',$dir);
 			$dir_array[$dir] = $dest_dir;
 		}
+		$this->data['directories'] = $dir_array;
 
-		$data['directories'] = $dir_array;
+		//initialize the form values
+		$this->data['dest_path'] = $media_root;
+		$this->data['create_entry'] = FALSE;
+
+		// get max upload size from php.ini settings
 		$max = ini_get('upload_max_filesize');
 		$max = preg_replace("/^([0-9]+)([KMG]*)/", "$1/$2", $max);
 		$max_size_array = explode('/',$max);
 		
 		switch($max_size_array[1]) {
 		case 'K':
-			$max_size = $max_size_array[0] * 1024;
+			$this->data['max_size'] = $max_size_array[0].' Kb';
+			$config['max_size'] = $max_size_array[0];
 			break;
 		case 'M':
-			$max_size = $max_size_array[0] * 1048576;
+			$this->data['max_size'] = $max_size_array[0].' Mb';
+			$config['max_size'] = $max_size_array[0] * 1024;
 			break;
 		case 'G':
-			$max_size = $max_size_array[0] * 1073741824;
+			$this->data['max_size'] = $max_size_array[0].' Gb';
+			$config['max_size'] = $max_size_array[0] * 1048576;
 			break;
 		default:
-			$max_size = $max_size_array[0];
+			$this->data['max_size'] = $max_size_array[0].' bytes';
+			$config['max_size'] = $max_size_array[0] / 1024;
 			break;
 		}
-		
-		$data['max_size'] = $max_size;
-		$data['msg'] = "Note: The maximum file upload size is ".;
 
-		$this->load->view('cms/upload',$data);
+		$config['allowed_types'] = 'gif|jpg|png|flv|mov|mp4';
+		$data['allowed_types'] = str_replace('|',', ',$config['allowed_types']);
+
+		// process form if submitted
+		if($this->input->post('submit') != '') {
+
+			if($this->input->post('create_entry') == 1) {
+				$this->data['create_entry'] = TRUE;
+			}
+
+			$config['upload_path'] = $this->input->post('dest_path');
+			$this->load->library('upload', $config);
+			
+			$success = $this->upload->do_upload();
+			
+			if ($success === FALSE)
+			{
+				$this->data['msg'] = $this->upload->display_errors('<p>', '</p>');
+			}	
+			else
+			{
+
+				$this->data['upload_data'] = $this->upload->data();
+				if($this->data['upload_data']['is_image'] == 1)
+				{
+					$img_path = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$this->data['upload_data']['full_path']);
+					$this->data['image_thumb'] = view_image($img_path,300);
+				}
+			}
+
+		}
+
+		if($success === TRUE) {
+			$this->load->view('cms/upload_success', $this->data);
+		} else {
+			$this->load->view('cms/upload_form', $this->data);
+		}
+
+
 	}
 
 	// find subdirectories
@@ -73,59 +126,5 @@ class Upload extends Controller {
 		return $dirs;
 	}
 
-	function do_upload()
-	{
-		//get max file size
-		$max = ini_get('upload_max_filesize');
-		$max = preg_replace("/^([0-9]+)([KMG]*)/", "$1/$2", $max);
-		$max_size_array = explode('/',$max);
-		
-		switch($max_size_array[1]) {
-		case 'K':
-			$max_size = $max_size_array[0] * 1024;
-			break;
-		case 'M':
-			$max_size = $max_size_array[0] * 1048576;
-			break;
-		case 'G':
-			$max_size = $max_size_array[0] * 1073741824;
-			break;
-		default:
-			$max_size = $max_size_array[0];
-			break;
-		}
-		
-		$data['max_size'] = $max_size;
-
-
-
-
-
-
-
-
-
-
-		$config['upload_path'] = $this->input->post('dest_path');
-		$config['allowed_types'] = 'gif|jpg|png|flv|mov|mp4';
-		$config['max_size']	= ini_get('upload_max_filesize');
-		$config['max_width']  = '1024';
-		$config['max_height']  = '768';
-		
-		$this->load->library('upload', $config);
-	
-		if ( ! $this->upload->do_upload())
-		{
-			$error = array('error' => $this->upload->display_errors());
-			
-			$this->load->view('upload_form', $error);
-		}	
-		else
-		{
-			$data = array('upload_data' => $this->upload->data());
-			
-			$this->load->view('upload_success', $data);
-		}
-	}	
 }
 ?>

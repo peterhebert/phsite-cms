@@ -1,7 +1,6 @@
 <?php
-class Cms extends Controller {
-
-	var $data = array();
+class Cms extends Controller
+{
 
 	function Cms()
 	{

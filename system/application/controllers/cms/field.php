@@ -1,8 +1,7 @@
 <?php
-class Field extends Controller {
+class Field extends Controller
+{
 
-	var $data = array();
-	
 	function Field()
 	{
 		parent::Controller();

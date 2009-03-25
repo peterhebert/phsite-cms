@@ -1,7 +1,6 @@
 <?php
 
 class Home extends Controller {
-	var $data = array();
 	
 	function Home()
 	{

@@ -1,6 +1,6 @@
 <?php
-class User extends Controller {
-	var $data = array();
+class User extends Controller
+{
 
 	function User()
 	{
