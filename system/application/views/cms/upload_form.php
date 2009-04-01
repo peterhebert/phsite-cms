@@ -11,6 +11,7 @@
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb">
 	<?php echo anchor("cms","phSite CMS"); ?> : 
+	<?php echo anchor("cms/media","media"); ?> : 
 	Upload a file</div>
 	<div class="page-wrap block">
 		<h1 class="first">Upload a file</h1>
@@ -20,7 +21,7 @@
 		}
 		$attributes = array('name' => "file_uploader", 'id' => "file_uploader");
 
-		echo form_open_multipart('cms/upload',$attributes);
+		echo form_open_multipart('cms/media/upload',$attributes);
 		echo "\n";
 
 			echo"<p><strong>Note</strong>: The maximum file size is {$max_size}<br />\n";

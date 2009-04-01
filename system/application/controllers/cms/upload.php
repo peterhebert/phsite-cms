@@ -62,7 +62,7 @@ class Upload extends Controller {
 		}
 
 		$config['allowed_types'] = 'gif|jpg|png|flv|mov|mp4';
-		$data['allowed_types'] = str_replace('|',', ',$config['allowed_types']);
+		$this->data['allowed_types'] = str_replace('|',', ',$config['allowed_types']);
 
 		// process form if submitted
 		if($this->input->post('submit') != '') {

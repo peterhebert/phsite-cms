@@ -11,7 +11,7 @@
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb">
 	<?php echo anchor("cms","phSite CMS"); ?> : 
-	<?php echo anchor("cms/upload","Upload a file"); ?> : 
+	<?php echo anchor("cms/media/upload","Upload a file"); ?> : 
 	File uploaded successfully
 	</div>
 	<div class="page-wrap block">

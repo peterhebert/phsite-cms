@@ -26,7 +26,9 @@ $().ready(function(){
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : CMS Home</div>
 	<div class="page-wrap block">
-		<div class="column w4"> <?php echo $content; ?>
+		<div class="column w4">
+		<h1>Content</h1>
+		<?php echo $content; ?>
 			<?php
 			foreach($new_objects as $index => $row) {
 				$my_uri = site_url("cms/content/edit/type/".$row['object_id']);
@@ -34,8 +36,15 @@ $().ready(function(){
 			}
 			?>
 			<p>Create New <?php echo form_dropdown('new_content',$dropdown); ?> <input id="new_go" name="new_go" type="button" value="Go" /></p>
+			<h2>Media</h2>
+			<ul>
+				<li><?php echo anchor("cms/media","manage media"); ?></li>
+				<li><?php echo anchor("cms/media/upload","upload media"); ?></li>
+			</ul>
 		</div>
-		<div class="float w2"><?php require_once('setup_menu.php'); ?></div>
+		<div class="float w2">
+		<?php require_once('setup_menu.php'); ?>
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

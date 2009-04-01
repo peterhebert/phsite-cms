@@ -1,4 +1,4 @@
-			<h2><?php echo anchor("cms/setup","Setup"); ?></h2>
+			<h2>Setup</h2>
 			<ul>
 				<li><?php echo anchor("cms/setup/site_prefs","Site preferences"); ?></li>
 				<li><?php echo anchor("cms/setup/languages","Languages"); ?></li>
