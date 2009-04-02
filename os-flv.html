@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Open Source FLV player</title>
+<style type="text/css">
+<!--
+/* object stuff here */
+
+/* hides the second object from all versions of IE */
+* html object.mov {
+	display: none;
+}
+
+/* displays the second object in all versions of IE apart from 5 on PC */
+* html object.mov/**/ {
+	display: inline;
+}
+
+/* hides the second object from all versions of IE >= 5.5 */
+* html object.mov {
+	display/**/: none;
+}
+
+-->
+</style>
+</head>
+<body>
+<h1>Open Source FLV player</h1>
+<!--OS FLV player-->
+<object type="application/x-shockwave-flash" data="osflv_player_v225/player.swf" width="640" height="360">
+	<param name="movie" value="osflv_player_v225/player.swf" />
+	<param name="allowFullScreen" value="true">
+	<param name="FlashVars" value="movie=video.flv&bgcolor=0x222222&fgcolor=0x999999&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
+</object>
+<!-- end OS FLV player -->
+
+
+</body>
+</html>
