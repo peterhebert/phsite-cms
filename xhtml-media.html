@@ -30,11 +30,11 @@
 <h2>DivX</h2>
 <!-- Start XHTML Divx Web Player -->
 <object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616" codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab" height="240" width="320">
-<param name="src" value="http://localhost/phsite_ci/AVI_DivX.avi">
-<param name="custommode" value="none">
+<param name="src" value="http://localhost/phsite_ci/AVI_DivX.avi" />
+<param name="custommode" value="none" />
 <object type="video/divx" data="http://localhost/phsite_ci/" class="mov" height="" width="">
-<param name="src" value="AVI_DivX.avi">
-<param name="custommode" value="none">
+<param name="src" value="AVI_DivX.avi" />
+<param name="custommode" value="none" />
 No video? Get the DivX Web Player for <a href="http://download.divx.com/player/DivXWebPlayerInstaller.exe">Windows</a> or <a href="http://download.divx.com/player/DivXWebPlayer.dmg">Mac</a>
 </object>
 <!-- End XHTML Divx Web Player -->
@@ -50,7 +50,7 @@ No video? Get the DivX Web Player for <a href="http://download.divx.com/player/D
 		 custommode="none" 
 		 width="320" 
 		 height="240" 
-		 previewImage="http://localhost/test.png" 
+		 previewimage="http://localhost/test.png" 
 		 pluginspage="http://go.divx.com/plugin/download/"/>
 	</object>
 
@@ -97,5 +97,22 @@ No video? Get the DivX Web Player for <a href="http://download.divx.com/player/D
 </object>
 <!-- FYI, that super small flash code works on everything from youtube / swf's / all other movie sites...-->
 <!-- End XHTML Flash -->
+
+
+<!--OS FLV player-->
+<script src='media/osflv_player_v225/AC_RunActiveContent.js' language='javascript'></script>
+<script language='javascript'>
+ AC_FL_RunContent('codebase', 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0', 'width', '640', 'height', '360', 'src', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'player8' : 'player'), 'pluginspage', 'http://www.macromedia.com/go/getflashplayer', 'id', 'flvPlayer', 'allowFullScreen', 'true', 'movie', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'player8' : 'player'), 'FlashVars', 'movie=test.flv&bgcolor=0x333333&fgcolor=0x13ABEC&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=');
+</script>
+<noscript>
+<object type="application/x-shockwave-flash" data="http://www.youtube.com/v/a0qMe7Z3EYg" width="640" height="360">
+	<param name="movie" value="media/osflv_player_v225/player.swf" />
+	<param name="allowFullScreen" value="true">
+	<param name="FlashVars" value="movie=osflv_player_v225/video.flv&bgcolor=0x333333&fgcolor=0x13ABEC&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
+</object>
+</noscript>
+<!-- end OS FLV player -->
+
+
 </body>
 </html>

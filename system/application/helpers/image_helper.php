@@ -207,26 +207,31 @@ if ( ! function_exists('get_metadata'))
 if ( ! function_exists('flv_player'))
 {
 
-	function flv_player($file,$params=array()) {
-		$player_code = "<script type=\"text/javascript\" src=\"/mediaplayer/swfobject.js\"></script>\n";
+	function flv_player($file, $width, $height, $params=array(), $fullscreen = true) {
+
+		$params['movie'] = '/osflv_player_v225/player.swf';
+		
+		foreach ($params as $param => $value) {
+			$flash_vars[] = $param.'='.$value;
+		}
+		$FlashVars = implode('&',$flash_vars);
+		
+		$player_code = "\n";
 		$player_code .= "\n";
+
 		return $player_code;
 	}
 
 }
 /*
+<!--OS FLV player-->
+<object type="application/x-shockwave-flash" data="/media/osflv_player_v225/player.swf" width="640" height="360">
+	<param name="movie" value="osflv_player_v225/player.swf" />
+	<param name="allowFullScreen" value="true">
+	<param name="FlashVars" value="movie=video.flv&bgcolor=0x222222&fgcolor=0x999999&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
+</object>
+<!-- end OS FLV player -->
 
-
-  <div id="flv_player"></div>
-
-  <script type="text/javascript">
-  var s1 = new SWFObject('/jw/embed/player.swf','ply','470','320','9','#ffffff');
-  s1.addParam('allowfullscreen','true');
-  s1.addParam('allowscriptaccess','always');
-  s1.addParam('wmode','opaque');
-  s1.addParam('flashvars','file=http://content.bitsontherun.com/videos/3ta6fhJQ.flv');
-  s1.write('flv_player');
-</script>
 */
 
 /* End of file image_helper.php */
