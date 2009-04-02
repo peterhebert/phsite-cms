@@ -3,9 +3,9 @@
 <head>
 <title>Content editor | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="/css/base.css" rel="stylesheet" type="text/css" />
-<link href="/css/simple.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="/js/jquery-1.3.1.min.js"></script>
+<link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
+<link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
@@ -22,7 +22,7 @@ $().ready(function(){
 });
 /* ]]> */
 </script>
-<script type="text/javascript" src="/js/tiny_mce/tiny_mce_gzip.js"></script>
+<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 
