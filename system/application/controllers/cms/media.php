@@ -121,7 +121,16 @@ class Media extends Controller {
 		}
 
 		if($success === TRUE) {
-			$this->load->view('cms/upload_success', $this->data);
+
+			if($this->data['create_entry'] === TRUE) {
+				// create entry in database for media
+				
+				/*$this->data['object_id'] = 3;
+				$this->load->view('cms/content_edit', $this->data);*/
+			} else {
+				$this->load->view('cms/upload_success', $this->data);
+			}
+
 		} else {
 			$this->load->view('cms/upload_form', $this->data);
 		}
