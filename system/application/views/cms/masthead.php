@@ -41,6 +41,8 @@ Array
 		echo anchor("cms/user/edit/id/".$userdata['user_id'],$userdata['username']);
 		echo " | ";
 		echo anchor("cms/logout",'Logout');
+		echo " | ";
+		echo anchor("",'View site');
 		echo "</p>\n";
 		echo "</div>\n";
 	}

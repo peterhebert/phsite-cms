@@ -152,7 +152,8 @@ class Content_model extends Model {
 			$data = array(
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
-			'user_id' => $this->user_id
+			'user_id' => $this->user_id,
+			'created' => $this->created
 			);
 			if($this->db->insert('content', $data)){
 				$this->content_id = $this->db->insert_id();

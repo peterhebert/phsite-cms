@@ -62,7 +62,7 @@ CREATE TABLE `content` (
   `created` datetime NOT NULL,
   `user_id` mediumint(9) unsigned default '1',
   PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -71,7 +71,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content` WRITE;
 /*!40000 ALTER TABLE `content` DISABLE KEYS */;
-INSERT INTO `content` VALUES (1,0,2,'2009-03-07 00:55:12','2009-03-06 16:55:12',1),(2,0,1,'2009-04-18 23:05:29','2009-04-18 16:00:00',1),(3,0,1,'2009-04-19 20:13:37','2009-04-19 13:13:37',1);
+INSERT INTO `content` VALUES (1,0,2,'2009-03-07 00:55:12','2009-03-06 16:55:12',1),(2,0,1,'2009-04-18 23:05:29','2009-04-18 16:00:00',1),(3,0,1,'2009-04-19 20:13:37','2009-04-19 13:13:37',1),(4,0,1,'2009-04-19 20:26:44','2009-04-19 13:26:44',1),(5,0,2,'2009-04-19 20:33:18','2009-04-19 13:33:18',1);
 /*!40000 ALTER TABLE `content` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -91,7 +91,7 @@ CREATE TABLE `content_data` (
   `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`data_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film! Now!</p>','eng','2009-03-25 19:13:26'),(7,2,1,'<p>Here are the various ways you can find me:</p>\n<ul>\n<li><a href=\"mailto:mail@peterhebert.com\">E-mail</a></li>\n<li> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a></li>\n<li><a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a></li>\n<li><a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a></li>\n<li><a title=\"Visit my Vimeo profile\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/gtalk:chat?hebert.pj@gmail.com\">Google Talk</a></li>\n<li><a href=\"callto://peterhebert\">Skype</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a></li>\n</ul>\n<p>You can add me to your address book by <a href=\"Peter_Hebert.vcf\">downloading my vCard</a>.</p>','eng','2009-04-18 23:04:57'),(8,2,3,'contact, links, profile pages, Facebook, YouTube, Vimeo, email, Skype, IM','eng','2009-04-18 23:04:57'),(9,3,1,'<p>This site is the online home of Peter Hebert, web developer, graphic designer and independent filmmaker. Peter lives in Vancouver, British Columbia.</p>\n<p><strong>Social Networks</strong><br /> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a> | <a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a> | <a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a> | <a title=\"Visit my Vimeo channel\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></p>\n<p><strong>Contact</strong><br /> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a> | <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a> | <a href=\"callto://peterhebert\">Skype</a> | <a href=\"mailto:mail@peterhebert.com\">E-mail</a> | <a href=\"../../../../Peter_Hebert.vcf\">download vCard</a></p>','eng','2009-04-18 23:09:42'),(10,3,3,'about, contact, social networks, Peter Hebert','eng','2009-04-18 23:09:42');
+INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film! Now!</p>','eng','2009-03-25 19:13:26'),(7,2,1,'<p>Here are the various ways you can find me:</p>\n<ul>\n<li><a href=\"mailto:mail@peterhebert.com\">E-mail</a></li>\n<li> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a></li>\n<li><a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a></li>\n<li><a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a></li>\n<li><a title=\"Visit my Vimeo profile\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/gtalk:chat?hebert.pj@gmail.com\">Google Talk</a></li>\n<li><a href=\"callto://peterhebert\">Skype</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a></li>\n</ul>\n<p>You can add me to your address book by <a href=\"Peter_Hebert.vcf\">downloading my vCard</a>.</p>','eng','2009-04-18 23:04:57'),(8,2,3,'contact, links, profile pages, Facebook, YouTube, Vimeo, email, Skype, IM','eng','2009-04-18 23:04:57'),(9,3,1,'<p>This site is the online home of Peter Hebert, web developer, graphic designer and independent filmmaker. Peter lives in Vancouver, British Columbia.</p>\n<p><strong>Social Networks</strong><br /> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a> | <a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a> | <a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a> | <a title=\"Visit my Vimeo channel\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></p>\n<p><strong>Contact</strong><br /> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a> | <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a> | <a href=\"callto://peterhebert\">Skype</a> | <a href=\"mailto:mail@peterhebert.com\">E-mail</a> | <a href=\"../../../../Peter_Hebert.vcf\">download vCard</a></p>','eng','2009-04-18 23:09:42'),(10,3,3,'about, contact, social networks, Peter Hebert','eng','2009-04-18 23:09:42'),(11,4,1,'<p>I have loved movies and filmmaking for as long as I can remember. Here are some of my films, and others that I have worked on.</p>','eng','2009-04-19 20:23:32'),(12,4,3,'film, production','eng','2009-04-19 20:23:32'),(13,5,1,'<p>I have been developing my own highly customizable but easy to use Content Management system built upon the <a title=\"visit the CodeIgniter project homepage\" href=\"http://codeigniter.com/\">CodeIgniter</a> php framework. I decided that the best way to put it through its paces is to use it to manage my own site. So for better or for worse, here we go.</p>','eng','2009-04-19 20:33:18'),(14,5,3,'php, CMS, content management, CodeIgniter, web development','eng','2009-04-19 20:33:18');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,7 +120,7 @@ CREATE TABLE `content_titles` (
   `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`title_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -129,7 +129,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_titles` WRITE;
 /*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
-INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09'),(2,1,'The Green Film','the_green_film','eng','2009-03-09 23:21:42'),(3,1,'The Green Film','the_green_film','eng','2009-03-09 23:33:39'),(4,2,'Contact','contact','eng','2009-04-18 23:04:57'),(5,3,'About this site','about_this_site','eng','2009-04-18 23:09:42');
+INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09'),(2,1,'The Green Film','the_green_film','eng','2009-03-09 23:21:42'),(3,1,'The Green Film','the_green_film','eng','2009-03-09 23:33:39'),(4,2,'Contact','contact','eng','2009-04-18 23:04:57'),(5,3,'About this site','about_this_site','eng','2009-04-18 23:09:42'),(6,4,'Film','film','eng','2009-04-19 20:23:32'),(7,5,'Moving site to phSite CMS','moving_site_to_phsite_cms','eng','2009-04-19 20:33:18');
 /*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -281,4 +281,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-04-19 20:20:14
+-- Dump completed on 2009-04-19 20:36:01
