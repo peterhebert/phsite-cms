@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.30, for apple-darwin9.5.0 (i386)
+-- MySQL dump 10.11
 --
 -- Host: localhost    Database: test
 -- ------------------------------------------------------
--- Server version	5.1.30
+-- Server version	5.0.67
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,15 +24,15 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `ISO_639_LANG` (
   `ISO_639_3` char(3) NOT NULL,
-  `ISO_639_2B` char(3) DEFAULT NULL,
-  `ISO_639_2T` char(3) DEFAULT NULL,
-  `ISO_639_1` char(2) DEFAULT NULL,
+  `ISO_639_2B` char(3) default NULL,
+  `ISO_639_2T` char(3) default NULL,
+  `ISO_639_1` char(2) default NULL,
   `Scope` char(1) NOT NULL COMMENT 'I(ndividual), M(acrolanguage), S(pecial)',
   `Type` char(1) NOT NULL COMMENT 'A(ncient), C(onstructed), E(xtinct), H(istorical), L(iving), S(pecial)',
   `Ref_Name` varchar(150) NOT NULL COMMENT 'Reference language name in English',
   `Inverted_Name` varchar(75) NOT NULL COMMENT 'inverted version of Ref_name for alpha sorting',
-  `Native_Name` varchar(75) DEFAULT NULL,
-  `activated` tinyint(1) NOT NULL DEFAULT '0',
+  `Native_Name` varchar(75) default NULL,
+  `activated` tinyint(1) NOT NULL default '0',
   KEY `639_3` (`ISO_639_3`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
@@ -55,14 +55,14 @@ DROP TABLE IF EXISTS `content`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `content` (
-  `content_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_id` mediumint(9) unsigned NOT NULL DEFAULT '0',
-  `object_id` mediumint(9) unsigned NOT NULL DEFAULT '1',
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `content_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `parent_id` mediumint(9) unsigned NOT NULL default '0',
+  `object_id` mediumint(9) unsigned NOT NULL default '1',
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `created` datetime NOT NULL,
-  `user_id` mediumint(9) unsigned DEFAULT '1',
-  PRIMARY KEY (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+  `user_id` mediumint(9) unsigned default '1',
+  PRIMARY KEY  (`content_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -71,7 +71,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content` WRITE;
 /*!40000 ALTER TABLE `content` DISABLE KEYS */;
-INSERT INTO `content` VALUES (1,0,2,'2009-03-07 00:55:12','2009-03-06 16:55:12',1);
+INSERT INTO `content` VALUES (1,0,2,'2009-03-07 00:55:12','2009-03-06 16:55:12',1),(2,0,1,'2009-04-18 23:05:29','2009-04-18 16:00:00',1),(3,0,1,'2009-04-19 20:13:37','2009-04-19 13:13:37',1);
 /*!40000 ALTER TABLE `content` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -83,15 +83,15 @@ DROP TABLE IF EXISTS `content_data`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `content_data` (
-  `data_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `data_id` mediumint(9) unsigned NOT NULL auto_increment,
   `content_id` mediumint(9) unsigned NOT NULL,
   `field_id` mediumint(9) unsigned NOT NULL,
   `value` mediumtext NOT NULL,
-  `lang` varchar(3) DEFAULT NULL,
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`data_id`),
+  `lang` varchar(3) default NULL,
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`data_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -100,7 +100,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
-INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film! Now!</p>','eng','2009-03-25 19:13:26');
+INSERT INTO `content_data` VALUES (6,1,3,'film, short, credits, RED','eng','2009-03-10 00:19:35'),(5,1,1,'<p>I worked on this cool short film last year called The Green Film, which was the intro film at last year\'s Crazy 8s festival. It was shot on the RED one camera and had several professionals on the crew, including Danny Novak, CSC as the cinematographer. They just launched the <a href=\"http://www.thegreenfilm.com/\">film\'s website</a>, a <a href=\"http://www.facebook.com/pages/The-Green-Film/63667507649?ref=mf\">Facebook group</a>, and the film is also in a <a href=\"https://www.delta.com/marketing/flyinmovies/index.jsp\">short film competition</a>, with the winner getting into the Tribeca film fest. Please go and vote for this film! Now!</p>','eng','2009-03-25 19:13:26'),(7,2,1,'<p>Here are the various ways you can find me:</p>\n<ul>\n<li><a href=\"mailto:mail@peterhebert.com\">E-mail</a></li>\n<li> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a></li>\n<li><a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a></li>\n<li><a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a></li>\n<li><a title=\"Visit my Vimeo profile\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/gtalk:chat?hebert.pj@gmail.com\">Google Talk</a></li>\n<li><a href=\"callto://peterhebert\">Skype</a></li>\n<li> <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a></li>\n</ul>\n<p>You can add me to your address book by <a href=\"Peter_Hebert.vcf\">downloading my vCard</a>.</p>','eng','2009-04-18 23:04:57'),(8,2,3,'contact, links, profile pages, Facebook, YouTube, Vimeo, email, Skype, IM','eng','2009-04-18 23:04:57'),(9,3,1,'<p>This site is the online home of Peter Hebert, web developer, graphic designer and independent filmmaker. Peter lives in Vancouver, British Columbia.</p>\n<p><strong>Social Networks</strong><br /> <a href=\"http://www.facebook.com/profile.php?id=527077494\">Facebook</a> | <a href=\"http://www.linkedin.com/in/peterhebert\">LinkedIn</a> | <a title=\"visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\">YouTube</a> | <a title=\"Visit my Vimeo channel\" href=\"http://vimeo.com/peterhebert\">Vimeo</a></p>\n<p><strong>Contact</strong><br /> <a href=\"http://mce_host/cms/content/edit/type/xmpp:mail@peterhebert.com\">Jabber</a> | <a href=\"http://mce_host/cms/content/edit/type/msnim:add?contact=peterhebert@hotmail.com\">MSN</a> | <a href=\"callto://peterhebert\">Skype</a> | <a href=\"mailto:mail@peterhebert.com\">E-mail</a> | <a href=\"../../../../Peter_Hebert.vcf\">download vCard</a></p>','eng','2009-04-18 23:09:42'),(10,3,3,'about, contact, social networks, Peter Hebert','eng','2009-04-18 23:09:42');
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -112,15 +112,15 @@ DROP TABLE IF EXISTS `content_titles`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `content_titles` (
-  `title_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `title_id` mediumint(9) unsigned NOT NULL auto_increment,
   `content_id` mediumint(9) unsigned NOT NULL,
   `title` mediumtext NOT NULL,
   `uri_title` mediumtext NOT NULL,
   `lang` varchar(3) NOT NULL,
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`title_id`),
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`title_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -129,7 +129,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `content_titles` WRITE;
 /*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
-INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09'),(2,1,'The Green Film','the_green_film','eng','2009-03-09 23:21:42'),(3,1,'The Green Film','the_green_film','eng','2009-03-09 23:33:39');
+INSERT INTO `content_titles` VALUES (1,1,'The Green Film','the_green_film','eng','2009-03-07 00:58:09'),(2,1,'The Green Film','the_green_film','eng','2009-03-09 23:21:42'),(3,1,'The Green Film','the_green_film','eng','2009-03-09 23:33:39'),(4,2,'Contact','contact','eng','2009-04-18 23:04:57'),(5,3,'About this site','about_this_site','eng','2009-04-18 23:09:42');
 /*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -141,10 +141,10 @@ DROP TABLE IF EXISTS `field`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `field` (
-  `field_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `field_id` mediumint(9) unsigned NOT NULL auto_increment,
   `field_name` text NOT NULL,
   `input_type` varchar(8) NOT NULL,
-  PRIMARY KEY (`field_id`)
+  PRIMARY KEY  (`field_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
@@ -166,10 +166,10 @@ DROP TABLE IF EXISTS `object`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `object` (
-  `object_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` mediumint(9) unsigned NOT NULL auto_increment,
   `name` text NOT NULL,
   `name_uri` text NOT NULL,
-  PRIMARY KEY (`object_id`)
+  PRIMARY KEY  (`object_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
@@ -191,13 +191,13 @@ DROP TABLE IF EXISTS `r_object_field`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `r_object_field` (
-  `id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `id` mediumint(9) unsigned NOT NULL auto_increment,
   `field_id` mediumint(9) unsigned NOT NULL,
   `object_id` mediumint(9) unsigned NOT NULL,
-  `required` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `order` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `required` tinyint(1) unsigned NOT NULL default '0',
+  `order` smallint(5) unsigned NOT NULL default '0',
   `validation` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
@@ -219,15 +219,15 @@ DROP TABLE IF EXISTS `site_meta`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `site_meta` (
-  `site_meta_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `site_meta_id` mediumint(9) unsigned NOT NULL auto_increment,
   `title` mediumtext NOT NULL,
   `subtitle` mediumtext,
   `description` mediumtext NOT NULL,
   `keywords` mediumtext,
   `copyright` mediumtext,
-  `lang` varchar(3) DEFAULT 'eng',
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`site_meta_id`)
+  `lang` varchar(3) default 'eng',
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`site_meta_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 SET character_set_client = @saved_cs_client;
 
@@ -249,16 +249,16 @@ DROP TABLE IF EXISTS `users`;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `users` (
-  `user_id` mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` mediumint(9) unsigned NOT NULL auto_increment,
   `name_first` varchar(20) NOT NULL,
   `name_last` varchar(20) NOT NULL,
   `username` varchar(20) NOT NULL COMMENT 'username',
   `password` varchar(50) NOT NULL COMMENT 'hash of salt & password',
-  `timezone` varchar(100) NOT NULL DEFAULT 'America/Vancouver' COMMENT 'time zone for user',
-  `admin` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'is user administrator',
-  `lang` varchar(3) NOT NULL DEFAULT 'eng' COMMENT 'default lang for user',
+  `timezone` varchar(100) NOT NULL default 'America/Vancouver' COMMENT 'time zone for user',
+  `admin` tinyint(1) NOT NULL default '0' COMMENT 'is user administrator',
+  `lang` varchar(3) NOT NULL default 'eng' COMMENT 'default lang for user',
   `email` text NOT NULL,
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY  (`user_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='list of users on site';
 SET character_set_client = @saved_cs_client;
 
@@ -281,4 +281,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-03-25 19:13:47
+-- Dump completed on 2009-04-19 20:20:14

@@ -119,7 +119,11 @@ class Content extends Controller
 				$this->Content_model->parent_id = $this->input->post('parent_id');
 				$this->Content_model->object_id = $this->input->post('object_id');
 				$this->Content_model->user_id = $this->input->post('user_id');
-				$this->Content_model->created = $this->input->post('created');
+				if($this->input->post('created') == '' || $this->input->post('created') == '0000-00-00 00:00:00') {
+					$this->Content_model->created = date('Y-m-d H:i:s');
+				} else {
+					$this->Content_model->created = $this->input->post('created');
+				}
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->lang = $this->input->post('lang');
 
