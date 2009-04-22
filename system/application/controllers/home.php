@@ -21,6 +21,7 @@ class Home extends Controller {
 		if($base != '') {
 			$base = '/'.$base;
 		}
+		$this->data['base_path'] = $base;
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 	}
@@ -32,6 +33,17 @@ class Home extends Controller {
 
 		if($uri == '') {
 			$view = 'themes/'.$this->Site_model->theme.'/home';
+			
+			$menu_links = $this->Content_model->get_list(0,'',0);
+			
+			foreach($menu_links as $link) {
+				$this->Content_model->content_id = $link['content_id'];
+				$this->Content_model->content_lang = $this->Site_model->default_lang;
+				$this->Content_model->get_content();
+				$zzz_menu[] = anchor($this->Content_model->uri_title, $this->Content_model->title);
+			}
+			
+			$this->data['menu'] = $zzz_menu;
 			$this->load->view($view,$this->data);
 		} else {
 			$this->process_uri($uri);
@@ -136,6 +148,7 @@ class Home extends Controller {
 			$view = 'themes/'.$this->Site_model->theme.'/'.$this->Object_model->name_uri;
 
 			$this->load->view($view,$this->data);
+
 		} else {
 			$this->data['message'] = implode(', ',$msg);
 

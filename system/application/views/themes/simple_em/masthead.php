@@ -5,7 +5,7 @@
 		</div>
 		<div class="column lh">Site subtitle</div>
 		<div class="float-right lh">
-			<form action="<?php echo site_url("cms/content/search") ?>" method="post" id="site-search">
+			<form action="<?php echo site_url("search") ?>" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />
 				<input name="search-submit" type="submit" id="search-submit" value="Search" />
 			</form>

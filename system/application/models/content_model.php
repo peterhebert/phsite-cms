@@ -11,7 +11,8 @@ class Content_model extends Model {
 
 	var $title_id;
 	var $title;
-	var $lang;
+	var $uri_title;
+	var $content_lang;
 
     function Content_model()
     {
@@ -22,8 +23,8 @@ class Content_model extends Model {
     // list content
 	function get_list($limit=0,$order='',$parent='',$page=1)
     {
-		if($this->lang != '') {
-			$this->db->where = array('lang' => $this->lang);
+		if($this->content_lang != '') {
+			$this->db->where = array('lang' => $this->content_lang);
 		}
 		if($parent != '' && is_numeric($parent)) {
 			$this->db->where = array('parent_id' => intval($parent));
@@ -67,9 +68,9 @@ class Content_model extends Model {
 
 		// get title
 		$title_where['content_id'] = $this->content_id;
-		/*if($this->lang != '') {
-			$title_where['lang'] = $this->lang;
-		}*/
+		if($this->content_lang != '') {
+			$title_where['lang'] = $this->content_lang;
+		}
 		
 		$title_query = $this->db->get_where('content_titles', $title_where);
 		if ($title_query->num_rows() > 0)
@@ -77,7 +78,8 @@ class Content_model extends Model {
 		   $trow = $title_query->row();
 		   $this->title_id = $trow->title_id;
 		   $this->title = $trow->title;
-		   $this->lang = $trow->lang;
+		   $this->uri_title = $trow->uri_title;
+		   $this->content_lang = $trow->lang;
 		}
 
 		// get content
@@ -107,8 +109,8 @@ class Content_model extends Model {
 			LEFT JOIN field ON content_data.field_id = field.field_id
 			WHERE content.content_id = ".$this->content_id;
 
-			if($this->lang != '') {
-				$sql .= " AND content_data.lang = '{$this->lang}'";
+			if($this->content_lang != '') {
+				$sql .= " AND content_data.lang = '{$this->content_lang}'";
 			}
 
 			$query = $this->db->query($sql);
@@ -124,10 +126,10 @@ class Content_model extends Model {
 		
 		$otherlangs = array();
 
-		if($this->lang == '') {
+		if($this->content_lang == '') {
 			$sql = "select count(data_id) as num, lang from content_data where lang != '' group by lang";
 		} else {
-			$sql = "select count(data_id) as num, lang from content_data where lang != '{$this->lang}' and lang != '' group by lang";
+			$sql = "select count(data_id) as num, lang from content_data where lang != '{$this->content_lang}' and lang != '' group by lang";
 		}
 		
 		$query = $this->db->query($sql);
@@ -190,7 +192,7 @@ class Content_model extends Model {
 				'content_id' => $this->content_id,
 				'field_id' => $field_id,
 				'value' => $value,
-				'lang' => $this->lang
+				'lang' => $this->content_lang
 				);
 				if($this->db->insert('content_data', $data)){
 					return TRUE;
@@ -216,7 +218,7 @@ class Content_model extends Model {
 				'content_id' => $this->content_id,
 				'field_id' => $field_id,
 				'value' => $value,
-				'lang' => $this->lang
+				'lang' => $this->content_lang
 				);
 		
 				$this->db->where('data_id', $data_id);
@@ -234,15 +236,15 @@ class Content_model extends Model {
     }
 
     // search for content by title, parent
-	function find_by_uri_parent($str,$parent_id,$lang='')
+	function find_by_uri_parent($str,$parent_id,$zlang='')
     {
 
 		$uri_title = $this->input->xss_clean($str);
 		
 		$where['parent_id'] = $parent_id;
 		$where['uri_title'] = $uri_title;
-		if($lang != '') {
-			$where['lang'] = $lang;
+		if($zlang != '') {
+			$where['lang'] = $zlang;
 		}
 		
 		$this->db->select('*');
@@ -268,7 +270,7 @@ class Content_model extends Model {
 		// try to find existing title id
 		if($this->title_id == '') {
 
-			$title_query = $this->db->get_where('content_titles', array('content_id' => $this->content_id, 'lang' => $this->lang));
+			$title_query = $this->db->get_where('content_titles', array('content_id' => $this->content_id, 'lang' => $this->content_lang));
 			if ($title_query->num_rows() > 0)
 			{
 			   $trow = $title_query->row();
@@ -284,7 +286,7 @@ class Content_model extends Model {
 			'content_id' => $this->content_id,
 			'title' => $this->title,
 			'uri_title' => convert_uri($this->title),
-			'lang' => $this->lang
+			'lang' => $this->content_lang
 			);
 			if($this->db->insert('content_titles', $data)){
 				$this->title_id = $this->db->insert_id();
@@ -297,7 +299,7 @@ class Content_model extends Model {
 			'content_id' => $this->content_id,
 			'title' => $this->title,
 			'uri_title' => convert_uri($this->title),
-			'lang' => $this->lang
+			'lang' => $this->content_lang
 			);
 	
 			$this->db->where('title_id', $this->title_id);
@@ -316,7 +318,7 @@ class Content_model extends Model {
 
 		$sql = "SELECT * FROM content LEFT JOIN content_titles
 		ON content.content_id = content_titles.content_id
-		WHERE content_titles.lang = '{$this->lang}'";
+		WHERE content_titles.lang = '{$this->content_lang}'";
 		
 		if ($this->content_id != '')
 		{
@@ -327,7 +329,6 @@ class Content_model extends Model {
 		$query = $this->db->query($sql);
 		return $query->result_array();
 	}
-
 
 }
 

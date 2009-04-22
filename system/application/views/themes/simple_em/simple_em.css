@@ -31,7 +31,7 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 	width:53em;
 }
 
-.column { float: left; margin-right: 1em; }
+.column, .golden .block .column { float: left; margin-right: 1em; }
 .golden .column { margin-right: 2em; }
 .g1 { width: 32em; }
 .g2 { width: 19em; }
@@ -189,4 +189,13 @@ text-align:left;
 #page form table#properties td select
 {
 font-size:0.9em;
+}
+ul.social-icons {
+	margin:0;
+	padding: 0;
+}
+ul.social-icons li {
+	list-style-type:none;
+	float: left;
+	margin-right: .5em;
 }
