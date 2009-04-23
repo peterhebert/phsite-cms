@@ -97,8 +97,8 @@ $().ready(function(){
 
 					<p><?php
 					$options = array('eng' => 'English', 'fra'  => 'Fran&ccedil;ais');
-					echo form_label('Default language', 'lang');
-					echo form_dropdown('lang', $options, $lang);		
+					echo form_label('Default language', 'default_lang');
+					echo form_dropdown('default_lang', $options, $default_lang);		
 					?></p>
 
 			</fieldset>

@@ -225,7 +225,7 @@ class Setup extends Controller
 
 			// set validation rules
 			$this->form_validation->set_rules('site_meta_id', 'ID', 'is_natural_no_zero');
-			$this->form_validation->set_rules('lang', 'Language', 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('site_lang', 'Language', 'required|alpha|exact_length[3]');
 			$this->form_validation->set_rules('title', 'Site Title', 'required');
 			$this->form_validation->set_rules('description', 'Description', 'required');
 
@@ -240,7 +240,7 @@ class Setup extends Controller
 				$this->Site_model->description = $this->input->post('description');
 				$this->Site_model->keywords = $this->input->post('keywords');
 				$this->Site_model->copyright = $this->input->post('copyright');
-				$this->Site_model->lang = $this->input->post('lang');
+				$this->Site_model->site_lang = $this->input->post('site_lang');
 
 				$this->Site_model->update_meta();
 
@@ -256,7 +256,7 @@ class Setup extends Controller
 		$this->data['description'] =  $this->Site_model->description;
 		$this->data['keywords'] =  $this->Site_model->keywords;
 		$this->data['copyright'] =  $this->Site_model->copyright;
-		$this->data['lang'] =  $this->Site_model->lang;
+		$this->data['site_lang'] =  $this->Site_model->site_lang;
 
 		// get list of enabled languages
 		$languages = $this->Language_model->get_list();

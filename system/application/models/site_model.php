@@ -29,7 +29,7 @@ class Site_model extends Model {
 	var $description;
 	var $keywords;
 	var $copyright;
-	var $lang;
+	var $site_lang;
 	var $updated;
 
     function Site_model()
@@ -118,7 +118,7 @@ class Site_model extends Model {
 		if($this->site_meta_id != '') {
 			$query = $this->db->get_where('site_meta', array('site_meta_id' => $this->site_meta_id));
 		} else {
-			$query = $this->db->get_where('site_meta', array('lang' => $lang));
+			$query = $this->db->get_where('site_meta', array('site_lang' => $lang));
 		}
 
 		if($row = $query->row_array()) {
@@ -128,7 +128,7 @@ class Site_model extends Model {
 			$this->description = $row['description'];
 			$this->keywords = $row['keywords'];
 			$this->copyright = $row['copyright'];
-			$this->lang = $row['lang'];
+			$this->site_lang = $row['site_lang'];
 			$this->updated = $row['updated'];
 		}
     }
@@ -141,7 +141,7 @@ class Site_model extends Model {
 		'description' => $this->description,
 		'keywords' => $this->keywords,
 		'copyright' => $this->copyright,
-		'lang' => $this->lang
+		'site_lang' => $this->site_lang
 		);
 
 		if($this->site_meta_id == '')

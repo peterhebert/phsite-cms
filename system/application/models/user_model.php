@@ -8,7 +8,7 @@ class User_model extends Model {
 	var $password;
 	var $timezone;
 	var $admin;
-	var $lang;
+	var $default_lang;
 	var $email;
 	
     function User_model()
@@ -45,7 +45,7 @@ class User_model extends Model {
 		$this->password = $row['password'];
 		$this->timezone = $row['timezone'];
 		$this->admin = $row['admin'];
-		$this->lang = $row['lang'];
+		$this->default_lang = $row['default_lang'];
 		$this->email = $row['email'];
     }
 
@@ -62,7 +62,7 @@ class User_model extends Model {
 		$data['username'] = $this->username;
 		$data['timezone'] = $this->timezone;
 		$data['admin'] = $this->admin;
-		$data['lang'] = $this->lang;
+		$data['default_lang'] = $this->default_lang;
 		$data['email'] = $this->email;
 
 		if($this->user_id != '') {
@@ -137,7 +137,7 @@ class User_model extends Model {
 				$this->password = $row['password'];
 				$this->timezone = $row['timezone'];
 				$this->admin = $row['admin'];
-				$this->lang = $row['lang'];
+				$this->default_lang = $row['default_lang'];
 				$this->email = $row['email'];
 				return TRUE;
 			}

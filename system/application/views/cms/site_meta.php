@@ -28,8 +28,8 @@
 			}
 ?>
 			<p><?php
-			echo form_label('Language', 'lang');
-			echo form_dropdown('lang', $langArray, $lang);		
+			echo form_label('Language', 'site_lang');
+			echo form_dropdown('site_lang', $langArray, $site_lang);		
 			?></p>
 <?php
 			$field_params = array(

@@ -41,8 +41,8 @@ class Content extends Controller
 			$this->Content_model->content_id = $row['content_id'];
 			$this->Content_model->get_content();
 			$link = "cms/content/edit/id/".$this->Content_model->content_id;
-			if($this->Content_model->lang != '') {
-				$link .= "/lang/".$this->Content_model->lang;
+			if($this->Content_model->content_lang != '') {
+				$link .= "/lang/".$this->Content_model->content_lang;
 			}
 
 			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
@@ -77,7 +77,6 @@ class Content extends Controller
 			$form['valid'] = $this->input->post('valid');
 			$form['required'] = $this->input->post('required');
 			$form['data_ids'] = $this->input->post('data_id');
-			//$form['values'] = $this->input->post('value');
 			
 			// set validation rules
 			if($this->input->post('content_id') != '') {
@@ -125,7 +124,7 @@ class Content extends Controller
 					$this->Content_model->created = $this->input->post('created');
 				}
 				$this->Content_model->title = $this->input->post('title');
-				$this->Content_model->lang = $this->input->post('lang');
+				$this->Content_model->content_lang = $this->input->post('content_lang');
 
 				if(!$this->Content_model->update_content()) {
 					$success = FALSE;
@@ -162,10 +161,11 @@ class Content extends Controller
 		if(array_key_exists('id',$params)) {
 			$this->Content_model->content_id = $params['id'];
 		}
-		if($this->Content_model->lang == '' && array_key_exists('lang',$params)) {
-			$this->Content_model->lang = $params['lang'];
-		} else {
-			$this->Content_model->lang = '';
+		
+		if(array_key_exists('lang',$params)) {
+			if($this->Content_model->content_lang == '') {
+				$this->Content_model->content_lang = $params['lang'];
+			}
 		}
 
 		$this->Content_model->get_content();
@@ -173,7 +173,7 @@ class Content extends Controller
 		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
 			$this->Content_model->object_id = $params['type']; 
 		}
-		$this->data['lang'] = $this->Content_model->lang;
+		$this->data['content_lang'] = $this->Content_model->content_lang;
 		$this->data['content_id'] = $this->Content_model->content_id;
 		$this->data['parent_id'] = $this->Content_model->parent_id;
 		$this->data['object_id'] = $this->Content_model->object_id;
@@ -182,6 +182,11 @@ class Content extends Controller
 		$this->data['updated'] = $this->Content_model->updated;
 		$this->data['title_id'] = $this->Content_model->title_id;
 		$this->data['title'] = $this->Content_model->title;
+
+		if(array_key_exists('type',$params)) {
+			$this->Content_model->object_id = $params['type'];
+			$this->data['object_id'] = $this->Content_model->object_id;
+		}
 
 		// get list of enabled languages
 		$languages = $this->Language_model->get_list();
@@ -241,6 +246,10 @@ class Content extends Controller
 
 		$this->Object_model->load_object();
 		$this->data['fields'] = $this->Object_model->fields;
+		
+		if($this->Content_model->content_id != '') {
+			$this->data['uri'] = $this->Content_model->get_uri();
+		}
 		
 		$this->load->view('cms/content_edit',$this->data);
 	

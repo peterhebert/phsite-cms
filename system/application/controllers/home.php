@@ -82,7 +82,7 @@ class Home extends Controller {
 			if($info) {
 				$temp_uri .= '/'.$path;
 				$temp_parent = $info->content_id;
-				$lang = $info->lang;
+				$lang = $info->content_lang;
 
 				if ($current_path < $pathcount) {
 					$blinks[] = anchor($temp_uri, $info->title);

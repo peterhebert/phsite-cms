@@ -70,7 +70,7 @@ class User extends Controller
 		'username' => '',
 		'timezone' => '',
 		'admin' => '',
-		'lang' => '',
+		'default_lang' => '',
 		'email' => '',
 		);
 
@@ -98,7 +98,7 @@ class User extends Controller
 
 			$this->form_validation->set_rules('timezone', 'Time Zone', 'required|is_timezone');
 			$this->form_validation->set_rules('admin', 'User Type', 'required|is_natural');
-			$this->form_validation->set_rules('lang', 'Default language', 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('default_lang', 'Default language', 'required|alpha|exact_length[3]');
 			$this->form_validation->set_rules('email', 'Email address', 'required|valid_email');
 
 			// validate and process if all valid
@@ -115,7 +115,7 @@ class User extends Controller
 				$this->User_model->username = $this->input->post('username');
 				$this->User_model->timezone = $this->input->post('timezone');
 				$this->User_model->admin = $this->input->post('admin');
-				$this->User_model->lang = $this->input->post('lang');
+				$this->User_model->default_lang = $this->input->post('default_lang');
 				$this->User_model->email = $this->input->post('email');
 
 				if($this->input->post('password') != '') {
@@ -157,7 +157,7 @@ class User extends Controller
 			$this->data['username'] = $this->User_model->username;
 			$this->data['timezone'] = $this->User_model->timezone;
 			$this->data['admin'] = $this->User_model->admin;
-			$this->data['lang'] = $this->User_model->lang;
+			$this->data['default_lang'] = $this->User_model->default_lang;
 			$this->data['email'] = $this->User_model->email;
 
 		}

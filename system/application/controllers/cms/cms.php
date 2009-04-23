@@ -43,6 +43,7 @@ class Cms extends Controller
 		$this->data['objects'] = $this->load->view('cms/object_list',$d2, true);
 
 		// get recently added pages
+		$list = array();
 		$contentdata['title'] = "Recently Added";
 		$content = $this->Content_model->get_list(10,'desc');
 		foreach($content as $row)
@@ -51,7 +52,7 @@ class Cms extends Controller
 			$this->Content_model->get_content();
 			$link = "cms/content/edit/id/".$this->Content_model->content_id;
 			if($this->Content_model->lang != '') {
-				$link .= "/lang/".$this->Content_model->lang;
+				$link .= "/lang/".$this->Content_model->content_lang;
 			}
 			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
 		}

@@ -72,7 +72,9 @@ function toggleEditor(id) {
 			echo $msg;
 			echo"</div>\n";
 		}
-
+		if(isset($uri)) {
+			echo "<p>".anchor($uri,"Preview this page", array('rel' => 'external','title' => 'Preview this page in a new browser window'))."</p>\n";
+		}
 		// open form
 		echo form_open($action);
 
@@ -185,8 +187,8 @@ function toggleEditor(id) {
 		echo"</p>\n";
 
 		echo"<p>";
-		echo form_label('Language', 'lang');
-		echo form_dropdown('lang', $langArray, $lang);
+		echo form_label('Language', 'content_lang');
+		echo form_dropdown('content_lang', $langArray, $content_lang);
 		echo"</p>\n";
 ?></fieldset></div>
 <?php
