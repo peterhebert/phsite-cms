@@ -317,15 +317,17 @@ class Content_model extends Model {
     function getParents()
     {
 
-		$sql = "SELECT * FROM content LEFT JOIN content_titles
-		ON content.content_id = content_titles.content_id
-		WHERE content_titles.content_lang = '{$this->content_lang}'";
-		
-		if ($this->content_id != '')
+		if($this->content_id == '')
 		{
-			$sql .= " AND content.content_id != ".$this->content_id." 
-			AND content.parent_id != ".$this->content_id;
+			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE parent_id = '0'";
+		} else {
+
+			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE content_titles.content_lang = '{$this->content_lang}' AND content.content_id != ".$this->content_id." AND content.parent_id != ".$this->content_id;
+
 		}
+
+
+
 				
 		$query = $this->db->query($sql);
 		return $query->result_array();

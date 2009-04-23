@@ -109,7 +109,7 @@ class Cms extends Controller
 					'name_last' => $this->User_model->name_last,
 					'timezone' => $this->User_model->timezone,
 					'admin' => $this->User_model->admin,
-					'lang' => $this->User_model->lang,
+					'default_lang' => $this->User_model->default_lang,
 					'email' => $this->User_model->email
 					);
 					$this->session->set_userdata($sess);
