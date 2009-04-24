@@ -12,8 +12,12 @@ class Cms extends Controller
 		$this->load->model('Object_model');
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
+		$this->load->model('Site_model');
 
 		$this->load->library('session');
+		
+		// get site prefs
+		$this->Site_model->load_prefs();
 	}
 	
 	function index()
@@ -43,21 +47,7 @@ class Cms extends Controller
 		$this->data['objects'] = $this->load->view('cms/object_list',$d2, true);
 
 		// get recently added pages
-		$list = array();
-		$contentdata['title'] = "Recently Added";
-		$content = $this->Content_model->get_list(10,'desc');
-		foreach($content as $row)
-		{
-			$this->Content_model->content_id = $row['content_id'];
-			$this->Content_model->get_content();
-			$link = "cms/content/edit/id/".$this->Content_model->content_id;
-			if($this->Content_model->lang != '') {
-				$link .= "/lang/".$this->Content_model->content_lang;
-			}
-			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
-		}
-		$contentdata['list'] = ul($list);
-		$this->data['content'] = $this->load->view('cms/content_list',$contentdata, true);
+		$this->data['content'] = $this->recent();
 	
 		// now load view
 		$this->load->view('cms/index',$this->data);
@@ -162,5 +152,34 @@ class Cms extends Controller
 		redirect('');
 		exit();
 	} 
+
+
+	function recent()
+	{
+
+		// get recently added pages
+		$content = $this->Content_model->list_recent();
+		
+		foreach($content as $page) {
+			$link = "cms/content/edit/id/".$page['content_id'];
+			if($page['content_lang'] != '') {
+				$link .= "/lang/".$page['content_lang'];
+			}
+
+			$list[] = anchor($link, $page['title'], array('title' => "edit '{$page['title']}'"));
+			
+		}
+
+		if(isset($list)) {
+			$contentdata['title'] = "Recently Added";
+			$contentdata['list'] = ul($list);
+		}
+		$recent = $this->load->view('cms/content_list',$contentdata, true);
+		return $recent;
+
+	}
+
+
+
 }
 ?>

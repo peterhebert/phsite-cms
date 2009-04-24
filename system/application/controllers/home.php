@@ -181,7 +181,7 @@ class Home extends Controller {
 			'created' => $this->Content_model->created,
 			'updated' => $updated,
 			'title' => $this->Content_model->title,
-			'content_data' => $content_data,
+			'content_data' => $this->Content_model->content_data,
 			);
 			unset($content_data);
 		}

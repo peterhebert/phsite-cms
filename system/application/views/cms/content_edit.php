@@ -83,115 +83,14 @@ function toggleEditor(id) {
 		echo form_hidden('my_url', $action);
 
 		// do main content fields
-?>
-<div class="column g1"><fieldset><legend>Content</legend>
-<?php
-		$field_params = array(
-		'class'        => 'text',
-		'name'        => 'title',
-		'id'          => 'title',
-		'value'       => $title
-		);
-		echo"<p>";
-		echo form_label('Title', 'title');
-		echo form_input($field_params);
-		echo"</p>\n";
-		
-		foreach($fields as $fd) {
-			$field_params = array();
-
-			//$field_params['name'] = "value[]";
-			$field_params['name'] = 'value_'.$fd['field_id'];
-			//$field_params['id'] = $fd['field_name'];
-
-			$value = '';
-			$data_id = '';
-
-			if(is_array($content_data) && count($content_data) > 0) {
-				foreach($content_data as $dt) {
-					if($dt['field_id'] == $fd['field_id']) {
-						$value = $dt['value'];
-						$data_id = $dt['data_id'];
-						$required = $dt['required'];
-						$valid = $dt['validation'];
-					}
-				}
-			}
-			if($value != '') {
-				$field_params['value'] = $value;
-			}
-
-			echo form_hidden('field_id[]', $fd['field_id']);
-			echo form_hidden('required[]', $fd['required']);
-			echo form_hidden('valid[]', $fd['validation']);
-			echo form_hidden('data_id[]', $data_id);
-
-			echo "<p>";
-			echo form_label($fd['field_name']);
-
-
-			switch($fd['input_type']) {
-			case 'file':
-				echo form_upload($field_params);
-				break;
-			case 'text':
-				$field_params['class'] = $fd['input_type'];
-				echo form_input($field_params);
-				break;
-			case 'textarea':
-				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 38;
-				echo form_textarea($field_params);
-				break;
-			case 'richtext':
-				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 38;
-				echo form_textarea($field_params);
-				break;
-			default:
-				echo form_input($field_params);
-			}
-			if($fd['input_type'] == 'file') {
-			echo "</p>\n<p class=\"indent\">Maximum file size: ";
-			}
-			echo "</p>\n";
-						
-		}
-?></fieldset></div>
-<div class="float g2"><fieldset><legend>Meta</legend>
-<?php 
-		echo"<p>";
-		echo form_label('Author', 'user_id');
-		echo form_dropdown('user_id', $userArray, $user_id);
-		echo"</p>\n";
-
-		echo"<p>";
-		echo form_label('Content type', 'object_id');
-		echo form_dropdown('object_id', $objArray, $object_id);
-		echo"</p>\n";
-	
-		echo"<p>";
-		echo form_label('Parent', 'parent_id');
-		echo form_dropdown('parent_id', $parentArray, $parent_id);
-		echo"</p>\n";
-	
-		$field_params = array(
-		'name'        => 'created',
-		'id'          => 'created',
-		'class'	=> 'small_input',
-		'value' => $created,
-		);
-		echo"<p>";
-		echo form_label('Created', 'created');
-		echo form_input($field_params);
-		echo"</p>\n";
-
-		echo"<p>";
-		echo form_label('Language', 'content_lang');
-		echo form_dropdown('content_lang', $langArray, $content_lang);
-		echo"</p>\n";
-?></fieldset></div>
-<?php
+		?>
+		<div class="column g1"><fieldset><legend>Content</legend>
+		<?php echo $content; ?>
+		</fieldset></div>
+		<div class="float g2"><fieldset><legend>Meta</legend>
+		<?php echo $meta; ?>
+		</fieldset></div>
+		<?php
 
 
 		// close form

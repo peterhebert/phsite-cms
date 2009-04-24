@@ -109,6 +109,27 @@ class MY_Form_validation extends CI_Form_validation {
 		$valid = in_array($str, $timezone_identifiers);
 		return $valid;
 	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * is a valid iso 639-3 language?
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+
+	function is_lang($str)
+	{
+		$pattern = '^([a-z]){3}$';
+		$valid = ereg($pattern, $str);
+		return $valid;
+	}
+
+
+
+
 }
 
 // END Form Validation Class
