@@ -3,7 +3,7 @@
 // phSite Global Preferences
 
 // ID of the content for the home page (0 means auto-generate it)
-$config['home_page_id'] = 2;
+$config['home_page_id'] = 0;
 
 // folder for current theme in '/system/application/views/'
 $config['theme'] = 'simple_em';
