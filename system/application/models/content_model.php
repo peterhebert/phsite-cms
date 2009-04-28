@@ -8,6 +8,7 @@ class Content_model extends Model {
 	var $created;
 	var $updated;
 	var $content_data;
+	var $splash = 0; // make available to display on home page
 
 	var $title_id;
 	var $title;
@@ -23,11 +24,16 @@ class Content_model extends Model {
     // list content
 	function get_list($limit=0,$order='',$parent='',$page=1)
     {
+
+		$this->db->select('*');
+		$this->db->from('content');
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+
 		if($this->content_lang != '') {
 			$this->db->where = array('content_lang' => $this->content_lang);
 		}
 		if($parent != '' && is_numeric($parent)) {
-			$this->db->where = array('parent_id' => intval($parent));
+			$this->db->where = array('parent_id' => $parent);
 		}
 		if($limit > 0) {
 			if($page > 1) {
@@ -37,13 +43,13 @@ class Content_model extends Model {
 				$this->db->limit($limit);
 			}
 		}
-
 		if($order == 'asc' or $order == 'desc') {
 			$this->db->order_by('created',$order);
 		}
-		
-		$query = $this->db->get('content');
+
+		$query = $this->db->get();
 		return $query->result_array();
+
 	}
 
     // list recent content
@@ -95,6 +101,7 @@ class Content_model extends Model {
 			$this->updated = $row->updated;
 			$this->created = $row->created;
 			$this->user_id = $row->user_id;
+			$this->splash = $row->splash;
 		}
 
 	}
@@ -183,7 +190,8 @@ class Content_model extends Model {
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
 			'user_id' => $this->user_id,
-			'created' => $this->created
+			'created' => $this->created,
+			'splash' => $this->splash
 			);
 			if($this->db->insert('content', $data)){
 				$this->content_id = $this->db->insert_id();
@@ -195,7 +203,8 @@ class Content_model extends Model {
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
 			'user_id' => $this->user_id,
-			'created' => $this->created
+			'created' => $this->created,
+			'splash' => $this->splash
 			);
 			$this->db->where('content_id', $this->content_id);
 			if($this->db->update('content', $data)){
@@ -394,6 +403,21 @@ class Content_model extends Model {
 
     }
 
+	function get_site_creation_date()
+    {
+
+		$sql = "SELECT MIN(created) as 'site_created'  FROM content";
+		$query = $this->db->query($sql);
+
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			return $row->site_created;
+		} else {
+			return FALSE;
+		}
+
+	}
 
 }
 

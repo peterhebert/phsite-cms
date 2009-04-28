@@ -30,6 +30,7 @@ class Site_model extends Model {
 	var $keywords;
 	var $copyright;
 	var $site_lang;
+	var $creator;
 	var $updated;
 
     function Site_model()
@@ -106,11 +107,14 @@ class Site_model extends Model {
 			
 			$file = fopen($filename,'w');
 			if(fwrite($file, $prefs)) {
-				$msg = '';
+				$msg = 'site preferences updated successfully';
+			} else {
+				$msg = 'could not update site preferences';
 			}
 			fclose($file);
 	
 		}
+		return $msg;
 	}
 
 	function load_meta($lang='eng')
@@ -130,6 +134,7 @@ class Site_model extends Model {
 			$this->copyright = $row['copyright'];
 			$this->site_lang = $row['site_lang'];
 			$this->updated = $row['updated'];
+			$this->creator = $row['creator'];
 		}
     }
 
@@ -141,6 +146,7 @@ class Site_model extends Model {
 		'description' => $this->description,
 		'keywords' => $this->keywords,
 		'copyright' => $this->copyright,
+		'creator' => $this->creator,
 		'site_lang' => $this->site_lang
 		);
 

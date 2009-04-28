@@ -12,7 +12,7 @@
 	<div class="page-wrap block" id="breadcrumb">
 	<?php echo anchor("cms","phSite CMS"); ?> : 
 	<?php echo anchor("cms/setup","Setup"); ?> : 
-	Site preferences
+	Site metadata
 	</div>
 	<div class="page-wrap block">
 
@@ -51,6 +51,17 @@
 			);
 			echo"<p>";
 			echo form_label('Subtitle', 'subtitle');
+			echo form_input($field_params);
+			echo"</p>\n";
+
+			$field_params = array(
+			'class'        => 'text',
+			'name'        => 'creator',
+			'id'          => 'creator',
+			'value'       => $creator
+			);
+			echo"<p>";
+			echo form_label('Creator (person or organisation)', 'creator');
 			echo form_input($field_params);
 			echo"</p>\n";
 		

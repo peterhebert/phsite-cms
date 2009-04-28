@@ -102,6 +102,10 @@ class Setup extends Controller
 			// set validation rules
 			$this->form_validation->set_rules('home_page_id', 'Home Page', 'required|is_natural');
 			$this->form_validation->set_rules('webmaster_id', 'Webmaster', 'required|is_natural_no_zero');
+
+			$this->form_validation->set_rules('limit_posts', 'Posts per page (blogs)', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('limit_thumbs', 'images per page (galleries)', 'required|is_natural_no_zero');
+
 			$this->form_validation->set_rules('default_lang', 'Default Language', 'required|alpha|exact_length[3]');
 			$this->form_validation->set_rules('theme', 'Theme', 'required|alpha_dash');
 
@@ -114,7 +118,10 @@ class Setup extends Controller
 				$this->Site_model->theme = $this->input->post('theme');
 				$this->Site_model->default_lang = $this->input->post('default_lang');
 				$this->Site_model->webmaster_id = $this->input->post('webmaster_id');
-				$this->Site_model->update_prefs();
+				$this->Site_model->limit_posts = $this->input->post('limit_posts');
+				$this->Site_model->limit_thumbs = $this->input->post('limit_thumbs');
+
+				$this->data['msg'] = $this->Site_model->update_prefs();
 
 			} // end validation
 
@@ -126,6 +133,8 @@ class Setup extends Controller
 		$this->data['theme'] = $this->Site_model->theme;
 		$this->data['default_lang'] =  $this->Site_model->default_lang;
 		$this->data['webmaster_id'] =  $this->Site_model->webmaster_id;
+		$this->data['limit_posts'] =  $this->Site_model->limit_posts;
+		$this->data['limit_thumbs'] =  $this->Site_model->limit_thumbs;
 
 		// get list of enabled languages
 		$languages = $this->Language_model->get_list();
@@ -151,10 +160,7 @@ class Setup extends Controller
 		$homeArray[0] = 'Auto-generate';
 		$homePages = $this->Content_model->get_list('','asc',0);
 		foreach($homePages as $row) {
-			$this->Content_model->content_id = $row['content_id'];
-			$this->Content_model->lang = $this->Site_model->default_lang;
-			$this->Content_model->get_content();
-			$homeArray[$row['content_id']] = $this->Content_model->title;
+			$homeArray[$row['content_id']] = $row['title'];
 		}
 		$this->data['homeArray'] = $homeArray;
 		
@@ -167,7 +173,7 @@ class Setup extends Controller
 
 			if ($dh = opendir($theme_dir)) {
 				while (($file = readdir($dh)) !== false) {
-					if($file != '.' && $file != '..' && is_dir($theme_dir.'/'.$file)) {
+					if($file != '.svn' && $file != '.' && $file != '..' && is_dir($theme_dir.'/'.$file)) {
 						$themeArray[$file] = str_replace('_',' ',$file);
 					}
 				}
@@ -228,6 +234,7 @@ class Setup extends Controller
 			$this->form_validation->set_rules('site_lang', 'Language', 'required|alpha|exact_length[3]');
 			$this->form_validation->set_rules('title', 'Site Title', 'required');
 			$this->form_validation->set_rules('description', 'Description', 'required');
+			$this->form_validation->set_rules('creator', 'Creator', 'required');
 
 			// on valid, write metadata
 			if ($this->form_validation->run() == FALSE)
@@ -240,15 +247,19 @@ class Setup extends Controller
 				$this->Site_model->description = $this->input->post('description');
 				$this->Site_model->keywords = $this->input->post('keywords');
 				$this->Site_model->copyright = $this->input->post('copyright');
+				$this->Site_model->creator = $this->input->post('creator');
 				$this->Site_model->site_lang = $this->input->post('site_lang');
 
-				$this->Site_model->update_meta();
+				if($this->Site_model->update_meta() == TRUE)
+				{
+					$this->data['msg'] = 'site metadata updated successfully';
+				}
 
 			} // end validation
 
 		} // end form processing
 
-		// now load config
+		// now load metadata
 		$this->Site_model->load_meta();
 		$this->data['site_meta_id'] =  $this->Site_model->site_meta_id;
 		$this->data['title'] =  $this->Site_model->title;
@@ -256,6 +267,7 @@ class Setup extends Controller
 		$this->data['description'] =  $this->Site_model->description;
 		$this->data['keywords'] =  $this->Site_model->keywords;
 		$this->data['copyright'] =  $this->Site_model->copyright;
+		$this->data['creator'] =  $this->Site_model->creator;
 		$this->data['site_lang'] =  $this->Site_model->site_lang;
 
 		// get list of enabled languages
@@ -276,6 +288,11 @@ class Setup extends Controller
 	}
     // end site metadata
 
+    // prefs for home page
+	function home_page()
+    {
+		echo "home page prefs";
+	}
 
 }
 ?>

@@ -31,7 +31,9 @@ tinyMCE_GZ.init({
 	themes : 'advanced',
 	languages : 'en',
 	disk_cache : true,
-	debug : false
+	debug : false,
+	relative_urls : false,
+	convert_urls: false
 });
 
 tinyMCE.init({
@@ -45,10 +47,10 @@ tinyMCE.init({
 	theme_advanced_toolbar_align : "left",
 	editor_selector : "richtext",
 	editor_deselector : "textarea",
-	content_css : "/css/tinymce.css"
-
+	content_css : "/css/tinymce.css",
+	relative_urls : false,
+	convert_urls : false
 });
-
 
 function toggleEditor(id) {
 	if (!tinyMCE.getInstanceById(id))
@@ -87,9 +89,16 @@ function toggleEditor(id) {
 		<div class="column g1"><fieldset><legend>Content</legend>
 		<?php echo $content; ?>
 		</fieldset></div>
-		<div class="float g2"><fieldset><legend>Meta</legend>
-		<?php echo $meta; ?>
-		</fieldset></div>
+		<div class="float g2">
+			<fieldset>
+				<legend>Meta</legend>
+				<?php echo $meta; ?>
+			</fieldset>
+			<fieldset>
+				<legend>Properties</legend>
+				<?php echo $properties; ?>
+			</fieldset>
+		</div>
 		<?php
 
 

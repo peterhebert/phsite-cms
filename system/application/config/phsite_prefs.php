@@ -3,9 +3,9 @@
 // phSite Global Preferences
 
 // ID of the content for the home page (0 means auto-generate it)
-$config['home_page_id'] = 0;
+$config['home_page_id'] = 2;
 
-// folder for current theme in './system/application/views/'
+// folder for current theme in '/system/application/views/'
 $config['theme'] = 'simple_em';
 
 // default site language (ISO 639-3 code)
@@ -15,10 +15,10 @@ $config['default_lang'] = 'eng';
 $config['webmaster_id'] = 1;
 
 // limit for queries on blog entries per page
-$config['limit_posts'] = 10;
+$config['limit_posts'] = 5;
 
 // limit for queries on thumbnails per page in galleries
-$config['limit_thumbs'] = 30;
+$config['limit_thumbs'] = 20;
 
 /* End of file phsite_prefs.php */
 /* Location: ./system/application/config/phsite_prefs.php */

@@ -1,9 +1,12 @@
 <div id="masthead">
 	<div class="page-wrap block">
 		<div class="column">
-			<h2>Site name</h2>
+			<h2><?php echo $site_meta_title; ?></h2>
 		</div>
-		<div class="column lh">Site subtitle</div>
+		<?php
+		if ($site_meta_subtitle != '') {
+		echo "<div class=\"column lh\">{$site_meta_subtitle}</div>\n";
+		} ?>
 		<div class="float-right lh">
 			<form action="<?php echo site_url("search") ?>" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />

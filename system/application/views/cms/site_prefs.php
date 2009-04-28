@@ -40,6 +40,30 @@
 			echo form_dropdown('webmaster_id', $userArray, $webmaster_id);		
 			?></p>
 
+			<?php
+			$field_params = array(
+			'class'        => 'tiny_input align-right',
+			'name'        => 'limit_posts',
+			'id'          => 'limit_posts',
+			'value'       => $limit_posts
+			);
+			echo"<p>";
+			echo form_label('Posts per page (blogs)', 'limit_posts');
+			echo form_input($field_params);
+			echo"</p>\n";
+
+			$field_params = array(
+			'class'        => 'tiny_input align-right',
+			'name'        => 'limit_thumbs',
+			'id'          => 'limit_thumbs',
+			'value'       => $limit_thumbs
+			);
+			echo"<p>";
+			echo form_label('Thumbnails per page (galleries)', 'limit_thumbs');
+			echo form_input($field_params);
+			echo"</p>\n";
+			?>
+
 			<input name="submit" type="submit" id="submit" value="save" />
 		</form>
 	</div>

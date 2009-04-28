@@ -16,6 +16,9 @@
 				<h2>Site preferences</h2>
 				<p>This is where you can change site-wide prefrences, such as designating a home page, choosing default languages, designating a Webmaster and Editor users, and selecting a site theme.</p>
 				<p><?php echo anchor("cms/setup/site_prefs","Edit site preferences"); ?></p>
+				<h2>Site metadata</h2>
+				<p>This is where you can change information about your site, such as description, title, footer, etc.</p>
+				<p><?php echo anchor("cms/setup/site_meta","Edit site metadata"); ?></p>
 				<h2>Data Structure</h2>
 				<p>You can define what types of content your site has, and add as many custom fields as you want.</p>
 				<p><?php echo anchor("cms/setup/structure","Edit data structure"); ?></p>

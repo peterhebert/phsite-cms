@@ -259,24 +259,15 @@ class Content extends Controller
 		$parentArray = $this->get_parents();
 		$langArray = $this->get_langs();
 
+
+
+
+
 		$meta =	"<p>";
 		$meta .= form_label('Author', 'user_id');
 		$meta .=  form_dropdown('user_id', $userArray, $this->Content_model->user_id);
 		$meta .= "</p>\n";
 		
-		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
-			$this->Content_model->object_id = $params['type']; 
-		}
-		$meta .= "<p>";
-		$meta .=  form_label('Content type', 'object_id');
-		$meta .=  form_dropdown('object_id', $objArray, $this->Content_model->object_id);
-		$meta .= "</p>\n";
-		
-		$meta .= "<p>";
-		$meta .=  form_label('Parent', 'parent_id');
-		$meta .=  form_dropdown('parent_id', $parentArray, $this->Content_model->parent_id);
-		$meta .= "</p>\n";
-	
 		$field_params = array(
 		'name'        => 'created',
 		'id'          => 'created',
@@ -293,6 +284,29 @@ class Content extends Controller
 		$meta .=  form_dropdown('content_lang', $langArray, $this->Content_model->content_lang);
 		$meta .= "</p>\n";
 
+
+		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
+			$this->Content_model->object_id = $params['type']; 
+		}
+		$properties = "<p>";
+		$properties .=  form_label('Content type', 'object_id');
+		$properties .=  form_dropdown('object_id', $objArray, $this->Content_model->object_id);
+		$properties .= "</p>\n";
+		
+		$properties .= "<p>";
+		$properties .=  form_label('Parent', 'parent_id');
+		$properties .=  form_dropdown('parent_id', $parentArray, $this->Content_model->parent_id);
+		$properties .= "</p>\n";
+	
+		$field_params = array(1 => 'Yes', 0 => 'No');
+		$properties .= "<p>";
+		$properties .=  form_label('Available to home page', 'splash');
+		$properties .=  form_dropdown('splash', $field_params, $this->Content_model->splash);
+		$properties .= "</p>\n";
+
+
+
+
 		if($this->Content_model->content_id != '') {
 			$this->data['action'] = site_url("cms/content/edit/id/".$this->Content_model->content_id);
 		} else {
@@ -303,6 +317,7 @@ class Content extends Controller
 		$this->data['title_id'] = $this->Content_model->title_id;
 		$this->data['content'] = $content;
 		$this->data['meta'] = $meta;
+		$this->data['properties'] = $properties;
 		$this->data['uri'] = $this->Content_model->get_uri();
 
 		$this->load->view('cms/content_edit',$this->data);
@@ -318,13 +333,14 @@ class Content extends Controller
 		'object_id' => $this->input->post('object_id'),
 		'created' => $this->input->post('created'),
 		'user_id' => $this->input->post('user_id'),
+		'splash' => $this->input->post('splash'),
 		'data_id' => $this->input->post('data_id'),
 		'field_id' => $this->input->post('field_id'),
 		'field_name' => $this->input->post('field_name'),
 		'content_lang' => $this->input->post('content_lang'),
 		'title' => $this->input->post('title'),
 		'title_id' => $this->input->post('title_id'),
-		'valid' => $this->input->post('valid'),
+		'validation' => $this->input->post('validation'),
 		'required' => $this->input->post('required'),
 		'my_url' => $this->input->post('my_url'),
 		);
@@ -376,6 +392,7 @@ class Content extends Controller
 				$this->Content_model->created = $this->input->post('created');
 			}
 			$this->Content_model->user_id = $this->input->post('user_id');
+			$this->Content_model->splash = $this->input->post('splash');
 			$this->Content_model->content_lang = $this->input->post('content_lang');
 			$this->Content_model->title = $this->input->post('title');
 			$this->Content_model->title_id = $this->input->post('title_id');
