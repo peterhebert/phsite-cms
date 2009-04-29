@@ -146,5 +146,120 @@ if ( ! function_exists('convert_uri'))
 	}
 }
 
+if ( ! function_exists('checkEncoding'))
+{
+	function checkEncoding ( $string, $string_encoding )
+	{
+		$fs = $string_encoding == 'UTF-8' ? 'UTF-32' : $string_encoding;
+	
+		$ts = $string_encoding == 'UTF-32' ? 'UTF-8' : $string_encoding;
+	
+		return $string === mb_convert_encoding ( mb_convert_encoding ( $string, $fs, $ts ), $ts, $fs );
+	}
+}
+
+if ( ! function_exists('convert_entities'))
+{
+	function convert_entities($string,$safetags="") {
+		if(!checkEncoding($string, "UTF-8")) {
+			$text = mb_convert_encoding($string, "UTF-8");
+		} else {
+			$text = $string;
+		}
+		$text = htmlentities($text,ENT_QUOTES,'UTF-8');
+		
+		// do the basic tags first
+		$basicTags = "b,strong,em,i";
+	
+		if ($safetags = "") {
+			$safetags = $basicTags;
+		} else {
+			$safetags = $basicTags.",".$safetags;
+		}
+	
+		$allowableTags = explode(',',$safetags);
+		
+		foreach ($allowableTags as $tag) {
+			$find[] = "/&lt;$tag&gt;/";
+			$replace[] = "<$tag>";
+			$find[] = "/&lt;\/$tag&gt;/";
+			$replace[] = "<$tag>";
+		}
+	
+		// now do the tags with attributes
+		$complexTags = array('a','div','span','img');
+	
+		foreach ($complexTags as $tag) {
+			$find[] = "/&lt;$tag /";
+			$replace[] = "<$tag ";
+		
+			$find[] = "/&lt;\/$tag&gt;/";
+			$replace[] = "</$tag>";
+		}
+		$find[] = "/\"&gt;/";
+		$replace[] = "\">";
+	
+		$find[] = "/\" \/&gt;/";
+		$replace[] = "\" />";
+	
+		// check for attributes
+		$apattern = "(href|name|title|class|id|src|width|height|alt){1}=&quot;([^&]*)&quot;";
+		$areplace = "\\1=\"\\2\"";
+		$text = ereg_replace($apattern,$areplace,$text);
+	
+		// now do the preg_replace
+		$text = preg_replace($find,$replace,$text);
+	
+		return $text;
+	}
+}
+
+if ( ! function_exists('get_max_upload_size'))
+{
+	function get_max_upload_size() {
+		// get max upload size from php.ini settings
+		$max = ini_get('upload_max_filesize');
+		$max = preg_replace("/^([0-9]+)([KMG]*)/", "$1/$2", $max);
+		$max_size_array = explode('/',$max);
+		
+		switch($max_size_array[1]) {
+		case 'K':
+			$max_size = $max_size_array[0]* 1024 ;
+			break;
+		case 'M':
+			$max_size = $max_size_array[0] * 1024 * 1024;
+			break;
+		case 'G':
+			$max_size = $max_size_array[0] * 1024 * 1024 * 1024 ;
+			break;
+		default:
+			$max_size = $max_size_array[0];
+			break;
+		}
+		// return max upload size in bytes
+		return $max_size;
+	}
+}
+
+if ( ! function_exists('resize_bytes'))
+{
+	function resize_bytes($size)
+	{
+	   $count = 0;
+	   global $labels;
+	   $bytesText = 'bytes';
+	   $bytesInit = 'b';
+	   
+	   $format = array($bytesText,"K".$bytesInit,"M".$bytesInit,"G".$bytesInit,"T".$bytesInit,"P".$bytesInit,"E".$bytesInit,"Z".$bytesInit,"Y".$bytesInit);
+	   while(($size/1024)>1 && $count<8)
+	   {
+		   $size=$size/1024;
+		   $count++;
+	   }
+	   $formatted = number_format($size,0,'','.')." ".$format[$count];
+	   return $formatted;
+	}
+}
+
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

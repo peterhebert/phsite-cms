@@ -6,6 +6,13 @@ class Object extends Controller
 	{
 		parent::Controller();
 
+		$this->load->model('Site_model');
+		$this->load->model('Object_model');
+		$this->authenticate();
+	}
+
+	function authenticate()
+	{
 		// if not logged in, redirect to login form
 		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
@@ -14,9 +21,12 @@ class Object extends Controller
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
 		}
 
-		$this->load->model('Object_model');
 	}
 
 	function index()

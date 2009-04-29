@@ -9,7 +9,7 @@ class Content extends Controller
 		// load models
 		$this->load->model('Content_model');
 		$this->load->model('Object_model');
-
+		$this->load->model('Site_model');
 	}
 
 	function authenticate()
@@ -22,6 +22,10 @@ class Content extends Controller
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
 		}
 
 	}
@@ -223,11 +227,9 @@ class Content extends Controller
 			$content .=  "<p>";
 			$content .=  form_label($fd['field_name']);
 
-
 			switch($fd['input_type']) {
 			case 'file':
 				$content .=  form_upload($field_params);
-				$content .=  "</p>\n<p class=\"indent\">Maximum file size: ";
 				break;
 			case 'text':
 				$field_params['class'] = $fd['input_type'];
@@ -248,6 +250,12 @@ class Content extends Controller
 			}
 
 			$content .=  "</p>\n";
+
+			if($fd['input_type'] == 'file') {
+				$max_bytes = get_max_upload_size();
+				$max_format = resize_bytes($max_bytes);
+				$content .=  "<p class=\"indent\">Maximum file size: ".$max_format."</p>\n";
+			}
 
 		}
 		

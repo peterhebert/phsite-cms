@@ -117,12 +117,18 @@ class Site_model extends Model {
 		return $msg;
 	}
 
-	function load_meta($lang='eng')
+	function load_meta($lang='')
     {
 		if($this->site_meta_id != '') {
 			$query = $this->db->get_where('site_meta', array('site_meta_id' => $this->site_meta_id));
 		} else {
-			$query = $this->db->get_where('site_meta', array('site_lang' => $lang));
+			if($lang != '') {
+				$query = $this->db->get_where('site_meta', array('site_lang' => $lang));
+			} else if ($this->site_lang != '') {
+				$query = $this->db->get_where('site_meta', array('site_lang' => $this->site_lang));
+			} else {
+				$query = $this->db->get_where('site_meta', array('site_lang' => $this->default_lang));
+			}
 		}
 
 		if($row = $query->row_array()) {

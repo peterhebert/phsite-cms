@@ -6,16 +6,6 @@ class Setup extends Controller
 	{
 		parent::Controller();
 
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-		}
-
 		$this->load->helper('form');
 
 		// load objects
@@ -25,8 +15,28 @@ class Setup extends Controller
 		$this->load->model('Object_model');
 		$this->load->model('Site_model');
 		$this->load->model('User_model');
+
+		$this->authenticate();
 	}
 	
+	function authenticate()
+	{
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
+		}
+
+	}
+
 	function index()
 	{
 		$this->load->view('cms/setup',$this->data);

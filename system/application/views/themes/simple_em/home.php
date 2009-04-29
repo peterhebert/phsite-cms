@@ -43,7 +43,7 @@
 		</div>
 		
 	</div>
-	<div class="page-wrap block" id="footer"><?php if ($site_meta_copyright != '') { echo "Copyright &copy; ".$site_meta_copyright; } ?>
+	<div class="page-wrap block" id="footer"><?php if ($site_meta_copyright != '') { echo $site_meta_copyright; } ?>
 </div>
 </div>
 </body>

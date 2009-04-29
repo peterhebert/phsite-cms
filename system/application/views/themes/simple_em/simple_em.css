@@ -20,7 +20,7 @@ can also have 6-column grid (120px each) with 15px gutter
 em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
 */
 
-#masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; text-align:center; }
+#masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; border-bottom:1px solid #666666; text-align:center; }
 #page {
 	padding: 0 2em;
 	text-align:center;
@@ -43,6 +43,16 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .w6 { width: 53em; }
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
+
+/* gallery styles (reverse dark grey background with almost-white grey text */
+body.gallery { background-color: #1A1A1A; color:#EEEEEE; }
+body.gallery a { color:#CCCCCC}
+body.gallery a:visited { color:#999999; }
+body.gallery a:hover { color:#EEEEEE; }
+body.gallery h1,body.gallery h2,body.gallery h3,body.gallery h4,body.gallery h5,body.gallery h6 {
+	color:#FFFFFF;
+}
+
 
 /* image containers */
 .placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }

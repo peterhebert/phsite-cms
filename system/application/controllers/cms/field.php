@@ -6,17 +6,12 @@ class Field extends Controller
 	{
 		parent::Controller();
 
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-		}
-
 		$this->load->model('Field_model');
+		$this->load->model('Site_model');
+
+		// if not logged in, redirect to login form
+		$this->authenticate();
+
 		$this->input_types = array(
 		'text' => 'text',
 		'textarea' => 'textarea',
@@ -25,6 +20,24 @@ class Field extends Controller
 		'radio' => 'radio',
 		'password' => 'password',
 		'file' => 'file');
+	}
+
+	function authenticate()
+	{
+		// if not logged in, redirect to login form
+		$this->load->library('session');
+		if(!$this->session->userdata('user_id'))
+		{
+			redirect('cms/login');
+			exit();
+		} else {
+			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
+		}
+
 	}
 
 	function index()

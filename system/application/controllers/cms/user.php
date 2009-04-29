@@ -6,6 +6,17 @@ class User extends Controller
 	{
 		parent::Controller();
 
+		$this->load->model('Site_model');
+		$this->load->model('User_model');
+
+		// get site prefs & meta
+		$this->Site_model->load_prefs();
+
+		$this->authenticate();
+	} // end constructor
+
+	function authenticate()
+	{
 		// if not logged in, redirect to login form
 		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
@@ -14,10 +25,13 @@ class User extends Controller
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
 		}
-		$this->load->model('User_model');
 
-	} // end constructor
+	}
 
 	function index()
 	{
@@ -58,21 +72,20 @@ class User extends Controller
 
 	function edit()
 	{
+
 		$this->load->helper('form');
 		$this->load->library('form_validation');
 
-		$this->data = array(
-		'action' => 'cms/user/edit/',
-		'hidden' => '',
-		'user_id' => '',
-		'name_first' => '',
-		'name_last' => '',
-		'username' => '',
-		'timezone' => '',
-		'admin' => '',
-		'default_lang' => '',
-		'email' => '',
-		);
+		$this->data['action'] = 'cms/user/edit/';
+		$this->data['hidden'] = '';
+		$this->data['user_id'] = '';
+		$this->data['name_first'] = '';
+		$this->data['name_last'] = '';
+		$this->data['username'] = '';
+		$this->data['timezone'] = '';
+		$this->data['admin'] = '';
+		$this->data['default_lang'] = '';
+		$this->data['email'] = '';
 
 		$params = $this->uri->uri_to_assoc(4);
 		if($this->User_model->user_id == '' && array_key_exists('id',$params)) {

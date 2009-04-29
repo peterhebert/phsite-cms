@@ -52,7 +52,7 @@ class Home extends Controller {
 				$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
 				$this->data['site_meta_description'] = $this->Site_model->description;
 				$this->data['site_meta_keywords'] = $this->Site_model->keywords;
-				$this->data['site_meta_copyright'] = $this->Site_model->copyright;
+				$this->data['site_meta_copyright'] = convert_entities($this->Site_model->copyright);
 				$this->data['site_meta_creator'] = $this->Site_model->creator;
 				$this->data['site_meta_updated'] = $this->Site_model->updated;
 				$this->data['site_meta_updated_W3C'] = substr($this->Site_model->updated,0,10);
@@ -175,7 +175,7 @@ class Home extends Controller {
 			$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
 			$this->data['site_meta_description'] = $this->Site_model->description;
 			$this->data['site_meta_keywords'] = $this->Site_model->keywords;
-			$this->data['site_meta_copyright'] = $this->Site_model->copyright;
+			$this->data['site_meta_copyright'] = convert_entities($this->Site_model->copyright);
 			$this->data['site_meta_creator'] = $this->Site_model->creator;
 			$this->data['site_meta_updated'] = $this->Site_model->updated;
 

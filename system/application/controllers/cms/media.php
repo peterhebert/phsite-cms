@@ -6,19 +6,30 @@ class Media extends Controller {
 	{
 		parent::Controller();
 		$this->load->helper(array('form','url','file','image'));
-		$this->load->library('session');
+		$this->load->model('Site_model');
 	}
 	
-	function index()
-	{	
+	function authenticate()
+	{
 		// if not logged in, redirect to login form
+		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
 		{
 			redirect('cms/login');
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
 		}
+
+	}
+
+	function index()
+	{	
+		$this->authenticate();
 
 		//get list of directories in media folder
 		$media_root = realpath($_SERVER['DOCUMENT_ROOT']).MEDIA_PATH_ORIG;
@@ -39,14 +50,7 @@ class Media extends Controller {
 	function upload()
 	{	
 
-		// if not logged in, redirect to login form
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-		}
+		$this->authenticate();
 
 		$success = FALSE;
 		
@@ -65,28 +69,9 @@ class Media extends Controller {
 		$this->data['create_entry'] = FALSE;
 
 		// get max upload size from php.ini settings
-		$max = ini_get('upload_max_filesize');
-		$max = preg_replace("/^([0-9]+)([KMG]*)/", "$1/$2", $max);
-		$max_size_array = explode('/',$max);
-		
-		switch($max_size_array[1]) {
-		case 'K':
-			$this->data['max_size'] = $max_size_array[0].' Kb';
-			$config['max_size'] = $max_size_array[0];
-			break;
-		case 'M':
-			$this->data['max_size'] = $max_size_array[0].' Mb';
-			$config['max_size'] = $max_size_array[0] * 1024;
-			break;
-		case 'G':
-			$this->data['max_size'] = $max_size_array[0].' Gb';
-			$config['max_size'] = $max_size_array[0] * 1048576;
-			break;
-		default:
-			$this->data['max_size'] = $max_size_array[0].' bytes';
-			$config['max_size'] = $max_size_array[0] / 1024;
-			break;
-		}
+		$max_bytes = get_max_upload_size();
+		$this->data['max_size'] = resize_bytes($max_bytes);
+		$config['max_size'] = $max_bytes * 1024;
 
 		$config['allowed_types'] = 'gif|jpg|png|flv|mov|mp4';
 		$this->data['allowed_types'] = str_replace('|',', ',$config['allowed_types']);
@@ -174,7 +159,7 @@ class Media extends Controller {
 			$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
 
 			if(!in_array($file,$ignore) && !is_dir($newpath)) {
-					$files[] = $newpath;
+				$files[] = $newpath;
 			}
 		}
 		//closing the directory

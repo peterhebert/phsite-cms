@@ -1,1 +1,1 @@
-phSite CMS &copy; 2009 Peter Hebert. Licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" title="Read the text of the MIT License"><abbr title="Massachusetts Institute of Technology">MIT</abbr> License</a>.
+phSite CMS &copy; 2009 <a href="http://www.peterhebert.com/">Peter Hebert</a>. Licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" title="Read the text of the MIT License"><abbr title="Massachusetts Institute of Technology">MIT</abbr> License</a>.

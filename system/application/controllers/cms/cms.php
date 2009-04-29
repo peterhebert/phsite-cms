@@ -16,25 +16,40 @@ class Cms extends Controller
 
 		$this->load->library('session');
 		
-		// get site prefs
+		// get site prefs & meta
 		$this->Site_model->load_prefs();
+
+		// get site metadata
+		$this->Site_model->load_meta();
+		$this->data['site_title'] = $this->Site_model->title;
 	}
 	
-	function index()
+	function authenticate()
 	{
 		// if not logged in, redirect to login form
+		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
 		{
 			redirect('cms/login');
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
+			// get site metadata
+			$this->Site_model->site_lang = $this->session->userdata('default_lang');
+			$this->Site_model->load_meta();
+			$this->data['site_title'] = $this->Site_model->title;
 		}
+
+	}
+
+	function index()
+	{
+		$this->authenticate();
 
 		$params = $this->uri->uri_to_assoc(3);
 
 		if(array_key_exists('lang',$params)) {
-			$this->Content_model->lang = $params['lang'];
+			$this->Content_model->content_lang = $params['lang'];
 		}
 
 		// load list of fields

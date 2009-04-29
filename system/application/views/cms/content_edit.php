@@ -20,6 +20,7 @@ $().ready(function(){
 	});
 
 });
+
 /* ]]> */
 </script>
 <script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
