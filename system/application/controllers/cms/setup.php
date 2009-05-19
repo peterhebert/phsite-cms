@@ -115,6 +115,8 @@ class Setup extends Controller
 
 			$this->form_validation->set_rules('limit_posts', 'Posts per page (blogs)', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('limit_thumbs', 'images per page (galleries)', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_thumb', 'image thumbnail size', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_display', 'image display size', 'required|is_natural_no_zero');
 
 			$this->form_validation->set_rules('default_lang', 'Default Language', 'required|alpha|exact_length[3]');
 			$this->form_validation->set_rules('theme', 'Theme', 'required|alpha_dash');
@@ -130,6 +132,8 @@ class Setup extends Controller
 				$this->Site_model->webmaster_id = $this->input->post('webmaster_id');
 				$this->Site_model->limit_posts = $this->input->post('limit_posts');
 				$this->Site_model->limit_thumbs = $this->input->post('limit_thumbs');
+				$this->Site_model->img_size_thumb = $this->input->post('img_size_thumb');
+				$this->Site_model->img_size_display = $this->input->post('img_size_display');
 
 				$this->data['msg'] = $this->Site_model->update_prefs();
 
@@ -145,6 +149,8 @@ class Setup extends Controller
 		$this->data['webmaster_id'] =  $this->Site_model->webmaster_id;
 		$this->data['limit_posts'] =  $this->Site_model->limit_posts;
 		$this->data['limit_thumbs'] =  $this->Site_model->limit_thumbs;
+		$this->data['img_size_thumb'] =  $this->Site_model->img_size_thumb;
+		$this->data['img_size_display'] =  $this->Site_model->img_size_display;
 
 		// get list of enabled languages
 		$languages = $this->Language_model->get_list();

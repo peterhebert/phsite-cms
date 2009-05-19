@@ -62,6 +62,28 @@
 			echo form_label('Thumbnails per page (galleries)', 'limit_thumbs');
 			echo form_input($field_params);
 			echo"</p>\n";
+
+			$field_params = array(
+			'class'        => 'tiny_input align-right',
+			'name'        => 'img_size_thumb',
+			'id'          => 'img_size_thumb',
+			'value'       => $img_size_thumb
+			);
+			echo"<p>";
+			echo form_label('Image thumbnail size', 'img_size_thumb');
+			echo form_input($field_params);
+			echo"</p>\n";
+
+			$field_params = array(
+			'class'        => 'tiny_input align-right',
+			'name'        => 'img_size_display',
+			'id'          => 'img_size_display',
+			'value'       => $img_size_display
+			);
+			echo"<p>";
+			echo form_label('Image display size', 'img_size_display');
+			echo form_input($field_params);
+			echo"</p>\n";
 			?>
 
 			<input name="submit" type="submit" id="submit" value="save" />

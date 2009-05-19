@@ -20,5 +20,9 @@ $config['limit_posts'] = 5;
 // limit for queries on thumbnails per page in galleries
 $config['limit_thumbs'] = 20;
 
+// default sizes for image galleries
+$config['img_size_thumb'] = 100;
+$config['img_size_display'] = 640;
+
 /* End of file phsite_prefs.php */
 /* Location: ./system/application/config/phsite_prefs.php */

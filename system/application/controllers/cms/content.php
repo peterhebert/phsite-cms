@@ -10,6 +10,8 @@ class Content extends Controller
 		$this->load->model('Content_model');
 		$this->load->model('Object_model');
 		$this->load->model('Site_model');
+
+		$this->load->helper('image');
 	}
 
 	function authenticate()
@@ -25,6 +27,7 @@ class Content extends Controller
 			// get site metadata
 			$this->Site_model->site_lang = $this->session->userdata('default_lang');
 			$this->Site_model->load_meta();
+			$this->Site_model->load_prefs();
 			$this->data['site_title'] = $this->Site_model->title;
 		}
 
@@ -211,6 +214,10 @@ class Content extends Controller
 
 		// now generate form input fields
 		foreach($fields as $fd_id => $fd) {
+		
+			echo "<pre>";
+			print_r($fd);
+			echo "</pre>\r";
 			$field_params = array(
 				'id' => $fd['field_name'],
 				'name' => 'value_'.$fd_id,
@@ -229,7 +236,35 @@ class Content extends Controller
 
 			switch($fd['input_type']) {
 			case 'file':
-				$content .=  form_upload($field_params);
+				$this->load->model('Media_model');
+				$this->Media_model->list_dirs();
+				$media_root = $this->Media_model->dir_base;
+				$dir_files = array(''=> 'no file');
+				foreach($this->Media_model->dir_list as $index => $dir)
+				{
+					$this->Media_model->dir_current = $dir;
+					$dest_dir = str_replace($media_root,'',$dir);
+
+					$this->Media_model->list_files();
+					foreach($this->Media_model->file_list as $file_path) {
+						$file_rel = str_replace($media_root,'',$file_path);
+						$pinfo = pathinfo($file_path);
+						$dir_files[$file_rel] = $pinfo['basename'];
+					}
+					
+				}
+
+				$field_params = array(
+					'id' => $fd['field_name'],
+					'name' => 'value_'.$fd_id,
+					'value' => $fd['value'],
+				);
+
+				$content .= "thumb size: ".$this->Site_model->img_size_thumb."<br />\r";
+				$content .= "filename: ".$fd['value']."<br />\r";
+				
+				$content .= view_image($fd['value'],100)."<br />\r";
+				$content .= form_dropdown($fd['field_name'], $dir_files, $fd['value']);
 				break;
 			case 'text':
 				$field_params['class'] = $fd['input_type'];
@@ -251,11 +286,6 @@ class Content extends Controller
 
 			$content .=  "</p>\n";
 
-			if($fd['input_type'] == 'file') {
-				$max_bytes = get_max_upload_size();
-				$max_format = resize_bytes($max_bytes);
-				$content .=  "<p class=\"indent\">Maximum file size: ".$max_format."</p>\n";
-			}
 
 		}
 		
@@ -423,6 +453,11 @@ class Content extends Controller
 				
 				$temp_label = $form['field_name'][$index];
 				$temp_val = $this->input->post($form_fd_name);
+				
+				if($temp_label == 'keywords')
+				{
+					$temp_val = csv_normalize($temp_val);
+				}
 				$temp_data_id = $form['data_id'][$index];
 
 				if($this->Content_model->update_data($fd_id,$temp_val,$temp_data_id) === FALSE)

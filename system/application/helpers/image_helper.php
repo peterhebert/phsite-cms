@@ -1,6 +1,32 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
+if ( ! function_exists('embed_media'))
+{
+	function embed_media($path, $size='', $crop_ratio='', $attributes = '' ) {
+
+		// get filename from path
+		$path_parts = pathinfo($path);
+		
+		$dirname = $path_parts['dirname'];
+		$basename = $path_parts['basename'];
+		$ext_orig = $path_parts['extension'];
+		$extension = strtolower($ext_orig);
+		$filename = $path_parts['filename'];
+
+		switch ($extension) {
+		case 'jpg' || 'jpeg' || 'png' || 'gif':
+			$code = view_image($path, $size, $crop_ratio, $attributes);
+			break;
+		case 'flv' || 'swf':
+			$code = flv_player($path);
+			break;
+		default:
+			break;
+		}
+
+	}
+}
 
 if ( ! function_exists('view_image'))
 {
@@ -13,7 +39,7 @@ if ( ! function_exists('view_image'))
 		src				path to image
 		size			size to fit image to by largest dimension
 		ratio			force ratio of resized image
-		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text, 'id' => 'image tag id')
+		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text', 'id' => 'image tag id')
 		
 		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
 		*/
@@ -23,8 +49,15 @@ if ( ! function_exists('view_image'))
 		}
 
 		// Path to original image and to resized version
-		$orig_image_path = $_SERVER["DOCUMENT_ROOT"].$path;
-		$orig_image_path_rel = trim($path,'/');
+		$root_path = realpath($_SERVER["DOCUMENT_ROOT"]);
+		$pos = strpos($path, $root_path);
+		if ($pos === false) {
+			$orig_image_path = $root_path.$path;
+			$orig_image_path_rel = trim($path,'/');
+		} else {
+			$orig_image_path = $path;
+			$orig_image_path_rel = trim(str_replace($root_path,'',$path),'/');
+		}
 		
 		if(file_exists($orig_image_path)) {
 			
@@ -207,32 +240,28 @@ if ( ! function_exists('get_metadata'))
 if ( ! function_exists('flv_player'))
 {
 
-	function flv_player($file, $width, $height, $params=array(), $fullscreen = true) {
+	function flv_player($file, $width = 640, $height = 360, $fullscreen = true, $flvars=array()) {
 
-		$params['movie'] = '/osflv_player_v225/player.swf';
+		$player = '/assets/osflv_player_v225/player.swf';
+		$flash_vars[] = 'movie='.$file;
 		
-		foreach ($params as $param => $value) {
+		foreach ($flvars as $param => $value) {
 			$flash_vars[] = $param.'='.$value;
 		}
 		$FlashVars = implode('&',$flash_vars);
 		
-		$player_code = "\n";
-		$player_code .= "\n";
+		$player_code = "<!-- begin OS FLV player -->\n";
+		$player_code .= "<object type=\"application/x-shockwave-flash\" data=\"{$player}\" width=\"{$width}\" height=\"{$height}\">\n";
+		$player_code .= "<param name=\"movie\" value=\"{$player}\" />\n";
+		$player_code .= "<param name=\"allowFullScreen\" value=\"{$fullscreen}\">\n";
+		$player_code .= "<param name=\"FlashVars\" value=\"{$FlashVars}\" />\n";
+		$player_code .= "</object>\n";
+		$player_code .= "<!-- end OS FLV player -->\n";
 
 		return $player_code;
 	}
 
 }
-/*
-<!--OS FLV player-->
-<object type="application/x-shockwave-flash" data="/media/osflv_player_v225/player.swf" width="640" height="360">
-	<param name="movie" value="osflv_player_v225/player.swf" />
-	<param name="allowFullScreen" value="true">
-	<param name="FlashVars" value="movie=video.flv&bgcolor=0x222222&fgcolor=0x999999&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
-</object>
-<!-- end OS FLV player -->
-
-*/
 
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

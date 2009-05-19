@@ -33,6 +33,25 @@ if ( ! function_exists('convert_date'))
 
 }
 
+if ( ! function_exists('csv_normalize'))
+{	
+	function csv_normalize($str)
+	{
+		$valueArray = explode(',',$str);
+		$cleanVals = array();
+		foreach ($valueArray as $val)
+		{
+			if($val != '') {
+				$cleanVals[] = trim($val,' ');
+			}
+		}
+		natcasesort($cleanVals);
+		$csv_return = implode(', ',$cleanVals);
+		return $csv_return;
+	}
+
+}
+
 if ( ! function_exists('sort_compare'))
 {	
 	function sort_compare($a, $b) {

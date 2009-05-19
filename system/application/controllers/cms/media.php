@@ -7,6 +7,7 @@ class Media extends Controller {
 		parent::Controller();
 		$this->load->helper(array('form','url','file','image'));
 		$this->load->model('Site_model');
+		$this->load->model('Media_model');
 	}
 	
 	function authenticate()
@@ -32,13 +33,28 @@ class Media extends Controller {
 		$this->authenticate();
 
 		//get list of directories in media folder
-		$media_root = realpath($_SERVER['DOCUMENT_ROOT']).MEDIA_PATH_ORIG;
-		$dir_files[$media_root] = $this->find_media($media_root);
+		$media_root = $this->Media_model->dir_base;
+		$this->Media_model->list_dirs();
+		$this->data['dir_list'] = $this->Media_model->dir_list;
+		$this->data['media_root'] = $media_root;
 
-		$subdirs = $this->findSubDirs($media_root);
-		foreach($subdirs as $dir) {
+		$this->load->view('cms/media',$this->data);
+	}
+
+	function media_list()
+	{	
+		$this->authenticate();
+
+		//get list of directories in media folder
+		$media_root = $this->Media_model->dir_base;
+		$this->Media_model->list_dirs();
+		foreach($this->Media_model->dir_list as $index => $dir)
+		{
+			$this->Media_model->dir_current = $dir;
+			$this->Media_model->list_files();
 			$dest_dir = str_replace($media_root,'',$dir);
-			$dir_files[$dest_dir] = $this->find_media($dir);
+			
+			$dir_files[$dest_dir] = $this->Media_model->file_list;
 		}
 
 		$this->data['media_root'] = $media_root;
@@ -46,6 +62,7 @@ class Media extends Controller {
 
 		$this->load->view('cms/media',$this->data);
 	}
+
 
 	function upload()
 	{	

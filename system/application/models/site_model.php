@@ -22,6 +22,10 @@ class Site_model extends Model {
 	// limit for queries on thumbnails per page in galleries
 	var $limit_thumbs;
 
+	// default sizes for image galleries
+	var $img_size_thumb;
+	var $img_size_display;
+
 	// site metadata (language-specific)
 	var $site_meta_id;
 	var $title;
@@ -56,6 +60,8 @@ class Site_model extends Model {
 		$this->webmaster_id = $this->config->item('webmaster_id');
 		$this->limit_posts = $this->config->item('limit_posts');
 		$this->limit_thumbs = $this->config->item('limit_thumbs');
+		$this->img_size_thumb = $this->config->item('img_size_thumb');
+		$this->img_size_display = $this->config->item('img_size_display');
     }
 
     function update_prefs()
@@ -96,6 +102,14 @@ class Site_model extends Model {
 		$prefs .= "// limit for queries on thumbnails per page in galleries\n";
 		$prefs .= "\$config['limit_thumbs'] = ";
 		$prefs .= $this->limit_thumbs;
+		$prefs .= ";\n\n";
+		
+		$prefs .= "// default sizes for image galleries\n";
+		$prefs .= "\$config['img_size_thumb'] = ";
+		$prefs .= $this->img_size_thumb;
+		$prefs .= ";\n";
+		$prefs .= "\$config['img_size_display'] = ";
+		$prefs .= $this->img_size_display;
 		$prefs .= ";\n\n";
 		
 		$prefs .= "/* End of file phsite_prefs.php */\n";

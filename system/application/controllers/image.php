@@ -14,7 +14,7 @@ class Image extends Controller {
 		$this->load->helper('image');
 
 		$uri_raw = $this->uri->uri_string();
-		//$url_params =  str_replace( '/image/view/', '', $url_raw);
+		$url_params =  str_replace( '/image/', '', $uri_raw);
 		$uri = preg_replace('|^/image/(.*)$|','$1',$uri_raw);
 		
 		if($uri != '')

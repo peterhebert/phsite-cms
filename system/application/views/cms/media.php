@@ -14,18 +14,30 @@
 		<h1>Media</h1>
 		
 		<?php
-		foreach($files as $dir => $filelist) {
-			if(is_array($filelist) && count($filelist) > 0) {
-				$dir_rel = str_replace($media_root,'',$dir);
-				echo "<h2>$dir_rel</h2>\n";
-				foreach($filelist as $file) {
-					$file_link = str_replace($_SERVER["DOCUMENT_ROOT"],'',$file);
-					$files_clean[] = '<a href="'.$file_link.'">'.basename($file).'</a>';
+
+		if(isset($dir_list)) {
+		foreach($dir_list as $dir) {
+			$files_clean[] = str_replace($media_root,'',$dir);
+		}
+		echo ul($files_clean);
+}
+
+		if(isset($files)) {
+			foreach($files as $dir => $filelist) {
+				if(is_array($filelist) && count($filelist) > 0) {
+					$dir_rel = str_replace($media_root,'',$dir);
+					echo "<h2>$dir_rel</h2>\n";
+					foreach($filelist as $file) {
+						$file_link = str_replace($_SERVER["DOCUMENT_ROOT"],'',$file);
+						$files_clean[] = '<a href="'.$file_link.'">'.basename($file).'</a>';
+					}
+					echo ul($files_clean);
+					unset($files_clean);
 				}
-				echo ul($files_clean);
-				unset($files_clean);
 			}
 		}
+
+
 		?>
 		<p><?php echo anchor("cms/media/upload","upload media"); ?></p>
 	</div>
