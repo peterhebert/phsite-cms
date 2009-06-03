@@ -38,7 +38,7 @@ $().ready(function(){
 			<p>Create New <?php echo form_dropdown('new_content',$dropdown); ?> <input id="new_go" name="new_go" type="button" value="Go" /></p>
 			<h2>Media</h2>
 			<ul>
-				<li><?php echo anchor("cms/media","manage media"); ?></li>
+				<li><?php echo anchor("cms/media/manage","manage media"); ?></li>
 				<li><?php echo anchor("cms/media/upload","upload media"); ?></li>
 			</ul>
 		</div>

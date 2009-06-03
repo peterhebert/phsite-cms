@@ -46,6 +46,7 @@ $route['scaffolding_trigger'] = "";
 $route['cms'] = "cms/cms";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
+$route['cms/media'] = "cms/media/manage";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

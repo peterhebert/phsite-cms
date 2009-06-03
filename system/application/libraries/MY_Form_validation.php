@@ -37,18 +37,41 @@ class MY_Form_validation extends CI_Form_validation {
 	// --------------------------------------------------------------------
 	
 	/**
-	 * Windows/UNIX file path
+	 * directory exists
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	bool
 	 */	
-	function file_path($str)
+	function path_dir($str)
 	{
-		$pattern = '^([A-Z]:){0,1}[A-Za-z0-9\\\-_\./ ]+$';
-		$valid = ereg($pattern, $str);
+		$valid = FALSE;
+		$file_full = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG.$str;
+		if(file_exists($file_full) && is_dir($file_full))
+		{
+			$valid = TRUE;
+		}
+		
 		return $valid;
+	}
 
+	/**
+	 * file exists
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+	function path_file($str)
+	{
+		$valid = FALSE;
+		$file_full = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG.$str;
+		if(file_exists($file_full) && !is_dir($file_full))
+		{
+			$valid = TRUE;
+		}
+		
+		return $valid;
 	}
 
 	// --------------------------------------------------------------------

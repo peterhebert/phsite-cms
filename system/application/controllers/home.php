@@ -44,7 +44,9 @@ class Home extends Controller {
 				$menu_links = $this->Content_model->get_list(0,'',0);
 				
 				foreach($menu_links as $link) {
-					$zzz_menu[] = anchor($link['uri_title'], $link['title']);
+					$link_uri = $this->Content_model->get_uri_display($link['content_id']);
+					$zzz_menu[] = anchor($link_uri, $link['title']);
+					unset($link_uri);
 				}
 	
 				$this->Site_model->load_meta($this->Site_model->default_lang);
@@ -159,6 +161,13 @@ class Home extends Controller {
 			// if image, generate image tag and get metadata
 			if($this->Object_model->name == 'image')
 			{
+				$this->load->helper('image');
+				if(array_key_exists('file',$this->data['content_data']))
+				{
+					//view_image($this->data['content_data']['file'],$this->Site_model->img_size_display);
+					//$this->data['image_meta'] = get_metadata($this->data['content_data']['file']);
+
+				}
 			}
 
 			// prepare child content for display

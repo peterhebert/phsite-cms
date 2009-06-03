@@ -215,9 +215,6 @@ class Content extends Controller
 		// now generate form input fields
 		foreach($fields as $fd_id => $fd) {
 		
-			echo "<pre>";
-			print_r($fd);
-			echo "</pre>\r";
 			$field_params = array(
 				'id' => $fd['field_name'],
 				'name' => 'value_'.$fd_id,
@@ -235,11 +232,18 @@ class Content extends Controller
 			$content .=  form_label($fd['field_name']);
 
 			switch($fd['input_type']) {
+
+			case 'directory':
+				$this->load->model('Media_model');
+				$this->Media_model->list_dirs();
+				$media_root = $this->Media_model->dir_base;
+				$content .= form_dropdown($field_params['name'], $this->Media_model->dir_list, $fd['value']);
+				break;
 			case 'file':
 				$this->load->model('Media_model');
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
-				$dir_files = array(''=> 'no file');
+				$dir_files = array('' => 'no file');
 				foreach($this->Media_model->dir_list as $index => $dir)
 				{
 					$this->Media_model->dir_current = $dir;
@@ -254,17 +258,7 @@ class Content extends Controller
 					
 				}
 
-				$field_params = array(
-					'id' => $fd['field_name'],
-					'name' => 'value_'.$fd_id,
-					'value' => $fd['value'],
-				);
-
-				$content .= "thumb size: ".$this->Site_model->img_size_thumb."<br />\r";
-				$content .= "filename: ".$fd['value']."<br />\r";
-				
-				$content .= view_image($fd['value'],100)."<br />\r";
-				$content .= form_dropdown($fd['field_name'], $dir_files, $fd['value']);
+				$content .= form_dropdown($field_params['name'], $dir_files, $fd['value']);
 				break;
 			case 'text':
 				$field_params['class'] = $fd['input_type'];
@@ -384,6 +378,7 @@ class Content extends Controller
 		);
 		
 		// set validation rules
+
 		if($this->input->post('content_id') != '') {
 			$this->form_validation->set_rules('content_id', 'Content ID', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('title_id', 'Title ID', 'required|is_natural_no_zero');

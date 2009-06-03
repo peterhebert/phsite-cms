@@ -51,6 +51,69 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .image .image-right { float: right; margin-left: 1em; }
 .image img { border: 1px solid #000000; }
 
+/* thumbnail lists */
+	ul.thumbnails {
+	list-style:none inside;
+	margin:0;
+	padding:0 0 1ex 0;
+	clear:both;
+	display:table;
+	}
+	ul.thumbnails:after {
+		 visibility: hidden;
+		 display: block;
+		 font-size: 0;
+		 content: " ";
+		 clear: both;
+		 height: 0;
+		 }
+	ul.thumbnails { display: inline-block; }
+	/* start commented backslash hack \*/
+	* html ul.thumbnails { height: 1%; }
+	ul.thumbnails { display: block; }
+	/* close commented backslash hack */
+	
+	ul.thumbnails li { float: left; list-style-type: none; margin: 1ex; padding: 0; text-align: center; }
+
+	ul.thumbnails li .thumb {
+		margin:0;
+		padding:0;
+		overflow: visible;
+		position: relative;
+		display: table;
+	}
+	ul.thumbnails li .thumb a {
+		display:table-cell;
+		vertical-align:middle;
+		position: static;
+	}
+
+	* html ul.thumbnails li .thumb a {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+	}
+	
+	* html ul.thumbnails li .thumb a img {
+		position: relative;
+		top:-49%;
+		left:-50%;
+	}
+	
+	ul.thumbnails li .thumb a img {
+		border:1px solid #666666;
+		margin:0;
+		padding:0;
+	}
+	.thumbnails .title {
+		margin: 1ex 0 0 0;
+		padding:0;
+		text-align:center;
+		font-size:0.8em;
+		white-space:normal;
+	}
+
+
 /* masthead styles */
 #masthead a, #masthead a:visited { color: #eeeeee; text-decoration:underline; }
 #masthead a:hover { color:#ffcc66; text-decoration:underline }
@@ -118,6 +181,7 @@ text,textarea,richtext,checkbox,radio,password,file
 #page form .small_input { width: 9.5em;}
 #page form .tiny_input { width: 2.5em;}
 #page form .text, #page form .password { width: 22em;}
+#page form .large_input { width: 28em;}
 #page form .textarea { width: 22em; height: 8em; }
 #page form .richtext { width: 22em; height: 24em; }
 

@@ -56,7 +56,8 @@ class Object extends Controller
 		'numeric' => 'Numeric',
 		'is_natural' => 'Natural numbers (0, 1, 2, 3, etc.)',
 		'is_natural_no_zero' => 'Natural numbers/no zeroes (1, 2, 3, etc.)',
-		'file_path' => 'file path',
+		'path_file' => 'file path',
+		'path_dir' => 'directory',
 		'valid_ip' => 'Internet Protocol (IP) address'
 		);
 
@@ -251,7 +252,8 @@ class Object extends Controller
 		'numeric',
 		'is_natural',
 		'is_natural_no_zero',
-		'file_path',
+		'path_file',
+		'path_dir',
 		'valid_ip'
 		);
 		

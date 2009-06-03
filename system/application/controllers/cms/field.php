@@ -19,7 +19,9 @@ class Field extends Controller
 		'checkbox' => 'checkbox',
 		'radio' => 'radio',
 		'password' => 'password',
-		'file' => 'file');
+		'file' => 'file path',
+		'directory' => 'directory path',
+		);
 	}
 
 	function authenticate()

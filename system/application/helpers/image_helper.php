@@ -1,29 +1,39 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
-if ( ! function_exists('embed_media'))
+if ( ! function_exists('file_is_image'))
 {
-	function embed_media($path, $size='', $crop_ratio='', $attributes = '' ) {
+	function is_image($path) {
+	
+		$is_image = FALSE;
 
-		// get filename from path
-		$path_parts = pathinfo($path);
-		
-		$dirname = $path_parts['dirname'];
-		$basename = $path_parts['basename'];
-		$ext_orig = $path_parts['extension'];
-		$extension = strtolower($ext_orig);
-		$filename = $path_parts['filename'];
+		$acceptable_types = array(
+		'image/gif' => 'gif',  
+		'image/jpeg' => 'jpeg',  
+		'image/png' => 'png',  
+		'application/x-shockwave-flash' => 'swf',  
+		'image/psd' => 'psd',  
+		'image/bmp' => 'bmp',  
+		'image/tiff' => 'tiff',  
+		'image/tiff' => 'tiff',  
+		'image/jp2' => 'jp2',  
+		'image/iff' => 'iff',  
+		'image/vnd.wap.wbmp' => 'bmp',  
+		'image/xbm' => 'xbm',  
+		'image/vnd.microsoft.icon' => 'ico'
+		); 
 
-		switch ($extension) {
-		case 'jpg' || 'jpeg' || 'png' || 'gif':
-			$code = view_image($path, $size, $crop_ratio, $attributes);
-			break;
-		case 'flv' || 'swf':
-			$code = flv_player($path);
-			break;
-		default:
-			break;
+		if(file_exists($path))
+		{
+			$pathinfo = pathinfo($path);
+			$file_info = getimagesize($path);
+			if(in_array($pathinfo['extension'],$acceptable_types) && $fileinfo !== FALSE && array_key_exists($fileinfo['mime'],$acceptable_types))
+			{
+				$is_image = TRUE;
+			}
 		}
+		
+		return $is_image;
 
 	}
 }
@@ -31,7 +41,7 @@ if ( ! function_exists('embed_media'))
 if ( ! function_exists('view_image'))
 {
 
-	function view_image($path,$size,$crop_ratio='', $img_tag_attr = '' ) {
+	function view_image($path,$size,$img_tag_attr = '',$square=FALSE ) {
 
 		/* 
 		parameters for function
@@ -49,89 +59,71 @@ if ( ! function_exists('view_image'))
 		}
 
 		// Path to original image and to resized version
-		$root_path = realpath($_SERVER["DOCUMENT_ROOT"]);
-		$pos = strpos($path, $root_path);
-		if ($pos === false) {
-			$orig_image_path = $root_path.$path;
-			$orig_image_path_rel = trim($path,'/');
-		} else {
-			$orig_image_path = $path;
-			$orig_image_path_rel = trim(str_replace($root_path,'',$path),'/');
-		}
+		$orig_image_path = $_SERVER["DOCUMENT_ROOT"].$path;
+		$orig_image_path_rel = trim($path,'/');
 		
 		if(file_exists($orig_image_path)) {
 			
 			$orig_size = getimagesize($orig_image_path);
-
+			//print_r( $orig_size);
+			
 			if($orig_size !== FALSE) {
 	
 				$orig_width = $orig_size[0];
 				$orig_height = $orig_size[1];
 				$orig_ratio = $orig_width / $orig_height;
 		
-				if($crop_ratio != '') {
-					// force crop to fit supplied aspect ratio 
-		
+				if($square === TRUE) {
+					// force crop to fit square
+					
 					// first determine offsets for crop of orig
-					if ($crop_ratio > $orig_ratio) {
+					if ($orig_ratio > 1) {
 		
-						// wider than orig, take orig width, offset vertical
-						$crop_width = $orig_width;
-						$crop_height = round( $orig_width * (1/$crop_ratio) );
-						$offset_x = 0;
-						$offset_y = ceil(($orig_height - $crop_height) / 2 );
-	
-					} else if ($crop_ratio < $orig_ratio) {
-		
-						// narrower than orig, take orig height, offset horizontal
-		
+						// LANDSCAPE - lop off sides
+
 						$crop_height = $orig_height;
 						$crop_width = round( $orig_height * (1/$crop_ratio) );
 						
 						$offset_x = ceil(($orig_width - $crop_width) / 2 );
 						$offset_y = 0;
+	
+					} else if ($orig_ratio < 1) {
+		
+						// PORTRAIT  - lop off top and bottom
+
+						$crop_width = $orig_width;
+						$crop_height = round( $orig_width * (1/$crop_ratio) );
+						$offset_x = 0;
+						$offset_y = ceil(($orig_height - $crop_height) / 2 );
+		
 						
-					} else { // same ratio = no cropping
+					} else { // ORIGINAL IS SQUARE = no cropping
 						$offset_x = 0;
 						$offset_y = 0;
 						$crop_width = $orig_width;
 						$crop_height = $orig_height;
 					}
 		
-					// now determine width and height
-					$min_new = round( $size * (1/$crop_ratio) );
-		
-					if ($crop_ratio > 1) { // landscape
-						$new_width = $size;
-						$new_height = $min_new;
-					} else if ($crop_ratio < 1) { // portrait
-						$new_width = $min_new;
-						$new_height = $size;
-					} else { // square
-						$new_width = $size;
-						$new_height = $size;
-					}
-		
+					$new_width = $size;
+					$new_height = $size;
 				
 				} else { // scale proportionally
 					$offset_x = 0;
 					$offset_y = 0;
 		
-					$max_new = $size;
-					$min_new = round( $max_new * (1/$orig_ratio) );
-		
 					// now determine width and height
 		
 					if ($orig_ratio > 1) { // landscape
 						$new_width = $size;
-						$new_height = $min_new;
+						$new_height = round($size * (1/$orig_ratio));
 					} else if ($orig_ratio < 1) { // portrait
-						$new_width = $min_new;
+						$new_width = round($size * $orig_ratio);
 						$new_height = $size;
 					} else { // square
 						$new_width = $size;
 						$new_height = $size;
 					}
+
 		
 				}
 				
@@ -145,17 +137,25 @@ if ( ! function_exists('view_image'))
 				// determine file name of scaled image
 				$pi = pathinfo($orig_image_path);
 				$dest_dir = str_replace(MEDIA_PATH_ORIG,MEDIA_PATH_CACHE,$pi['dirname']);
-				if($crop_ratio != '' && $crop_ratio != $orig_ratio) {
+
+				if($square === TRUE && $orig_ratio != 1) {
 					$fn_copy_short = $pi['filename'].'_'.$size.'_'.$crop_ratio.'.jpg';
 				} else {
 					$fn_copy_short = $pi['filename'].'_'.$size.'.jpg';
 				}
 				$scaled_image_path = $dest_dir.'/'.$fn_copy_short;
-				
+
 				$scaled_image_path_rel = str_replace($_SERVER["DOCUMENT_ROOT"],'',$scaled_image_path);
 				$scaled_image_path_rel = trim($scaled_image_path_rel,'/');
 				
+				if(!file_exists ( $dest_dir ) ){
+					if(!mkdir($dest_dir)) {
+						$result = "<p>cache directory '".$dest_dir."' does not exist and cannot be written</p>\r";
+					}
+				}
+				
 				if(!file_exists($scaled_image_path) && $size != '' && $size <= $max_orig) {
+					
 					// Get the CodeIgniter super object
 					$CI =& get_instance();
 					
@@ -171,7 +171,9 @@ if ( ! function_exists('view_image'))
 						$config['width']			= $new_width;
 						$config['height']			= $new_height;
 						$CI->image_lib->initialize($config);
-						$CI->image_lib->resize();
+						if($CI->image_lib->resize() !== FALSE){
+							echo $CI->image_lib->display_errors();
+						}
 						$CI->image_lib->clear();
 					} else {
 						// do cropping
@@ -188,7 +190,9 @@ if ( ! function_exists('view_image'))
 						$config['width']			= $new_width;
 						$config['height']			= $new_height;
 						$CI->image_lib->initialize($config);
-						$CI->image_lib->resize();
+						if($CI->image_lib->resize() !== FALSE){
+							echo $CI->image_lib->display_errors();
+						}
 						$CI->image_lib->clear();
 					}
 					

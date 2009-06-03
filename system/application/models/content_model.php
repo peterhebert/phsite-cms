@@ -368,6 +368,55 @@ class Content_model extends Model {
 	}
 
 
+    function get_uri_display($id,$content_lang='')
+    {
+
+		// first get data about supplied id
+		$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE content.content_id = ".$id;
+		if($content_lang != '') {
+			$sql .= " AND content_lang = '{$content_lang}'";
+		}
+		$query = $this->db->query($sql);
+
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$uriArray[] = $row->uri_title;
+			$content_id = $row->parent_id;
+			$content_lang = $row->content_lang;
+
+		} 
+
+		// now get uri path
+		while ($content_id != 0)
+		{
+
+			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id 
+			WHERE content.content_id = ".$content_id;
+			if($content_lang != '') {
+				$sql .= " AND content_lang = '{$content_lang}'";
+			}
+			$query = $this->db->query($sql);
+
+			if ($query->num_rows() > 0)
+			{
+			   $row = $query->row();
+			
+			   $uriArray[] = $row->uri_title;
+			   $content_id = $row->parent_id;
+
+			} 
+
+		} 
+		
+		$uriArray2 = array_reverse($uriArray);
+		$uri = implode('/',$uriArray2);
+
+		return $uri;
+
+    }
+
     function get_uri()
     {
 		

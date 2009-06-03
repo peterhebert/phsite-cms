@@ -8,7 +8,28 @@ class Media_model extends Model {
 	var $dir_list_rel;
 
 	var $file_list;
+
+	var $media_id;
+	var $file_uri;
+	var $external;
 	var $mime;
+	var $created;
+	var $creator;
+
+	var $data_id;
+	var $media_lang;
+	var $title;
+	var $uri_title;
+	var $description;
+	var $keywords;
+	var $copyright;
+	var $city;
+	var $prov_state;
+	var $country;
+
+	var $iptc;
+	var $exif;
+
 
     function Media_model()
     {
@@ -127,10 +148,156 @@ class Media_model extends Model {
 		$this->file_list = $insertfiles;
 	}
 
+    function update_media()
+    {
+
+		$data = array(
+		'file_uri' => $this->file_uri,
+		'external' => $this->external,
+		'mime' => $this->mime,
+		'created' => $this->created,
+		'creator' => $this->creator,
+		);
+
+		if($this->media_id == '') {
+			// insert
+			if($this->db->insert('media', $data)){
+				$this->media_id = $this->db->insert_id();
+				return TRUE;
+			}
+		} else {
+			// update
+			$this->db->where('media_id', $this->media_id);
+			if($this->db->update('media', $data)){
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+    function update_meta()
+    {
+
+		$data = array(
+		'media_id' => $this->media_id,
+		'media_lang' => $this->media_lang,
+		'title' => $this->title,
+		'uri_title' => convert_uri($this->title),
+		'description' => $this->description,
+		'keywords' => $this->keywords,
+		'copyright' => $this->copyright,
+		'city' => $this->city,
+		'prov_state' => $this->prov_state,
+		'country' => $this->country
+		);
+		if($this->data_id == '') {
+			// insert
+			if($this->db->insert('media_data', $data)){
+				$this->data_id = $this->db->insert_id();
+				return TRUE;
+			}
+		} else {
+			// update
+			$this->db->where('data_id', $this->data_id);
+			if($this->db->update('media_data', $data)){
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+    }
 
 
+    function get_media()
+    {
 
+		// first get data from 'media' table
+		$query = $this->db->get_where('media', array('media_id' => $this->media_id));
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$this->file_uri = $row->file_uri;
+			$this->external = $row->external;
+			$this->mime = $row->mime;
+			$this->created = $row->created;
+			$this->creator = $row->creator;
+			return TRUE;
+		} else {
+			return FALSE;
+		}
 
+	}
+
+    function get_media_by_uri()
+    {
+
+		// first get data from 'media' table
+		$query = $this->db->get_where('media', array('file_uri' => $this->file_uri));
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$this->media_id = $row->media_id;
+			$this->external = $row->external;
+			$this->mime = $row->mime;
+			$this->created = $row->created;
+			$this->creator = $row->creator;
+			return TRUE;
+		} else {
+			return FALSE;
+		}
+
+	}
+
+    function get_meta()
+    {
+		$this->db->select('*');
+		$this->db->from('media_data');
+
+		if($this->data_id != '') {
+			$this->db->where('data_id', $this->data_id);
+		} else {
+			$this->db->where('media_id', $this->media_id);
+			$this->db->where('media_lang', $this->media_lang);
+		}
+		
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0)
+		{
+		   $row = $query->row();
+		
+		   $this->data_id = $row->data_id;
+		   $this->media_lang = $row->media_lang;
+		   $this->title = $row->title;
+		   $this->uri_title = $row->uri_title;
+		   $this->description = $row->description;
+		   $this->keywords = $row->keywords;
+		   $this->copyright = $row->copyright;
+		   $this->city = $row->city;
+		   $this->prov_state = $row->prov_state;
+		   $this->country = $row->country;
+		}
+	}
+
+    function read_file_info()
+    {
+		$file_full = $this->dir_base.$this->file_uri;
+		
+		if(file_exists($file_full) && !is_dir($file_full)) {
+
+			$size = getimagesize($file_full, $info);
+			if(isset($info['APP13']))
+			{
+				$this->iptc = iptcparse($info['APP13']);
+			} else {
+				$this->iptc = FALSE;
+			}
+			$this->exif = exif_read_data($file_full);
+	
+		}
+		
+	}
 }
 
 ?>

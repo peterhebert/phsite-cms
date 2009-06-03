@@ -56,7 +56,8 @@ class Image extends Controller {
 	
 	
 			}
-	
+	$size = 150;
+
 			$image_html = view_image($src,$size,$ratio,$attr);
 			echo $image_html;
 			$metadata = get_metadata($src);
