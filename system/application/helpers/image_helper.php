@@ -267,5 +267,6 @@ if ( ! function_exists('flv_player'))
 
 }
 
+
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

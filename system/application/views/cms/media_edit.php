@@ -9,16 +9,32 @@
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Media editor</div>
+	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : <?php echo anchor("cms/media/manage","Media"); ?> : Media editor</div>
 	<div class="page-wrap block">
 		<h1>Media editor</h1>
 		<?php
-		if(isset($thumb)) {
-			echo $thumb;
+		if(isset($msg)) {
+			echo"<div class=\"msg\">";
+			echo $msg;
+			echo"</div>\n";
 		}
+		?>
+		<div class="block six">
+		<?php
+		echo "<div class=\"column w5\">";
 		if(isset($form)) {
 			echo $form;
 		}
+		echo "</div>";
+		echo "<div class=\"float w1\">";
+		if(isset($thumb)) {
+			echo $thumb;
+		}
+		if(isset($langlist)) {
+			echo "<h2>Other Languages</h2>";
+			echo $langlist;
+		}
+		echo "</div>";
 		
 		if(isset($meta)) {
 			echo "<pre>";
@@ -26,6 +42,7 @@
 			echo "</pre>";
 		}
 		?>
+		</div>
 
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>

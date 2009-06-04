@@ -30,6 +30,33 @@ class Media_model extends Model {
 	var $iptc;
 	var $exif;
 
+	var $media_types = array(
+	'dcr' => array('application/x-director','Shockwave Director'),
+	'swf ' => array('application/x-shockwave-flash','Shockwave Flash'),
+	'flac' => array('audio/flac','Free Lossless Audio Codec'),
+	'mp3 ' => array('audio/mpeg3','MPEG-2 layer 3 audio'),
+	'oga' => array('audio/ogg','Ogg Audio'),
+	'ogg' => array('audio/ogg','Ogg Vorbis Audio'),
+	'gif ' => array('image/gif','Graphical Interchange Format'),
+	'jpg ' => array('image/jpeg','Joint Photographic Experts Group (JPEG) image'),
+	'png ' => array('image/png','Portable Network Graphics'),
+	'mpeg ' => array('video/mpeg','Moving Picture Experts Group (MPEG) video'),
+	'mpg ' => array('video/mpeg','Moving Picture Experts Group (MPEG) video'),
+	'ogv' => array('video/ogg','Ogg Video'),
+	'mov ' => array('video/quicktime','QuickTime'),
+	'flv' => array('video/x-flv','Flash video'),
+	'tgz ' => array('application/gnutar','Tar Gzip archive'),
+	'doc ' => array('application/msword','Microsoft Word document'),
+	'pdf ' => array('application/pdf','Portable Document Format'),
+	'rtf ' => array('application/rtf','Rich Text format'),
+	'xls ' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
+	'ppt ' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
+	'zip ' => array('application/zip','Zip archive'),
+	'txt' => array('text/plain','plain text'),
+	'odt' => array('application/vnd.oasis.opendocument.text','OpenDocument Text'),
+	'odp' => array('application/vnd.oasis.opendocument.presentation','OpenDocument Presentation'),
+	'ods' => array('application/vnd.oasis.opendocument.spreadsheet','OpenDocument Spreadsheet'),
+	);
 
     function Media_model()
     {
@@ -105,47 +132,46 @@ class Media_model extends Model {
 	}
 
 	function list_files_unique($filepath='') {
-		//using the opendir function
-		$dir_handle = @opendir($filepath) or die("Unable to open $filepath");
-		$bases = array();
-		$files = array();
-	
+		
+		$this->list_files($filepath);
+
+		$files = $this->file_list;
+		$new_list = array();
 		$imageTypes = array("jpg","gif","png");
 	
+		$fnames = array();
+		$exts = array();
+
 		//running the while loop
-		while ($file = readdir($dir_handle)) {
-			$newpath = $filepath.'/'.$file;
-	
-			$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
-			if(!in_array($file,$ignore) && !is_dir($newpath)) {
-				$pi = pathinfo($file);
-				$fnames[] = $pi['filename'];
-				$exts[] = $pi['extension'];
-				$files[] = $file;
-			}
+		foreach ($files as $file) {
+			$pi = pathinfo($file);
+			$fnames[] = $pi['filename'];
+			$exts[] = strtolower($pi['extension']);
 		}
-		//closing the directory
-		closedir($dir_handle);
 		
-		if(is_array($fnames)) {
-			$count = array_count_values($fnames);
-			foreach($count as $fname => $times) {
+		$unique_names = array_count_values($fnames);
 		
-				$duplicates = array_keys( $fnames, $fname );
-				if($times > 1) {
-					foreach($duplicates as $key) {
-						if(!in_array($exts[$key],$imageTypes)) {
-							$insertfiles[] = $files[$key];
-						}
+		foreach($unique_names as $uname => $times) {
+			$matching_keys = array_keys( $fnames, $uname);
+			if($times > 1) {
+				foreach($matching_keys as $key) {
+					
+					if(!in_array($exts[$key],$imageTypes)) {
+						$newfile = $files[$key];
 					}
-				} else {
-					$insertfiles[] = $files[$duplicates[0]];
 				}
-		
+				if(!isset($newfile)) {
+					$newfile = $files[$matching_keys[0]];
+				}
+
+			} else {
+				$newfile = $files[$matching_keys[0]];
 			}
+			$new_list[] = $newfile;
+			unset($newfile);
 		}
-		
-		$this->file_list = $insertfiles;
+
+		$this->file_list = $new_list;
 	}
 
     function update_media()
@@ -251,6 +277,8 @@ class Media_model extends Model {
 
     function get_meta()
     {
+		$success = FALSE;
+
 		$this->db->select('*');
 		$this->db->from('media_data');
 
@@ -265,39 +293,86 @@ class Media_model extends Model {
 
 		if ($query->num_rows() > 0)
 		{
-		   $row = $query->row();
-		
-		   $this->data_id = $row->data_id;
-		   $this->media_lang = $row->media_lang;
-		   $this->title = $row->title;
-		   $this->uri_title = $row->uri_title;
-		   $this->description = $row->description;
-		   $this->keywords = $row->keywords;
-		   $this->copyright = $row->copyright;
-		   $this->city = $row->city;
-		   $this->prov_state = $row->prov_state;
-		   $this->country = $row->country;
+			$success = TRUE;
+			$row = $query->row();
+			
+			$this->data_id = $row->data_id;
+			$this->media_lang = $row->media_lang;
+			$this->title = $row->title;
+			$this->uri_title = $row->uri_title;
+			$this->description = $row->description;
+			$this->keywords = $row->keywords;
+			$this->copyright = $row->copyright;
+			$this->city = $row->city;
+			$this->prov_state = $row->prov_state;
+			$this->country = $row->country;
 		}
+		
+		return $success;
 	}
+
+    // return other languages than current language
+    function get_other_langs()
+    {
+		
+		$otherlangs = array();
+
+		$this->db->select('*');
+		$this->db->from('media_data');
+
+		$this->db->where('media_id', $this->media_id);
+		$this->db->where('media_lang !=', $this->media_lang);
+		
+		$query = $this->db->get();
+
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result_array() as $row)
+			{
+			   $otherlangs[] = $row['content_lang'];
+			}
+		}
+		return $otherlangs;
+    }
 
     function read_file_info()
     {
-		$file_full = $this->dir_base.$this->file_uri;
-		
+
+		$file_full = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG.$this->file_uri;
 		if(file_exists($file_full) && !is_dir($file_full)) {
 
 			$size = getimagesize($file_full, $info);
+
 			if(isset($info['APP13']))
 			{
 				$this->iptc = iptcparse($info['APP13']);
 			} else {
 				$this->iptc = FALSE;
 			}
-			$this->exif = exif_read_data($file_full);
-	
+			$test_exif = @exif_read_data($file_full);
+			if(is_array($test_exif)) {
+				$this->exif = $test_exif;
+			} else {
+				$this->exif = FALSE;
+			}
 		}
 		
 	}
+
+	function get_mime($filename) {
+		if(file_exists($filename) && !is_dir($filename)) {
+			$ext = strrchr($filename, '.');
+			if(array_key_exists($ext,$this->media_types)) {
+				return $this->media_types[$ext][0];
+			} else {
+				return 'application/octet-stream';
+			}
+		}
+
+		return FALSE;
+	}
+
+
 }
 
 ?>

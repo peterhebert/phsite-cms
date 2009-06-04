@@ -145,12 +145,8 @@ class MY_Form_validation extends CI_Form_validation {
 
 	function is_lang($str)
 	{
-		$pattern = '^([a-z]){3}$';
-		$valid = ereg($pattern, $str);
-		return $valid;
+		return ( ! ereg('^([a-z]){3}$', $str)) ? FALSE : TRUE;
 	}
-
-
 
 
 }
