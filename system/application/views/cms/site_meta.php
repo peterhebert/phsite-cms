@@ -94,7 +94,18 @@
 			'value'       => $copyright
 			);
 			echo"<p>";
-			echo form_label('Copyright', 'copyright');
+			echo form_label('Copyright notice', 'copyright');
+			echo form_input($field_params);
+			echo"</p>\n";
+
+			$field_params = array(
+			'class'        => 'text',
+			'name'        => 'copyright_year_start',
+			'id'          => 'copyright_year_start',
+			'value'       => $copyright_year_start
+			);
+			echo"<p>";
+			echo form_label('Copyright Start Year', 'copyright_year_start');
 			echo form_input($field_params);
 			echo"</p>\n";
 			?>

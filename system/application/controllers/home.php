@@ -23,6 +23,34 @@ class Home extends Controller {
 		}
 		$this->data['base_path'] = $base;
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
+
+		// get site metadata
+		$this->Site_model->load_meta($this->Site_model->default_lang);
+		$this->data['site_meta_title'] = $this->Site_model->title;
+		$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
+		$this->data['site_meta_description'] = $this->Site_model->description;
+		$this->data['site_meta_keywords'] = $this->Site_model->keywords;
+		
+		$copyright = convert_entities($this->Site_model->copyright);
+		$copyright_year = $this->Site_model->copyright_year_start;
+		
+		if($copyright != ''){
+			$this->data['site_meta_copyright'] = "&copy; ";
+			if($copyright_year != ''){
+				$this->data['site_meta_copyright'] .= $copyright_year.' - ';
+				$this->data['site_meta_copyright'] .= date("Y").' ';
+			}
+			$this->data['site_meta_copyright'] .= $copyright;
+		} else {
+			$this->data['site_meta_copyright'] = '';
+		}
+		
+		
+		$this->data['site_meta_creator'] = $this->Site_model->creator;
+		$this->data['site_meta_updated'] = $this->Site_model->updated;
+		$this->data['site_meta_updated_W3C'] = substr($this->Site_model->updated,0,10);
+		$this->data['site_meta_lang'] = $this->Site_model->site_lang;
+
 	}
 	
 	function index()
@@ -49,17 +77,6 @@ class Home extends Controller {
 					unset($link_uri);
 				}
 	
-				$this->Site_model->load_meta($this->Site_model->default_lang);
-				$this->data['site_meta_title'] = $this->Site_model->title;
-				$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
-				$this->data['site_meta_description'] = $this->Site_model->description;
-				$this->data['site_meta_keywords'] = $this->Site_model->keywords;
-				$this->data['site_meta_copyright'] = convert_entities($this->Site_model->copyright);
-				$this->data['site_meta_creator'] = $this->Site_model->creator;
-				$this->data['site_meta_updated'] = $this->Site_model->updated;
-				$this->data['site_meta_updated_W3C'] = substr($this->Site_model->updated,0,10);
-				$this->data['site_meta_lang'] = $this->Site_model->site_lang;
-				
 				$this->data['menu'] = $zzz_menu;
 				$this->load->view($view,$this->data);
 			} else {
@@ -178,16 +195,6 @@ class Home extends Controller {
 				
 			}
 			
-			// get site metadata
-			$this->Site_model->load_meta($this->Content_model->content_lang);
-			$this->data['site_meta_title'] = $this->Site_model->title;
-			$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
-			$this->data['site_meta_description'] = $this->Site_model->description;
-			$this->data['site_meta_keywords'] = $this->Site_model->keywords;
-			$this->data['site_meta_copyright'] = convert_entities($this->Site_model->copyright);
-			$this->data['site_meta_creator'] = $this->Site_model->creator;
-			$this->data['site_meta_updated'] = $this->Site_model->updated;
-
 			$view = 'themes/'.$this->Site_model->theme.'/'.$this->Object_model->name_uri;
 
 			$this->load->view($view,$this->data);
@@ -246,6 +253,16 @@ class Home extends Controller {
 
 
 	}
+
+	function sitemap()
+	{
+		$this->data['list'] = $this->Content_model->site_map(0,0,$this->Site_model->site_lang);
+
+		$view = 'themes/'.$this->Site_model->theme.'/site_map';
+
+		$this->load->view($view,$this->data);
+	}
+
 
 }
 ?>

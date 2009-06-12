@@ -36,6 +36,7 @@ class Site_model extends Model {
 	var $site_lang;
 	var $creator;
 	var $updated;
+	var $copyright_year_start;
 
     function Site_model()
     {
@@ -152,6 +153,7 @@ class Site_model extends Model {
 			$this->description = $row['description'];
 			$this->keywords = $row['keywords'];
 			$this->copyright = $row['copyright'];
+			$this->copyright_year_start = $row['copyright_year_start'];
 			$this->site_lang = $row['site_lang'];
 			$this->updated = $row['updated'];
 			$this->creator = $row['creator'];
@@ -166,6 +168,7 @@ class Site_model extends Model {
 		'description' => $this->description,
 		'keywords' => $this->keywords,
 		'copyright' => $this->copyright,
+		'copyright_year_start' => $this->copyright_year_start,
 		'creator' => $this->creator,
 		'site_lang' => $this->site_lang
 		);

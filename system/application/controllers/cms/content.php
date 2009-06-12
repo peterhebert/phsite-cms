@@ -59,11 +59,9 @@ class Content extends Controller
 
 	function site_map()
 	{
-		
-		$this->data['title'] = 'Site Map';
-		$this->data['list'] = $this->Content_model->site_map(0,0,$this->Site_model->site_lang);
-
-		$this->load->view('cms/content_list',$this->data);
+		$this->authenticate();
+		$this->data['list'] = $this->Content_model->site_map(0,1,$this->Site_model->site_lang);
+		$this->load->view('cms/site_map',$this->data);
 	}
 
 	function get_langs()

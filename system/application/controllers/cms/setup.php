@@ -263,6 +263,7 @@ class Setup extends Controller
 				$this->Site_model->description = $this->input->post('description');
 				$this->Site_model->keywords = $this->input->post('keywords');
 				$this->Site_model->copyright = $this->input->post('copyright');
+				$this->Site_model->copyright_year_start = $this->input->post('copyright_year_start');
 				$this->Site_model->creator = $this->input->post('creator');
 				$this->Site_model->site_lang = $this->input->post('site_lang');
 
@@ -283,6 +284,7 @@ class Setup extends Controller
 		$this->data['description'] =  $this->Site_model->description;
 		$this->data['keywords'] =  $this->Site_model->keywords;
 		$this->data['copyright'] =  $this->Site_model->copyright;
+		$this->data['copyright_year_start'] =  $this->Site_model->copyright_year_start;
 		$this->data['creator'] =  $this->Site_model->creator;
 		$this->data['site_lang'] =  $this->Site_model->site_lang;
 

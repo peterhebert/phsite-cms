@@ -27,9 +27,11 @@ $().ready(function(){
 	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : CMS Home</div>
 	<div class="page-wrap block">
 		<div class="column w4">
-		<h1>Content</h1>
-		<?php echo $content; ?>
+			<h1>Content</h1>
 			<?php
+			echo $content; 
+			echo "<p>".anchor("cms/content/site_map","Site Map")."</p>\r";
+		
 			foreach($new_objects as $index => $row) {
 				$my_uri = site_url("cms/content/edit/type/".$row['object_id']);
 				$dropdown[$my_uri] = $row['name'];

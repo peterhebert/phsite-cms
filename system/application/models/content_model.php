@@ -77,13 +77,12 @@ class Content_model extends Model {
 
 			if($mode == 0) {
 				$link = '/'.$this->get_uri_display($page['content_id'],$page['content_lang']);
-				$alt =  'view';
+				$list .= anchor($link, $page['title'], array('title' => "view '{$page['title']}'"));
 			} else {
 				$link = "cms/content/edit/id/".$page['content_id'];
 				$link .= "/lang/".$page['content_lang'];
-				$alt =  'edit';
+				$list .= anchor($link, $page['title'], array('title' => "edit '{$page['title']}'", 'class' => 'sitemap'));
 			}
-			$list .= anchor($link, $page['title'], array('title' => "$alt '{$page['title']}'"));
 
 			$children = $this->site_map($page['content_id'],$mode,$page['content_lang']);
 

@@ -43,6 +43,7 @@
 $route['default_controller'] = "home";
 $route['scaffolding_trigger'] = "";
 
+$route['sitemap'] = "home/sitemap";
 $route['cms'] = "cms/cms";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
