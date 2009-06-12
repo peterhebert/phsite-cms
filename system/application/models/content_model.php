@@ -4,6 +4,7 @@ class Content_model extends Model {
 	var $content_id;
 	var $parent_id;
 	var $object_id;
+	var $object_name;
 	var $user_id;
 	var $created;
 	var $updated;
@@ -22,7 +23,7 @@ class Content_model extends Model {
     }
 
     // list content
-	function get_list($limit=0,$order='',$parent='',$page=1)
+	function get_list($limit=0,$order='',$parent_id='',$page=1)
     {
 
 		$this->db->select('*');
@@ -30,10 +31,10 @@ class Content_model extends Model {
 		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
 
 		if($this->content_lang != '') {
-			$this->db->where = array('content_lang' => $this->content_lang);
+			$this->db->where('content_lang', $this->content_lang); 
 		}
-		if($parent != '' && is_numeric($parent)) {
-			$this->db->where = array('parent_id' => $parent);
+		if($parent_id != '' && is_numeric($parent_id)) {
+			$this->db->where('parent_id', $parent_id); 
 		}
 		if($limit > 0) {
 			if($page > 1) {
@@ -50,6 +51,52 @@ class Content_model extends Model {
 		$query = $this->db->get();
 		return $query->result_array();
 
+	}
+
+    // list site map
+	function site_map($parent_id=0,$mode=0,$my_lang='')
+    {
+
+		$this->db->from('content');
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+		$this->db->where('parent_id', $parent_id); 
+		if($my_lang != '') {
+			$this->db->where('content_lang', $my_lang); 
+		}
+		$query = $this->db->get();
+		$pages = $query->result_array();
+		
+		$list = '';
+		if(count($pages) > 0) {
+			$list = "<ul>\r";
+		}
+
+
+		foreach($pages as $page) {
+			$list .= "<li>";
+
+			if($mode == 0) {
+				$link = '/'.$this->get_uri_display($page['content_id'],$page['content_lang']);
+				$alt =  'view';
+			} else {
+				$link = "cms/content/edit/id/".$page['content_id'];
+				$link .= "/lang/".$page['content_lang'];
+				$alt =  'edit';
+			}
+			$list .= anchor($link, $page['title'], array('title' => "$alt '{$page['title']}'"));
+
+			$children = $this->site_map($page['content_id'],$mode,$page['content_lang']);
+
+			if($children != "") {
+				$list .=  $children;
+			}
+			$list .=  "</li>\r";
+		}
+		if(count($pages) > 0) {
+			$list .= "</ul>\r";
+		}
+		
+		return $list;
 	}
 
     // list recent content
@@ -189,6 +236,7 @@ class Content_model extends Model {
 			$data = array(
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
+			'object_name' => $this->object_name,
 			'user_id' => $this->user_id,
 			'created' => $this->created,
 			'splash' => $this->splash
@@ -202,6 +250,7 @@ class Content_model extends Model {
 			$data = array(
 			'parent_id' => $this->parent_id,
 			'object_id' => $this->object_id,
+			'object_name' => $this->object_name,
 			'user_id' => $this->user_id,
 			'created' => $this->created,
 			'splash' => $this->splash
@@ -368,16 +417,18 @@ class Content_model extends Model {
 	}
 
 
-    function get_uri_display($id,$content_lang='')
+    function get_uri_display($content_id,$content_lang='')
     {
 
 		// first get data about supplied id
-		$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE content.content_id = ".$id;
+		
+		$this->db->from('content');
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+		$this->db->where('content.content_id', $content_id); 
 		if($content_lang != '') {
-			$sql .= " AND content_lang = '{$content_lang}'";
+			$this->db->where('content_lang', $content_lang); 
 		}
-		$query = $this->db->query($sql);
-
+		$query = $this->db->get();
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();
@@ -392,12 +443,13 @@ class Content_model extends Model {
 		while ($content_id != 0)
 		{
 
-			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id 
-			WHERE content.content_id = ".$content_id;
-			if($content_lang != '') {
-				$sql .= " AND content_lang = '{$content_lang}'";
-			}
-			$query = $this->db->query($sql);
+		$this->db->from('content');
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+		$this->db->where('content.content_id', $content_id); 
+		if($content_lang != '') {
+			$this->db->where('content_lang', $content_lang); 
+		}
+		$query = $this->db->get();
 
 			if ($query->num_rows() > 0)
 			{
@@ -405,7 +457,6 @@ class Content_model extends Model {
 			
 			   $uriArray[] = $row->uri_title;
 			   $content_id = $row->parent_id;
-
 			} 
 
 		} 

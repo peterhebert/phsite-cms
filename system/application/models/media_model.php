@@ -3,6 +3,7 @@ class Media_model extends Model {
 
 	var $dir_base;
 	var $dir_current;
+	var $dir_name;
 
 	var $dir_list;
 	var $dir_list_rel;
@@ -32,26 +33,26 @@ class Media_model extends Model {
 
 	var $media_types = array(
 	'dcr' => array('application/x-director','Shockwave Director'),
-	'swf ' => array('application/x-shockwave-flash','Shockwave Flash'),
-	'flac' => array('audio/flac','Free Lossless Audio Codec'),
-	'mp3 ' => array('audio/mpeg3','MPEG-2 layer 3 audio'),
-	'oga' => array('audio/ogg','Ogg Audio'),
-	'ogg' => array('audio/ogg','Ogg Vorbis Audio'),
-	'gif ' => array('image/gif','Graphical Interchange Format'),
-	'jpg ' => array('image/jpeg','Joint Photographic Experts Group (JPEG) image'),
-	'png ' => array('image/png','Portable Network Graphics'),
-	'mpeg ' => array('video/mpeg','Moving Picture Experts Group (MPEG) video'),
-	'mpg ' => array('video/mpeg','Moving Picture Experts Group (MPEG) video'),
-	'ogv' => array('video/ogg','Ogg Video'),
-	'mov ' => array('video/quicktime','QuickTime'),
+	'swf' => array('application/x-shockwave-flash','Flash'),
+	'flac' => array('audio/flac','<acronym title="Free Lossless Audio Codec">FLAC</acronym> audio'),
+	'mp3' => array('audio/mpeg3','MP3 audio'),
+	'oga' => array('audio/ogg','Ogg audio'),
+	'ogg' => array('audio/ogg','Ogg Vorbis audio'),
+	'gif' => array('image/gif','<acronym title="Graphical Interchange Format">GIF</acronym>'),
+	'jpg' => array('image/jpeg','<acronym title="Joint Photographic Experts Group">JPEG</acronym> image'),
+	'png' => array('image/png','<acronym title="Portable Network Graphics">PNG</acronym> image'),
+	'mpeg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
+	'mpg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
+	'ogv' => array('video/ogg','Ogg video'),
+	'mov' => array('video/quicktime','QuickTime video'),
 	'flv' => array('video/x-flv','Flash video'),
-	'tgz ' => array('application/gnutar','Tar Gzip archive'),
-	'doc ' => array('application/msword','Microsoft Word document'),
-	'pdf ' => array('application/pdf','Portable Document Format'),
-	'rtf ' => array('application/rtf','Rich Text format'),
-	'xls ' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
-	'ppt ' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
-	'zip ' => array('application/zip','Zip archive'),
+	'tgz' => array('application/gnutar','Tar Gzip archive'),
+	'doc' => array('application/msword','Microsoft Word document'),
+	'pdf' => array('application/pdf','Portable Document Format'),
+	'rtf' => array('application/rtf','Rich text format'),
+	'xls' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
+	'ppt' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
+	'zip' => array('application/zip','Zip archive'),
 	'txt' => array('text/plain','plain text'),
 	'odt' => array('application/vnd.oasis.opendocument.text','OpenDocument Text'),
 	'odp' => array('application/vnd.oasis.opendocument.presentation','OpenDocument Presentation'),
@@ -359,11 +360,14 @@ class Media_model extends Model {
 		
 	}
 
-	function get_mime($filename) {
+	function get_mime($filename,$mode=0) {
 		if(file_exists($filename) && !is_dir($filename)) {
 			$ext = strrchr($filename, '.');
+			$ext = substr($ext,1,strlen($ext)-1);
+			$ext = strtolower($ext);
+
 			if(array_key_exists($ext,$this->media_types)) {
-				return $this->media_types[$ext][0];
+				return $this->media_types[$ext][$mode];
 			} else {
 				return 'application/octet-stream';
 			}
@@ -371,6 +375,13 @@ class Media_model extends Model {
 
 		return FALSE;
 	}
+
+    function delete_media()
+    {
+		$tables = array('media', 'media_data');
+		$this->db->where('media_id', $this->media_id);
+		$this->db->delete($tables);
+    }
 
 
 }

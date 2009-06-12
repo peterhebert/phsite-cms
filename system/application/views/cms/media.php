@@ -8,7 +8,7 @@
 <style type="text/css">
 <!--
 ul.thumbnails li {
-	min-height: <?php echo round(($size/15)+.5,3); ?>em;
+	min-height: <?php echo round(($size/15)+2.5,3); ?>em;
 }
 ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
 -->
@@ -26,6 +26,14 @@ $().ready(function(){
 		
 	});
 
+	$("a[id='select_all']").click(function () {
+		$("input[type='checkbox']").attr("checked","checked");
+	});
+
+	$("a[id='deselect_all']").click(function () {
+		$("input[type='checkbox']").removeAttr("checked");
+	});
+
 });
 
 /* ]]> */
@@ -39,8 +47,14 @@ $().ready(function(){
 		<h1>Manage media</h1>
 		<p><?php echo anchor("cms/media/upload","upload media"); ?></p>
 		<?php
+		if(isset($msg)) {
+			echo "<div class=\"msg\">";
+			echo $msg;
+			echo "</div>\r";
+		}
+
 		if(isset($dirs)) {
-			echo form_open('cms/media');
+			echo form_open(current_url());
 			echo $dirs;
 			echo "<noscript>";
 			echo form_submit('submit', 'Load');
@@ -48,7 +62,10 @@ $().ready(function(){
 			echo form_close();
 		}
 		if(isset($files)) {
+			echo form_open(current_url());
 			echo $files;
+			echo $del_buttons;
+			echo form_close();
 		} ?>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>

@@ -116,17 +116,66 @@ class Media extends Controller {
 		$this->authenticate();
 		
 		$this->Media_model->media_lang = $this->Site_model->default_lang;
+		$media_root = $this->Media_model->dir_base;
 
 		$uri = $this->uri->segment_array();
 		$dirA = array_slice($uri, 3);
 		$displayDir = implode('/',$dirA);
 		$myDir = '/'.$displayDir;
 
+		if($this->input->post('delete') != '') {
+
+			$del_ids = $this->input->post('delete');
+			$unsuccessfull = array();
+			
+			// delete all selected files
+			foreach($del_ids as $del_file_id) {
+			
+				$del_db = FALSE;
+				$this->Media_model->media_id = $del_file_id;
+				$del_media_exists = $this->Media_model->get_media();
+
+				if($del_media_exists === TRUE && $this->Media_model->external == 0) {
+				
+					$del_filename = $media_root.$this->Media_model->file_uri;
+					$ext = strrchr($this->Media_model->file_uri, '.');
+					$jpg_alt = str_replace($ext,'.jpg',$del_filename);
+					
+					// try deleting
+					if(file_exists($del_filename)) {
+						if(@unlink($del_filename) === TRUE) {
+							@unlink($jpg_alt);
+							$del_db = TRUE;
+						} else {
+							$unsuccessfull[] = basename($this->Media_model->file_uri);
+						}
+					}
+					
+				} else {
+					$del_db = TRUE;
+				}
+				
+				if($del_db === TRUE) {
+					$this->Media_model->delete_media();
+				}
+			}
+			
+			 //success message
+			if( count($unsuccessfull) == 0 ) {
+				$this->data['msg'] = "<p>All files were successfully deleted</p>\r";
+			}
+			 //error message
+			if( count($unsuccessfull) > 0 ) {
+				$this->data['msg'] = "<p>The following files could not be deleted:<br />".implode(', ',$unsuccessfull)."</p>\r";
+			}
+
+		}
+
+
 		if($this->input->post('directory') != '') {
 			$myDir = $this->input->post('directory');
 		}
 		//get list of directories in media folder
-		$media_root = $this->Media_model->dir_base;
 		$this->Media_model->list_dirs();
 
 		$dir_array['/'] = 'Media root';
@@ -141,6 +190,7 @@ class Media extends Controller {
 
 
 		$files = '';
+		$del_buttons = '';
 		
 		$attributes = array('class' => 'thumbnails');
 
@@ -154,6 +204,10 @@ class Media extends Controller {
 		}
 		$files .= "<h2>$displayDir</h2>\n";
 		if(is_array($temp_file_list) && count($temp_file_list) > 0) {
+			$files .= "<p>Click thumbnails to edit</p>\n";
+			$del_buttons = "<p><a href=\"#\" id=\"select_all\" class=\"mg-right\">Select All</a> ";
+			$del_buttons .= "<a href=\"#\" id=\"deselect_all\" class=\"mg-right\">Deselect All</a> ";
+			$del_buttons .= form_submit('submit', 'Delete files')."</p>\n";
 			$this->Media_model->external = 0;
 			foreach($temp_file_list as $file) {
 
@@ -176,20 +230,16 @@ class Media extends Controller {
 				$media_exists = $this->Media_model->get_media_by_uri();
 				
 				if($media_exists) {
-					echo $this->Media_model->file_uri." exists - id {$this->Media_model->media_id}<br />\r";
 					
 					$meta_exists = $this->Media_model->get_meta();
 					if($meta_exists !== FALSE) {
-						//echo $this->Media_model->file_uri." HAS METADATA: {$this->Media_model->data_id} <br />\r";
 					} else {
-						//echo $this->Media_model->file_uri." DOES NOT HAVE META <br />\r";
 						// insert metadata to database
 						$this->get_file_metadata();
 						$this->Media_model->update_meta();
 					}
 					
 				} else {
-					//echo $this->Media_model->file_uri." DOES NOT EXIST <br />\r";
 					// load file metadata and insert to database
 					$this->get_file_metadata();
 					$media_ins = $this->Media_model->update_media();
@@ -216,9 +266,23 @@ class Media extends Controller {
 					
 					$img_tag = basename($file);
 				}
-				
-				$temp_code = "<div class=\"thumb\"><a href=\"{$tag_link}\">{$img_tag}</a></div>\r";
-			
+
+				$chk = array(
+				'name'        => 'delete[]',
+				'value'       => $this->Media_model->media_id,
+				'checked'     => FALSE,
+				);
+
+				if ($this->Media_model->title != '') {
+					$chk_lbl = $this->Media_model->title;
+				} else {
+					$chk_lbl = basename($this->Media_model->file_uri);
+				}
+
+				$temp_code = "<div class=\"thumb\"><a href=\"{$tag_link}\" alt=\"edit '{$this->Media_model->title}'\">{$img_tag}</a></div>\r";
+				$temp_code .= "<div class=\"title\"><label>".form_checkbox($chk)." {$chk_lbl}</label><br />\r";
+				$temp_code .= $this->Media_model->get_mime($media_root.$this->Media_model->file_uri,1)."</div>\r";
+
 				$files_clean[] = $temp_code;
 			}
 			$files .= ul($files_clean, $attributes);
@@ -228,8 +292,11 @@ class Media extends Controller {
 		} else {
 			$files .= "<p>no media in directory</p>\n";
 		}
+
+
 		$this->data['page'] = $this->config->item('base_url').'cms/media/manage';
 		$this->data['files'] = $files;
+		$this->data['del_buttons'] = $del_buttons;
 		$this->data['size'] = $this->Site_model->img_size_thumb;
 		$this->data['dirs'] = form_dropdown('directory', $dir_array, $myDir);
 		$this->load->view('cms/media', $this->data);
@@ -579,6 +646,9 @@ class Media extends Controller {
 
 		if($this->Media_model->title == '') {
 			$this->Media_model->title = $filename;
+		}
+		if($this->Media_model->created == '') {
+			$this->Media_model->created = date('Y-m-d H:i:s');
 		}
 
 	}

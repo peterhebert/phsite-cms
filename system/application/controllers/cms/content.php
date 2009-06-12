@@ -37,26 +37,32 @@ class Content extends Controller
 	{
 		$this->authenticate();
 
-		$params = $this->uri->uri_to_assoc(4);
-
 		$this->data['title'] = 'Content';
-		$content = $this->Content_model->get_list();
+		$content = $this->Content_model->get_list(0,$order='',$parent='',$page=1);
 
-		foreach($content as $row)
-		{
-
-			$this->Content_model->content_id = $row['content_id'];
-			$this->Content_model->get_content();
-			$link = "cms/content/edit/id/".$this->Content_model->content_id;
-			if($this->Content_model->content_lang != '') {
-				$link .= "/lang/".$this->Content_model->content_lang;
+		foreach($content as $page) {
+			$link = "cms/content/edit/id/".$page['content_id'];
+			if($page['content_lang'] != '') {
+				$link .= "/lang/".$page['content_lang'];
 			}
 
-			$list[$this->Content_model->content_id] = anchor($link, $this->Content_model->title, array('title' => "edit '{$this->Content_model->title}'"));
-
+			$list[] = anchor($link, $page['title'], array('title' => "edit '{$page['title']}'"));
+			
 		}
 
-		$this->data['list'] = ul($list);
+		if(isset($list)) {
+			$this->data['list'] = ul($list);
+		}
+
+		$this->load->view('cms/content_list',$this->data);
+	}
+
+	function site_map()
+	{
+		
+		$this->data['title'] = 'Site Map';
+		$this->data['list'] = $this->Content_model->site_map(0,0,$this->Site_model->site_lang);
+
 		$this->load->view('cms/content_list',$this->data);
 	}
 
@@ -237,7 +243,14 @@ class Content extends Controller
 				$this->load->model('Media_model');
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
-				$content .= form_dropdown($field_params['name'], $this->Media_model->dir_list, $fd['value']);
+				$dir_list_temp = $this->Media_model->dir_list;
+				
+				foreach($dir_list_temp as $the_dir) {
+					$temp_dir_val = str_replace($media_root,'',$the_dir);
+					$dir_vals[$temp_dir_val] = $temp_dir_val;
+				}
+				
+				$content .= form_dropdown($field_params['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
 				$this->load->model('Media_model');
@@ -290,10 +303,6 @@ class Content extends Controller
 		$objArray = $this->get_objects();
 		$parentArray = $this->get_parents();
 		$langArray = $this->get_langs();
-
-
-
-
 
 		$meta =	"<p>";
 		$meta .= form_label('Author', 'user_id');
@@ -418,7 +427,12 @@ class Content extends Controller
 
 			$this->Content_model->content_id = $this->input->post('content_id');
 			$this->Content_model->parent_id = $this->input->post('parent_id');
+
+			$this->Object_model->object_id = $this->input->post('object_id');
+			$this->Object_model->load_object();
 			$this->Content_model->object_id = $this->input->post('object_id');
+			$this->Content_model->object_name = $this->Object_model->name_uri;
+
 			if($this->input->post('created') == '' || $this->input->post('created') == '0000-00-00 00:00:00') {
 				$this->Content_model->created = date('Y-m-d H:i:s');
 			} else {

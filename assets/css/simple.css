@@ -215,7 +215,8 @@ div.msg strong {
 	font-style: normal;
 	font-weight: bold;
 }
-
+/* right margin on inline element */
+.mg-right { margin-right: 0.5em; }
 
 /* CMS only - properties table */
 #page form table#properties td,

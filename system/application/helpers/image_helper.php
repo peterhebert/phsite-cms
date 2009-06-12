@@ -65,7 +65,6 @@ if ( ! function_exists('view_image'))
 		if(file_exists($orig_image_path)) {
 			
 			$orig_size = getimagesize($orig_image_path);
-			//print_r( $orig_size);
 			
 			if($orig_size !== FALSE) {
 	

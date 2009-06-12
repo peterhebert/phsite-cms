@@ -311,6 +311,5 @@ if(! function_exists('format_dates'))
 	}
 }
 
-
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */
