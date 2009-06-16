@@ -10,6 +10,7 @@ class Content_model extends Model {
 	var $updated;
 	var $content_data;
 	var $splash = 0; // make available to display on home page
+	var $index = 1; // make available to menus, other indexes
 
 	var $title_id;
 	var $title;
@@ -23,7 +24,7 @@ class Content_model extends Model {
     }
 
     // list content
-	function get_list($limit=0,$order='',$parent_id='',$page=1)
+	function get_list($limit=0,$order='',$parent_id = -1,$page=1)
     {
 
 		$this->db->select('*');
@@ -33,7 +34,7 @@ class Content_model extends Model {
 		if($this->content_lang != '') {
 			$this->db->where('content_lang', $this->content_lang); 
 		}
-		if($parent_id != '' && is_numeric($parent_id)) {
+		if($parent_id != -1 && is_numeric($parent_id)) {
 			$this->db->where('parent_id', $parent_id); 
 		}
 		if($limit > 0) {
@@ -99,15 +100,49 @@ class Content_model extends Model {
 	}
 
     // list recent content
-	function list_recent($iso_lang='eng',$limit=10)
+	function list_recent($iso_lang='eng',$object = -1,$object2 = -1,$not = FALSE,$splash=-1,$index=-1)
     {
 		$this->db->select('*');
 		$this->db->from('content');
 		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		$this->db->where = array('content_lang' => $iso_lang);
-		$this->db->limit($limit);
+		if($object > 0)
+		{
+			if($not === TRUE)
+			{
+				$this->db->where('object_id !=', $object);
+			}
+			else
+			{
+				$this->db->where('object_id', $object);
+			}
+			if($object2 > 0)
+			{
+				if($not === TRUE)
+				{
+					$this->db->where('object_id !=', $object2);
+				}
+				else
+				{
+					$this->db->where('object_id', $object2);
+				}
+			}
+
+		}
+
+		if($splash > -1)
+		{
+			$this->db->where('splash',$splash);
+		}
+		if($index > -1)
+		{
+			$this->db->where('index',$index);
+		}
+
+		$this->db->where('content_lang', $iso_lang);
+		$this->db->limit($this->config->item('limit_posts'));
 		$this->db->order_by('created','desc');
 		$query = $this->db->get();
+
 		return $query->result_array();
 	}
 
@@ -148,6 +183,7 @@ class Content_model extends Model {
 			$this->created = $row->created;
 			$this->user_id = $row->user_id;
 			$this->splash = $row->splash;
+			$this->index = $row->index;
 		}
 
 	}
@@ -238,7 +274,8 @@ class Content_model extends Model {
 			'object_name' => $this->object_name,
 			'user_id' => $this->user_id,
 			'created' => $this->created,
-			'splash' => $this->splash
+			'splash' => $this->splash,
+			'index' => $this->index
 			);
 			if($this->db->insert('content', $data)){
 				$this->content_id = $this->db->insert_id();
@@ -252,7 +289,8 @@ class Content_model extends Model {
 			'object_name' => $this->object_name,
 			'user_id' => $this->user_id,
 			'created' => $this->created,
-			'splash' => $this->splash
+			'splash' => $this->splash,
+			'index' => $this->index
 			);
 			$this->db->where('content_id', $this->content_id);
 			if($this->db->update('content', $data)){

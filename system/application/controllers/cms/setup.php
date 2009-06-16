@@ -174,9 +174,9 @@ class Setup extends Controller
 		// get list of top level pages for home page
 		$homeArray = array();
 		$homeArray[0] = 'Auto-generate';
-		$homePages = $this->Content_model->get_list('','asc',0);
+		$homePages = $this->Content_model->get_list(0,'asc',0);
 		foreach($homePages as $row) {
-			$homeArray[$row['content_id']] = $row['title'];
+			$homeArray["{$row['content_id']}"] = $row['title'];
 		}
 		$this->data['homeArray'] = $homeArray;
 		

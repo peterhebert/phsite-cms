@@ -4,7 +4,7 @@
 #
 # Host: localhost (MySQL 5.0.67)
 # Database: test
-# Generation Time: 2009-06-12 16:06:41 -0700
+# Generation Time: 2009-06-16 16:14:44 -0700
 # ************************************************************
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -7940,17 +7940,20 @@ CREATE TABLE `content` (
   `created` datetime NOT NULL,
   `user_id` mediumint(9) unsigned default '1',
   `splash` tinyint(1) NOT NULL default '0',
+  `index` tinyint(1) NOT NULL default '1',
   PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `content` WRITE;
 /*!40000 ALTER TABLE `content` DISABLE KEYS */;
-INSERT INTO `content` (`content_id`,`parent_id`,`object_id`,`object_name`,`updated`,`created`,`user_id`,`splash`)
+INSERT INTO `content` (`content_id`,`parent_id`,`object_id`,`object_name`,`updated`,`created`,`user_id`,`splash`,`index`)
 VALUES
-	(1,0,1,'','2009-04-23 17:03:06','2009-04-23 17:03:06',1,0),
-	(2,1,1,'','2009-04-24 09:46:06','2009-04-24 09:46:06',1,0),
-	(3,0,1,'','2009-04-28 12:15:54','2009-04-28 12:15:54',1,1),
-	(4,2,3,'gallery','2009-06-11 15:43:30','2009-05-19 14:14:43',1,0);
+	(1,0,1,'','2009-06-16 14:10:01','2009-04-23 17:03:06',1,0,1),
+	(2,1,1,'','2009-06-16 14:10:01','2009-04-24 09:46:06',1,0,1),
+	(3,0,1,'static_page','2009-06-16 14:19:44','2009-04-28 12:15:54',1,1,1),
+	(4,0,3,'blog_entry','2009-06-16 15:53:13','2009-05-19 14:14:43',1,0,1),
+	(5,0,4,'blog','2009-06-16 14:56:36','2009-06-16 12:49:36',1,0,1),
+	(6,1,6,'event','2009-06-16 15:37:25','2009-06-16 15:37:25',1,0,1);
 
 /*!40000 ALTER TABLE `content` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -7970,7 +7973,7 @@ CREATE TABLE `content_data` (
   `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`data_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `content_data` WRITE;
 /*!40000 ALTER TABLE `content_data` DISABLE KEYS */;
@@ -7980,12 +7983,21 @@ VALUES
 	(2,1,3,'film, short, super 8, 16mm, RED One, DV','eng','2009-04-24 16:23:41'),
 	(3,2,1,'<p>Louis Bach has an extraordinary ability to win bets.</p>','eng','2009-04-24 14:50:25'),
 	(4,2,3,'film, DV, luck, lucky, mob, crime, comedy, drama','eng','2009-04-24 14:50:25'),
-	(5,3,1,'<p>This site is the online home of Peter Hebert, web developer, graphic designer and independent filmmaker. Peter lives in Vancouver, British Columbia.</p>\n<p><strong>Social Networks</strong></p>\n<ul class=\"social-icons block\">\n<li><a title=\"View my profile on Facebook\" href=\"http://www.facebook.com/profile.php?id=527077494\"><img src=\"/assets/icons/favicons/facebook.png\" alt=\"Facebook\" /></a></li>\n<li><a title=\"View my profile on LinkedIn\" href=\"http://www.linkedin.com/in/peterhebert\"><img src=\"/assets/icons/favicons/linkedin.png\" alt=\"LinkedIn\" /></a> </li>\n<li><a title=\"Visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\"><img src=\"/assets/icons/peter-hebert/youtube.png\" alt=\"YouTube\" /></a> </li>\n<li><a title=\"Visit my Vimeo channel\" href=\"http://vimeo.com/user1065113\"><img src=\"/assets/icons/favicons/vimeo.png\" alt=\"Vimeo\" /></a></li>\n</ul>\n<p><strong>Contact</strong></p>\n<ul class=\"social-icons block\">\n<li><a title=\"Send me an email\" href=\"mailto:mail@peterhebert.com\"><img src=\"/assets/icons/fugue/mail.png\" alt=\"e-mail\" /></a></li>\n<li><a title=\"Download my vCard for your address book\" href=\"/Peter_Hebert.vcf\"><img src=\"/assets/icons/fugue/card.png\" alt=\"vCard\" /></a></li>\n<li><a title=\"Send me an instant message via XMPP/Jabber/Google Talk\" href=\"xmpp:mail@peterhebert.com\"><img src=\"/assets/icons/favicons/xmpp-jabber.png\" alt=\"XMPP/Jabber/Google Talk\" /></a></li>\n<li><a title=\"Send me an instant message via MSN/Windows Live Messenger\" href=\"msnim:add?contact=peterhebert@hotmail.com\"><img src=\"/assets/icons/other/messenger.png\" alt=\"MSN/Windows Live Messenger\" /></a></li>\n<li><a title=\"Call me using Skype\" href=\"callto://peterhebert\"><img src=\"/assets/icons/favicons/skype.png\" alt=\"Skype\" /></a></li>\n</ul>','eng','2009-04-28 12:28:25'),
+	(5,3,1,'<p>I am a web developer and amateur filmmaker based in Vancouver, British Columbia, Canada. I can be reached at:</p>\n<p><strong>Social Networks</strong></p>\n<ul class=\"social-icons block\">\n<li><a title=\"View my profile on Facebook\" href=\"http://www.facebook.com/profile.php?id=527077494\"><img src=\"/assets/icons/favicons/facebook.png\" alt=\"Facebook\" /></a></li>\n<li><a title=\"View my profile on LinkedIn\" href=\"http://www.linkedin.com/in/peterhebert\"><img src=\"/assets/icons/favicons/linkedin.png\" alt=\"LinkedIn\" /></a> </li>\n<li><a title=\"Visit my YouTube channel\" href=\"http://www.youtube.com/user/peterhebert\"><img src=\"/assets/icons/peter-hebert/youtube.png\" alt=\"YouTube\" /></a> </li>\n<li><a title=\"Visit my Vimeo channel\" href=\"http://vimeo.com/user1065113\"><img src=\"/assets/icons/favicons/vimeo.png\" alt=\"Vimeo\" /></a></li>\n</ul>\n<p><strong>Messaging</strong></p>\n<ul class=\"social-icons block\">\n<li><a title=\"Send me an email\" href=\"mailto:mail@peterhebert.com\"><img src=\"/assets/icons/fugue/mail.png\" alt=\"e-mail\" /></a></li>\n<li><a title=\"Download my vCard for your address book\" href=\"/Peter_Hebert.vcf\"><img src=\"/assets/icons/fugue/card.png\" alt=\"vCard\" /></a></li>\n<li><a title=\"Send me an instant message via XMPP/Jabber/Google Talk\" href=\"xmpp:mail@peterhebert.com\"><img src=\"/assets/icons/favicons/xmpp-jabber.png\" alt=\"XMPP/Jabber/Google Talk\" /></a></li>\n<li><a title=\"Send me an instant message via MSN/Windows Live Messenger\" href=\"msnim:add?contact=peterhebert@hotmail.com\"><img src=\"/assets/icons/other/messenger.png\" alt=\"MSN/Windows Live Messenger\" /></a></li>\n<li><a title=\"Call me using Skype\" href=\"callto://peterhebert\"><img src=\"/assets/icons/favicons/skype.png\" alt=\"Skype\" /></a></li>\n</ul>','eng','2009-06-16 14:19:44'),
 	(6,3,3,'about, contact, Facebook, Peter Hebert, social networks, YouTube','eng','2009-05-19 13:13:39'),
 	(7,4,2,'Images from the production of Lucky - or Not?','eng','2009-05-20 13:58:25'),
 	(8,4,8,'/lucky-or-not/20030426_film-Lucky-or-Not_0081.JPG','eng','2009-05-21 10:01:13'),
-	(10,4,3,'film, photos, production','eng','2009-06-11 15:43:30'),
-	(11,4,10,'/lucky-or-not','eng','2009-06-11 15:43:30');
+	(10,4,3,'CMS, CodeIgniter, content management, php','eng','2009-06-16 15:52:39'),
+	(11,4,10,'/lucky-or-not','eng','2009-06-11 15:43:30'),
+	(12,5,1,'<p>This is my first blog post.</p>\n<p>How do you like it?</p>','eng','2009-06-16 12:49:36'),
+	(13,5,7,'This is my first blog ever','eng','2009-06-16 14:56:36'),
+	(14,5,3,'blog, templates, test','eng','2009-06-16 12:49:36'),
+	(15,6,2,'An intro to filmmaking at Cineworks','eng','2009-06-16 15:37:25'),
+	(16,6,12,'2009-10-04 20:00:00','eng','2009-06-16 15:37:25'),
+	(17,6,11,'2009-10-04 19:00:00','eng','2009-06-16 15:37:25'),
+	(18,6,13,'Cineworks office, Howe street','eng','2009-06-16 15:37:25'),
+	(19,4,7,'After months of development, I have finally launched my content manager, phSite CMS.','eng','2009-06-16 15:52:39'),
+	(20,4,1,'<p>After months of development, I have finally launched my content manager, phSite CMS. It is built upon the <a title=\"visit the CodeIgniter project homepage\" href=\"http://codeigniter.com/\">CodeIgniter</a> PHP framework. It is a beta release, and I welcome any and all suggestions on it.</p>','eng','2009-06-16 15:57:50');
 
 /*!40000 ALTER TABLE `content_data` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8005,7 +8017,7 @@ CREATE TABLE `content_titles` (
   `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`title_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `content_titles` WRITE;
 /*!40000 ALTER TABLE `content_titles` DISABLE KEYS */;
@@ -8013,8 +8025,10 @@ INSERT INTO `content_titles` (`title_id`,`content_id`,`title`,`uri_title`,`conte
 VALUES
 	(1,1,'Film','film','eng','2009-04-24 16:23:41'),
 	(2,2,'Lucky - or Not?','lucky_or_not','eng','2009-04-24 14:50:25'),
-	(3,3,'About this site','about_this_site','eng','2009-04-28 12:15:54'),
-	(4,4,'Production images','production_images','eng','2009-06-11 15:43:30');
+	(3,3,'About this site','about_this_site','eng','2009-06-16 14:19:44'),
+	(4,4,'Launch of phSite CMS beta','launch_of_phsite_cms_beta','eng','2009-06-16 15:52:39'),
+	(5,5,'My first blog entry','my_first_blog_entry','eng','2009-06-16 12:49:36'),
+	(6,6,'Cineworks Orientation','cineworks_orientation','eng','2009-06-16 15:37:25');
 
 /*!40000 ALTER TABLE `content_titles` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8030,7 +8044,7 @@ CREATE TABLE `field` (
   `field_name` text NOT NULL,
   `input_type` varchar(9) NOT NULL,
   PRIMARY KEY  (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `field` WRITE;
 /*!40000 ALTER TABLE `field` DISABLE KEYS */;
@@ -8043,9 +8057,12 @@ VALUES
 	(5,'author','text'),
 	(6,'subtitle','text'),
 	(7,'teaser','textarea'),
-	(8,'media','file'),
+	(8,'copyright','text'),
 	(9,'attachment','file'),
-	(10,'directory','directory');
+	(10,'directory','directory'),
+	(11,'start','text'),
+	(12,'end','text'),
+	(13,'location','text');
 
 /*!40000 ALTER TABLE `field` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8064,138 +8081,13 @@ CREATE TABLE `media` (
   `created` datetime NOT NULL,
   `creator` text,
   PRIMARY KEY  (`media_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=172 DEFAULT CHARSET=utf8 COMMENT='media file info';
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='media file info';
 
 LOCK TABLES `media` WRITE;
 /*!40000 ALTER TABLE `media` DISABLE KEYS */;
 INSERT INTO `media` (`media_id`,`file_uri`,`external`,`mime`,`created`,`creator`)
 VALUES
-	(3,'/lucky-or-not/20030426_film-Lucky-or-Not_0081.JPG',0,'image/jpeg','2003-04-26 12:13:58',''),
-	(4,'/lucky-or-not/20030426_film-Lucky-or-Not_0082.JPG',0,'image/jpeg','2003-04-26 12:14:23',''),
-	(5,'/lucky-or-not/20030426_film-Lucky-or-Not_0083.JPG',0,'image/jpeg','2003-04-26 12:14:43',''),
-	(6,'/lucky-or-not/20030426_film-Lucky-or-Not_0084.JPG',0,'image/jpeg','2003-04-26 12:26:25',''),
-	(7,'/lucky-or-not/20030426_film-Lucky-or-Not_0085.JPG',0,'image/jpeg','2003-04-26 12:26:39',''),
-	(8,'/lucky-or-not/20030426_film-Lucky-or-Not_0086.JPG',0,'image/jpeg','2003-04-26 12:27:00',''),
-	(9,'/lucky-or-not/20030426_film-Lucky-or-Not_0087.JPG',0,'image/jpeg','2003-04-26 12:27:22',''),
-	(10,'/lucky-or-not/20030426_film-Lucky-or-Not_0090.JPG',0,'image/jpeg','2003-04-26 13:10:31',''),
-	(11,'/lucky-or-not/20030426_film-Lucky-or-Not_0091.JPG',0,'image/jpeg','2003-04-26 13:29:24',''),
-	(12,'/lucky-or-not/20030426_film-Lucky-or-Not_0092.jpg',0,'image/jpeg','2003-04-26 13:30:20',''),
-	(13,'/lucky-or-not/20030426_film-Lucky-or-Not_0093.JPG',0,'image/jpeg','2003-04-26 13:34:18',''),
-	(14,'/lucky-or-not/20030426_film-Lucky-or-Not_0094.JPG',0,'image/jpeg','2003-04-26 13:37:04',''),
-	(15,'/lucky-or-not/20030426_film-Lucky-or-Not_0095.JPG',0,'image/jpeg','2003-04-26 13:43:29',''),
-	(16,'/lucky-or-not/20030426_film-Lucky-or-Not_0097.JPG',0,'image/jpeg','2003-04-26 13:59:53',''),
-	(17,'/lucky-or-not/20030426_film-Lucky-or-Not_0099.JPG',0,'image/jpeg','2003-04-26 14:06:42',''),
-	(18,'/lucky-or-not/20030426_film-Lucky-or-Not_0100.JPG',0,'image/jpeg','2003-04-26 15:08:43',''),
-	(19,'/lucky-or-not/20030426_film-Lucky-or-Not_0101.JPG',0,'image/jpeg','2003-04-26 15:13:26',''),
-	(20,'/lucky-or-not/20030426_film-Lucky-or-Not_0102.JPG',0,'image/jpeg','2003-04-26 15:14:41',''),
-	(21,'/lucky-or-not/20030426_film-Lucky-or-Not_0103.JPG',0,'image/jpeg','2003-04-26 15:20:40',''),
-	(22,'/lucky-or-not/20030426_film-Lucky-or-Not_0104.JPG',0,'image/jpeg','2003-04-26 15:23:22',''),
-	(23,'/lucky-or-not/20030426_film-Lucky-or-Not_0105.JPG',0,'image/jpeg','2003-04-26 15:24:37',''),
-	(24,'/lucky-or-not/20030510_film-Lucky-or-Not_0128.JPG',0,'image/jpeg','2003-05-10 17:47:26',''),
-	(25,'/lucky-or-not/20030510_film-Lucky-or-Not_0129.JPG',0,'image/jpeg','2003-05-10 17:47:36',''),
-	(26,'/lucky-or-not/20030510_film-Lucky-or-Not_0130.JPG',0,'image/jpeg','2003-05-10 17:47:44',''),
-	(27,'/lucky-or-not/20030510_film-Lucky-or-Not_0131.JPG',0,'image/jpeg','2003-05-10 17:48:29',''),
-	(28,'/lucky-or-not/20030510_film-Lucky-or-Not_0132.JPG',0,'image/jpeg','2003-05-10 17:48:39',''),
-	(31,'/lucky-or-not/20030510_film-Lucky-or-Not_0135.JPG',0,'image/jpeg','2003-05-10 18:32:17',''),
-	(37,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00007.JPG',0,'image/jpeg','2003-05-15 22:26:35',''),
-	(40,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00010.JPG',0,'image/jpeg','2003-05-15 22:29:01',''),
-	(48,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00018.JPG',0,'image/jpeg','2003-05-15 22:36:01',''),
-	(53,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00023.JPG',0,'image/jpeg','2003-05-15 22:41:16',''),
-	(54,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00024.JPG',0,'image/jpeg','2003-05-15 22:41:26',''),
-	(55,'/lucky-or-not/20030515_film-Lucky-or-Not_DSC00025.JPG',0,'image/jpeg','2003-05-15 22:41:29',''),
-	(75,'/lucky-or-not/20030607_film-Lucky-or-Not_DSC02122.JPG',0,'image/jpeg','2003-06-07 14:14:42',''),
-	(76,'/lucky-or-not/20030607_film-Lucky-or-Not_DSC02124.JPG',0,'image/jpeg','2003-06-07 15:38:53',''),
-	(77,'/lucky-or-not/20030607_film-Lucky-or-Not_DSC02126.JPG',0,'image/jpeg','2003-06-07 15:39:29',''),
-	(78,'/lucky-or-not/20030607_film-Lucky-or-Not_DSC02127.JPG',0,'image/jpeg','2003-06-07 15:39:58',''),
-	(79,'/lucky-or-not/20030608_film-Lucky-or-Not_0192.JPG',0,'image/jpeg','2003-06-08 14:22:54',''),
-	(80,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02128.JPG',0,'image/jpeg','2003-06-08 10:34:15',''),
-	(81,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02130.JPG',0,'image/jpeg','2003-06-08 10:36:10',''),
-	(82,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02132.JPG',0,'image/jpeg','2003-06-08 10:58:31',''),
-	(83,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02133.JPG',0,'image/jpeg','2003-06-08 12:01:38',''),
-	(84,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02136.JPG',0,'image/jpeg','2003-06-08 12:36:33',''),
-	(85,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02137.JPG',0,'image/jpeg','2003-06-08 12:38:33',''),
-	(86,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02138.JPG',0,'image/jpeg','2003-06-08 12:44:33',''),
-	(87,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02142.JPG',0,'image/jpeg','2003-06-08 12:56:56',''),
-	(88,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02147.JPG',0,'image/jpeg','2003-06-08 14:09:59',''),
-	(89,'/lucky-or-not/20030608_film-Lucky-or-Not_DSC02148.JPG',0,'image/jpeg','2003-06-08 14:26:28',''),
-	(90,'/lucky-or-not/20030611_film-Lucky-or-Not_JoeyFrankie.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(91,'/lucky-or-not/20030611_film-Lucky-or-Not_OBrien.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(92,'/lucky-or-not/20030628_film-Lucky-or-Not_0202.JPG',0,'image/jpeg','2003-06-28 16:37:52',''),
-	(93,'/lucky-or-not/20030628_film-Lucky-or-Not_0203.JPG',0,'image/jpeg','2003-06-28 16:38:17',''),
-	(94,'/lucky-or-not/20030628_film-Lucky-or-Not_0205.JPG',0,'image/jpeg','2003-06-28 18:37:58',''),
-	(95,'/lucky-or-not/20030628_film-Lucky-or-Not_0206.JPG',0,'image/jpeg','2003-06-28 18:38:15',''),
-	(96,'/lucky-or-not/20030628_film-Lucky-or-Not_0207.JPG',0,'image/jpeg','2003-06-28 18:40:44',''),
-	(97,'/lucky-or-not/20030628_film-Lucky-or-Not_0208.JPG',0,'image/jpeg','2003-06-28 18:40:52',''),
-	(98,'/lucky-or-not/20030628_film-Lucky-or-Not_0209.JPG',0,'image/jpeg','2003-06-28 18:41:28',''),
-	(99,'/lucky-or-not/20030628_film-Lucky-or-Not_0210.JPG',0,'image/jpeg','2003-06-28 18:41:36',''),
-	(100,'/lucky-or-not/20030628_film-Lucky-or-Not_0211.JPG',0,'image/jpeg','2003-06-28 18:41:49',''),
-	(101,'/lucky-or-not/20030628_film-Lucky-or-Not_0212.JPG',0,'image/jpeg','2003-06-28 18:41:54',''),
-	(102,'/lucky-or-not/20030628_film-Lucky-or-Not_0213.JPG',0,'image/jpeg','2003-06-28 18:42:00',''),
-	(103,'/lucky-or-not/20030628_film-Lucky-or-Not_0214.JPG',0,'image/jpeg','2003-06-28 18:42:16',''),
-	(104,'/lucky-or-not/20030628_film-Lucky-or-Not_0215.JPG',0,'image/jpeg','2003-06-28 18:42:33',''),
-	(105,'/lucky-or-not/20030628_film-Lucky-or-Not_0216.JPG',0,'image/jpeg','2003-06-28 18:42:55',''),
-	(106,'/lucky-or-not/20030628_film-Lucky-or-Not_0217.JPG',0,'image/jpeg','2003-06-28 18:43:12',''),
-	(107,'/lucky-or-not/20030628_film-Lucky-or-Not_0218.JPG',0,'image/jpeg','2003-06-28 18:43:23',''),
-	(108,'/lucky-or-not/20030628_film-Lucky-or-Not_0219.JPG',0,'image/jpeg','2003-06-28 18:43:42',''),
-	(109,'/lucky-or-not/20030628_film-Lucky-or-Not_0220.JPG',0,'image/jpeg','2003-06-28 18:43:54',''),
-	(110,'/lucky-or-not/20030628_film-Lucky-or-Not_0222.JPG',0,'image/jpeg','2003-06-28 18:44:27',''),
-	(111,'/lucky-or-not/20030628_film-Lucky-or-Not_0223.JPG',0,'image/jpeg','2003-06-28 18:44:44',''),
-	(112,'/lucky-or-not/20030628_film-Lucky-or-Not_0224.JPG',0,'image/jpeg','2003-06-28 19:02:14',''),
-	(113,'/lucky-or-not/20030628_film-Lucky-or-Not_0225.JPG',0,'image/jpeg','2003-06-28 19:02:37',''),
-	(114,'/lucky-or-not/20030628_film-Lucky-or-Not_02262.JPG',0,'image/jpeg','2003-06-28 10:35:03',''),
-	(115,'/lucky-or-not/20030628_film-Lucky-or-Not_02263.JPG',0,'image/jpeg','2003-06-28 11:25:11',''),
-	(116,'/lucky-or-not/20030628_film-Lucky-or-Not_02264.JPG',0,'image/jpeg','2003-06-28 13:50:49',''),
-	(117,'/lucky-or-not/20030628_film-Lucky-or-Not_02265.JPG',0,'image/jpeg','2003-06-28 15:18:51',''),
-	(118,'/lucky-or-not/20030628_film-Lucky-or-Not_02267.JPG',0,'image/jpeg','2003-06-28 15:19:11',''),
-	(119,'/lucky-or-not/20030628_film-Lucky-or-Not_02269.JPG',0,'image/jpeg','2003-06-28 16:12:06',''),
-	(120,'/lucky-or-not/20030628_film-Lucky-or-Not_02270.JPG',0,'image/jpeg','2003-06-28 16:12:21',''),
-	(121,'/lucky-or-not/20030628_film-Lucky-or-Not_02271.JPG',0,'image/jpeg','2003-06-28 16:12:52',''),
-	(122,'/lucky-or-not/20030628_film-Lucky-or-Not_02272.JPG',0,'image/jpeg','2003-06-28 16:13:18',''),
-	(123,'/lucky-or-not/20030628_film-Lucky-or-Not_02273.JPG',0,'image/jpeg','2003-06-28 16:13:58',''),
-	(124,'/lucky-or-not/20030628_film-Lucky-or-Not_02278.JPG',0,'image/jpeg','2003-06-28 16:22:15',''),
-	(125,'/lucky-or-not/20030628_film-Lucky-or-Not_02283.JPG',0,'image/jpeg','2003-06-28 16:31:34',''),
-	(126,'/lucky-or-not/20030628_film-Lucky-or-Not_02285.JPG',0,'image/jpeg','2003-06-28 16:41:35',''),
-	(127,'/lucky-or-not/20030628_film-Lucky-or-Not_02287.JPG',0,'image/jpeg','2003-06-28 16:43:26',''),
-	(128,'/lucky-or-not/20030628_film-Lucky-or-Not_02293.JPG',0,'image/jpeg','2003-06-28 18:47:15',''),
-	(129,'/lucky-or-not/20030628_film-Lucky-or-Not_02294.JPG',0,'image/jpeg','2003-06-28 18:47:29',''),
-	(130,'/lucky-or-not/20030628_film-Lucky-or-Not_02295.JPG',0,'image/jpeg','2003-06-28 18:47:48',''),
-	(131,'/lucky-or-not/20030628_film-Lucky-or-Not_02299.JPG',0,'image/jpeg','2003-06-28 18:49:40',''),
-	(132,'/lucky-or-not/20030628_film-Lucky-or-Not_02301.JPG',0,'image/jpeg','2003-06-28 18:50:11',''),
-	(133,'/lucky-or-not/20030628_film-Lucky-or-Not_02303.JPG',0,'image/jpeg','2003-06-28 19:06:49',''),
-	(134,'/lucky-or-not/20030628_film-Lucky-or-Not_02304.JPG',0,'image/jpeg','2003-06-28 19:07:34',''),
-	(135,'/lucky-or-not/20030629_film-Lucky-or-Not_02305.JPG',0,'image/jpeg','2003-06-29 11:55:56',''),
-	(136,'/lucky-or-not/20030629_film-Lucky-or-Not_02306.JPG',0,'image/jpeg','2003-06-29 13:14:21',''),
-	(137,'/lucky-or-not/20030629_film-Lucky-or-Not_02310.JPG',0,'image/jpeg','2003-06-29 13:15:10',''),
-	(138,'/lucky-or-not/20030706_film-Lucky-or-Not_0233.JPG',0,'image/jpeg','2003-07-06 10:53:10',''),
-	(143,'/lucky-or-not/20030715_film-Lucky-or-Not_0238.JPG',0,'image/jpeg','2003-07-15 21:35:10',''),
-	(144,'/lucky-or-not/20030715_film-Lucky-or-Not_0239.JPG',0,'image/jpeg','2003-07-15 21:36:04',''),
-	(145,'/lucky-or-not/20030715_film-Lucky-or-Not_0240.JPG',0,'image/jpeg','2003-07-15 21:38:19',''),
-	(146,'/lucky-or-not/20030715_film-Lucky-or-Not_0241.JPG',0,'image/jpeg','2003-07-15 21:38:49',''),
-	(147,'/lucky-or-not/2005_film-stills-Lucky-or-not_bend.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(148,'/lucky-or-not/2005_film-stills-Lucky-or-not_boys.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(149,'/lucky-or-not/2005_film-stills-Lucky-or-not_cam-peter.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(150,'/lucky-or-not/2005_film-stills-Lucky-or-not_checkingshot.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(151,'/lucky-or-not/2005_film-stills-Lucky-or-not_floodlight.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(152,'/lucky-or-not/2005_film-stills-Lucky-or-not_globe.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(153,'/lucky-or-not/2005_film-stills-Lucky-or-not_hospital-01.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(154,'/lucky-or-not/2005_film-stills-Lucky-or-not_hospital-camera.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(155,'/lucky-or-not/2005_film-stills-Lucky-or-not_lone_director.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(156,'/lucky-or-not/2005_film-stills-Lucky-or-not_mark-closeup.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(157,'/lucky-or-not/2005_film-stills-Lucky-or-not_mark-walking.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(158,'/lucky-or-not/2005_film-stills-Lucky-or-not_plane_camera_setup.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(159,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_007.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(160,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_011.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(161,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_013.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(162,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_019.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(163,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_020.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(164,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_028.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(165,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_029.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(166,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_030.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(167,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_12.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(168,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_14.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(169,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_20.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(170,'/lucky-or-not/2005_film-stills-Lucky-or-not_rcr_xl1_21.jpg',0,'image/jpeg','2009-06-05 07:59:23',''),
-	(171,'/lucky-or-not/2005_film-stills-Lucky-or-not_sign.jpg',0,'image/jpeg','2009-06-05 07:59:23','');
+	(1,'/regular-expressions-cheat-sheet-v2.png',0,NULL,'2009-06-15 12:13:49','');
 
 /*!40000 ALTER TABLE `media` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8221,138 +8113,13 @@ CREATE TABLE `media_data` (
   `country` mediumtext,
   PRIMARY KEY  (`data_id`),
   FULLTEXT KEY `value` (`title`)
-) ENGINE=MyISAM AUTO_INCREMENT=172 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `media_data` WRITE;
 /*!40000 ALTER TABLE `media_data` DISABLE KEYS */;
 INSERT INTO `media_data` (`data_id`,`media_id`,`media_lang`,`title`,`uri_title`,`updated`,`description`,`keywords`,`copyright`,`city`,`prov_state`,`country`)
 VALUES
-	(3,3,'eng','Maggie','maggie','2009-06-05 07:59:23','Maggie Euteneier listens to the actors during filming of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(4,4,'eng','green room','green_room','2009-06-05 07:59:23','Director Peter Hebert discusses wardrobe with Mike Caza in the green room as Joyce MacPhee looks on','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(5,5,'eng','sound man','sound_man','2009-06-05 07:59:23','Sound man Mark McKay prepares his gear before shooting.','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(6,6,'eng','heather - green room','heather_green_room','2009-06-05 07:59:23','Heather Earle relaxes in the green room before shooting begins','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(7,7,'eng','Rod - green room','rod_green_room','2009-06-05 07:59:23','Rod Davison relaxes in the green room','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(8,8,'eng','Green room discussion 1','green_room_discussion_1','2009-06-05 07:59:23','Heather Earle and Rod Davison discuss their next scene in the green room','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(9,9,'eng','Green room discussion 2','green_room_discussion_2','2009-06-05 07:59:23','Heather Earle and Rod Davison discuss their next scene in the green room','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(10,10,'eng','sleeping','sleeping','2009-06-05 07:59:23','Rod Davison takes a break between takes','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(11,11,'eng','office','office','2009-06-05 07:59:23','Heather Earle and Mike Caza take short break between takes','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(12,12,'eng','20030426_film-Lucky-or-Not_0092','20030426_film_lucky_or_not_0092','2009-06-05 07:59:23','','','','','',''),
-	(13,13,'eng','O\'Brien and Walker','o_brien_and_walker','2009-06-05 07:59:23','Heather Earle is Detective O\'Brien and Mike Caza is Detective Walker in the film \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(14,14,'eng','waiting','waiting','2009-06-05 07:59:23','Heather Earle waits for the lighting to be set before her scene','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(15,15,'eng','Lt thinking','lt_thinking','2009-06-05 07:59:23','Rod Davison is deep in thought as Lieutenant Monroe','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(16,16,'eng','breaktime','breaktime','2009-06-05 07:59:23','Joyce MacPhee talks with cast and crew during a break in shooting','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(17,17,'eng','luckyornot-260403-15.jpg','luckyornot_260403_15_jpg','2009-06-05 07:59:23','','Lucky - or Not?, film, production','','','',''),
-	(18,18,'eng','20030426_film-Lucky-or-Not_0100','20030426_film_lucky_or_not_0100','2009-06-05 07:59:23','','','','','',''),
-	(19,19,'eng','adjusting equipment','adjusting_equipment','2009-06-05 07:59:23','Mark McKay adjusts the levels on his mixer before shooting begins','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(20,20,'eng','Tech talk','tech_talk','2009-06-05 07:59:23','Jason Tetro and Brian Hunter discuss the next shot during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(21,21,'eng','break','break','2009-06-05 07:59:23','Heather Earle and Mark Leahy talk with crew between takes','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(22,22,'eng','Actors','actors','2009-06-05 07:59:23','Mike Caza, Mark Leahy and Heather Earle discuss their performances before shooting begins','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(23,23,'eng','interrogation','interrogation','2009-06-05 07:59:23','Louis Bach (Mark Leahy) is questioned by Detectives O\'Brien (Heather Earle) and Walker (Mike Caza)','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(24,24,'eng','Frankie and Joey','frankie_and_joey','2009-06-05 07:59:23','Derick Fage and Jamie Douglas get into character during a break in shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(25,25,'eng','Joey','joey','2009-06-05 07:59:23','Derick Fage plays the mobster Joey in the film \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(26,26,'eng','Frankie','frankie','2009-06-05 07:59:23','Jamie Douglas plays the mobster Joey in the film \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(27,27,'eng','Roughing it up','roughing_it_up','2009-06-05 07:59:23','Joey and Frankie (Derick Fage and Jamie Douglas) rough up Louis Bach (Mark Leahy) during a break in the filming of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(28,28,'eng','Roughing it up','roughing_it_up','2009-06-05 07:59:23','Joey and Frankie (Derick Fage and Jamie Douglas) rough up Louis Bach (Mark Leahy) in the film \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(31,31,'eng','Walking the Walk','walking_the_walk','2009-06-05 07:59:23','Joey (Derick Fage) and Frankie (Jamie Douglas) strut their stuff as mobsters in the film \"Lucky or Not?\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(37,37,'eng','limo scene 1','limo_scene_1','2009-06-05 07:59:23','','film, Lucky - or Not?, screenshots','','Ottawa','Ontario','Canada'),
-	(40,40,'eng','DSC00010.JPG','dsc00010_jpg','2009-06-05 07:59:23','','Lucky - or Not?, screenshots, film','','','',''),
-	(48,48,'eng','DSC00018.JPG','dsc00018_jpg','2009-06-05 07:59:23','','film, Lucky - or Not?, screenshots','','Ottawa','Ontario','Canada'),
-	(53,53,'eng','DSC00023.JPG','dsc00023_jpg','2009-06-05 07:59:23','','film, Lucky - or Not?, screenshots','','Ottawa','Ontario','Canada'),
-	(54,54,'eng','DSC00024.JPG','dsc00024_jpg','2009-06-05 07:59:23','','film, Lucky - or Not?, screenshots','','Ottawa','Ontario','Canada'),
-	(55,55,'eng','DSC00025.JPG','dsc00025_jpg','2009-06-05 07:59:23','','film, Lucky - or Not?, screenshots','','Ottawa','Ontario','Canada'),
-	(75,75,'eng','Christophe','christophe','2009-06-05 07:59:23','Documentary videographer Christophe Forget','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(76,76,'eng','Frankie','frankie','2009-06-05 07:59:23','Jamie Douglas as Frankie, on location during filming of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(77,77,'eng','I\'m going mad!','i_m_going_mad','2009-06-05 07:59:23','Peter Hebert is caught in a crazy pose on location before shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(78,78,'eng','Crew','crew','2009-06-05 07:59:23','Crew members Bryon Hunter and Mark McKay on location during filming of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(79,79,'eng','Joey','joey','2009-06-05 07:59:23','Mobster Joey (Derick Fage) in his getaway car from the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(80,80,'eng','Cast and Crew','cast_and_crew','2009-06-05 07:59:23','Cast and crew from the movie \"Lucky or Not\" (from left to right): Mark Leahy, Bryon Hunter, Derick Fage and Mike Caza','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(81,81,'eng','Detective O\'Brien','detective_o_brien','2009-06-05 07:59:23','Heather Earle strikes a pose as Detective O\'Brien in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(82,82,'eng','Joey Frankie guns','joey_frankie_guns','2009-06-05 07:59:23','Derick Fage, as Joey and Jamie Douglas as Frankie strike a menacing pose during filming of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(83,83,'eng','Zena Boys','zena_boys','2009-06-05 07:59:23','Mobsters Joey and Frankie (Dreick Fage and Jamie Douglas) pose with Zena, Warrior Princess on location for the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(84,84,'eng','Shootout taping 1','shootout_taping_1','2009-06-05 07:59:23','Director and cameraman Peter Hebert shooting a scene from \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(85,85,'eng','Standoff','standoff','2009-06-05 07:59:23','Louis is held at gunpoint by Joey while Frankie aims at the police detectives in a standoff in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(86,86,'eng','Confrontation','confrontation','2009-06-05 07:59:23','Detectives O\'Brien (Heather Earle) and Walker (Mike Caza) pull their guns in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(87,87,'eng','Shootout taping 2','shootout_taping_2','2009-06-05 07:59:23','Tapng a shootout scene in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(88,88,'eng','Louis bleeds','louis_bleeds','2009-06-05 07:59:23','Louis Bach (Mark Leahy) writhes on the ground in pain after being shot in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(89,89,'eng','DSC02148','dsc02148','2009-06-05 07:59:23','','Lucky - or Not?, film','','','',''),
-	(90,90,'eng','JoeyFrankie','joeyfrankie','2009-06-05 07:59:23','','Lucky - or Not?, film','','','',''),
-	(91,91,'eng','OBrien','obrien','2009-06-05 07:59:23','','Lucky - or Not?, film','','','',''),
-	(92,92,'eng','Heather / Jamie','heather_jamie','2009-06-05 07:59:23','Heather Earle and Jamie Douglas take a break between scenes','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(93,93,'eng','bryon - sepia','bryon_sepia','2009-06-05 07:59:23','','Lucky - or Not?, Bryon Hunter','','','',''),
-	(94,94,'eng','20030628_film-Lucky-or-Not_0205','20030628_film_lucky_or_not_0205','2009-06-05 07:59:23','','','','','',''),
-	(95,95,'eng','I can\'t take it anymore!','i_can_t_take_it_anymore','2009-06-05 07:59:23','Director Peter Hebert shows signs of stress during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(96,96,'eng','bathroom discussion','bathroom_discussion','2009-06-05 07:59:23','','Lucky - or Not?','','','',''),
-	(97,97,'eng','Joyce','joyce','2009-06-05 07:59:23','','Lucky - or Not?','','','',''),
-	(98,98,'eng','Laughing','laughing','2009-06-05 07:59:23','Cast and crew clown around between takes','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(99,99,'eng','20030628_film-Lucky-or-Not_0210','20030628_film_lucky_or_not_0210','2009-06-05 07:59:23','','','','','',''),
-	(100,100,'eng','Mirror','mirror','2009-06-05 07:59:23','','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(101,101,'eng','Jamie','jamie','2009-06-05 07:59:23','Jamie Douglas','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(102,102,'eng','preparations','preparations','2009-06-05 07:59:23','Jamie Douglas and Derick Fage get ready for a scene','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(103,103,'eng','peter and joyce','peter_and_joyce','2009-06-05 07:59:23','Peter Hebert and Joyce MacPhee prepare for shooting','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(104,104,'eng','shot planning','shot_planning','2009-06-05 07:59:23','Director Peter Hebert talks about the next shot to cameraman Bryon Hunter','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(105,105,'eng','Direction','direction','2009-06-05 07:59:23','Peter Hebert gives direction to cameraman Bryon Hunter in preparation for the next shot','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(106,106,'eng','Jamie closeup','jamie_closeup','2009-06-05 07:59:23','Jamie Douglas','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(107,107,'eng','Picture','picture','2009-06-05 07:59:23','Jamie Douglas takes a picture on location during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(108,108,'eng','camera setup','camera_setup','2009-06-05 07:59:23','Bryon Hunter sets up his camera before shooting','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(109,109,'eng','Derick','derick','2009-06-05 07:59:23','Derick Fage plays Joey in \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(110,110,'eng','photos','photos','2009-06-05 07:59:23','Jamie Douglas looks at some digital photos during a break in shooting','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(111,111,'eng','stare','stare','2009-06-05 07:59:23','Derick Fage (Joey) gives a menacing stare','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(112,112,'eng','20030628_film-Lucky-or-Not_0224','20030628_film_lucky_or_not_0224','2009-06-05 07:59:23','','','','','',''),
-	(113,113,'eng','fun shoot','fun_shoot','2009-06-05 07:59:23','Derick Fage and Jamie Douglas discuss the upcoming scene','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(114,114,'eng','Coffee Break','coffee_break','2009-06-05 07:59:23','extra Cindy Bertinato and actor Jamie Douglas enjoy a coffee on the set of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(115,115,'eng','Leah\'s escorts','leah_s_escorts','2009-06-05 07:59:23','Derick Fage (Joey), Leah Miller (the Good Looking Woman) and Jamie Douglas (Frankie) take a break during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(116,116,'eng','Candid Camera','candid_camera','2009-06-05 07:59:23','Jamie Douglas captures Heather Earle on a camcorder','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(117,117,'eng','Leah','leah','2009-06-05 07:59:23','Leah Miller takes a sip of water between takes during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(118,118,'eng','Heather relaxing','heather_relaxing','2009-06-05 07:59:23','Heather Earle relaxes while waiting to shoot her scene','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(119,119,'eng','Joey gets the girl','joey_gets_the_girl','2009-06-05 07:59:23','Derick Fage and Leah Miller ham it up on location during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(120,120,'eng','Getting friendly with the camera','getting_friendly_with_the_camera','2009-06-05 07:59:23','Jamie Douglas clowns around with cameraman Bryon Hunter during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(121,121,'eng','warming up','warming_up','2009-06-05 07:59:23','Derick Fage jokes around while director Peter Hebert and Leah Miller look on','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(122,122,'eng','extra kiss','extra_kiss','2009-06-05 07:59:23','A couple of extras pucker up for the camera during shooting of \"Lucky or Not\"','Lucky - or Not?','','','',''),
-	(123,123,'eng','breaktime 2','breaktime_2','2009-06-05 07:59:23','Cast members take a little break during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(124,124,'eng','extras','extras','2009-06-05 07:59:23','David Scarcella and some of the extras in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(125,125,'eng','Heather and Derick','heather_and_derick','2009-06-05 07:59:23','Heather Earle (Detective O\'Brien) and Derick Fage (Joey)','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(126,126,'eng','extras','extras','2009-06-05 07:59:23','Extras Bob Ford, Anda Carabineanu and Ray Besharah on location of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(127,127,'eng','Joyce','joyce','2009-06-05 07:59:23','Joyce MacPhee is part of the crew of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(128,128,'eng','boom time','boom_time','2009-06-05 07:59:23','Peter Hebert holds the boom while Joyce MacPhee looks on','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(129,129,'eng','nervous?','nervous','2009-06-05 07:59:23','Derick Fage awaits the start of the next scene','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(130,130,'eng','focussing','focussing','2009-06-05 07:59:23','Cameraman Bryon Hunter sets up a shot during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(131,131,'eng','fuggedaboudit!','fuggedaboudit','2009-06-05 07:59:23','mobsters Joey (Derick Fage) and Frankie (Jamie Douglas) ham it up during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(132,132,'eng','Mark','mark','2009-06-05 07:59:23','Mark Leahy (playing Louis Bach) on location at Rideau Carleton Raceway during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(133,133,'eng','tsk tsk','tsk_tsk','2009-06-05 07:59:23','Jamie DOuglas waves his finger at Derick Fage before shooting a scene in \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(134,134,'eng','intensity','intensity','2009-06-05 07:59:23','Jamie Douglas has an intense look as he is about to perform a scene in the movie \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(135,135,'eng','Talking to the Boss','talking_to_the_boss','2009-06-05 07:59:23','Jamie Douglas, Frank Mascitto and Derick Fage discuss \"mob business\" during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(136,136,'eng','camera setup','camera_setup','2009-06-05 07:59:23','Bryon Hunetr and Peter Hebert (off frame to the right) set up their cameras','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(137,137,'eng','show me the money','show_me_the_money','2009-06-05 07:59:23','Jamie Douglas and Derick Fage ham it up as Mark Leahy holds a wad of money during shooting of \"Lucky or Not\"','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(138,138,'eng','the big cheese','the_big_cheese','2009-06-05 07:59:23','The big director in his little chair','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(143,143,'eng','rcr cast/crew party','rcr_cast_crew_party','2009-06-05 07:59:23','','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(144,144,'eng','cast and crew party','cast_and_crew_party','2009-06-05 07:59:23','Cast and crew gather for a portrait at the wrap party.\rleft to right - top row: Mark McKay, Peter Hebert, Mark Leahy, Bryon Hunter.\rbottom row: Heather Earle, James Douglas, Leah Miller, Derick Fage.','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(145,145,'eng','cast crew bleachers','cast_crew_bleachers','2009-06-05 07:59:23','top row: Bryon Hunter, Mark Leahy, Heather Earle, Mark McKay.\rbottom row: Peter Hebert, James Douglas, Leah Miller, Derick Fage.','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(146,146,'eng','cast crew relax','cast_crew_relax','2009-06-05 07:59:23','top row: Bryon Hunter, Mark Leahy, Heather Earle, Mark McKay.\rbottom row: Peter Hebert, James Douglas, Leah Miller, Derick Fage.','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(147,147,'eng','2005_film-stills-Lucky-or-not_bend','2005_film_stills_lucky_or_not_bend','2009-06-05 07:59:23','','','','','',''),
-	(148,148,'eng','2005_film-stills-Lucky-or-not_boys','2005_film_stills_lucky_or_not_boys','2009-06-05 07:59:23','','','','','',''),
-	(149,149,'eng','2005_film-stills-Lucky-or-not_cam-peter','2005_film_stills_lucky_or_not_cam_peter','2009-06-05 07:59:23','','','','','',''),
-	(150,150,'eng','2005_film-stills-Lucky-or-not_checkingshot','2005_film_stills_lucky_or_not_checkingshot','2009-06-05 07:59:23','','','','','',''),
-	(151,151,'eng','floodlight','floodlight','2009-06-05 07:59:23','The crew gets set for the next shot','film, Lucky - or Not?, production','','Ottawa','Ontario','Canada'),
-	(152,152,'eng','2005_film-stills-Lucky-or-not_globe','2005_film_stills_lucky_or_not_globe','2009-06-05 07:59:23','','','','','',''),
-	(153,153,'eng','2005_film-stills-Lucky-or-not_hospital-01','2005_film_stills_lucky_or_not_hospital_01','2009-06-05 07:59:23','','','','','',''),
-	(154,154,'eng','2005_film-stills-Lucky-or-not_hospital-camera','2005_film_stills_lucky_or_not_hospital_camera','2009-06-05 07:59:23','','','','','',''),
-	(155,155,'eng','2005_film-stills-Lucky-or-not_lone_director','2005_film_stills_lucky_or_not_lone_director','2009-06-05 07:59:23','','','','','',''),
-	(156,156,'eng','2005_film-stills-Lucky-or-not_mark-closeup','2005_film_stills_lucky_or_not_mark_closeup','2009-06-05 07:59:23','','','','','',''),
-	(157,157,'eng','2005_film-stills-Lucky-or-not_mark-walking','2005_film_stills_lucky_or_not_mark_walking','2009-06-05 07:59:23','','','','','',''),
-	(158,158,'eng','2005_film-stills-Lucky-or-not_plane_camera_setup','2005_film_stills_lucky_or_not_plane_camera_setup','2009-06-05 07:59:23','','','','','',''),
-	(159,159,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_007','2005_film_stills_lucky_or_not_rcr_xl1_007','2009-06-05 07:59:23','','','','','',''),
-	(160,160,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_011','2005_film_stills_lucky_or_not_rcr_xl1_011','2009-06-05 07:59:23','','','','','',''),
-	(161,161,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_013','2005_film_stills_lucky_or_not_rcr_xl1_013','2009-06-05 07:59:23','','','','','',''),
-	(162,162,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_019','2005_film_stills_lucky_or_not_rcr_xl1_019','2009-06-05 07:59:23','','','','','',''),
-	(163,163,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_020','2005_film_stills_lucky_or_not_rcr_xl1_020','2009-06-05 07:59:23','','','','','',''),
-	(164,164,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_028','2005_film_stills_lucky_or_not_rcr_xl1_028','2009-06-05 07:59:23','','','','','',''),
-	(165,165,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_029','2005_film_stills_lucky_or_not_rcr_xl1_029','2009-06-05 07:59:23','','','','','',''),
-	(166,166,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_030','2005_film_stills_lucky_or_not_rcr_xl1_030','2009-06-05 07:59:23','','','','','',''),
-	(167,167,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_12','2005_film_stills_lucky_or_not_rcr_xl1_12','2009-06-05 07:59:23','','','','','',''),
-	(168,168,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_14','2005_film_stills_lucky_or_not_rcr_xl1_14','2009-06-05 07:59:23','','','','','',''),
-	(169,169,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_20','2005_film_stills_lucky_or_not_rcr_xl1_20','2009-06-05 07:59:23','','','','','',''),
-	(170,170,'eng','2005_film-stills-Lucky-or-not_rcr_xl1_21','2005_film_stills_lucky_or_not_rcr_xl1_21','2009-06-05 07:59:23','','','','','',''),
-	(171,171,'eng','2005_film-stills-Lucky-or-not_sign','2005_film_stills_lucky_or_not_sign','2009-06-05 07:59:23','','','','','','');
+	(1,1,'eng','regular-expressions-cheat-sheet-v2.png','regular_expressions_cheat_sheet_v2_png','2009-06-15 12:13:49','','','','','','');
 
 /*!40000 ALTER TABLE `media_data` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8368,15 +8135,18 @@ CREATE TABLE `object` (
   `name` text NOT NULL,
   `name_uri` text NOT NULL,
   PRIMARY KEY  (`object_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `object` WRITE;
 /*!40000 ALTER TABLE `object` DISABLE KEYS */;
 INSERT INTO `object` (`object_id`,`name`,`name_uri`)
 VALUES
 	(1,'static page','static_page'),
-	(2,'blog entry','blog_entry'),
-	(3,'gallery','gallery');
+	(2,'blog index','blog'),
+	(3,'blog entry','blog_entry'),
+	(4,'gallery index','gallery'),
+	(5,'calendar','calendar'),
+	(6,'event','event');
 
 /*!40000 ALTER TABLE `object` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8395,7 +8165,7 @@ CREATE TABLE `r_object_field` (
   `order` smallint(5) unsigned NOT NULL default '0',
   `validation` text,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `r_object_field` WRITE;
 /*!40000 ALTER TABLE `r_object_field` DISABLE KEYS */;
@@ -8403,13 +8173,23 @@ INSERT INTO `r_object_field` (`id`,`field_id`,`object_id`,`required`,`order`,`va
 VALUES
 	(1,1,1,1,0,''),
 	(2,3,1,0,0,''),
-	(3,1,2,1,2,''),
-	(7,7,2,0,3,''),
-	(5,3,2,1,4,''),
-	(6,6,2,0,1,''),
-	(8,2,3,0,1,''),
-	(10,3,3,0,2,''),
-	(12,10,3,0,0,'path_dir');
+	(14,2,2,1,0,''),
+	(15,9,3,0,4,'path_file'),
+	(16,1,3,0,2,''),
+	(13,2,4,1,0,''),
+	(10,3,3,0,3,''),
+	(18,10,4,1,0,'path_dir'),
+	(17,7,3,0,1,''),
+	(19,2,5,0,0,''),
+	(20,6,5,0,0,''),
+	(21,2,6,0,0,''),
+	(22,12,6,0,0,'is_date'),
+	(23,11,6,0,0,'is_date'),
+	(24,2,5,0,0,''),
+	(25,2,6,1,4,''),
+	(26,12,6,1,2,'is_date'),
+	(27,13,6,0,3,''),
+	(28,11,6,1,1,'is_date');
 
 /*!40000 ALTER TABLE `r_object_field` ENABLE KEYS */;
 UNLOCK TABLES;

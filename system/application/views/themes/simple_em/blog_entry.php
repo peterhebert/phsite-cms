@@ -16,7 +16,16 @@
 		<?php echo $content_data['body']; ?>
 		<p>Keywords: <?php echo $content_data['keywords']; ?>
 	</div>
-	<div class="page-wrap block" id="footer">footer</div>
+	<div class="page-wrap block" id="footer"><?php 
+	echo "<p>";
+	if (array_key_exists('copyright',$content_data) && $content_data['copyright'] != '') {
+		echo $content_data['copyright'];
+	} else {
+		echo $site_meta_copyright;
+	}
+	echo "</p>\r";
+	echo $footer;
+	?></div>
 </div>
 </body>
 </html>

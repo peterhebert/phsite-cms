@@ -43,11 +43,14 @@
 $route['default_controller'] = "home";
 $route['scaffolding_trigger'] = "";
 
-$route['sitemap'] = "home/sitemap";
 $route['cms'] = "cms/cms";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
 $route['cms/media'] = "cms/media/manage";
+$route['cms/(:any)'] = "cms/$1";
+$route['sitemap'] = "home/sitemap";
+$route['(:any)'] = "home/index/$1";
+
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

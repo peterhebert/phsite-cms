@@ -29,8 +29,8 @@ $().ready(function(){
 		<div class="column w4">
 			<h1>Content</h1>
 			<?php
-			echo $content; 
 			echo "<p>".anchor("cms/content/site_map","Site Map")."</p>\r";
+			echo $content; 
 		
 			foreach($new_objects as $index => $row) {
 				$my_uri = site_url("cms/content/edit/type/".$row['object_id']);

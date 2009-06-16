@@ -201,11 +201,33 @@ text-align:left;
 {
 font-size:0.9em;
 }
-ul.social-icons {
+/*blog entries*/
+ul.posts {
 	margin:0;
 	padding: 0;
 }
-ul.social-icons li {
+ul.posts li {
+	list-style-type:none;
+	margin:0 0 .5em 0;
+	padding: 0 0 .5em 0;
+	border-bottom:1px dotted #cccccc;
+}
+ul.posts li:last-child,
+ul.posts li.last,
+ul.posts ul li
+ {
+	margin:0;
+	padding: 0;
+	border-bottom:0px none;
+}
+/*  SOCIAL MEDIA ICONS */
+ul.social-icons {
+	margin:0 0 .5em 0;
+	padding: 0;
+}
+ul.social-icons li,
+ul.posts ul.social-icons li
+ {
 	list-style-type:none;
 	float: left;
 	margin-right: .5em;

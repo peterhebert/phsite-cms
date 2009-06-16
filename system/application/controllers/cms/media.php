@@ -88,7 +88,7 @@ class Media extends Controller {
 				if($this->data['upload_data']['is_image'] == 1)
 				{
 					$img_path = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$this->data['upload_data']['full_path']);
-					$this->data['image_thumb'] = view_image($img_path,300);
+					$this->data['image_thumb'] = view_image($img_path,$this->Site_model->img_size_thumb);
 				}
 			}
 
@@ -96,14 +96,24 @@ class Media extends Controller {
 
 		if($success === TRUE) {
 
-			if($this->data['create_entry'] === TRUE) {
-				// create entry in database for media
-				
-				/*$this->data['object_id'] = 3;
-				$this->load->view('cms/content_edit', $this->data);*/
+			$this->data['msg'] = "<p>File uploaded successfully</p>\r";
+
+			$this->Media_model->file_uri = '/'.trim($img_path,'/');
+			$this->Media_model->get_file_metadata();
+			$this->Media_model->external = 0;
+		
+			$this->Media_model->media_lang = $this->Site_model->default_lang;
+
+			if ($this->Media_model->update_media() == TRUE)
+			{
+				if ($this->Media_model->update_meta() == TRUE)
+				{
+					$this->data['msg'] = "<p>Metadata added to database</p>\r";
+				} else {
+				}
 			} else {
-				$this->load->view('cms/upload_success', $this->data);
 			}
+			$this->load->view('cms/upload_success', $this->data);
 
 		} else {
 			$this->load->view('cms/upload_form', $this->data);
@@ -114,6 +124,7 @@ class Media extends Controller {
 
 	function manage() {
 		$this->authenticate();
+		$this->data['msg'] = '';
 		
 		$this->Media_model->media_lang = $this->Site_model->default_lang;
 		$media_root = $this->Media_model->dir_base;
@@ -121,7 +132,9 @@ class Media extends Controller {
 		$uri = $this->uri->segment_array();
 		$dirA = array_slice($uri, 3);
 		$displayDir = implode('/',$dirA);
-		$myDir = '/'.$displayDir;
+		$myDir = $displayDir;
+		
+		$this->data['msg'] = $myDir."<br />\r";
 
 		if($this->input->post('delete') != '') {
 
@@ -178,7 +191,7 @@ class Media extends Controller {
 		//get list of directories in media folder
 		$this->Media_model->list_dirs();
 
-		$dir_array['/'] = 'Media root';
+		$dir_array[''] = 'Media root';
 		foreach($this->Media_model->dir_list as $index => $dir)
 		{
 			$this->Media_model->dir_current = $dir;
@@ -232,16 +245,16 @@ class Media extends Controller {
 				if($media_exists) {
 					
 					$meta_exists = $this->Media_model->get_meta();
-					if($meta_exists !== FALSE) {
-					} else {
+					if($meta_exists === FALSE) {
 						// insert metadata to database
-						$this->get_file_metadata();
+						$this->Media_model->get_file_metadata();
 						$this->Media_model->update_meta();
 					}
 					
 				} else {
 					// load file metadata and insert to database
-					$this->get_file_metadata();
+					$this->Media_model->get_file_metadata();
+					$this->data['msg'] .= $this->Media_model->file_uri."<br />";	
 					$media_ins = $this->Media_model->update_media();
 					if($media_ins) {
 						$meta_ins = $this->Media_model->update_meta();
@@ -595,61 +608,6 @@ class Media extends Controller {
 			}
 		}
 		return $langArray;
-
-	}
-
-	function get_file_metadata()
-	{
-		$file = $this->Media_model->dir_base.$this->Media_model->file_uri;
-
-		$bname = basename($file);
-		$fileArr = explode('.',$bname);
-		$ext = array_pop  ( $fileArr);
-		$filename = implode('.',$fileArr);
-
-		$this->Media_model->read_file_info();
-
-		if(is_array($this->Media_model->iptc)) {
-			if(array_key_exists('2#105', $this->Media_model->iptc)) {
-				$this->Media_model->title = $this->Media_model->iptc['2#105'][0];
-			}
-			if(array_key_exists('2#120', $this->Media_model->iptc)) {
-				$this->Media_model->description = $this->Media_model->iptc['2#120'][0];
-			}
-			if(array_key_exists('2#025', $this->Media_model->iptc)) {
-				$this->Media_model->keywords = implode(', ',$this->Media_model->iptc['2#025']);
-			}
-			if(array_key_exists('2#080', $this->Media_model->iptc)) {
-				$this->Media_model->creator = $this->Media_model->iptc['2#080'][0];
-			}
-			if(array_key_exists('2#090', $this->Media_model->iptc)) {
-				$this->Media_model->city = $this->Media_model->iptc['2#090'][0];
-			}
-			if(array_key_exists('2#095', $this->Media_model->iptc)) {
-				$this->Media_model->prov_state = $this->Media_model->iptc['2#095'][0];
-			}
-			if(array_key_exists('2#101', $this->Media_model->iptc)) {
-				$this->Media_model->country = $this->Media_model->iptc['2#101'][0];
-			}
-			if(array_key_exists('2#116', $this->Media_model->iptc)) {
-				$this->Media_model->copyright = $this->Media_model->iptc['2#116'][0];
-			}
-		}
-		if(is_array($this->Media_model->exif)) {
-			if(array_key_exists('MimeType', $this->Media_model->exif)) {
-				$this->Media_model->mime = $this->Media_model->exif['MimeType'];
-			}
-			if(array_key_exists('DateTimeOriginal', $this->Media_model->exif)) {
-				$this->Media_model->created = $this->Media_model->exif['DateTimeOriginal'];
-			}
-		}
-
-		if($this->Media_model->title == '') {
-			$this->Media_model->title = $filename;
-		}
-		if($this->Media_model->created == '') {
-			$this->Media_model->created = date('Y-m-d H:i:s');
-		}
 
 	}
 

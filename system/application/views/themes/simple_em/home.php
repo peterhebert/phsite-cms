@@ -23,28 +23,30 @@
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block">
-		Home
 		<div class="golden">
-			<div class="column g1">
-				<?php if(isset($recent) && recent != '') {
-				echo "<h1>Recent blog posts</h1>";
-				echo $recent;
-				}
-				?>&nbsp;
+			<div class="column g1"><?php
+			if(isset($recent))
+			{
+				echo ul($recent, array('class' => 'posts'));
+			}
+			?>
 			</div>
 			<div class="float g2">
-				<h1>About this site</h1>
-				<p><?php echo $site_meta_description; ?></p>
+				<?php
+				if(isset($sidebar))
+				{
+					echo ul($sidebar, array('class' => 'posts'));
+				}
+				?>
 				<div class="block bdr-top">
 					<h2>Site Menu</h2>
-					<?php echo ul($menu); ?>
+					<?php echo $menu; ?>
 				</div>
 			</div>
 		</div>
 		
 	</div>
-	<div class="page-wrap block" id="footer"><?php if ($site_meta_copyright != '') { echo $site_meta_copyright; } ?>
-</div>
+	<div class="page-wrap block" id="footer"><?php if ($site_meta_copyright != '') { echo $site_meta_copyright; } ?></div>
 </div>
 </body>
 </html>

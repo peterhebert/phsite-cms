@@ -343,7 +343,12 @@ class Media_model extends Model {
 		if(file_exists($file_full) && !is_dir($file_full)) {
 
 			$size = getimagesize($file_full, $info);
+			/*$mime = get_mime($file_full);
 
+			if ($mime != FALSE) {
+				$this->mime = $mime;
+			}*/
+			
 			if(isset($info['APP13']))
 			{
 				$this->iptc = iptcparse($info['APP13']);
@@ -360,17 +365,86 @@ class Media_model extends Model {
 		
 	}
 
+	function get_file_metadata()
+	{
+		$this->read_file_info();
+
+		if(is_array($this->iptc)) {
+			if(array_key_exists('2#105', $this->iptc)) {
+				$this->title = $this->iptc['2#105'][0];
+			}
+			if(array_key_exists('2#120', $this->iptc)) {
+				$this->description = $this->iptc['2#120'][0];
+			}
+			if(array_key_exists('2#025', $this->iptc)) {
+				$this->keywords = implode(', ',$this->iptc['2#025']);
+			}
+			if(array_key_exists('2#080', $this->iptc)) {
+				$this->creator = $this->iptc['2#080'][0];
+			}
+			if(array_key_exists('2#090', $this->iptc)) {
+				$this->city = $this->iptc['2#090'][0];
+			}
+			if(array_key_exists('2#095', $this->iptc)) {
+				$this->prov_state = $this->iptc['2#095'][0];
+			}
+			if(array_key_exists('2#101', $this->iptc)) {
+				$this->country = $this->iptc['2#101'][0];
+			}
+			if(array_key_exists('2#116', $this->iptc)) {
+				$this->copyright = $this->iptc['2#116'][0];
+			}
+		}
+		
+		if(is_array($this->exif)) {
+			if(array_key_exists('MimeType', $this->exif)) {
+				$this->mime = $this->exif['MimeType'];
+			}
+			if(array_key_exists('DateTimeOriginal', $this->exif)) {
+				$this->created = $this->exif['DateTimeOriginal'];
+			}
+		}
+
+		if($this->title == '') {
+			$this->title = basename($this->file_uri);
+		}
+		
+		if($this->created == '') {
+			$this->created = date('Y-m-d H:i:s');
+		}
+
+	}
+
 	function get_mime($filename,$mode=0) {
-		if(file_exists($filename) && !is_dir($filename)) {
+		if(file_exists($filename) && !is_dir($filename))
+		{
+
+			$mime = exif_imagetype($filename);
+
 			$ext = strrchr($filename, '.');
 			$ext = substr($ext,1,strlen($ext)-1);
 			$ext = strtolower($ext);
 
-			if(array_key_exists($ext,$this->media_types)) {
-				return $this->media_types[$ext][$mode];
+			if(array_key_exists($ext,$this->media_types))
+			{
+				$mime_ext = $this->media_types[$ext][$mode];
+
+				if ($mime != FALSE )
+				{
+					return $mime;
+				} else {
+					return $mime_ext;
+				}
+				
 			} else {
-				return 'application/octet-stream';
+				if ($mime != FALSE)
+				{
+					return $mime;
+				} else {
+					return 'application/octet-stream';
+				}
 			}
+
 		}
 
 		return FALSE;

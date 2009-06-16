@@ -10,13 +10,14 @@
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb">
-	<?php echo anchor("cms","phSite CMS"); ?> : 
-	<?php echo anchor("cms/media/upload","Upload a file"); ?> : 
-	File uploaded successfully
+	<?php echo anchor("cms","phSite CMS"); ?> : Upload a file
 	</div>
 	<div class="page-wrap block">
-		<h1 class="first">File uploaded successfully</h1>
 		<?php
+		if (isset($msg))
+		{
+			echo "<div class=\"msg\">$msg</p>";
+		}
 		if (isset($image_thumb))
 		{
 			echo "<p>$image_thumb</p>";

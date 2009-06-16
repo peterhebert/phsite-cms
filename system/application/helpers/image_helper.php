@@ -27,7 +27,7 @@ if ( ! function_exists('file_is_image'))
 		{
 			$pathinfo = pathinfo($path);
 			$file_info = getimagesize($path);
-			if(in_array($pathinfo['extension'],$acceptable_types) && $fileinfo !== FALSE && array_key_exists($fileinfo['mime'],$acceptable_types))
+			if(in_array($pathinfo['extension'],$acceptable_types) && $file_info !== FALSE && array_key_exists($file_info['mime'],$acceptable_types))
 			{
 				$is_image = TRUE;
 			}

@@ -339,8 +339,13 @@ class Content extends Controller
 	
 		$field_params = array(1 => 'Yes', 0 => 'No');
 		$properties .= "<p>";
-		$properties .=  form_label('Available to home page', 'splash');
+		$properties .=  form_label('Display on home page', 'splash');
 		$properties .=  form_dropdown('splash', $field_params, $this->Content_model->splash);
+		$properties .= "</p>\n";
+
+		$properties .= "<p>";
+		$properties .=  form_label('Available to menus/indexes', 'index');
+		$properties .=  form_dropdown('index', $field_params, $this->Content_model->index);
 		$properties .= "</p>\n";
 
 

@@ -47,7 +47,7 @@ $().ready(function(){
 		<h1>Manage media</h1>
 		<p><?php echo anchor("cms/media/upload","upload media"); ?></p>
 		<?php
-		if(isset($msg)) {
+		if(isset($msg) && $msg != '') {
 			echo "<div class=\"msg\">";
 			echo $msg;
 			echo "</div>\r";

@@ -72,7 +72,6 @@ class Object extends Controller
 		
 		if($this->input->post('submit')) {
 			$this->load->library('form_validation');
-			
 
 			// get post data for object
 			$this->Object_model->object_id = $this->input->post('object_id');
@@ -94,6 +93,8 @@ class Object extends Controller
 				$this->Object_model->name = $this->input->post('name');
 				if(!$this->Object_model->update_object()) {
 					$errors = $errors + 1;
+				} else {
+					$this->Object_model->load_object();
 				}
 
 				// put post field data into arrays
@@ -173,6 +174,7 @@ class Object extends Controller
 					}
 					if($errors === 0)
 					{
+						//$this->Object_model->load_object();
 						$this->data['msg'] = 'Object updated successfully';
 					} else {
 						$this->data['msg'] = 'Object could not be updated successfully';
@@ -206,13 +208,15 @@ class Object extends Controller
 		}
 
 		// get list of related fields, with current values
-		if(array_key_exists('id',$params)) {
+		if($this->Object_model->object_id == '' && array_key_exists('id',$params)) {
 			$this->Object_model->object_id = $params['id'];
-			$this->Object_model->load_object();
+		}
 
+		if($this->Object_model->object_id != '') {
+			$this->Object_model->load_object();
 			$this->data['name'] = $this->Object_model->name;
 			$this->data['name_uri'] = $this->Object_model->name_uri;
-			$this->data['hidden'] = array('object_id' => $params['id']);
+			$this->data['hidden'] = array('object_id' => $this->Object_model->object_id);
 
 			foreach ($this->Object_model->fields as $row) {
 				$obj_fields[$row['field_id']]['rel_id'] = $row['id'];
@@ -227,8 +231,9 @@ class Object extends Controller
 				$obj_fields[$row['field_id']]['min_length'] = $validation['min'];
 				$obj_fields[$row['field_id']]['max_length'] = $validation['max'];
 			}
-
 		}
+
+
 
 		$this->data['attributes'] = array('id' => 'editor');
 		$this->data['fields'] = $obj_fields;

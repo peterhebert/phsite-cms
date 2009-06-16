@@ -56,7 +56,8 @@ class Home extends Controller {
 	function index()
 	{
 		$uri_raw = $this->uri->uri_string();
-		$uri = preg_replace('|^/home/index/(.*)$|','$1',$uri_raw);
+
+		$uri = trim($uri_raw,'/');
 
 		$created = $this->Content_model->get_site_creation_date();
 		if($created !== FALSE) {
@@ -70,14 +71,49 @@ class Home extends Controller {
 				$view = 'themes/'.$this->Site_model->theme.'/home';
 				
 				$menu_links = $this->Content_model->get_list(0,'',0);
-				
 				foreach($menu_links as $link) {
 					$link_uri = $this->Content_model->get_uri_display($link['content_id']);
-					$zzz_menu[] = anchor($link_uri, $link['title']);
+					$menu[] = anchor($link_uri, $link['title']);
 					unset($link_uri);
 				}
+
+				$recent_list = $this->Content_model->list_recent($this->Site_model->default_lang,3,-1,FALSE,-1,1);
+				foreach($recent_list as $link) {
+					$this->Content_model->content_id = $link['content_id'];
+				
+					$this->Object_model->object_id = $link['object_id'];
+					$this->Object_model->load_object();
+					$view_embed = 'themes/'.$this->Site_model->theme.'/embed_'.$this->Object_model->name_uri;
+					
+					$data_recent = $this->_embed_content();
+					$data_recent['title'] = $link['title'];
+					$data_recent['uri'] = $this->Content_model->get_uri_display($link['content_id']);
+					
+					$recent[] = $this->load->view($view_embed,$data_recent, TRUE);
+
+				}
+				unset($data_recent);
+
+				$sidebar_list = $this->Content_model->list_recent($this->Site_model->default_lang,1,-1,FALSE,1);
+				foreach($sidebar_list as $link) {
+					$this->Content_model->content_id = $link['content_id'];
+				
+					$this->Object_model->object_id = $link['object_id'];
+					$this->Object_model->load_object();
+					$view_embed = 'themes/'.$this->Site_model->theme.'/embed_'.$this->Object_model->name_uri;
+					
+					$data_sidebar = $this->_embed_content();
+					$data_sidebar['title'] = $link['title'];
+					$data_sidebar['uri'] = $this->Content_model->get_uri_display($link['content_id']);
+					
+					$sidebar[] = $this->load->view($view_embed,$data_sidebar, TRUE);
+				}
+				unset($data_sidebar);
+
 	
-				$this->data['menu'] = $zzz_menu;
+				$this->data['menu'] = ul($menu);
+				$this->data['recent'] = $recent;
+				$this->data['sidebar'] = $sidebar;
 				$this->load->view($view,$this->data);
 			} else {
 				
@@ -87,14 +123,14 @@ class Home extends Controller {
 				$this->Content_model->get_title();
 			
 				$uri = $this->Content_model->get_uri();
-				$this->process_uri($uri);
+				$this->_process_uri($uri);
 			}
 		} else {
-			$this->process_uri($uri);
+			$this->_process_uri($uri);
 		}
 	}
 	
-	function process_uri($uri)
+	function _process_uri($uri)
 	{
 		$errors = FALSE;
 
@@ -155,13 +191,15 @@ class Home extends Controller {
 			$this->data['updated'] = $this->Content_model->updated;
 			$this->data['title'] = $this->Content_model->title;
 
-			
 			foreach($this->Content_model->content_data as $field) {
 				$this->data['content_data'][$field['field_name']] = $field['value'];
 				if($field['updated'] > $this->data['updated']) {
 					$this->data['updated'] = $field['updated'];
 				}
 			}
+
+			// set footer
+			$this->data['footer'] = "<p>Powered by <a href=\"phsite.peterhebert.com\">phSite CMS</a></p>\r";
 
 			// get author info
 			$this->User_model->user_id = $this->Content_model->user_id;
@@ -200,10 +238,11 @@ class Home extends Controller {
 			$this->load->view($view,$this->data);
 
 		} else {
-			$this->data['message'] = implode(', ',$msg);
+			$this->data['uri'] = $uri;
+			$view = 'themes/'.$this->Site_model->theme.'/error_404';
 
 			$this->output->set_status_header('404');
-			$this->load->view('error_404',$this->data);
+			$this->load->view($view,$this->data);
 		}
 
 	}
@@ -263,6 +302,42 @@ class Home extends Controller {
 		$this->load->view($view,$this->data);
 	}
 
+	function _embed_content()
+	{
+	
+		$this->Content_model->get_content();
+
+		$data_embed['content_id'] = $this->Content_model->content_id;
+		$data_embed['parent_id'] = $this->Content_model->parent_id;
+		$data_embed['object_id'] = $this->Content_model->object_id;
+		$data_embed['user_id'] = $this->Content_model->user_id;
+		$data_embed['created'] = $this->Content_model->created;
+		$data_embed['updated'] = $this->Content_model->updated;
+		$data_embed['title'] = $this->Content_model->title;
+
+		
+		foreach($this->Content_model->content_data as $field) {
+			$data_embed['content_data'][$field['field_name']] = $field['value'];
+			if($field['updated'] > $data_embed['updated']) {
+				$data_embed['updated'] = $field['updated'];
+			}
+		}
+
+		// get author info
+		$this->User_model->user_id = $this->Content_model->user_id;
+		$this->User_model->load();
+		$data_embed['author']['name_first'] = $this->User_model->name_first;
+		$data_embed['author']['name_last'] = $this->User_model->name_last;
+		$data_embed['author']['username'] = $this->User_model->username;
+		$data_embed['author']['email'] = $this->User_model->email;
+
+		// get object info
+		$this->Object_model->object_id = $this->Content_model->object_id;
+		$this->Object_model->load_object();
+			
+		return $data_embed;
+
+	}
 
 }
 ?>
