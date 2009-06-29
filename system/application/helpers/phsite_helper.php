@@ -146,7 +146,7 @@ if ( ! function_exists('listTimeZones'))
 
 if ( ! function_exists('convert_uri'))
 {
-	function convert_uri($string){
+	function convert_uri($string,$dirs=FALSE){
 	
 		$newstring = strtolower($string);
 	
@@ -155,7 +155,11 @@ if ( ! function_exists('convert_uri'))
 	
 		$newstring = str_replace($search, $replace, $newstring);
 	
-		$findRegEx = "([^A-Za-z0-9]+)";
+		if($dirs == TRUE) {
+			$findRegEx = "([^A-Za-z0-9/]+)";
+		} else {
+			$findRegEx = "([^A-Za-z0-9]+)";
+		}
 	
 		$newstring = preg_replace($findRegEx, '_', $newstring);
 		

@@ -1,30 +1,26 @@
 <?php
-class Content_model extends Model {
+class Content_model extends MY_Model {
 
-	var $content_id;
-	var $parent_id;
-	var $object_id;
-	var $object_name;
-	var $user_id;
-	var $created;
-	var $updated;
-	var $content_data;
-	var $splash = 0; // make available to display on home page
-	var $index = 1; // make available to menus, other indexes
+	// 'content' variables
+	var $content_id, $user_id, $parent_id, $type_id, $type_name, $publish_status, $splash, $index, $date_1, $date_2, $date_updated;
+	
+	// 'content_meta' content by language variables
+	var $content_meta_id, $field_id, $field_name, $value, $content_lang, $meta_updated;
+	
+	// 'content_titles' title variables
+	var $content_title_id, $title, $uri_title, $subtitle, $title_updated;
 
-	var $title_id;
-	var $title;
-	var $uri_title;
-	var $content_lang;
+	// misc utility variables
+	var $content_list;
 
     function Content_model()
     {
         // Call the Model constructor
-        parent::Model();
+        parent::MY_Model();
     }
 
     // list content
-	function get_list($limit=0,$order='',$parent_id = -1,$page=1)
+	function list_content($limit=0,$order='',$dir='desc',$parent_id = -1,$page=1)
     {
 
 		$this->db->select('*');
@@ -45,38 +41,30 @@ class Content_model extends Model {
 				$this->db->limit($limit);
 			}
 		}
-		if($order == 'asc' or $order == 'desc') {
-			$this->db->order_by('created',$order);
+		if($order != '') {
+			$this->db->order_by($order,$dir);
 		}
 
 		$query = $this->db->get();
-		return $query->result_array();
+		$this->content_list = $query->result_array();
 
 	}
 
     // list site map
-	function site_map($parent_id=0,$mode=0,$my_lang='')
+	function site_map($mode=1,$limit=0,$parent_id = -1)
     {
 
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		$this->db->where('parent_id', $parent_id); 
-		if($my_lang != '') {
-			$this->db->where('content_lang', $my_lang); 
-		}
-		$query = $this->db->get();
-		$pages = $query->result_array();
-		
-		$list = '';
+		$this->list_content($limit,'title','asc',$parent_id);
+		$pages = $this->content_list;
+
+		$list = "";
 		if(count($pages) > 0) {
-			$list = "<ul>\r";
+			$list .= "<ul>\r";
 		}
-
-
 		foreach($pages as $page) {
 			$list .= "<li>";
 
-			if($mode == 0) {
+			if($mode != 1) {
 				$link = '/'.$this->get_uri_display($page['content_id'],$page['content_lang']);
 				$list .= anchor($link, $page['title'], array('title' => "view '{$page['title']}'"));
 			} else {
@@ -85,7 +73,7 @@ class Content_model extends Model {
 				$list .= anchor($link, $page['title'], array('title' => "edit '{$page['title']}'", 'class' => 'sitemap'));
 			}
 
-			$children = $this->site_map($page['content_id'],$mode,$page['content_lang']);
+			$children = $this->site_map($mode,$limit,$page['content_id']);
 
 			if($children != "") {
 				$list .=  $children;
@@ -99,60 +87,13 @@ class Content_model extends Model {
 		return $list;
 	}
 
-    // list recent content
-	function list_recent($iso_lang='eng',$object = -1,$object2 = -1,$not = FALSE,$splash=-1,$index=-1)
-    {
-		$this->db->select('*');
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		if($object > 0)
-		{
-			if($not === TRUE)
-			{
-				$this->db->where('object_id !=', $object);
-			}
-			else
-			{
-				$this->db->where('object_id', $object);
-			}
-			if($object2 > 0)
-			{
-				if($not === TRUE)
-				{
-					$this->db->where('object_id !=', $object2);
-				}
-				else
-				{
-					$this->db->where('object_id', $object2);
-				}
-			}
-
-		}
-
-		if($splash > -1)
-		{
-			$this->db->where('splash',$splash);
-		}
-		if($index > -1)
-		{
-			$this->db->where('index',$index);
-		}
-
-		$this->db->where('content_lang', $iso_lang);
-		$this->db->limit($this->config->item('limit_posts'));
-		$this->db->order_by('created','desc');
-		$query = $this->db->get();
-
-		return $query->result_array();
-	}
-
     // search for content
 	function search($str)
     {
 		$match = $this->input->xss_clean($str);
 
 		$sql = "SELECT `content_id`, AVG( MATCH(`value`) AGAINST ('{$match}') ) AS `score` 
-		FROM `content_data` 
+		FROM `content_meta` 
 		WHERE MATCH(value) AGAINST ('{$match}') 
 		GROUP BY content_id 
 		ORDER BY score desc
@@ -177,13 +118,16 @@ class Content_model extends Model {
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();
-			$this->parent_id = $row->parent_id;
-			$this->object_id = $row->object_id;
-			$this->updated = $row->updated;
-			$this->created = $row->created;
 			$this->user_id = $row->user_id;
+			$this->parent_id = $row->parent_id;
+			$this->type_id = $row->type_id;
+			$this->type_name = $row->type_name;
+			$this->publish_status = $row->publish_status;
 			$this->splash = $row->splash;
 			$this->index = $row->index;
+			$this->date_1 = $row->date_1;
+			$this->date_2 = $row->date_2;
+			$this->date_updated = $row->date_updated;
 		}
 
 	}
@@ -211,30 +155,32 @@ class Content_model extends Model {
 		   $this->title_id = $row->title_id;
 		   $this->title = $row->title;
 		   $this->uri_title = $row->uri_title;
-		   $this->content_lang = $row->content_lang;
+		   $this->subtitle = $row->subtitle;
+		   $this->content_lang = $row->lang_ISO_639_3;
+		   $this->title_updated = $row->date_updated;
 		}
 	}
 
     function get_content_data()
     {
 		// get content data
-		$sql = "SELECT content_data.*,
-		r_object_field.validation, r_object_field.required, r_object_field.order,
+		$sql = "SELECT content_meta.*,
+		r_types_fields.validation, r_types_fields.required, r_types_fields.order,
 		field.field_name, field.input_type
-		FROM content_data LEFT JOIN
-		(r_object_field LEFT JOIN field ON r_object_field.field_id = field.field_id)
-		ON content_data.field_id = r_object_field.field_id
-		WHERE r_object_field.object_id = {$this->object_id}
-		AND content_data.content_id = ".$this->content_id;
+		FROM content_meta LEFT JOIN
+		(r_types_fields LEFT JOIN field ON r_types_fields.field_id = fields.field_id)
+		ON content_meta.field_id = r_types_fields.field_id
+		WHERE r_types_fields.type_id = {$this->type_id}
+		AND content_meta.content_id = ".$this->content_id;
 		if($this->content_lang != '') {
-			$sql .= " AND content_data.content_lang = '".$this->content_lang."'";
+			$sql .= " AND content_meta.content_lang = '".$this->content_lang."'";
 		}
-		$sql .= "ORDER BY r_object_field.order";
+		$sql .= "ORDER BY r_types_fields.order";
 
 	
 		$query = $this->db->query($sql);
 	
-		$this->content_data = $query->result_array();
+		$this->content_meta = $query->result_array();
     }
 
     // return other languages than current language
@@ -244,9 +190,9 @@ class Content_model extends Model {
 		$otherlangs = array();
 
 		if($this->content_lang == '') {
-			$sql = "select count(data_id) as num, content_lang from content_data where content_lang != '' group by content_lang";
+			$sql = "select count(data_id) as num, content_lang from content_meta where content_lang != '' group by content_lang";
 		} else {
-			$sql = "select count(data_id) as num, content_lang from content_data where content_lang != '{$this->content_lang}' and content_lang != '' group by content_lang";
+			$sql = "select count(data_id) as num, content_lang from content_meta where content_lang != '{$this->content_lang}' and content_lang != '' group by content_lang";
 		}
 		
 		$query = $this->db->query($sql);
@@ -265,33 +211,27 @@ class Content_model extends Model {
     // update main content info
     function update_content()
     {
+		$data = array(
+		'user_id' => $this->user_id,
+		'parent_id' => $this->parent_id,
+		'type_id' => $this->type_id,
+		'type_name' => $this->type_name,
+		'publish_status' => $this->publish_status,
+		'splash' => $this->splash,
+		'index' => $this->index,
+		'date_1' => $this->date_1,
+		'date_2' => $this->date_2,
+		'date_updated' => $this->date_updated
+		);
 
 		if($this->content_id == '') {
 			// insert
-			$data = array(
-			'parent_id' => $this->parent_id,
-			'object_id' => $this->object_id,
-			'object_name' => $this->object_name,
-			'user_id' => $this->user_id,
-			'created' => $this->created,
-			'splash' => $this->splash,
-			'index' => $this->index
-			);
 			if($this->db->insert('content', $data)){
 				$this->content_id = $this->db->insert_id();
 				return TRUE;
 			}
 		} else {
 			// update
-			$data = array(
-			'parent_id' => $this->parent_id,
-			'object_id' => $this->object_id,
-			'object_name' => $this->object_name,
-			'user_id' => $this->user_id,
-			'created' => $this->created,
-			'splash' => $this->splash,
-			'index' => $this->index
-			);
 			$this->db->where('content_id', $this->content_id);
 			if($this->db->update('content', $data)){
 				return TRUE;
@@ -305,22 +245,19 @@ class Content_model extends Model {
     // update field data
     function update_data($field_id,$value,$data_id)
     {
-		$success = TRUE;
+		$data = array(
+		'content_id' => $this->content_id,
+		'field_id' => $this->field_id,
+		'value' => $this->value,
+		'lang_ISO_639_3' => $this->content_lang
+		);
 
-		if($data_id == '') {
+		if($content_meta_id == '') {
 
 			if($value != '') {
 				// insert
-				$data = array(
-				'content_id' => $this->content_id,
-				'field_id' => $field_id,
-				'value' => $value,
-				'content_lang' => $this->content_lang
-				);
-				if($this->db->insert('content_data', $data)){
+				if($this->db->insert('content_meta', $data)){
 					return TRUE;
-				} else {
-					return FALSE;
 				}
 			} else {
 				return TRUE;
@@ -328,31 +265,23 @@ class Content_model extends Model {
 			
 		} else {
 
+			$this->db->where('content_meta_id', $this->content_meta_id);
 			if($value == '') {
 				// delete
-				$this->db->where('data_id', $data_id);
-				if($this->db->delete('content_data')){
+				if($this->db->delete('content_meta')){
 					return TRUE;
 				}
 
 			} else {
 				// update
-				$data = array(
-				'content_id' => $this->content_id,
-				'field_id' => $field_id,
-				'value' => $value,
-				'content_lang' => $this->content_lang
-				);
-		
-				$this->db->where('data_id', $data_id);
-				if($this->db->update('content_data', $data)){
+				if($this->db->update('content_meta', $data)){
 					return TRUE;
 				}
 			}
 
 		}
 
-		return $success;
+		return FALSE;
 
     }
 
@@ -400,15 +329,17 @@ class Content_model extends Model {
 
 		}
 
+		$data = array(
+		'content_id' => $this->content_id,
+		'title' => $this->title,
+		'uri_title' => convert_uri($this->title),
+		'subtitle' => $this->subtitle,
+		'lang_ISO_639_3' => $this->content_lang
+		);
+
 		// update or insert title
 		if($this->title_id == '') {
 			// insert
-			$data = array(
-			'content_id' => $this->content_id,
-			'title' => $this->title,
-			'uri_title' => convert_uri($this->title),
-			'content_lang' => $this->content_lang
-			);
 			if($this->db->insert('content_titles', $data)){
 				$this->title_id = $this->db->insert_id();
 				return TRUE;
@@ -416,13 +347,6 @@ class Content_model extends Model {
 			
 		} else {
 			// update
-			$data = array(
-			'content_id' => $this->content_id,
-			'title' => $this->title,
-			'uri_title' => convert_uri($this->title),
-			'content_lang' => $this->content_lang
-			);
-	
 			$this->db->where('title_id', $this->title_id);
 			if($this->db->update('content_titles', $data)){
 				return TRUE;
@@ -434,7 +358,7 @@ class Content_model extends Model {
     }
 
     // return list of possible parents
-    function getParents()
+    function get_parents()
     {
 
 		if($this->content_id == '')
@@ -445,14 +369,32 @@ class Content_model extends Model {
 			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE content_titles.content_lang = '{$this->content_lang}' AND content.content_id != ".$this->content_id." AND content.parent_id != ".$this->content_id;
 
 		}
-
-
-
 				
 		$query = $this->db->query($sql);
 		return $query->result_array();
 	}
 
+    function get_parents_dropdown()
+    {
+
+		$parents = $this->get_parents();
+
+		$list[0] = "site root";
+		
+		if(is_array($parents) && count($parents) > 0) {
+			foreach($parents as $row) {
+				if(array_key_exists('title',$row) && $row['title'] != '') {
+					$pname = $row['title'];
+				} else {
+					$pname = $row['content_id'];
+				}
+
+				$list[$row['content_id']] = $pname;
+			}
+		}
+
+		return $list;
+	}
 
     function get_uri_display($content_id,$content_lang='')
     {

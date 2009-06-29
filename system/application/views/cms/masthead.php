@@ -14,7 +14,7 @@
 
 	<div class="page-wrap block">
 		<div class="column">
-			<p>Site: <?php echo anchor('', $site_title, array('title' => 'View site in new window')); ?></p>
+			<p>Site: <?php echo anchor('', $site_title, array('title' => 'View site in new window', 'rel' => 'external')); ?></p>
 		</div>
 		<?php
 		if(isset($userdata)) {

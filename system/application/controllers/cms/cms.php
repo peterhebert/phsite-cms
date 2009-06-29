@@ -1,76 +1,44 @@
 <?php
-class Cms extends Controller
+class Cms extends MY_Controller
 {
 
 	function Cms()
 	{
-		parent::Controller();
-		$this->load->helper('form');
+		parent::MY_Controller();
 
-		// load objects
+		// load necessary resources
+		$this->load->helper('form');
 		$this->load->model('Field_model');
-		$this->load->model('Object_model');
+		$this->load->model('Content_type_model');
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
-		$this->load->model('Site_model');
-
 		$this->load->library('session');
-		
-		// get site prefs & meta
-		$this->Site_model->load_prefs();
 
-		// get site metadata
-		$this->Site_model->load_meta();
-		$this->data['site_title'] = $this->Site_model->title;
 	}
 	
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
-
-	}
-
 	function index()
 	{
-		$this->authenticate();
-
-		$params = $this->uri->uri_to_assoc(3);
-
-		if(array_key_exists('lang',$params)) {
-			$this->Content_model->content_lang = $params['lang'];
-		}
-
-		// load list of fields
-		$d2['list'] = $this->Field_model->get_list();
-		$this->data['fields'] = $this->load->view('cms/field_list',$d2, true);
-	
-		// load list of objects
-		$d2['list'] = $this->Object_model->get_list();
-		$this->data['new_objects'] = $d2['list'];
-		$this->data['objects'] = $this->load->view('cms/object_list',$d2, true);
+		//$this->_authenticate();
 
 		// get recently added pages
-		$this->data['content'] = $this->recent();
-	
+		$contentdata['title'] = "Recently Added";
+		$contentdata['list'] = $this->Content_model->site_map(1,10);
+		$this->data['content'] = $this->load->view('cms/content_list',$contentdata, true);
+
+		$this->data['dropdown'] = $this->Content_type_model->get_list_dropdown_create();
+
+		// load list of content types
+		$this->Content_type_model->get_list();
+		$d2['list'] = $this->Content_type_model->types;
+		$this->data['objects'] = $this->load->view('cms/content_types_list',$d2, true);
+
 		// now load view
 		$this->load->view('cms/index',$this->data);
 	}
+
 	
 	function login()   
 	{  
-		$this->load->helper('form');
 		$this->load->library('form_validation');
 
 		// if already logged in, redirect
@@ -101,7 +69,7 @@ class Cms extends Controller
 				$this->data['msg'] = validation_errors();
 			} else {
 				// perform authentication
-				$auth = $this->User_model->authenticate($this->input->post('username'),$this->input->post('password'));
+				$auth = $this->User_model->authenticate_user($this->input->post('username'),$this->input->post('password'));
 
 				if($auth === TRUE)
 				{
@@ -161,40 +129,16 @@ class Cms extends Controller
 		$this->load->view('cms/login',$this->data);  
 	} 
 
+
+
+
+
 	function logout()   
 	{  
 		$this->session->sess_destroy();
 		redirect('');
 		exit();
 	} 
-
-
-	function recent()
-	{
-
-		// get recently added pages
-		$content = $this->Content_model->list_recent();
-		
-		foreach($content as $page) {
-			$link = "cms/content/edit/id/".$page['content_id'];
-			if($page['content_lang'] != '') {
-				$link .= "/lang/".$page['content_lang'];
-			}
-
-			$list[] = anchor($link, $page['title'], array('title' => "edit '{$page['title']}'"));
-			
-		}
-
-		if(isset($list)) {
-			$contentdata['title'] = "Recently Added";
-			$contentdata['list'] = ul($list);
-		}
-		$recent = $this->load->view('cms/content_list',$contentdata, true);
-		return $recent;
-
-	}
-
-
 
 }
 ?>

@@ -16,15 +16,13 @@
 		if (isset($msg)){
 		echo "<div class=\"msg\">{$msg}</div>\n";
 		}
-		if(count($list) == 0) {
-			$list[] = "No users found";
+		if(isset($list)) {
+			echo $list;
 		}
-		echo ul($list);
-		if($userdata['admin'] == 1) {
+		if(isset($admin) && $admin == 1) {
 		echo "<p>". anchor("cms/user/edit","New User")."</p>";
 		}
 		?>
-
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

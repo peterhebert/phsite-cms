@@ -1,147 +1,91 @@
 <?php
 
-class Media extends Controller {
+class Media extends MY_Controller {
 		
 	function Media()
 	{
 		parent::Controller();
 		$this->load->helper(array('form','url','file','image'));
-		$this->load->model('Site_model');
 		$this->load->model('Media_model');
 		$this->load->model('Language_model');
 	}
 	
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->Site_model->load_prefs();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
-
-	}
-
 	function index()
 	{	
 		$this->manage();
-	}
+/*		$this->_authenticate();
 
-	function upload()
-	{	
-
-		$this->authenticate();
-
-		$success = FALSE;
-		
-		//get list of directories in media folder
+		$this->Media_model->media_lang = $this->Site_model->default_lang;
 		$media_root = $this->Media_model->dir_base;
-		$dir_array[$media_root] = 'media root';
 
-		$this->Media_model->list_dirs($media_root);
-		foreach($this->Media_model->dir_list as $dir) {
-			$dest_dir = str_replace($media_root,'',$dir);
-			$dir_array[$dir] = $dest_dir;
-		}
-		$this->data['directories'] = $dir_array;
+		//get list of directories in media folder
+		$this->Media_model->list_dirs();
+		$this->Media_model->list_files_unique($media_root);
 
-		//initialize the form values
-		$this->data['dest_path'] = $media_root;
-		$this->data['create_entry'] = FALSE;
-
-		// get max upload size from php.ini settings
-		$max_bytes = get_max_upload_size();
-		$this->data['max_size'] = resize_bytes($max_bytes);
-		$config['max_size'] = $max_bytes * 1024;
-
-		$config['allowed_types'] = 'gif|jpg|png|flv|mov|mp4';
-		$this->data['allowed_types'] = str_replace('|',', ',$config['allowed_types']);
-
-		// process form if submitted
-		if($this->input->post('submit') != '') {
-
-			if($this->input->post('create_entry') == 1) {
-				$this->data['create_entry'] = TRUE;
-			}
-
-			$config['upload_path'] = $this->input->post('dest_path');
-			$this->load->library('upload', $config);
-			
-			$success = $this->upload->do_upload();
-			
-			if ($success === FALSE)
-			{
-				$this->data['msg'] = $this->upload->display_errors('<p>', '</p>');
-			}	
-			else
-			{
-
-				$this->data['upload_data'] = $this->upload->data();
-				if($this->data['upload_data']['is_image'] == 1)
-				{
-					$img_path = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$this->data['upload_data']['full_path']);
-					$this->data['image_thumb'] = view_image($img_path,$this->Site_model->img_size_thumb);
-				}
-			}
-
-		}
-
-		if($success === TRUE) {
-
-			$this->data['msg'] = "<p>File uploaded successfully</p>\r";
-
-			$this->Media_model->file_uri = '/'.trim($img_path,'/');
-			$this->Media_model->get_file_metadata();
-			$this->Media_model->external = 0;
+		$this->Media_model->path_uri = '/';
 		
-			$this->Media_model->media_lang = $this->Site_model->default_lang;
+		if($this->Media_model->get_path_by_uri() === FALSE) {
+			$this->Media_model->path_title = 'Media root';
+		} 
+		$dirs[] = anchor('cms/media/manage/'.$this->Site_model->default_lang,$this->Media_model->path_title)." ({$this->Media_model->file_count})";
+		
+		foreach($this->Media_model->dir_list as $index => $dir)
+		{
+			$this->Media_model->dir_current = $dir;
+			$this->Media_model->list_files_unique();
+			
+			$dest_dir = str_replace($media_root,'',$dir);
 
-			if ($this->Media_model->update_media() == TRUE)
-			{
-				if ($this->Media_model->update_meta() == TRUE)
-				{
-					$this->data['msg'] = "<p>Metadata added to database</p>\r";
-				} else {
-				}
+			$this->Media_model->path_uri = $dest_dir;
+
+			$dest_display_dir = str_replace($media_root.'/','',$dir);
+			$dest_link = 'cms/media/manage/'.$this->Site_model->default_lang.$dest_dir;
+			
+			if($this->Media_model->get_path_by_uri() === TRUE) {
+				$dest_text = $this->Media_model->path_title;
 			} else {
+				$dest_text = $dest_display_dir;
 			}
-			$this->load->view('cms/upload_success', $this->data);
-
-		} else {
-			$this->load->view('cms/upload_form', $this->data);
+			$dirs[] = anchor($dest_link,$dest_text)." ({$this->Media_model->file_count})";
+			
 		}
+		$this->data['dirs'] = $dirs;
 
+		$this->load->view('cms/media', $this->data);
+*/	}
 
-	}
-
+	
 	function manage() {
-		$this->authenticate();
+		$this->_authenticate();
 		$this->data['msg'] = '';
 		
 		$this->Media_model->media_lang = $this->Site_model->default_lang;
 		$media_root = $this->Media_model->dir_base;
-
-		$uri = $this->uri->segment_array();
-		$dirA = array_slice($uri, 3);
-		$displayDir = implode('/',$dirA);
-		$myDir = $displayDir;
 		
-		$this->data['msg'] = $myDir."<br />\r";
+		$this->_get_dir();
+		$display_dir = $this->Media_model->path_uri;
 
+		/* update directory info in database */
+
+		if($this->input->post('directory') != '') {
+			$myDir = $this->input->post('directory');
+		}
+
+		if($this->input->post('path_title') != '') {
+			if($this->input->post('path_id') != '') {
+				$this->Media_model->path_id = $this->input->post('path_id');
+			}
+			$this->Media_model->path_title = $this->input->post('path_title');
+			$this->Media_model->path_lang = $this->input->post('path_lang');
+			$this->Media_model->update_path();
+		}
+
+		// delete all selected files
 		if($this->input->post('delete') != '') {
 
 			$del_ids = $this->input->post('delete');
 			$unsuccessfull = array();
 			
-			// delete all selected files
 			foreach($del_ids as $del_file_id) {
 			
 				$del_db = FALSE;
@@ -183,44 +127,108 @@ class Media extends Controller {
 			}
 
 		}
-
-
-		if($this->input->post('directory') != '') {
-			$myDir = $this->input->post('directory');
-		}
+		
 		//get list of directories in media folder
 		$this->Media_model->list_dirs();
 
-		$dir_array[''] = 'Media root';
+		if($this->Media_model->path_lang != '')
+		{
+			$dir_array['/'.$this->Media_model->path_lang] = 'Media root';
+		} else {
+			$dir_array[''] = 'Media root';
+		}
 		foreach($this->Media_model->dir_list as $index => $dir)
 		{
 			$this->Media_model->dir_current = $dir;
 			$dest_dir = str_replace($media_root,'',$dir);
 			$dest_display_dir = str_replace($media_root.'/','',$dir);
-
+			if($this->Media_model->path_lang != '')
+			{
+				$dest_dir = '/'.$this->Media_model->path_lang.$dest_dir;
+			}
 			$dir_array[$dest_dir] = $dest_display_dir;
 		}
 
+		$dirs = "<p>";
+		$dirs .= form_label('Select directory','directory');
+		if($this->Media_model->path_lang != '')
+		{
+			$dirs .= form_dropdown('directory', $dir_array, '/'.$this->Media_model->path_lang.$display_dir);
+		} else {
+			$dirs .= form_dropdown('directory', $dir_array, $display_dir);
+		}
+		$dirs .= "</p>\n";
+
+		$this->data['dirs'] = $dirs;
 
 		$files = '';
-		$del_buttons = '';
+
+		$other_langs = $this->Media_model->get_path_langs();
+		if($other_langs)
+		{
+			foreach($other_langs as $temp_lang)
+			{
+				$this->Language_model->load($temp_lang);
+				$other_list[] = anchor('cms/media/manage/'.$temp_lang.$display_dir, $this->Language_model->Ref_Name);
+			}
+
+			$files .= "<div class=\"block\">";
+			$files .= "<div class=\"column w4\">";
+		}
 		
 		$attributes = array('class' => 'thumbnails');
 
-		$this->Media_model->dir_current = $media_root.$myDir;
+		$this->Media_model->dir_current = $media_root.$display_dir;
 		$this->Media_model->list_files_unique();
 
 		$temp_file_list = $this->Media_model->file_list;
 
-		if($displayDir == '') {
-			$displayDir = 'Media Root';
+		$this->Media_model->path_uri = $display_dir;
+
+		$files .=  form_open(current_url());
+		if($this->Media_model->get_path_by_uri()) {
+			$files .= form_hidden('path_id',$this->Media_model->path_id);
 		}
-		$files .= "<h2>$displayDir</h2>\n";
+
+
+		$files .= form_fieldset('Path info');
+		$field_params = array(
+		'name'        => 'path_title',
+		'id'          => 'path_title',
+		'class'	=> 'text',
+		'value' => $this->Media_model->path_title,
+		);
+		$files .= "<p>";
+		$files .= form_label('Title','path_title');
+		$files .=  form_input($field_params);
+		$files .= "</p>\n";
+
+		$langArray = $this->get_langs();
+
+		$files .= "<p>";
+		$files .=  form_label('Language', 'path_lang');
+		$files .=  form_dropdown('path_lang', $langArray, $this->Media_model->path_lang);
+		$files .= "</p>\n";
+
+		$files .= form_fieldset_close();
+
+		if($other_langs)
+		{
+			$files .= "</div>";
+			$files .= "<div class=\"float w2\">";
+			$files .= "<h4>Other languages</h4>";
+			$files .= ul($other_list);
+			$files .= "</div>";
+			$files .= "</div>";
+		}
+
+
+
 		if(is_array($temp_file_list) && count($temp_file_list) > 0) {
-			$files .= "<p>Click thumbnails to edit</p>\n";
-			$del_buttons = "<p><a href=\"#\" id=\"select_all\" class=\"mg-right\">Select All</a> ";
-			$del_buttons .= "<a href=\"#\" id=\"deselect_all\" class=\"mg-right\">Deselect All</a> ";
-			$del_buttons .= form_submit('submit', 'Delete files')."</p>\n";
+			$files .= form_fieldset('Files');
+			$files .= "<p>Click thumbnails to edit, select checkboxes to delete files</p>\n";
+			$files .= "<p><a href=\"#\" id=\"select_all\" class=\"mg-right\">Select All</a> ";
+			$files .= "<a href=\"#\" id=\"deselect_all\" class=\"mg-right\">Deselect All</a></p>\n";
 			$this->Media_model->external = 0;
 			foreach($temp_file_list as $file) {
 
@@ -254,7 +262,7 @@ class Media extends Controller {
 				} else {
 					// load file metadata and insert to database
 					$this->Media_model->get_file_metadata();
-					$this->data['msg'] .= $this->Media_model->file_uri."<br />";	
+
 					$media_ins = $this->Media_model->update_media();
 					if($media_ins) {
 						$meta_ins = $this->Media_model->update_meta();
@@ -300,24 +308,24 @@ class Media extends Controller {
 			}
 			$files .= ul($files_clean, $attributes);
 			unset($files_clean);
-
+			$files .= form_fieldset_close();
 
 		} else {
 			$files .= "<p>no media in directory</p>\n";
 		}
+		$files .= '<p>'.form_submit('submit', 'Save')."</p>\n";
+		$files .=  form_close();
 
-
-		$this->data['page'] = $this->config->item('base_url').'cms/media/manage';
+		$this->data['page'] = site_url('cms/media/manage');
 		$this->data['files'] = $files;
-		$this->data['del_buttons'] = $del_buttons;
 		$this->data['size'] = $this->Site_model->img_size_thumb;
-		$this->data['dirs'] = form_dropdown('directory', $dir_array, $myDir);
-		$this->load->view('cms/media', $this->data);
+
+		$this->load->view('cms/media_manage', $this->data);
 	}
 
 	function edit() {
 
-		$this->authenticate();
+		$this->_authenticate();
 		
 		$media_root = $this->Media_model->dir_base;
 		$dir = str_replace($_SERVER["DOCUMENT_ROOT"],'',$media_root);
@@ -594,6 +602,129 @@ class Media extends Controller {
 		
 		$this->load->view('cms/media_edit', $this->data);
 
+	}
+
+	function upload()
+	{	
+
+		$this->_authenticate();
+
+		$success = FALSE;
+		
+		//get list of directories in media folder
+		$media_root = $this->Media_model->dir_base;
+		$dir_array[''] = 'media root';
+
+		$this->Media_model->list_dirs($media_root);
+		foreach($this->Media_model->dir_list as $dir) {
+			$dest_dir = str_replace($media_root,'',$dir);
+			$dir_array[$dest_dir] = $dest_dir;
+		}
+		$this->data['directories'] = $dir_array;
+
+		//initialize the form values
+		$this->data['dest_path'] = $media_root;
+		$this->data['create_entry'] = FALSE;
+
+		// get max upload size from php.ini settings
+		$max_bytes = get_max_upload_size();
+		$this->data['max_size'] = resize_bytes($max_bytes);
+		$config['max_size'] = $max_bytes * 1024;
+
+		$my_types = array_keys($this->Media_model->media_types);
+		$config['allowed_types'] = implode('|',$my_types);
+
+		foreach($this->Media_model->media_types as $ext => $type) {
+			$arr_allowed[] = $type[1]." (.{$ext})";
+		}
+		$this->data['allowed_types'] = implode("<br />\n",$arr_allowed);
+
+		// process form if submitted
+		if($this->input->post('submit') != '') {
+			$this->data['msg'] = '';
+
+			if($this->input->post('new_path') != '') {
+				$new_path = convert_uri($this->input->post('new_path'),TRUE);
+				$new_path = '/'.trim($new_path,'/');
+				$full_path = $media_root.$new_path;
+
+				if (!file_exists($full_path) || !is_dir($full_path) ) {
+					if(!mkdir($full_path, 0755))
+					{
+					$this->data['msg'] .= "<p>the path '{$this->input->post('new_path')}' could not be created</p>\r";
+					}
+				}
+
+			} else {
+				$full_path = $media_root.$this->input->post('dest_path');
+			}
+
+			$config['upload_path'] = $full_path;
+			$this->load->library('upload', $config);
+			
+			$success = $this->upload->do_upload();
+			
+			if ($success === FALSE)
+			{
+				$this->data['msg'] .= $this->upload->display_errors('<p>', '</p>');
+			}	
+			else
+			{
+
+				$this->data['upload_data'] = $this->upload->data();
+				if($this->data['upload_data']['is_image'] == 1)
+				{
+					$img_path = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$this->data['upload_data']['full_path']);
+					$this->data['image_thumb'] = view_image($img_path,$this->Site_model->img_size_thumb);
+				}
+			}
+
+		}
+
+		if($success === TRUE) {
+
+			$this->data['msg'] = "<p>File uploaded successfully</p>\r";
+
+			$this->Media_model->file_uri = '/'.trim($img_path,'/');
+			$this->Media_model->get_file_metadata();
+			$this->Media_model->external = 0;
+		
+			$this->Media_model->media_lang = $this->Site_model->default_lang;
+
+			if ($this->Media_model->update_media() == TRUE)
+			{
+				if ($this->Media_model->update_meta() == TRUE)
+				{
+					$this->data['msg'] = "<p>Metadata added to database</p>\r";
+				} else {
+				}
+			} else {
+			}
+			$this->load->view('cms/upload_success', $this->data);
+
+		} else {
+			$this->load->view('cms/upload_form', $this->data);
+		}
+
+
+	}
+
+	function _get_dir() {
+		$raw_uri = $this->uri->segment_array();
+		$uri_array = array_slice($raw_uri, 3);
+		
+
+		if($this->uri->total_segments() <= 3) {
+			$this->Media_model->path_lang = $this->Site_model->default_lang;
+			$dir = '/';
+		} else {
+			if($this->Language_model->load($uri_array[0]) === TRUE) {
+				$this->Media_model->path_lang = array_shift($uri_array);
+			}	
+			$dir = '/'.implode('/',$uri_array);
+		}
+
+		$this->Media_model->path_uri = $dir;
 	}
 
 	function get_langs()

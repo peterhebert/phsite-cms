@@ -1,196 +1,158 @@
 <?php
-class Site_model extends Model {
+class Site_model extends MY_Model {
 
-	// ID of the content for the home page (0 means auto-generate it)
-	var $home_page_id;
-
-	// folder for current theme in '/system/application/views/'
-	var $theme;
-
-	// default site language
-	var $default_lang;
-
-	// user ID of the site webmaster (used for contact info and RSS feeds)
-	var $webmaster_id;
-
-	// path to phsite folder
-	var $install_path;
-
-	// limit for queries on blog entries per page
-	var $limit_posts;
+	// list variables
+	var $site_meta_fields;
+	var $site_themes;
 	
-	// limit for queries on thumbnails per page in galleries
-	var $limit_thumbs;
+	var $site_id, $site_timezone, $site_admin_id, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id;
+	var $img_size_th, $img_size_sm, $img_size_md, $img_size_lg;
+	var $limit_posts, $limit_thumbs;
+	
+	// title variables
+	var $site_title_id, $title, $subtitle, $site_title_updated;
 
-	// default sizes for image galleries
-	var $img_size_thumb;
-	var $img_size_display;
-
-	// site metadata (language-specific)
-	var $site_meta_id;
-	var $title;
-	var $subtitle;
-	var $description;
-	var $keywords;
-	var $copyright;
-	var $site_lang;
-	var $creator;
-	var $updated;
-	var $copyright_year_start;
+	// site metadata 
+	var $site_current_lang, $site_metadata;
 
     function Site_model()
     {
         // Call the Model constructor
-        parent::Model();
+        parent::MY_Model();
 
-		// update site prefs
-		$docroot = $_SERVER['DOCUMENT_ROOT'];
-		$script = $_SERVER['SCRIPT_NAME'];
-		$basedir = preg_replace('/(.*)index\.php(.*)/','\1',$script);
-		$this->install_path = $docroot.$basedir;
-    }
-
-    // load the site prefs from config file
-	function load_prefs()
-    {
 		$this->config->load('phsite_prefs');
-
-		$this->home_page_id = $this->config->item('home_page_id');
-		$this->theme = $this->config->item('theme');
-		$this->default_lang = $this->config->item('default_lang');
-		$this->webmaster_id = $this->config->item('webmaster_id');
-		$this->limit_posts = $this->config->item('limit_posts');
-		$this->limit_thumbs = $this->config->item('limit_thumbs');
-		$this->img_size_thumb = $this->config->item('img_size_thumb');
-		$this->img_size_display = $this->config->item('img_size_display');
+		$this->site_id = $this->config->item('site_id');
+		$this->load_site();
     }
 
-    function update_prefs()
+    // load the site data
+	function load_site()
     {
-
-		// get document directory of index.php
-		$dir = $this->install_path.'system/application/config';
-		$filename = $dir.'/phsite_prefs.php';
-	
-		$prefs  = "<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');\n\n";
-		$prefs .= "// phSite Global Preferences\n\n";
-		
-		$prefs .= "// ID of the content for the home page (0 means auto-generate it)\n";
-		$prefs .= "\$config['home_page_id'] = ";
-		$prefs .= $this->home_page_id;
-		$prefs .= ";\n\n";
-		
-		$prefs .= "// folder for current theme in '/system/application/views/'\n";
-		$prefs .= "\$config['theme'] = '";
-		$prefs .= $this->theme;
-		$prefs .= "';\n\n";
-
-		$prefs .= "// default site language (ISO 639-3 code)\n";
-		$prefs .= "\$config['default_lang'] = '";
-		$prefs .= $this->default_lang;
-		$prefs .= "';\n\n";
-
-		$prefs .= "// user ID of the site webmaster (used for contact info and RSS feeds)\n";
-		$prefs .= "\$config['webmaster_id'] = ";
-		$prefs .= $this->webmaster_id;
-		$prefs .= ";\n\n";
-		
-		$prefs .= "// limit for queries on blog entries per page\n";
-		$prefs .= "\$config['limit_posts'] = ";
-		$prefs .= $this->limit_posts;
-		$prefs .= ";\n\n";
-		
-		$prefs .= "// limit for queries on thumbnails per page in galleries\n";
-		$prefs .= "\$config['limit_thumbs'] = ";
-		$prefs .= $this->limit_thumbs;
-		$prefs .= ";\n\n";
-		
-		$prefs .= "// default sizes for image galleries\n";
-		$prefs .= "\$config['img_size_thumb'] = ";
-		$prefs .= $this->img_size_thumb;
-		$prefs .= ";\n";
-		$prefs .= "\$config['img_size_display'] = ";
-		$prefs .= $this->img_size_display;
-		$prefs .= ";\n\n";
-		
-		$prefs .= "/* End of file phsite_prefs.php */\n";
-		$prefs .= "/* Location: ./system/application/config/phsite_prefs.php */\n";
-	
-		// now write preferences to config file
-		if (is_dir($dir)) {
-			chdir($dir);
-			
-			$file = fopen($filename,'w');
-			if(fwrite($file, $prefs)) {
-				$msg = 'site preferences updated successfully';
-			} else {
-				$msg = 'could not update site preferences';
-			}
-			fclose($file);
-	
-		}
-		return $msg;
-	}
-
-	function load_meta($lang='')
-    {
-		if($this->site_meta_id != '') {
-			$query = $this->db->get_where('site_meta', array('site_meta_id' => $this->site_meta_id));
-		} else {
-			if($lang != '') {
-				$query = $this->db->get_where('site_meta', array('site_lang' => $lang));
-			} else if ($this->site_lang != '') {
-				$query = $this->db->get_where('site_meta', array('site_lang' => $this->site_lang));
-			} else {
-				$query = $this->db->get_where('site_meta', array('site_lang' => $this->default_lang));
-			}
-		}
+		$query = $this->db->get_where('sites', array('site_id' => $this->site_id));
 
 		if($row = $query->row_array()) {
-			$this->site_meta_id = $row['site_meta_id'];
-			$this->title = $row['title'];
-			$this->subtitle = $row['subtitle'];
-			$this->description = $row['description'];
-			$this->keywords = $row['keywords'];
-			$this->copyright = $row['copyright'];
-			$this->copyright_year_start = $row['copyright_year_start'];
-			$this->site_lang = $row['site_lang'];
-			$this->updated = $row['updated'];
-			$this->creator = $row['creator'];
+			$this->site_timezone = $row['timezone'];
+			$this->site_admin_id = $row['site_admin_id'];
+			$this->theme = $row['theme'];
+			$this->site_default_lang = $row['default_lang'];
+			$this->site_date_created = $row['date_created'];
+			$this->site_date_updated = $row['date_updated'];
+			$this->home_content_id = $row['home_content_id'];
+			$this->img_size_th = $row['img_size_th'];
+			$this->img_size_sm = $row['img_size_sm'];
+			$this->img_size_md = $row['img_size_md'];
+			$this->img_size_lg = $row['img_size_lg'];
+			$this->limit_posts = $row['limit_posts'];
+			$this->limit_thumbs = $row['limit_thumbs'];
 		}
     }
 
-    function update_meta()
+	function load_site_meta()
     {
-		$site_metadata = array(
-		'title' => $this->title,
-		'subtitle' => $this->subtitle,
-		'description' => $this->description,
-		'keywords' => $this->keywords,
-		'copyright' => $this->copyright,
-		'copyright_year_start' => $this->copyright_year_start,
-		'creator' => $this->creator,
-		'site_lang' => $this->site_lang
+
+		$this->db->join('fields', 'site_meta.field_id = fields.field_id', 'left');
+		$this->db->where('site_id', $this->site_id);
+
+		if($this->site_meta_id != '') {
+			$this->db->where('site_meta_id', $this->site_meta_id);
+		}
+		if($this->site_current_lang != '') {
+			$this->db->where('lang_ISO_639_3', $this->site_current_lang);
+		} else {
+			$this->db->where('lang_ISO_639_3',$this->site_default_lang);
+		}
+
+		$query = $this->db->get('site_meta');
+		$this->site_metadata = $query->result_array();
+
+    }
+
+	function load_site_title()
+    {
+		$this->db->where('site_id', $this->site_id);
+		if($this->site_title_id != '') {
+			$this->db->where('site_title_id', $this->site_title_id);
+		}
+		if($this->site_current_lang != '') {
+			$this->db->where('lang_ISO_639_3', $this->site_current_lang);
+		} else {
+			$this->db->where('lang_ISO_639_3',$this->site_default_lang);
+		}
+		$this->db->limit(1);
+		$query = $this->db->get('site_titles');
+
+
+    }
+
+/*
+
+	// site metadata 
+	var $site_current_lang, $site_metadata;
+	// title variables
+	var $site_title_id, $title, $subtitle, $site_title_updated;
+
+
+CREATE TABLE `site_titles` (
+  `site_title_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `site_id` mediumint(9) unsigned NOT NULL,
+  `title` mediumtext NOT NULL,
+  `subtitle` mediumtext,
+  `lang_ISO_639_3` varchar(3) NOT NULL,
+  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`site_title_id`),
+  FULLTEXT KEY `title` (`title`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8
+*/
+
+
+	function update_site()
+    {
+		$db_fields = array(
+		'site_admin_id' => $this->site_admin_id,
+		'theme' => $this->theme,
+		'timezone' => $this->site_timezone,
+		'default_lang' => $this->site_default_lang,
+		'date_created' => $this->site_date_created,
+		'home_content_id' => $this->home_content_id,
+		'img_size_th' => $this->img_size_th,
+		'img_size_sm' => $this->img_size_sm,
+		'img_size_md' => $this->img_size_md,
+		'img_size_lg' => $this->img_size_lg,
+		'limit_posts' => $this->limit_posts,
+		'limit_thumbs' => $this->limit_thumbs,
 		);
 
-		if($this->site_meta_id == '')
+		if($this->site_id == '')
 		{
-			// insert metadata for this language
-	
-			if($this->db->insert('site_meta', $site_metadata)) {
-				$this->site_meta_id = $this->db->insert_id();
+			// create new site
+			if($this->db->insert('sites', $db_fields)) {
+				$this->site_id = $this->db->insert_id();
 				return TRUE;
-			} else {
-				return FALSE;
 			}
+
 		} else {
-			// update metadata for this language
-			if( $this->db->update('site_meta', $site_metadata, array('site_meta_id' => $this->site_meta_id)) ) {
+			// update site
+			if( $this->db->update('sites', $db_fields, array('site_id' => $this->site_id)) ) {
 				return TRUE;
-			} else {
-				return FALSE;
 			}
 		}
+		return FALSE;
+
+    }
+	// end update_site()
+
+    // get metadata fields
+	function load_meta_fields()
+    {
+
+		$this->db->join('fields', 'r_sites_fields.field_id = fields.field_id', 'left');
+		$this->db->where('site_id', $this->site_id);
+		$this->db->order_by("order", "asc");
+		$query = $this->db->get('r_sites_fields');
+
+		$this->site_meta_fields = $query->result_array();
+
+		
     }
 
 }

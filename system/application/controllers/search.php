@@ -1,5 +1,5 @@
 <?php
-class Search extends Controller
+class Search extends MY_Controller
 {
 
 	function Search()

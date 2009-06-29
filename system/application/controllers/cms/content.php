@@ -1,133 +1,85 @@
 <?php
-class Content extends Controller
+class Content extends MY_Controller
 {
 
 	function Content()
 	{
 		parent::Controller();
-
-		// load models
 		$this->load->model('Content_model');
-		$this->load->model('Object_model');
-		$this->load->model('Site_model');
-
+		$this->load->model('Content_type_model');
 		$this->load->helper('image');
-	}
-
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->Site_model->load_prefs();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
-
 	}
 
 	function index()
 	{
-		$this->authenticate();
-
-		$this->data['title'] = 'Content';
-		$content = $this->Content_model->get_list(0,$order='',$parent='',$page=1);
-
-		foreach($content as $page) {
-			$link = "cms/content/edit/id/".$page['content_id'];
-			if($page['content_lang'] != '') {
-				$link .= "/lang/".$page['content_lang'];
-			}
-
-			$list[] = anchor($link, $page['title'], array('title' => "edit '{$page['title']}'"));
-			
-		}
-
-		if(isset($list)) {
-			$this->data['list'] = ul($list);
-		}
-
-		$this->load->view('cms/content_list',$this->data);
+		$this->site_map();
 	}
 
 	function site_map()
 	{
-		$this->authenticate();
+		$this->_authenticate();
 		$this->data['list'] = $this->Content_model->site_map(0,1,$this->Site_model->site_lang);
 		$this->load->view('cms/site_map',$this->data);
 	}
 
-	function get_langs()
+	function delete()
 	{
-		// get list of enabled languages
-		$languages = $this->Language_model->get_list();
-		foreach($languages as $row) {
-			if($row['Native_Name'] != '') {
-				$langArray[$row['ISO_639_3']] = $row['Native_Name'];
+		$this->_authenticate();
+
+		$form_uri = $this->uri->uri_string();
+		$params = $this->uri->uri_to_assoc(4);
+		if(array_key_exists('id',$params)) {
+			$this->Content_model->content_id = $params['id'];
+			$this->data['msg'] = "<p>Are you sure you want to delete this content?</p>\r";
+		}
+		if(array_key_exists('lang',$params)) {
+			$this->Content_model->content_lang = $params['lang'];
+			$this->Language_model->load( $params['lang']);
+
+			$this->data['msg'] = "<p>Are you sure you want to delete the '{$this->Language_model->Ref_Name}' version of this content?</p>\r";
+		}
+
+		if($this->Content_model->content_id != '') {
+			$this->Content_model->get_content();
+		}
+		
+		$temp_title = $this->Content_model->title;
+		$this->data['title'] = $temp_title;
+
+		$deleted = FALSE;
+
+		// if confirmed, please delete appropriate content
+		if($this->input->post('confirm') != '') {
+			if(array_key_exists('lang',$params)) {
+				$deleted = $this->Content_model->delete_lang();
 			} else {
-				$langArray[$row['ISO_639_3']] = $row['Inverted_Name'];
-			}
-		}
-		return $langArray;
-
-	}
-
-	function get_objects()
-	{
-		// get list of object types
-		$objects = $this->Object_model->get_list();
-		foreach($objects as $row) {
-			$objArray[$row['object_id']] = $row['name'];
-		}
-		return $objArray;
-
-	}
-
-	function get_users()
-	{
-		// get list of users
-		$userArray = array();
-		$users = $this->User_model->get_list();
-		foreach($users as $row) {
-			$userArray[$row['user_id']] = $row['name_last'].', '.$row['name_first'];
-		}
-		return $userArray;
-	}
-
-	function get_parents()
-	{
-		// get list of possible parent content
-		$parents = $this->Content_model->getParents();
-		$parentArray[0] = "site root";
-		if(is_array($parents) && count($parents) > 0) {
-			foreach($parents as $row) {
-				if(array_key_exists('title',$row) && $row['title'] != '') {
-					$pname = $row['title'];
-				} else {
-					$pname = $row['content_id'];
-				}
-
-				$parentArray[$row['content_id']] = $pname;
+				$deleted = $this->Content_model->delete_content();
 			}
 		}
 
-		return $parentArray;
+		if($deleted) {
+			$this->data['msg'] = "The content '{$temp_title}' has been successfully deleted";
+		} else {
+			if($this->input->post('submit') != '') {
+				$this->data['msg'] .= "<p>You must confirm the deletion</p>";
+			}
+			$body = "<form action=\"{$form_uri}\" method=\"post\" name=\"delete\">";
+			$body .=  "<p><label><input name=\"confirm\" type=\"checkbox\" value=\"1\" /> yes</label></p>\r";
+			$body .=  "<p><input name=\"submit\" type=\"submit\" value=\"Submit\" /></p>\r";
+			$body .= "</form>\r";
+			$this->data['body'] = $body;
+		}
+
+		$this->load->view('cms/content_delete',$this->data);
+
 	}
 
 	function edit()
 	{
-		$this->authenticate();
+		$this->_authenticate();
 
 		$this->load->model('User_model');
 		$this->load->model('Field_model');
-		$this->load->model('Language_model');
 		$this->load->library('form_validation');		
 
 		$params = $this->uri->uri_to_assoc(4);
@@ -150,9 +102,23 @@ class Content extends Controller
 				$this->Content_model->content_lang = $params['lang'];
 			}
 		}
+
 		if($this->Content_model->content_id != '') {
 			$this->Content_model->get_content();
+
+			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
+			$del_lang = $del_base.'/lang/'.$this->Content_model->content_lang;
+			
+			$this->Language_model->load($this->Content_model->content_lang);
+
+			$this->data['delete_links'] = "<p>Delete this content : ";
+			$this->data['delete_links'] .= anchor($del_lang,$this->Language_model->Ref_Name, array('title' => 'Delete this language'));
+			$this->data['delete_links'] .= " | ";
+			$this->data['delete_links'] .= anchor($del_base,'All languages', array('title' => 'Delete this content in all languages'));
+			$this->data['delete_links'] .= "</p>\n";
+
 		}
+
 
 		// generate content form
 
@@ -161,15 +127,15 @@ class Content extends Controller
 		}
 
 		if($this->Content_model->object_id != '') {
-			$this->Object_model->object_id = $this->Content_model->object_id;
+			$this->Content_type_model->object_id = $this->Content_model->object_id;
 		} else {
-			$this->Object_model->object_id = 1;
+			$this->Content_type_model->object_id = 1;
 		}
 
 
-		$this->Object_model->load_object();
+		$this->Content_type_model->load_object();
 
-		$obj_fields = $this->Object_model->fields;
+		$obj_fields = $this->Content_type_model->fields;
 		$content_data = $this->Content_model->content_data;
 
 		$fields = array();
@@ -242,6 +208,7 @@ class Content extends Controller
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
 				$dir_list_temp = $this->Media_model->dir_list;
+				$dir_vals[''] = 'media root';
 				
 				foreach($dir_list_temp as $the_dir) {
 					$temp_dir_val = str_replace($media_root,'',$the_dir);
@@ -297,10 +264,10 @@ class Content extends Controller
 
 		// generate meta form
 
-		$userArray = $this->get_users();
-		$objArray = $this->get_objects();
-		$parentArray = $this->get_parents();
-		$langArray = $this->get_langs();
+		$userArray = $this->User_model->get_list_dropdown();
+		$typeArray = $this->Content_type_model->get_list_dropdown();
+		$langArray = $this->Language_model->get_list_dropdown();
+		$parentArray = $this->Content_model->get_parents_dropdown();
 
 		$meta =	"<p>";
 		$meta .= form_label('Author', 'user_id');
@@ -329,7 +296,7 @@ class Content extends Controller
 		}
 		$properties = "<p>";
 		$properties .=  form_label('Content type', 'object_id');
-		$properties .=  form_dropdown('object_id', $objArray, $this->Content_model->object_id);
+		$properties .=  form_dropdown('object_id', $typeArray, $this->Content_model->object_id);
 		$properties .= "</p>\n";
 		
 		$properties .= "<p>";
@@ -347,9 +314,6 @@ class Content extends Controller
 		$properties .=  form_label('Available to menus/indexes', 'index');
 		$properties .=  form_dropdown('index', $field_params, $this->Content_model->index);
 		$properties .= "</p>\n";
-
-
-
 
 		if($this->Content_model->content_id != '') {
 			$this->data['action'] = site_url("cms/content/edit/id/".$this->Content_model->content_id);
@@ -431,10 +395,10 @@ class Content extends Controller
 			$this->Content_model->content_id = $this->input->post('content_id');
 			$this->Content_model->parent_id = $this->input->post('parent_id');
 
-			$this->Object_model->object_id = $this->input->post('object_id');
-			$this->Object_model->load_object();
+			$this->Content_type_model->object_id = $this->input->post('object_id');
+			$this->Content_type_model->load_object();
 			$this->Content_model->object_id = $this->input->post('object_id');
-			$this->Content_model->object_name = $this->Object_model->name_uri;
+			$this->Content_model->object_name = $this->Content_type_model->name_uri;
 
 			if($this->input->post('created') == '' || $this->input->post('created') == '0000-00-00 00:00:00') {
 				$this->Content_model->created = date('Y-m-d H:i:s');

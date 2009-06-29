@@ -108,10 +108,11 @@ $autoload['language'] = array();
 |
 */
 
-$autoload['model'] = array();
+$autoload['model'] = array('Site_model','Language_model');
 
 
 /*
+
 | -------------------------------------------------------------------
 |  Auto-load Core Libraries
 | -------------------------------------------------------------------

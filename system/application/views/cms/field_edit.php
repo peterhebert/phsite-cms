@@ -14,29 +14,20 @@
 	<?php echo anchor("cms/setup","Setup"); ?> : 
 	<?php echo anchor("cms/setup/structure","Data Structure"); ?> : 
 	Field editor</div>
-	<div class="page-wrap block">
-		<h1 class="first">Field editor</h1>
-		<?php 
-		if (isset($msg)) {
-			echo "<div class=\"msg\">$msg</div>\n"; 
-		}
-		$action = "cms/field/edit/".$field_id;
-		$attributes = array('name' => "field_editor", 'id' => "field_editor");
-		$hidden = array('field_id' => "$field_id");
-
-		echo form_open($action,$attributes,$hidden);
-		echo "\n";
-		?>
-			<p>
-				<label for="field_name">Field name</label>
-				<?php echo form_input('field_name',$field_name); ?></p>
-			<p>
-				<label for="input_type">Input type</label>
-				<?php echo form_dropdown('input_type', $types, $input_type); ?></p>
-			<p>
-				<input name="submit" type="submit" id="submit" value="save" />
-			</p>
-		</form>
+	<div class="page-wrap">
+		<div class="block">
+			<div class="column w4">
+			<h1 class="first">Field editor</h1>
+			<?php 
+			if (isset($msg)) {
+				echo "<div class=\"msg\">$msg</div>\n"; 
+			}
+			if (isset($form)) {
+				echo $form; 
+			}
+			?></div>
+			<div class="float w2">&nbsp;</div>
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

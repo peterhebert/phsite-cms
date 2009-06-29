@@ -1,5 +1,5 @@
 <?php
-class Language_model extends Model {
+class Language_model extends MY_Model {
 
 	var $ISO_639_3;
 	var $ISO_639_2B;
@@ -15,7 +15,7 @@ class Language_model extends Model {
     function Language_model()
     {
         // Call the Model constructor
-        parent::Model();
+        parent::MY_Model();
     }
 
     // get list of languages
@@ -32,6 +32,25 @@ class Language_model extends Model {
 		}
 
 		return $query->result_array();
+	}
+
+    // get list of active languages for form drop-down
+	function get_list_dropdown()
+    {
+		$active = $this->get_list();
+		$list = array();
+		
+		foreach($active as $row)
+		{
+			if($row['Native_Name'] != '')
+			{
+				$list[$row['ISO_639_3']] = $row['Native_Name'];
+			} else {
+				$list[$row['ISO_639_3']] = $row['Ref_Name'];
+			}
+		}
+
+		return $list;
 	}
 
     // find matching languages
@@ -53,17 +72,35 @@ class Language_model extends Model {
 	function load($key)
     {
 		$query = $this->db->get_where('ISO_639_LANG', array('ISO_639_3' => $key));
-		$row = $query->row_array();
-		$this->ISO_639_3 = $row['ISO_639_3'];
-		$this->ISO_639_2B = $row['ISO_639_2B'];
-		$this->ISO_639_2T = $row['ISO_639_2T'];
-		$this->ISO_639_1 = $row['ISO_639_1'];
-		$this->Scope = $row['Scope'];
-		$this->Type = $row['Type'];
-		$this->Ref_Name = $row['Ref_Name'];
-		$this->Inverted_Name = $row['Inverted_Name'];
-		$this->Native_Name = $row['Native_Name'];
-		$this->activated = $row['activated'];
+ 
+ 		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			$this->ISO_639_3 = $row['ISO_639_3'];
+			$this->ISO_639_2B = $row['ISO_639_2B'];
+			$this->ISO_639_2T = $row['ISO_639_2T'];
+			$this->ISO_639_1 = $row['ISO_639_1'];
+			$this->Scope = $row['Scope'];
+			$this->Type = $row['Type'];
+			$this->Ref_Name = $row['Ref_Name'];
+			$this->Inverted_Name = $row['Inverted_Name'];
+			$this->Native_Name = $row['Native_Name'];
+			$this->activated = $row['activated'];
+			return TRUE;
+		} else {
+			$this->ISO_639_3 = '';
+			$this->ISO_639_2B = '';
+			$this->ISO_639_2T = '';
+			$this->ISO_639_1 = '';
+			$this->Scope = '';
+			$this->Type = '';
+			$this->Ref_Name = '';
+			$this->Inverted_Name = '';
+			$this->Native_Name = '';
+			$this->activated = '';
+			return FALSE;
+		}
+
     }
 
 	function set_active($val)

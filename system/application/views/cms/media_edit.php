@@ -9,7 +9,7 @@
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : <?php echo anchor("cms/media/manage","Media"); ?> : Media editor</div>
+	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : <?php echo anchor("cms/media","Media"); ?> : Media editor</div>
 	<div class="page-wrap block">
 		<h1>Media editor</h1>
 		<?php

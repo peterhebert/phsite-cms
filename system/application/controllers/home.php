@@ -1,6 +1,6 @@
 <?php
 
-class Home extends Controller {
+class Home extends MY_Controller {
 	
 	function Home()
 	{
@@ -197,9 +197,6 @@ class Home extends Controller {
 					$this->data['updated'] = $field['updated'];
 				}
 			}
-
-			// set footer
-			$this->data['footer'] = "<p>Powered by <a href=\"phsite.peterhebert.com\">phSite CMS</a></p>\r";
 
 			// get author info
 			$this->User_model->user_id = $this->Content_model->user_id;

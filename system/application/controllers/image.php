@@ -1,6 +1,6 @@
 <?php
 
-class Image extends Controller {
+class Image extends MY_Controller {
 
 	function Image()
 	{

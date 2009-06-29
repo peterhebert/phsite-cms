@@ -9,6 +9,19 @@
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
+   
+    $('a[rel="external"]').click( function() {
+        window.open( $(this).attr('href') );
+        return false;
+    });
+   
+});
+
+/* ]]> */
+</script>
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function(){
 
 	$("#new_go").click(function () {
 	
@@ -32,10 +45,6 @@ $().ready(function(){
 			echo "<p>".anchor("cms/content/site_map","Site Map")."</p>\r";
 			echo $content; 
 		
-			foreach($new_objects as $index => $row) {
-				$my_uri = site_url("cms/content/edit/type/".$row['object_id']);
-				$dropdown[$my_uri] = $row['name'];
-			}
 			?>
 			<p>Create New <?php echo form_dropdown('new_content',$dropdown); ?> <input id="new_go" name="new_go" type="button" value="Go" /></p>
 			<h2>Media</h2>

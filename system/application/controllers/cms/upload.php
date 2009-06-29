@@ -1,36 +1,17 @@
 <?php
 
-class Upload extends Controller {
+class Upload extends MY_Controller {
 		
 	function Upload()
 	{
 		parent::Controller();
 		$this->load->helper(array('form','url','file','image'));
-		$this->load->model('Site_model');
 	}
 	
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
-
-	}
-
 	function index()
 	{	
 
-		$this->authenticate();
+		$this->_authenticate();
 
 		$success = FALSE;
 		

@@ -1,5 +1,5 @@
 <?php
-class Field extends Controller
+class Field extends MY_Controller
 {
 
 	function Field()
@@ -10,113 +10,196 @@ class Field extends Controller
 		$this->load->model('Site_model');
 
 		// if not logged in, redirect to login form
-		$this->authenticate();
-
-		$this->input_types = array(
-		'text' => 'text',
-		'textarea' => 'textarea',
-		'richtext' => 'rich text editor',
-		'checkbox' => 'checkbox',
-		'radio' => 'radio',
-		'password' => 'password',
-		'file' => 'file path',
-		'directory' => 'directory path',
-		);
-	}
-
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
+		//$this->_authenticate();
 
 	}
 
 	function index()
 	{
-		$this->data['list'] = $this->Field_model->get_list();
+		$this->Field_model->field_lang = $this->Site_model->site_default_lang;
+		$list = $this->Field_model->get_list();
+		$this->data['list'] = $list;
 
 		$this->load->view('cms/field_list',$this->data);
 	}
 
 	function edit()
 	{
+
 		$this->load->library('form_validation');
 		$params = $this->uri->uri_to_assoc(4);
-		
-		$this->data['msg'] = '';
-		$this->data['field_id'] = '';
-		$this->data['field_name'] = '';
-		$this->data['input_type'] = '';
-		$this->data['types'] = $this->input_types;
 
-		// do validation if form submitted
-		if($this->input->post('submit') != '') {
-			
-			if($this->input->post('field_id') != '') {
-				$this->form_validation->set_rules('field_id', 'Field ID', 'required|integer');
-			}
-	
-			$this->form_validation->set_rules('field_name', 'Field Name', 'required|xss_clean');
-			$this->form_validation->set_rules('input_type', 'Input Type', 'required|callback_valid_input|xss_clean');
-	
-			if ($this->form_validation->run() == FALSE)
-			{
-				$this->data['msg'] = validation_errors(); 
-				$this->data['field_id'] = $this->input->post('field_id');
-				$this->data['field_name'] = $this->input->post('field_name');
-				$this->data['input_type'] = $this->input->post('input_type');	
-
-
-			}
-			else
-			{
-				
-				if($this->input->post('field_id') != '') {
-					$this->Field_model->field_id = $this->input->post('field_id');	
-					$this->Field_model->field_name = $this->input->post('field_name');	
-					$this->Field_model->input_type = $this->input->post('input_type');
-					
-					$updated = $this->Field_model->update_field();
-				} else {
-					$updated = $this->Field_model->new_field($this->input->post('field_name'),$this->input->post('input_type'));
-				}
-	
-				if($updated == TRUE) {
-					$this->data['msg'] = "field has been updated";
-				}
-			}
-		}
-
-		if($this->Field_model->field_id == '' && array_key_exists('id',$params)) {
+		if(array_key_exists('id',$params)) {
 			$this->Field_model->field_id = $params['id'];
 		}	
 
-		$this->data['field_id'] = $this->Field_model->field_id;
-		
-		if($this->Field_model->field_id != '') {
-			$this->Field_model->load();
-			$this->data['field_name'] = $this->Field_model->field_name;
-			$this->data['input_type'] = $this->Field_model->input_type;
+		if(array_key_exists('lang',$params)) {
+			if(is_numeric($params['lang'])) {
+				$this->Field_model->field_meta_id = $params['lang'];
+			} else {
+				$this->Field_model->field_lang = $params['lang'];
+			}
+		}	
+
+		$this->_process_form();
+
+		$this->Field_model->load();
+		$this->Field_model->load_meta();
+
+		$this->data['form'] = $this->_edit_form();
+
+		$msg = $this->Field_model->messages;
+		if(is_array($msg) && count($msg) > 0)
+		{
+			$this->data['msg'] = "<p>";
+			$this->data['msg'] .= implode("</p>\r<p>", $msg);
+			$this->data['msg'] .= "</p>";
 		}
 
 		$this->load->view('cms/field_edit',$this->data);
 	}
+	
+	function _process_form()
+	{
+		// do validation if form submitted
+		if($this->input->post('submit') != '') {
+			
+			// set validation rules
+			$this->form_validation->set_rules('field_ref_name', 'Field Reference Name', 'required');
+			$this->form_validation->set_rules('field_input_type', 'Input Type', 'required|callback_valid_input');
+
+			$this->form_validation->set_rules('validation_string', 'Value type', 'callback_valid_valid');
+			$this->form_validation->set_rules('validation_exact', 'Exact Length', 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_min', 'Minimum Length', 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_max', 'Maximum Length', 'is_natural_no_zero');
+
+			$this->form_validation->set_rules('field_name', 'Field Name', 'required');
+			$this->form_validation->set_rules('field_lang', 'Language', 'required|is_lang');
+
+			$form_is_valid = $this->form_validation->run();
+
+			$this->Field_model->field_id = $this->input->post('field_id');
+			$this->Field_model->field_ref_name = $this->input->post('field_ref_name');	
+			$this->Field_model->field_input_type = $this->input->post('field_input_type');	
+
+			$this->Field_model->validation_string = $this->input->post('validation_string');	
+			$this->Field_model->validation_exact = $this->input->post('validation_exact');	
+			$this->Field_model->validation_min = $this->input->post('validation_min');	
+			$this->Field_model->validation_max = $this->input->post('validation_max');	
+
+			$this->Field_model->field_meta_id = $this->input->post('field_meta_id');	
+			$this->Field_model->field_name = $this->input->post('field_name');
+			$this->Field_model->field_lang = $this->input->post('field_lang');	
+		
+			// run validation rules
+			if ($form_is_valid === FALSE)
+			{
+				$this->Field_model->messages[] = validation_errors(); 
+			}
+			else
+			{
+				if($this->Field_model->update_field())
+				{
+					$this->Field_model->update_field_meta();
+				}
+			}
+
+		}
+	}
+
+	function _edit_form()
+	{
+
+		$this->Field_model->parse_validation();
+
+		$langs = $this->Language_model->get_list_dropdown();
+
+		$action = "cms/field/edit/id/".$this->Field_model->field_id;
+		if($this->Field_model->field_meta_id != '') {
+			$action .= "/lang/".$this->Field_model->field_meta_id;
+		} else if($this->Field_model->field_lang != '') {
+			$action .= "/lang/".$this->Field_model->field_lang;
+		} else {
+		}
+		
+		$attributes = array('name' => "field_editor", 'id' => "field_editor");
+		$hidden = array(
+		'field_id'  => $this->Field_model->field_id,
+		'field_meta_id'  => $this->Field_model->field_meta_id
+		);
+
+		$form = form_open($action,$attributes,$hidden)."\r";
+
+		// main data
+		$form .= form_fieldset('Field info');
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label('Reference name', 'field_ref_name');
+		$form .= form_input('field_ref_name',$this->Field_model->field_ref_name); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label('Input type', 'field_input_type');
+		$form .= form_dropdown('field_input_type', $this->Field_model->input_types, $this->Field_model->field_input_type); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+		
+		// metadata
+		$form .= form_fieldset('Field metatdata');
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label('Language', 'field_lang');
+		$form .= form_dropdown('field_lang', $langs, $this->Field_model->field_lang); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label('Field name', 'field_name');
+		$form .= form_input('field_name',$this->Field_model->field_name); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		// validation
+		$form .= form_fieldset('Validation');
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label('Field value is', 'validation_string');
+		$form .= form_dropdown('validation_string', $this->Field_model->validation_rules, $this->Field_model->validation_string); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label('Exact Length', 'validation_exact');
+		$form .= form_input('validation_exact',$this->Field_model->validation_exact); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label('Minimum Length', 'validation_min');
+		$form .= form_input('validation_min',$this->Field_model->validation_min); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label('Maximum Length', 'validation_max');
+		$form .= form_input('validation_max',$this->Field_model->validation_max); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		$form .= "<p>\r";
+		$submit_data = array(
+		'name'  => 'submit',
+		'id'  => 'submit'
+		);
+		$form .= form_submit($submit_data, 'save');
+		$form .= "</p>\r";
+		$form .= form_close("\r");
+
+		return $form;
+	}
+
 
 	function valid_input($value)
 	{
-		return array_key_exists($value,$this->input_types);
+		return array_key_exists($value,$this->Field_model->input_types);
 	}
+
+	function valid_valid($value)
+	{
+		return array_key_exists($value,$this->Field_model->validation_rules);
+	}
+
 
 }
 ?>

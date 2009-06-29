@@ -9,6 +9,19 @@
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
+   
+    $('a[rel="external"]').click( function() {
+        window.open( $(this).attr('href') );
+        return false;
+    });
+   
+});
+
+/* ]]> */
+</script>
+<script type="text/javascript">
+/* <![CDATA[ */
+$().ready(function(){
 
 	$("form select[name='object_id']").change(function () {
 	
@@ -76,8 +89,15 @@ function toggleEditor(id) {
 			echo"</div>\n";
 		}
 		if(isset($uri)) {
-			echo "<p>".anchor($uri,"Preview this page", array('rel' => 'external','title' => 'Preview this page in a new browser window'))."</p>\n";
+			echo "<p>";
+			echo anchor($uri,"Preview this page", array('rel' => 'external','title' => 'Preview this page in a new browser window'));
+			echo "</p>\n";
 		}
+
+		if(isset($delete_links)) {
+			echo $delete_links;
+		}
+		
 		// open form
 		echo form_open($action);
 

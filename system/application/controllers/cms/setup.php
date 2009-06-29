@@ -1,5 +1,5 @@
 <?php
-class Setup extends Controller
+class Setup extends MY_Controller
 {
 
 	function Setup()
@@ -11,32 +11,12 @@ class Setup extends Controller
 		// load objects
 		$this->load->model('Content_model');
 		$this->load->model('Field_model');
-		$this->load->model('Language_model');
-		$this->load->model('Object_model');
-		$this->load->model('Site_model');
+		$this->load->model('Content_type_model');
 		$this->load->model('User_model');
 
-		$this->authenticate();
+		$this->_authenticate();
 	}
 	
-	function authenticate()
-	{
-		// if not logged in, redirect to login form
-		$this->load->library('session');
-		if(!$this->session->userdata('user_id'))
-		{
-			redirect('cms/login');
-			exit();
-		} else {
-			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_meta();
-			$this->data['site_title'] = $this->Site_model->title;
-		}
-
-	}
-
 	function index()
 	{
 		$this->load->view('cms/setup',$this->data);
@@ -48,10 +28,12 @@ class Setup extends Controller
 		$d2['list'] = $this->Field_model->get_list();
 		$this->data['fields'] = $this->load->view('cms/field_list',$d2, true);
 	
-		// load list of objects
-		$d2['list'] = $this->Object_model->get_list();
+		// load list of content types
+		$this->Content_type_model->get_list();
+		$d2['list'] = $this->Content_type_model->types;
+
 		$this->data['new_objects'] = $d2['list'];
-		$this->data['objects'] = $this->load->view('cms/object_list',$d2, true);
+		$this->data['objects'] = $this->load->view('cms/content_types_list',$d2, true);
 
 		// now load view
 		$this->load->view('cms/setup_structure',$this->data);

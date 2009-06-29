@@ -160,8 +160,10 @@ list-style-type: none;
 
 #page form fieldset { border: 1px solid #999; padding: 1ex .666em; margin-bottom: 1em;}
 #page form fieldset legend { padding: 0 1ex; }
-#page form fieldset p label { width: 7em; margin-right: 1ex; }
-
+#page form fieldset p label {
+margin-right:0.5em;
+width:9.5em;
+}
 #page form .radiogroup {
 	line-height:2em;
 	float:left;
@@ -201,7 +203,6 @@ text,textarea,richtext,checkbox,radio,password,file
 #page form label span {
 	display:none;
 }
-
 /* post details, comments */
 .post-details p,
 .comments p {margin-bottom: .333em; }

@@ -24,7 +24,7 @@
 		echo $site_meta_copyright;
 	}
 	echo "</p>\r";
-	echo $footer;
+	echo POWERED_BY;
 	?></div>
 </div>
 </body>

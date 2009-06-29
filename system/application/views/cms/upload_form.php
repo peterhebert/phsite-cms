@@ -14,55 +14,58 @@
 	<?php echo anchor("cms/media","media"); ?> : 
 	Upload a file</div>
 	<div class="page-wrap block">
-		<h1 class="first">Upload a file</h1>
-		<?php 
-		if (isset($msg)) {
-			echo "<div class=\"msg\">$msg</div>\n"; 
-		}
-		$attributes = array('name' => "file_uploader", 'id' => "file_uploader");
+		<div class="column w4">
+			<h1 class="first">Upload a file</h1>
+			
+			<?php 
+			if (isset($msg)) {
+				echo "<div class=\"msg\">$msg</div>\n"; 
+			}
+			$attributes = array('name' => "file_uploader", 'id' => "file_uploader");
+	
+			echo form_open_multipart('cms/media/upload',$attributes);
+			echo "\n";
 
-		echo form_open_multipart('cms/media/upload',$attributes);
-		echo "\n";
+				$field_params = array(
+				'name'        => 'userfile',
+				'id'          => 'userfile',
+				);
+		
+				echo"<p>";
+				echo form_label('File', 'userfile');
+				echo form_upload($field_params);
+				echo"</p>\n";
+		
+				$field_params = array(
+				'name'        => 'dest_path',
+				'id'          => 'dest_path',
+				);
+				echo"<p>";
+				echo form_label('destination path', 'dest_path');
+				echo form_dropdown('dest_path',$directories);
+				echo"</p>\n";
 
-			echo"<p><strong>Note</strong>: The maximum file size is {$max_size}<br />\n";
-			echo "The following file types are allowed: {$allowed_types}</p>\n";
-	
-			$field_params = array(
-			'name'        => 'userfile',
-			'id'          => 'userfile',
-			);
-	
-			echo"<p>";
-			echo form_label('File', 'userfile');
-			echo form_upload($field_params);
-			echo"</p>\n";
-	
-			$field_params = array(
-			'name'        => 'dest_path',
-			'id'          => 'dest_path',
-			);
-			echo"<p>";
-			echo form_label('destination path', 'dest_path');
-			echo form_dropdown('dest_path',$directories);
-			echo"</p>\n";
-	
-			$field_params = array(
-			'name'        => 'create_entry',
-			'id'          => 'create_entry',
-			'value'       => 1,
-			'checked'     => $create_entry,
-			);
-	
-			echo"<p>";
-			echo form_label('Add to database?', 'create_entry');
-			echo form_checkbox($field_params);
-			echo"</p>\n";
-	
-			?>
-			<p>
-				<input name="submit" type="submit" id="submit" value="save" />
-			</p>
-		</form>
+				$field_params = array(
+				'name'        => 'new_path',
+				'id'          => 'new_path',
+				'class'          => 'text',
+				);
+		
+				echo"<p>";
+				echo form_label('or enter new path', 'new_path');
+				echo form_input($field_params);
+				echo"</p>\n";
+		
+				?>
+				<p>
+					<input name="submit" type="submit" id="submit" value="save" />
+				</p>
+			</form>
+		</div>
+		<div class="float w2"><?php 
+			echo"<p><strong>Note</strong>: The maximum file size is {$max_size}</p>\n";
+			echo "<p>The following file types are allowed:<br />\n{$allowed_types}</p>\n";
+		?></div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>

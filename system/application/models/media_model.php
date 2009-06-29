@@ -1,35 +1,18 @@
 <?php
 class Media_model extends Model {
 
-	var $dir_base;
-	var $dir_current;
-	var $dir_name;
+	/* directory / file managment */
+	var $dir_base, $dir_current, $dir_list, $dir_list_rel, $file_list, $file_count;
 
-	var $dir_list;
-	var $dir_list_rel;
+	/* folder info */
+	var $path_id, $path_uri, $path_title, $path_lang;
 
-	var $file_list;
+	/* media info */
+	var $media_id, $file_uri, $external, $mime, $created, $creator;
 
-	var $media_id;
-	var $file_uri;
-	var $external;
-	var $mime;
-	var $created;
-	var $creator;
-
-	var $data_id;
-	var $media_lang;
-	var $title;
-	var $uri_title;
-	var $description;
-	var $keywords;
-	var $copyright;
-	var $city;
-	var $prov_state;
-	var $country;
-
-	var $iptc;
-	var $exif;
+	/* media metadata */
+	var $data_id, $media_lang, $title, $uri_title, $description, $keywords, $copyright, $city, $prov_state, $country;
+	var $iptc, $exif;
 
 	var $media_types = array(
 	'dcr' => array('application/x-director','Shockwave Director'),
@@ -127,7 +110,8 @@ class Media_model extends Model {
 		}
 		//closing the directory
 		closedir($dir_handle);
-
+		
+		$this->file_count = count($files);
 		$this->file_list = $files;
 
 	}
@@ -172,7 +156,84 @@ class Media_model extends Model {
 			unset($newfile);
 		}
 
+		$this->file_count = count($new_list);
 		$this->file_list = $new_list;
+	}
+
+	/* update folder info */
+    function update_path()
+    {
+		$data = array(
+		'path_uri' => $this->path_uri,
+		'path_title' => $this->path_title,
+		'path_lang' => $this->path_lang
+		);
+
+		if($this->media_id == '') {
+			// insert
+			if($this->db->insert('media_paths', $data)){
+				$this->path_id = $this->db->insert_id();
+				return TRUE;
+			}
+		} else {
+			// update
+			$this->db->where('path_id', $this->path_id);
+			if($this->db->update('media_paths', $data)){
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+    function get_path_by_uri()
+    {
+
+		$this->db->where('path_uri', $this->path_uri);
+		if($this->path_lang != '') {
+			$this->db->where('path_lang', $this->path_lang);
+		}
+		$this->db->limit(1);
+		
+		$query = $this->db->get('media_paths');
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$this->path_id = $row->path_id;
+			$this->path_uri = $row->path_uri;
+			$this->path_title = $row->path_title;
+			$this->path_lang = $row->path_lang;
+			return TRUE;
+		} else {
+			$this->path_id = '';
+			$this->path_uri = '';
+			$this->path_title = '';
+			$this->path_lang = '';
+			return FALSE;
+		}
+
+	}
+
+    function get_path_langs()
+    {
+
+		$this->db->where('path_uri', $this->path_uri);
+		if($this->path_lang != '') {
+			$this->db->where('path_lang !=', $this->path_lang);
+		}
+		
+		$query = $this->db->get('media_paths');
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$other_langs[] = $row->path_lang;
+			}
+			return $other_langs;
+		} else {
+			return FALSE;
+		}
+
 	}
 
     function update_media()
@@ -343,12 +404,7 @@ class Media_model extends Model {
 		if(file_exists($file_full) && !is_dir($file_full)) {
 
 			$size = getimagesize($file_full, $info);
-			/*$mime = get_mime($file_full);
 
-			if ($mime != FALSE) {
-				$this->mime = $mime;
-			}*/
-			
 			if(isset($info['APP13']))
 			{
 				$this->iptc = iptcparse($info['APP13']);
@@ -457,6 +513,74 @@ class Media_model extends Model {
 		$this->db->delete($tables);
     }
 
+    function embed_media($id,$size='thumb')
+    {
+		$this->media_id = $id;
+		$this->get_media();
+		$this->get_meta();
+		
+		$file_path = MEDIA_PATH_ORIG.$this->file_uri;
+		
+		switch ($size) {
+		case 0 || 'thumb':
+			$size = $this->Site_model->img_size_thumb;
+			break;
+		case 'display':
+			$size = $this->Site_model->img_size_display;
+			break;
+		default:
+			if(is_numeric($size)) {
+				$size = intval($size);
+			} else {
+				$size = $this->Site_model->img_size_display;
+			}
+			break;
+		}
+		
+		switch ($this->mime) {
+		case '':
+			break;
+		case 'image/gif' || 'image/jpeg' || 'image/png':
+			$embed = view_image($file_path,$size, array ('alt' => $this->title) );
+			break;
+		default:
+			
+			$embed = anchor(MEDIA_PATH_ORIG.$this->file_uri,$this->title);
+			break;
+		}
+		
+		return $embed;
+/*
+
+	var $iptc;
+	var $exif;
+
+	'flac' => array('audio/flac','<acronym title="Free Lossless Audio Codec">FLAC</acronym> audio'),
+	'mp3' => array('audio/mpeg3','MP3 audio'),
+	'oga' => array('audio/ogg','Ogg audio'),
+	'ogg' => array('audio/ogg','Ogg Vorbis audio'),
+
+	'mpeg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
+	'mpg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
+	'ogv' => array('video/ogg','Ogg video'),
+	'mov' => array('video/quicktime','QuickTime video'),
+	'flv' => array('video/x-flv','Flash video'),
+
+	'dcr' => array('application/x-director','Shockwave Director'),
+	'swf' => array('application/x-shockwave-flash','Flash'),
+	'tgz' => array('application/gnutar','Tar Gzip archive'),
+	'doc' => array('application/msword','Microsoft Word document'),
+	'pdf' => array('application/pdf','Portable Document Format'),
+	'rtf' => array('application/rtf','Rich text format'),
+	'xls' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
+	'ppt' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
+	'zip' => array('application/zip','Zip archive'),
+	'txt' => array('text/plain','plain text'),
+	'odt' => array('application/vnd.oasis.opendocument.text','OpenDocument Text'),
+	'odp' => array('application/vnd.oasis.opendocument.presentation','OpenDocument Presentation'),
+	'ods' => array('application/vnd.oasis.opendocument.spreadsheet','OpenDocument Spreadsheet'),
+*/
+    }
 
 }
 

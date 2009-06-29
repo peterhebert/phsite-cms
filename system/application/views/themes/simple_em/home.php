@@ -46,7 +46,12 @@
 		</div>
 		
 	</div>
-	<div class="page-wrap block" id="footer"><?php if ($site_meta_copyright != '') { echo $site_meta_copyright; } ?></div>
+	<div class="page-wrap block" id="footer"><?php
+	if ($site_meta_copyright != '') {
+		echo '<p>'.$site_meta_copyright."</p>\r";
+	}
+	echo POWERED_BY;
+	?></div>
 </div>
 </body>
 </html>

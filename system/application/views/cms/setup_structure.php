@@ -13,7 +13,7 @@
 	<div class="page-wrap block">
 		<div class="column w5">
 			<h1>Data Structure</h1>
-			<p>You can define what types of content your CMS stores. Your content types are called Objects, and the individual data fields are called Fields. Fields can be assinged to any object.</p>
+			<p>You can define what types of content your CMS stores, and the individual data fields. Fields can be assinged to any content type.</p>
 			<div class="block">
 				<div class="column w1"><?php echo $objects; ?></div>
 				<div class="float w1"><?php echo $fields; ?></div>
