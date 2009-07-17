@@ -7,29 +7,64 @@ class User extends MY_Controller
 		parent::MY_Controller();
 
 		$this->load->model('User_model');
+		$this->load->helper('form');
 
 		//$this->_authenticate();
 	} // end constructor
 
 	function index()
 	{
-		$this->User_model->get_list();
-		if(count($this->User_model->user_list) > 0)
+
+		$userlist = array();
+
+//		if($this->session->userdata('admin') != 1)
+//		{
+//			$user_name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
+//			$user_url = "cms/user/edit/id/".$this->session->userdata('user_id');
+//			$userlist[] = anchor($user_url, $user_name);
+//		} else {
+
+			$this->User_model->get_list();
+
+			if(count($this->User_model->user_list) > 0)
+			{
+				foreach($this->User_model->user_list as $zy)
+				{
+					$user_name = $zy['name_last'].', '.$zy['name_first'];
+					$user_url = 'cms/user/edit/id/'.$zy['user_id'];
+					$userlist[] = anchor($user_url, $user_name);
+				}
+			}
+
+//		}
+		
+		if(count($userlist) > 0)
 		{
-			$this->data['list'] = ul($this->User_model->user_list);
+			$this->data['list'] = ul($userlist);
 		} else {
 			$this->data['msg'] = 'no users found';
 		}
+
+		// $this->load->view('cms/user_list',$this->data);
+
+		$this->data['sidebar'] = $this->_meta_menu();
 		
-		$this->load->view('cms/user_list',$this->data);
+		$this->data['form'] = $this->_edit_form();
+		$this->load->view('cms/cms_form',$this->data);
+
+
 	} // end index()
 
 	function edit()
 	{
+
 		$breadcrumb = anchor("cms","phSite CMS").' : ';
 		$breadcrumb .= anchor("cms/setup","Setup").' : ';
-		$breadcrumb .= anchor("cms/setup/user","Users").' : User editor';
+		$breadcrumb .= anchor("cms/user","Users").' : Edit user';
 		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_tag'] = 'Edit user | Users | Setup ';
+		$this->data['title_h1'] = 'Edit user';
 
 		$params = $this->uri->uri_to_assoc(4);
 		if(array_key_exists('id',$params)) {
@@ -37,49 +72,109 @@ class User extends MY_Controller
 		}
 		if(array_key_exists('lang',$params))
 		{
-			if(is_numeric($params['lang']))
-			{
-				$this->User_model->user_meta_id = $params['lang'];
-			} else {
-				$this->User_model->meta_lang = $params['lang'];
-			}
+			$this->User_model->meta_lang = $params['lang'];
 		}
 
 		$this->_process_form();
 		$this->User_model->load();
 		$this->User_model->load_meta();
 		
+		$msgs = $this->User_model->_output_messages();
+		if($msgs)
+		{
+			$this->data['msg'] = $msgs;
+		}
+
+		// list active languages
+		$lang_links = array();
+		$langs = $this->Language_model->get_list();
+
+		$usr_link = 'cms/user/edit/id/'.$this->User_model->user_id;
+
+		foreach($langs as $llang)
+		{
+
+			$temp_link = $usr_link.'/lang/'.$llang['ISO_639_3'];
+			if($llang['Native_Name'] != '')
+			{
+				$temp_txt = $llang['Native_Name'];
+			}
+			else
+			{
+				$temp_txt = $llang['Ref_Name'];
+			}
+			$lang_links[] = anchor($temp_link,$temp_txt);
+		}
+		
+		
+		$this->data['sidebar'] = $this->_meta_menu();
+		
 		$this->data['form'] = $this->_edit_form();
-		$this->load->view('cms/user_edit',$this->data);
+		$this->load->view('cms/cms_form',$this->data);
 
 	} // end edit()
 
 
-	function _timezone_list()
-	{
-		$timezones = timezone_identifiers_list();
-		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
-		$locations = array();
-		
-		foreach ($timezones as $zone)
+	function _meta_menu()
+    {
+		// list active languages
+		$site_meta_links = array();
+		$usr_links = array();
+		$langs = $this->Language_model->get_list();
+
+		$usr_link = 'cms/user/edit/id/'.$this->User_model->user_id;
+
+		foreach($langs as $llang)
 		{
-			$parts = explode('/', $zone);
-		   
-			// Only use "friendly" continent names
-			if (in_array($parts[0],$continents,true) )
-			{       
-	
-					$locations[$zone] = str_replace('_',' ',$zone);
-				
+			$site_link = 'cms/setup/site_meta/lang/'.$llang['ISO_639_3'];
+			$usr_tmp_link = $usr_link.'/lang/'.$llang['ISO_639_3'];
+			if($llang['Native_Name'] != '')
+			{
+				$temp_txt = $llang['Native_Name'];
 			}
+			else
+			{
+				$temp_txt = $llang['Ref_Name'];
+			}
+			$site_meta_links[] = anchor($site_link,$temp_txt);
+			$usr_links[] = anchor($usr_tmp_link,$temp_txt);
 		}
 
-		return $locations;
+		$menu = "<h2>Setup</h2>\r";
+		$menu .=  "<ul>\r";
+		$menu .=  "<li>".anchor("cms/setup/site_prefs","Site preferences")."</li>\r";
+		$menu .=  "<li>Site metadata\r";
+		$menu .=  "<ul>\r";
+		$menu .=  "<li>".anchor("cms/setup/site_meta_fields","Edit site metadata fields")."</li>\r";
+		$menu .=  "<li>Edit site metadata\r";
+		$menu .= ul($site_meta_links);
+		$menu .=  "</li>\r";
+		$menu .=  "</ul>\r";
+		$menu .=  "</li>\r";
+		$menu .= "<li>".anchor("cms/setup/languages","Languages")."</li>\r";
+		$menu .= "<li>".anchor("cms/setup/structure","Data Structure")."</li>\r";
+		$menu .= "<li>Users\r";
+		$menu .= "<ul>\r";
+		$menu .=  "<li>".anchor("cms/user/","Edit Users")."</li>\r";
+		$menu .=  "<li>".anchor("cms/user/user_meta_fields","Edit user metadata fields")."</li>\r";
+		if($this->User_model->user_id != '')
+		{
+		$menu .= "<li>User Metadata\r";
+		$menu .= ul($usr_links);
+		$menu .= "</li>\r";
+		}
+		$menu .= "</ul>\r";
+		$menu .=  "</li>\r";
+		$menu .=  "</ul>\r";
+
+		return $menu;
 	}
+
+
 
 	function _edit_form()
 	{
-		$this->load->helper('form');
+		$this->load->helper('timezone');
 		$this->load->model('Field_model');
 
 		$hidden = array();
@@ -88,6 +183,10 @@ class User extends MY_Controller
 		{
 			$action .= '/id/'.$this->User_model->user_id;
 			$hidden['user_id'] = $this->User_model->user_id;
+		}
+		if($this->User_model->site_rel_id != '')
+		{
+			$hidden['site_rel_id'] = $this->User_model->site_rel_id;
 		}
 		$attributes = array('id' => 'user_editor', 'name' => 'user_editor', 'title' => 'User editing form');
 
@@ -106,7 +205,7 @@ class User extends MY_Controller
 			$form .= "</p>\r";
 
 		} else {
-			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"0\" />\r";
+			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"{$this->User_model->admin}\" />\r";
 		}
 
 		$params = array(
@@ -149,7 +248,7 @@ class User extends MY_Controller
 		$form .= form_input($params);
 		$form .= "</p>\r";
 
-		$zones = $this->_timezone_list();
+		$zones = timezone_dropdown();
 		
 		$form .= "<p>\r";
 		$form .= form_label('Time Zone', 'timezone');
@@ -198,6 +297,13 @@ class User extends MY_Controller
 
 		$form .= form_fieldset('User Metadata');
 		
+		$options = $this->Language_model->get_list_dropdown();
+		$form .= "<p>\r";
+		$form .= form_label('Language', 'meta_lang');
+		$form .= form_dropdown('meta_lang', $options, $this->User_model->meta_lang);		
+		$form .= "</p>\r";
+
+
 		$this->User_model->load_meta();
 		$meta_fields = $this->User_model->metadata;
 
@@ -254,8 +360,6 @@ class User extends MY_Controller
 		{
 			$this->load->library('form_validation');
 
-			$this->data['msg'] = 'form submitted';
-
 			// set validation rules
 			$this->form_validation->set_rules('name_first', 'First Name', 'required');
 			$this->form_validation->set_rules('name_last', 'Last Name', 'required');
@@ -268,6 +372,7 @@ class User extends MY_Controller
 				$this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|alpha_dash');
 				$this->form_validation->set_rules('password_confirm', 'Password confirm', 'required|min_length[8]|alpha_dash|matches[password]');
 			}
+			$this->form_validation->set_rules('meta_lang', 'Metadata language', 'required|alpha|exact_length[3]');
 
 			// load custom field list and add validation rules
 			$this->User_model->list_user_fields();
@@ -300,70 +405,256 @@ class User extends MY_Controller
 			// validate and process if all valid
 			if ($form_valid)
 			{
-				$this->data['msg'] = 'form data is valid';
+				
+				// UPDATE USER TABLE
+				if($this->input->post('user_id') != '')
+				{
+					$this->User_model->user_id = $this->input->post('user_id');
+				}
+				if($this->input->post('password') != '')
+				{
+					$this->User_model->tmp_pwd = $this->input->post('password');
+				}
+				if($this->input->post('password_confirm') != '')
+				{
+					$this->User_model->tmp_pwd_conf = $this->input->post('password_confirm');
+				}
+				$this->User_model->name_first = $this->input->post('name_first');
+				$this->User_model->name_last = $this->input->post('name_last');
+				$this->User_model->username = $this->input->post('username');
+				$this->User_model->timezone = $this->input->post('timezone');
+				$this->User_model->default_lang = $this->input->post('default_lang');
+				$this->User_model->email = $this->input->post('email');
+
+				if($this->input->post('site_rel_id') != '')
+				{
+					$this->User_model->site_rel_id = $this->input->post('site_rel_id');
+				}
+				$this->User_model->admin = $this->input->post('admin');
+
+
+				if($this->User_model->update_user() === TRUE)
+				{
+					// update site users table
+					$this->User_model->update_site_user();
+	
+					// update metadata
+					$fields = $this->input->post('fields');
+					$metas = $this->input->post('user_meta_id');
+					foreach($fields as $key => $zf)
+					{
+						$val_name = 'value_'.$zf;
+						
+						$this->User_model->user_meta_id = $metas[$key];
+						$this->User_model->field_id = $zf;
+						$this->User_model->value = $this->input->post($val_name);
+						$this->User_model->meta_lang = $this->input->post('meta_lang');
+
+						$this->User_model->update_meta();
+
+					}
+				}
+
+				if(count($this->User_model->messages) === 0)
+				{
+					$this->User_model->messages[] = 'User info has been saved successfully';
+				}
+
 			} else {
-				$this->data['msg'] = validation_errors();
+				$this->User_model->messages[] = validation_errors();
 			}
 
 		} // end from processing
 
 	} // end _process_form()
 
-/*
+
+	function user_meta_fields()
+	{
+		$breadcrumb = anchor("cms","phSite CMS").' : ';
+		$breadcrumb .= anchor("cms/setup","Setup").' : ';
+		$breadcrumb .= anchor("cms/user","Users").' : User metadata fields';
+		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_tag'] = 'User metadata fields | Users | Setup ';
+		$this->data['title_h1'] = 'User metadata fields';
+
+		$this->_process_meta_fields();
+		
+		$this->data['form'] = $this->_form_meta_fields();
+
+		if(count($this->User_model->messages) > 0)
+		{
+			$this->data['msg'] = "<p>";
+			$this->data['msg'] .= implode("</p>\r<p>",$this->User_model->messages);
+			$this->data['msg'] .= "</p>";
+		}
+
+		$this->data['sidebar'] = $this->_meta_menu();
+		$this->load->view('cms/cms_form',$this->data);
+	}
+
+	function _form_meta_fields()
+	{
+
+		$action = "/cms/user/user_meta_fields";
+		$hidden = array('site_id' => $this->User_model->site_id);
+		$attributes = array('name' => 'user_meta_fields','id' => 'user_meta_fields');
+
+		$form = form_open($action, $attributes, $hidden);
+
+		// fields
+
+		$form .= "<table id=\"properties\">\r";
+		$form .= "<thead>\r";
+		$form .= "<tr>\r";
+		$form .= "<th scope=\"col\" id=\"hd_name\">field name</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_exists\">use for user metadata?</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_req\">required?</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_order\">order</th>\r";
+		$form .= "</tr>\r";
+		$form .= "</thead>\r";
+		$form .= "<tbody>\r";
+
+		$this->User_model->list_fields();
+		
+		$fieldCount = count($this->User_model->field_list);
+		$fieldNo = 1;
+
+		foreach($this->User_model->field_list as $field)
+		{
+
+			if($field['field_name'] != '') {
+				$temp_name = $field['field_name'];
+			} else {
+				$temp_name = $field['field_ref_name'];
+			}
+
+			if($fieldNo < $fieldCount) {
+			$form .= "<tr>\n";
+			} else {
+			$form .= "<tr class=\"last\">\n";
+			}
+			$fieldNo = $fieldNo + 1;
 	
-		// if form submitted, process data
+			$form .= form_hidden('field_id[]', $field['field_id']);
+	
+			if($field['rel_id'] != '') {
+				$exists = true;
+			} else {
+				$exists = false;
+			}
+			$form .= form_hidden('rel_id[]', $field['rel_id']);
+
+			$params = array(
+			'name'        => 'exists[]',
+			'id'          => 'exists[]',
+			'value'       => $field['field_id'],
+			'checked'     => $exists
+			);
+	
+			$form .= "<th headers=\"hd_name\" id=\"{$temp_name}\" scope=\"row\">{$temp_name}</th>\n";
+			$form .= "<td headers=\"hd_exists\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+
+			$params = array(
+			'name'        => 'required[]',
+			'id'          => 'required[]',
+			'value'       => $field['field_id'],
+			'checked'     => $field['required']
+			);
+
+			$form .= "<td headers=\"{$temp_name} hd_req\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+
+			$params = array(
+			'name'        => "order[]",
+			'id'          => "order[]",
+			'value'       => $field['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			$form .= "<td headers=\"{$temp_name} hd_order\">".form_input($params)."</td>\n";
+
+
+			$form .= "</tr>\n";
+
+		}
+
+
+		$form .= "</tbody></table>\n";
+		$form .= form_submit('submit', 'Save');
+		$form .= form_close();
+		return $form;
+	}
+
+
+	function _process_meta_fields()
+	{
+
 		if($this->input->post('submit') != '')
 		{
-			if($this->User_model->user_id == '' && $this->input->post('user_id') != '') {
-				$this->User_model->user_id = $this->input->post('user_id');
-			}
-	
-	
-	
-			// validate and process if all valid
-			if ($this->form_validation->run() == FALSE)
+			// get values from form post data
+			$this->User_model->site_id = $this->input->post('site_id');
+			
+			$temp_fields = $this->input->post('field_id');
+			$temp_rels = $this->input->post('rel_id');
+			$temp_exists = $this->input->post('exists');
+			$temp_required = $this->input->post('required');
+			$temp_order = $this->input->post('order');
+
+			$field_updates = array();
+			foreach($temp_fields as $index => $id)
 			{
-				$this->data['msg'] = validation_errors();
-			} else {
-	
-				if($this->input->post('user_id') != '') {
-					$this->User_model->user_id = $this->input->post('user_id');
+				$temp_field = array(
+				'field_id' => $id,
+				'rel_id' => $temp_rels[$index],
+				'exists' => FALSE,
+				'required' => 0,
+				'order' => $temp_order[$index],
+				);
+				
+				if(is_array($temp_exists) && in_array($id,$temp_exists)){
+					$temp_field['exists'] = TRUE;
 				}
-				$this->User_model->name_first = $this->input->post('name_first');
-				$this->User_model->name_last = $this->input->post('name_last');
-				$this->User_model->username = $this->input->post('username');
-				$this->User_model->timezone = $this->input->post('timezone');
-				$this->User_model->admin = $this->input->post('admin');
-				$this->User_model->default_lang = $this->input->post('default_lang');
-				$this->User_model->email = $this->input->post('email');
-	
-				if($this->input->post('password') != '') {
-					$success = $this->User_model->update_user($this->input->post('password'));
-				} else {
-					$success = $this->User_model->update_user();
+
+				if(is_array($temp_required) && in_array($id,$temp_required)){
+					$temp_field['required'] = 1;
 				}
-	
-				if($success) {
-					$this->data['msg'] = "<p>User updated successfully</p>\n";
-	
-					if($this->input->post('user_id') == '') {
-						if($this->email_user_info($this->input->post('password'),'new')) {
-							$data['msg'] .= "<p>Confirmation email sent</p>\n";
-						}
-						
-					} else if ($this->input->post('user_id') != '') {
-						if($this->email_user_info($this->input->post('password'))) {
-							$data['msg'] .= "<p>Confirmation email sent</p>\n";
-						}
-					}
-				} else {
-					$this->data['msg'] = "User could not be updated";
-				}
+				
+				$field_updates[] = $temp_field;
 			}
-	
+			$this->User_model->field_list = $field_updates;
+			$this->User_model->update_meta_fields();
+
 		}
-	
-*/
+		
+	}// end _process_meta_fields()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /*
@@ -407,22 +698,6 @@ class User extends MY_Controller
 		$this->load->view('cms/user_forgot_pwd',$this->data);
 
 	} // end forgot_password()
-
-	function match_zones($str)
-	{
-		$zones = timezone_identifiers_list();
-		$locations =  array();
-		
-		foreach ($zones as $zone)
-		{
-
-			if (preg_match($str, $zone)) {
-				$locations[] = $zone;
-			}
-		
-		}
-		return $locations;
-	} // end list_zones()
 
     function email_user_info($pwd,$action='') {
 		$this->load->library('email');
@@ -468,6 +743,9 @@ class User extends MY_Controller
 		}
 
 	} // end email_user_info()
+
+
+
 */
 
 }

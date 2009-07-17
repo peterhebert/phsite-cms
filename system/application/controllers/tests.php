@@ -4,7 +4,7 @@ class Tests extends MY_Controller {
 
 	function Tests()
 	{
-		parent::Controller();	
+		parent::MY_Controller();	
 	}
 	
     function index()
@@ -17,18 +17,11 @@ class Tests extends MY_Controller {
 		echo $this->Site_model->install_path;
 		echo "</p>\r";
 
-		$this->Site_model->load_site();
-		$this->Site_model->load_meta_fields();
-
-		echo "<p>site timezone: ";
-		echo $this->Site_model->site_timezone;
-		echo "</p>\r";
+		$this->_load_site_metadata();
 		
 		echo "<pre>";
-		print_r($this->Site_model->site_meta_fields);
+		print_r($this->data);
 		echo "</pre>\r";
-
-
 
     }
 

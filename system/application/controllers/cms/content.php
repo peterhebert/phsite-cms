@@ -7,24 +7,474 @@ class Content extends MY_Controller
 		parent::Controller();
 		$this->load->model('Content_model');
 		$this->load->model('Content_type_model');
+		$this->load->model('User_model');
+		$this->load->model('Field_model');
+		$this->load->model('Language_model');
 		$this->load->helper('image');
+
+		//$this->_authenticate();
+		$this->_load_site_metadata();
 	}
 
 	function index()
 	{
-		$this->site_map();
+
+		$this->Content_model->link_mode = 1;
+		$this->Content_model->lang_mode = $this->Language_model->lang_count;
+		$this->Content_model->content_lang = $this->Site_model->site_default_lang;
+		
+		$body = $this->Content_model->site_map();
+
+		$this->data['form'] = $body;
+
+		$breadcrumb = anchor("cms","phSite CMS").' : Content';
+		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_tag'] = 'Content ';
+		$this->data['title_h1'] = 'Content';
+		
+		//$this->data['form'] = $form;
+
+		$this->load->view('cms/cms_form',$this->data);
 	}
 
-	function site_map()
+	function edit()
 	{
-		$this->_authenticate();
-		$this->data['list'] = $this->Content_model->site_map(0,1,$this->Site_model->site_lang);
-		$this->load->view('cms/site_map',$this->data);
+		$this->load->helper('timezone');
+		$this->load->library('session');
+
+		$breadcrumb = anchor("cms","phSite CMS").' : ';
+		$breadcrumb .= anchor("cms/content","Content").' : ';
+		$breadcrumb .= 'Content editor';
+		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_tag'] = 'Content editor ';
+		$this->data['title_h1'] = 'Content editor';
+		
+		$params = $this->uri->uri_to_assoc(4);
+		if( array_key_exists('id',$params) ) {
+			$this->Content_model->content_id = $params['id'];
+		}
+		if( array_key_exists('lang',$params) ) {
+			$this->Content_model->content_lang = $params['lang'];
+		}
+		if( array_key_exists('type',$params) ) {
+			$this->Content_model->type_id = $params['type'];
+		}
+
+		$this->_process_form();
+
+		$this->Content_model->get_content();
+		
+		$this->data['form'] = $this->_form_edit();
+
+		$msg = $this->Content_model->_output_messages();
+		
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+		$this->load->view('cms/cms_form',$this->data);
+
 	}
 
-	function delete()
+	function _form_edit()
 	{
-		$this->_authenticate();
+		$this->load->helper('form');
+
+		$action = $this->uri->uri_string();
+		$attributes = array(
+		'name' => 'content_editor',
+		'id' => 'content_editor'
+		);
+
+		$form = form_open($action, $attributes);
+		if($this->Content_model->content_id != '')
+		{
+			$form .= form_hidden('content_id', $this->Content_model->content_id);
+
+			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
+			if($this->Content_model->content_lang != '')
+			{
+				$del_lang = $del_base.'/lang/'.$this->Content_model->content_lang;
+				$this->Language_model->ISO_639_3 = $this->Content_model->content_lang;
+				$this->Language_model->load();
+				$del_links[] = anchor($del_lang,$this->Language_model->Ref_Name, array('title' => 'Delete this language'));
+			}
+
+			$del_links[] = anchor($del_base,'all languages', array('title' => 'Delete this content in all languages'));
+
+			$delete = "<p>Delete : ";
+			$delete .= implode(" | ",$del_links);
+			$delete .= "</p>\r";
+		}
+
+		if($this->Content_model->content_title_id != '')
+		{
+			$form .= form_hidden('content_title_id', $this->Content_model->content_title_id);
+		}
+
+		$form .= form_fieldset('General information');
+
+		$form_options = $this->Content_type_model->get_list_dropdown();
+		$form .= "<p>";
+		$form .=  form_label('Content type', 'type_id');
+		$form .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
+		$form .= "</p>\n";
+
+		$form_options = $this->Content_model->get_parents_dropdown();
+		$form .= "<p>";
+		$form .=  form_label('Parent', 'parent_id');
+		$form .=  form_dropdown('parent_id', $form_options, $this->Content_model->parent_id);
+		$form .= "</p>\n";
+	
+		$form_options = array(1 => 'Yes', 0 => 'No');
+
+		$form .= "<p>";
+		$form .=  form_label('Publish', 'publish_status');
+		$form .=  form_dropdown('publish_status', $form_options, $this->Content_model->publish_status);
+		$form .= "</p>\n";
+
+		$form .= "<p>";
+		$form .=  form_label('Display on home page', 'splash');
+		$form .=  form_dropdown('splash', $form_options, $this->Content_model->splash);
+		$form .= "</p>\n";
+
+		$form .= "<p>";
+		$form .=  form_label('Available to menus/indexes', 'index');
+		$form .=  form_dropdown('index', $form_options, $this->Content_model->index);
+		$form .= "</p>\n";
+
+		$form_options = $this->User_model->get_list_dropdown();
+		$form .= "<p>";
+		$form .= form_label('Author', 'user_id');
+		$form .=  form_dropdown('user_id', $form_options, $this->Content_model->user_id);
+		$form .= "</p>\n";
+		
+		// convert dates to user timezone
+		$sys_zone = date_default_timezone_get();
+		$usr_zone = $this->session->userdata('timezone');
+		
+		if($usr_zone !== FALSE && $usr_zone != $sys_zone)
+		{
+			if($this->Content_model->date_1 != '')
+			{
+				$this->Content_model->date_1 = convert_time($this->Content_model->date_1, $usr_zone);
+			}
+			if($this->Content_model->date_2 != '')
+			{
+				$this->Content_model->date_2 = convert_time($this->Content_model->date_2, $usr_zone);
+			}
+	
+		}
+
+		if($this->Content_model->date_1 == '0000-00-00 00:00:00')
+		{
+			$this->Content_model->date_1 = '';
+		}
+		if($this->Content_model->date_2 == '0000-00-00 00:00:00')
+		{
+			$this->Content_model->date_2 = '';
+		}
+
+		$form_options = array(
+		'name'        => 'date_1',
+		'id'          => 'date_1',
+		'class'	=> 'small_input',
+		'value' => $this->Content_model->date_1,
+		);
+		$form .= "<p>";
+		$form .=  form_label('Created / Start Date', 'date_1');
+		$form .=  form_input($form_options);
+		$form .= "</p>\n";
+
+		$form_options = array(
+		'name'        => 'date_2',
+		'id'          => 'date_2',
+		'class'	=> 'small_input',
+		'value' => $this->Content_model->date_2,
+		);
+		$form .= "<p>";
+		$form .=  form_label('End / Expiry Date', 'date_2');
+		$form .=  form_input($form_options);
+		$form .= "</p>\n";
+
+		$form .= form_fieldset_close();
+
+		$form .= form_fieldset('Content');
+		$form .= $delete;
+
+		$form_options = $this->Language_model->get_list_dropdown();
+		$form .= "<p>";
+		$form .=  form_label('Language', 'content_lang');
+		$form .=  form_dropdown('content_lang', $form_options, $this->Content_model->content_lang);
+		$form .= "</p>\n";
+
+		$form_options = array(
+		'id' => 'title',
+		'name' => 'title',
+		'class' => 'text',
+		'value' => $this->Content_model->title
+		);
+		$form .= "<p>";
+		$form .= form_label('Title','title');
+		$form .= form_input($form_options);
+		$form .= "</p>";
+
+		$form_options = array(
+		'id' => 'subtitle',
+		'name' => 'subtitle',
+		'class' => 'text',
+		'value' => $this->Content_model->subtitle
+		);
+		$form .= "<p>";
+		$form .= form_label('Subitle','subtitle');
+		$form .= form_input($form_options);
+		$form .= "</p>";
+
+		$fd_meta = $this->Content_model->content_metadata;
+
+		foreach($fd_meta as $index => $fd)
+		{
+
+			// hidden fields
+			$form_options = array(
+			'field_id[]' =>  $index,
+			'field_name[]' =>  $fd['field_name'],
+			'content_meta_id[]' => $fd['content_meta_id'],
+			'required[]' =>  $fd['required'],
+			'field_needs_lang[]' => $fd['field_needs_lang']
+			);
+			
+			$form .= form_hidden($form_options);
+
+			$tmp_label = $fd['field_ref_name'];
+			if($fd['field_name'] != '')
+			{
+				$tmp_label = $fd['field_name'];
+			}
+			$form .= "<p>\r";
+			$form .= form_label($tmp_label, $fd['field_ref_name']);
+			$form_options = array(
+			'id' => $fd['field_ref_name'],
+			'name' => 'value_'.$index,
+			'value' => $fd['value'],
+			'class' => $fd['field_input_type']
+			);
+			switch($fd['field_input_type']) {
+
+			case 'directory':
+				$this->load->model('Media_model');
+				$this->Media_model->list_dirs();
+				$media_root = $this->Media_model->dir_base;
+				$dir_list_temp = $this->Media_model->dir_list;
+				$dir_vals[''] = 'media root';
+				
+				foreach($dir_list_temp as $the_dir) {
+					$temp_dir_val = str_replace($media_root,'',$the_dir);
+					$dir_vals[$temp_dir_val] = $temp_dir_val;
+				}
+				
+				$form .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				break;
+			case 'file':
+				$this->load->model('Media_model');
+				$this->Media_model->list_dirs();
+				$media_root = $this->Media_model->dir_base;
+				$dir_files = array('' => 'no file');
+				foreach($this->Media_model->dir_list as $index => $dir)
+				{
+					$this->Media_model->dir_current = $dir;
+					$dest_dir = str_replace($media_root,'',$dir);
+
+					$this->Media_model->list_files();
+					foreach($this->Media_model->file_list as $file_path) {
+						$file_rel = str_replace($media_root,'',$file_path);
+						$pinfo = pathinfo($file_path);
+						$dir_files[$file_rel] = $pinfo['basename'];
+					}
+					
+				}
+
+				$form .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				break;
+			case 'textarea':
+				$form_options['cols'] = 38;
+				$form .=  form_textarea($form_options);
+				break;
+			case 'richtext':
+				$form_options['cols'] = 38;
+				$form .=  form_textarea($form_options);
+				break;
+			default:
+				$form .=  form_input($form_options);
+			}
+			$form .= "</p>\r";
+		}
+		$form .= form_fieldset_close();
+		
+		$form .= "<p>";
+		$form .= form_submit('submit', 'Save');
+		$form .= "</p>\n";
+
+		$form .= form_close();
+		return $form;
+
+	}
+
+	function _process_form()
+	{
+		// if form submitted, process data
+		if($this->input->post('submit') != '')
+		{
+			$this->load->library('form_validation');		
+
+			// set validation rules
+			$this->form_validation->set_rules('type_id', 'Content Type', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('user_id', 'Author', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('parent_id', 'Parent', 'required|is_natural');
+			$this->form_validation->set_rules('title', 'Title', 'required');
+
+			$this->Content_model->get_content_meta_fields();
+			$meta_fields = $this->Content_model->content_meta_fields;
+			foreach($meta_fields as $fd)
+			{
+				$tmp_valid = array();
+
+				if($fd['required'] == 1)
+				{
+					$tmp_valid[] = 'required';
+				}
+
+				if($fd['field_validation'] != '')
+				{
+					$tmp_valid[] = $fd['field_validation'];
+				}
+				$lbl_name = $fd['field_ref_name'];
+				if($fd['field_name'] != '')
+				{
+					$lbl_name = $fd['field_name'];
+				}
+
+				$concat_valid = implode('|', $tmp_valid);
+
+				if($concat_valid != '')
+				{
+					$this->form_validation->set_rules('value_'.$fd['field_id'], $lbl_name, $concat_valid);
+				}
+
+			}
+			
+			// run validation and load field values
+			$form_is_valid = $this->form_validation->run();
+			
+			$this->Content_model->content_id = $this->input->post('content_id');
+			$this->Content_model->user_id = $this->input->post('user_id');
+			$this->Content_model->parent_id = $this->input->post('parent_id');
+			$this->Content_model->type_id = $this->input->post('type_id');
+			
+			// load type info
+			$this->Content_type_model->type_id = $this->input->post('type_id');
+			$this->Content_type_model->load_type();
+			$this->Content_model->type_name = $this->Content_type_model->type_name_uri;
+			
+			$this->Content_model->publish_status = $this->input->post('publish_status');
+			$this->Content_model->date_1 = $this->input->post('date_1');
+			$this->Content_model->date_2 = $this->input->post('date_2');
+			$this->Content_model->splash = $this->input->post('splash');
+			$this->Content_model->index = $this->input->post('index');
+			
+			$this->Content_model->content_title_id = $this->input->post('content_title_id');
+			$this->Content_model->content_lang = $this->input->post('content_lang');
+			$this->Content_model->title = $this->input->post('title');
+			$this->Content_model->subtitle = $this->input->post('subtitle');
+
+			$tmp_field_id = $this->input->post('field_id');
+			$tmp_field_name = $this->input->post('field_name');
+			$tmp_meta_id = $this->input->post('content_meta_id');
+			$tmp_required = $this->input->post('required');
+			$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+			
+			$form_meta = array();
+			foreach($tmp_field_id as $index => $tmp_id)
+			{
+				$val_lbl = 'value_'.$tmp_id;
+				$value = $this->input->post($val_lbl);
+				
+				$this->Field_model->field_id = $tmp_id;
+				$this->Field_model->load();
+				
+				if($this->Field_model->field_ref_name == 'keywords')
+				{
+					$value = csv_normalize($value);
+				}
+				
+				$tmp_meta = array(
+				'content_meta_id' => $tmp_meta_id[$index],
+				'field_id' => $tmp_id,
+				'field_name' => $tmp_field_name[$index],
+				'value' => $value,
+				'required' => $tmp_required[$index],
+				'rel_id' => '',
+				'order' => '',
+				'field_ref_name' => $this->Field_model->field_ref_name,
+				'field_input_type' => $this->Field_model->field_input_type,
+				'field_validation' => $this->Field_model->field_validation,
+				'field_needs_lang' => $this->Field_model->field_needs_lang,
+				);
+				
+				$form_meta["$tmp_id"] = $tmp_meta;
+
+			}
+			$this->Content_model->content_metadata = $form_meta;
+
+			// validate and process if all valid
+			if ($form_is_valid)
+			{
+
+				// convert dates to system timezone
+				$sys_zone = date_default_timezone_get();
+				$usr_zone = $this->session->userdata('timezone');
+
+				if($usr_zone !== FALSE && $usr_zone != $sys_zone)
+				{
+					if($this->Content_model->date_1 != '')
+					{
+						$this->Content_model->date_1 = convert_time($this->Content_model->date_1, $sys_zone, "Y-m-d H:i:s", $usr_zone);
+					}
+					if($this->Content_model->date_2 != '')
+					{
+						$this->Content_model->date_2 = convert_time($this->Content_model->date_2, $sys_zone, "Y-m-d H:i:s", $usr_zone);
+					}
+			
+				}
+				if($this->Content_model->date_1 == '')
+				{
+					$this->Content_model->date_1 = date('Y-m-d H:i:s');
+				}
+
+				// update Content 
+				$this->Content_model->update_content();
+				$this->Content_model->update_title();
+				$this->Content_model->update_metadata();
+
+				if(count($this->Content_model->messages) == 0)
+				{
+					$this->Content_model->messages[] = "content updated successfully";
+				}
+			}
+			else
+			{
+				$this->Content_model->messages[] = validation_errors();
+			}
+
+
+		}
+
+	}
+
+/*	function delete()
+	{
 
 		$form_uri = $this->uri->uri_string();
 		$params = $this->uri->uri_to_assoc(4);
@@ -74,403 +524,20 @@ class Content extends MY_Controller
 
 	}
 
-	function edit()
-	{
-		$this->_authenticate();
-
-		$this->load->model('User_model');
-		$this->load->model('Field_model');
-		$this->load->library('form_validation');		
-
-		$params = $this->uri->uri_to_assoc(4);
-		if(array_key_exists('id',$params)) {
-			$this->Content_model->content_id = $params['id'];
-		}
-
-		// if form submitted, process data
-		if($this->input->post('submit') != '') {
-			$this->process_form();
-		}
-
-		//load from database
-		if(array_key_exists('id',$params)) {
-			$this->Content_model->content_id = $params['id'];
-		}
-		
-		if(array_key_exists('lang',$params)) {
-			if($this->Content_model->content_lang == '') {
-				$this->Content_model->content_lang = $params['lang'];
-			}
-		}
-
-		if($this->Content_model->content_id != '') {
-			$this->Content_model->get_content();
-
-			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
-			$del_lang = $del_base.'/lang/'.$this->Content_model->content_lang;
-			
-			$this->Language_model->load($this->Content_model->content_lang);
-
-			$this->data['delete_links'] = "<p>Delete this content : ";
-			$this->data['delete_links'] .= anchor($del_lang,$this->Language_model->Ref_Name, array('title' => 'Delete this language'));
-			$this->data['delete_links'] .= " | ";
-			$this->data['delete_links'] .= anchor($del_base,'All languages', array('title' => 'Delete this content in all languages'));
-			$this->data['delete_links'] .= "</p>\n";
-
-		}
-
-
-		// generate content form
-
-		if(array_key_exists('type',$params)) {
-			$this->Content_model->object_id = $params['type'];
-		}
-
-		if($this->Content_model->object_id != '') {
-			$this->Content_type_model->object_id = $this->Content_model->object_id;
-		} else {
-			$this->Content_type_model->object_id = 1;
-		}
-
-
-		$this->Content_type_model->load_object();
-
-		$obj_fields = $this->Content_type_model->fields;
-		$content_data = $this->Content_model->content_data;
-
-		$fields = array();
-		
-		// populate field array
-		foreach($obj_fields as $dt) {
-			$fields[$dt['field_id']]['validation'] 	= $dt['validation'];
-			$fields[$dt['field_id']]['required'] 	= $dt['required'];
-			$fields[$dt['field_id']]['order'] 		= $dt['order'];
-			$fields[$dt['field_id']]['field_name'] 	= $dt['field_name'];
-			$fields[$dt['field_id']]['input_type'] 	= $dt['input_type'];
-
-			$fields[$dt['field_id']]['value'] 		= '';
-			$fields[$dt['field_id']]['data_id'] 	= '';
-		}
-
-		if(is_array($content_data) && count($content_data) > 0) {
-
-			foreach($content_data as $dt) {
-				$fields[$dt['field_id']]['validation'] 	= $dt['validation'];
-				$fields[$dt['field_id']]['required'] 	= $dt['required'];
-				$fields[$dt['field_id']]['order'] 		= $dt['order'];
-				$fields[$dt['field_id']]['value'] 		= $dt['value'];
-				$fields[$dt['field_id']]['data_id'] 	= $dt['data_id'];
-				$fields[$dt['field_id']]['field_name'] 	= $dt['field_name'];
-				$fields[$dt['field_id']]['input_type'] 	= $dt['input_type'];
-			}
-		}
-
-		// hidden fields
-		$content = form_hidden('content_id', $this->Content_model->content_id);
-		$content .= form_hidden('title_id', $this->Content_model->title_id);
-
-		$field_params = array(
-			'id' => 'title',
-			'name' => 'title',
-			'class' => 'text',
-			'value' => $this->Content_model->title
-		);
-
-		$content .=  "<p>";
-		$content .=  form_label('Title','title');
-		$content .=  form_input($field_params);
-		$content .=  "</p>";
-
-
-		// now generate form input fields
-		foreach($fields as $fd_id => $fd) {
-		
-			$field_params = array(
-				'id' => $fd['field_name'],
-				'name' => 'value_'.$fd_id,
-				'value' => $fd['value'],
-			);
-
-			// hidden fields
-			$content .=  form_hidden('field_id[]', $fd_id);
-			$content .=  form_hidden('field_name[]', $fd['field_name']);
-			$content .=  form_hidden('required[]', $fd['required']);
-			$content .=  form_hidden('validation[]', $fd['validation']);
-			$content .=  form_hidden('data_id[]', $fd['data_id']);
-
-			$content .=  "<p>";
-			$content .=  form_label($fd['field_name']);
-
-			switch($fd['input_type']) {
-
-			case 'directory':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_list_temp = $this->Media_model->dir_list;
-				$dir_vals[''] = 'media root';
-				
-				foreach($dir_list_temp as $the_dir) {
-					$temp_dir_val = str_replace($media_root,'',$the_dir);
-					$dir_vals[$temp_dir_val] = $temp_dir_val;
-				}
-				
-				$content .= form_dropdown($field_params['name'], $dir_vals, $fd['value']);
-				break;
-			case 'file':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_files = array('' => 'no file');
-				foreach($this->Media_model->dir_list as $index => $dir)
-				{
-					$this->Media_model->dir_current = $dir;
-					$dest_dir = str_replace($media_root,'',$dir);
-
-					$this->Media_model->list_files();
-					foreach($this->Media_model->file_list as $file_path) {
-						$file_rel = str_replace($media_root,'',$file_path);
-						$pinfo = pathinfo($file_path);
-						$dir_files[$file_rel] = $pinfo['basename'];
-					}
-					
-				}
-
-				$content .= form_dropdown($field_params['name'], $dir_files, $fd['value']);
-				break;
-			case 'text':
-				$field_params['class'] = $fd['input_type'];
-				$content .=  form_input($field_params);
-				break;
-			case 'textarea':
-				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 38;
-				$content .=  form_textarea($field_params);
-				break;
-			case 'richtext':
-				$field_params['class'] = $fd['input_type'];
-				$field_params['cols'] = 38;
-				$content .=  form_textarea($field_params);
-				break;
-			default:
-				$content .=  form_input($field_params);
-			}
-
-			$content .=  "</p>\n";
-
-
-		}
-		
-
-		// generate meta form
-
-		$userArray = $this->User_model->get_list_dropdown();
-		$typeArray = $this->Content_type_model->get_list_dropdown();
-		$langArray = $this->Language_model->get_list_dropdown();
-		$parentArray = $this->Content_model->get_parents_dropdown();
-
-		$meta =	"<p>";
-		$meta .= form_label('Author', 'user_id');
-		$meta .=  form_dropdown('user_id', $userArray, $this->Content_model->user_id);
-		$meta .= "</p>\n";
-		
-		$field_params = array(
-		'name'        => 'created',
-		'id'          => 'created',
-		'class'	=> 'small_input',
-		'value' => $this->Content_model->created,
-		);
-		$meta .= "<p>";
-		$meta .=  form_label('Created', 'created');
-		$meta .=  form_input($field_params);
-		$meta .= "</p>\n";
-
-		$meta .= "<p>";
-		$meta .=  form_label('Language', 'content_lang');
-		$meta .=  form_dropdown('content_lang', $langArray, $this->Content_model->content_lang);
-		$meta .= "</p>\n";
-
-
-		if($this->Content_model->object_id == '' && array_key_exists('type',$params)) {
-			$this->Content_model->object_id = $params['type']; 
-		}
-		$properties = "<p>";
-		$properties .=  form_label('Content type', 'object_id');
-		$properties .=  form_dropdown('object_id', $typeArray, $this->Content_model->object_id);
-		$properties .= "</p>\n";
-		
-		$properties .= "<p>";
-		$properties .=  form_label('Parent', 'parent_id');
-		$properties .=  form_dropdown('parent_id', $parentArray, $this->Content_model->parent_id);
-		$properties .= "</p>\n";
 	
-		$field_params = array(1 => 'Yes', 0 => 'No');
-		$properties .= "<p>";
-		$properties .=  form_label('Display on home page', 'splash');
-		$properties .=  form_dropdown('splash', $field_params, $this->Content_model->splash);
-		$properties .= "</p>\n";
-
-		$properties .= "<p>";
-		$properties .=  form_label('Available to menus/indexes', 'index');
-		$properties .=  form_dropdown('index', $field_params, $this->Content_model->index);
-		$properties .= "</p>\n";
-
-		if($this->Content_model->content_id != '') {
-			$this->data['action'] = site_url("cms/content/edit/id/".$this->Content_model->content_id);
-		} else {
-			$this->data['action'] = site_url("cms/content/edit/");
-		}
-
-		$this->data['content_id'] = $this->Content_model->content_id;
-		$this->data['title_id'] = $this->Content_model->title_id;
-		$this->data['content'] = $content;
-		$this->data['meta'] = $meta;
-		$this->data['properties'] = $properties;
-		$this->data['uri'] = $this->Content_model->get_uri();
-
-		$this->load->view('cms/content_edit',$this->data);
-
-	}
 	
-	function process_form()
-	{
 
-		$form = array(
-		'content_id' => $this->input->post('content_id'),
-		'parent_id' => $this->input->post('parent_id'),
-		'object_id' => $this->input->post('object_id'),
-		'created' => $this->input->post('created'),
-		'user_id' => $this->input->post('user_id'),
-		'splash' => $this->input->post('splash'),
-		'data_id' => $this->input->post('data_id'),
-		'field_id' => $this->input->post('field_id'),
-		'field_name' => $this->input->post('field_name'),
-		'content_lang' => $this->input->post('content_lang'),
-		'title' => $this->input->post('title'),
-		'title_id' => $this->input->post('title_id'),
-		'validation' => $this->input->post('validation'),
-		'required' => $this->input->post('required'),
-		'my_url' => $this->input->post('my_url'),
-		);
-		
-		// set validation rules
-
-		if($this->input->post('content_id') != '') {
-			$this->form_validation->set_rules('content_id', 'Content ID', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('title_id', 'Title ID', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('created', 'Date Created', 'required|is_date');
-		}
-
-		$this->form_validation->set_rules('object_id', 'Content Type', 'required|is_natural_no_zero');
-		$this->form_validation->set_rules('user_id', 'Author', 'required|is_natural_no_zero');
-		$this->form_validation->set_rules('parent_id', 'Parent', 'required|is_natural');
-
-		$this->form_validation->set_rules('title', 'Title', 'required');
-
-		foreach($form['field_id'] as $index => $id) {
-			$this->Field_model->field_id = $id;
-			$this->Field_model->load();
-			$validation = '';
-			$treq = array();
-			if($form['required'][$index] == 1) {
-				$treq[] = "required";
-			}
-			if($form['validation'][$index] != '') {
-				$treq[] = $form['validation'][$index];
-			}
-			if(count($treq) > 0 ) {
-				$validation = implode('|',$treq);
-				$this->form_validation->set_rules("value_{$id}", $this->Field_model->field_name, $validation);
-			}
-		}
-
-		// validate and process if all valid
-		if ($this->form_validation->run() == FALSE)
-		{
-			$this->data['msg'] = validation_errors();
-		} else {
-			$success = TRUE;
-			$msg_update = '';
-
-			$this->Content_model->content_id = $this->input->post('content_id');
-			$this->Content_model->parent_id = $this->input->post('parent_id');
-
-			$this->Content_type_model->object_id = $this->input->post('object_id');
-			$this->Content_type_model->load_object();
-			$this->Content_model->object_id = $this->input->post('object_id');
-			$this->Content_model->object_name = $this->Content_type_model->name_uri;
-
-			if($this->input->post('created') == '' || $this->input->post('created') == '0000-00-00 00:00:00') {
-				$this->Content_model->created = date('Y-m-d H:i:s');
-			} else {
-				$this->Content_model->created = $this->input->post('created');
-			}
-			$this->Content_model->user_id = $this->input->post('user_id');
-			$this->Content_model->splash = $this->input->post('splash');
-			$this->Content_model->content_lang = $this->input->post('content_lang');
-			$this->Content_model->title = $this->input->post('title');
-			$this->Content_model->title_id = $this->input->post('title_id');
-
-			// update Content object
-			if($this->Content_model->update_content() === FALSE) {
-				$success = FALSE;
-				$msg_update = "<p>Content could not be updated</p>\n";
-			}
-			
-			// update title
-			if($this->Content_model->update_title() === FALSE) {
-				$success = FALSE;
-				$msg_update = "<p>Title could not be updated</p>\n";
-			}
-
-			// update data
-			foreach($form['field_id'] as $index => $fd_id) {
-				$form_fd_name = 'value_'.$fd_id;
-				
-				$temp_label = $form['field_name'][$index];
-				$temp_val = $this->input->post($form_fd_name);
-				
-				if($temp_label == 'keywords')
-				{
-					$temp_val = csv_normalize($temp_val);
-				}
-				$temp_data_id = $form['data_id'][$index];
-
-				if($this->Content_model->update_data($fd_id,$temp_val,$temp_data_id) === FALSE)
-				{
-					$success = FALSE;
-					$msg_update .= "<p>Field '{$temp_label}' could not be updated</p>\n";
-				}
-			}
-			
-			if($success === TRUE) {
-				$this->data['msg'] = "content updated successfully";
-			} else {
-				$this->data['msg'] = $msg_update;
-			}
-
-		} // end validation
-	
-	}
-	
+*/
 	function search()
 	{
+		$this->Content_model->link_mode = 1;
 		$this->data['term'] = $this->input->post('search-text');
 		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
+		$this->data['query'] = $this->db->last_query();
 
-		if($this->uri->segment(4) == 'admin') {
-			$view = 'cms/search_results';
-		} else {
-			$this->load->model('Site_model');
-			$this->Site_model->load_prefs();
-			$view = 'themes/'.$this->Site_model->theme.'/search_results';
-			
-			$this->load->view('cms/search_results',$this->data);
-		}
+		$view = 'cms/search_results';
 
 		$this->load->view($view,$this->data);
 	}
-
-
 }
 ?>

@@ -11,7 +11,7 @@ class Field extends MY_Controller
 
 		// if not logged in, redirect to login form
 		//$this->_authenticate();
-
+		$this->_load_site_metadata();
 	}
 
 	function index()
@@ -25,6 +25,17 @@ class Field extends MY_Controller
 
 	function edit()
 	{
+
+	
+		$breadcrumb = anchor("cms","phSite CMS").' : ';
+		$breadcrumb .= anchor("cms/setup","Setup").' : ';
+		$breadcrumb .= anchor("cms/setup/structure","Data Structure").' : ';
+		$breadcrumb .= 'Field editor';
+
+		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_tag'] = 'Field editor | Data Structure | Setup ';
+		$this->data['title_h1'] = 'Field editor';
 
 		$this->load->library('form_validation');
 		$params = $this->uri->uri_to_assoc(4);
@@ -56,7 +67,33 @@ class Field extends MY_Controller
 			$this->data['msg'] .= "</p>";
 		}
 
-		$this->load->view('cms/field_edit',$this->data);
+		// list active languages
+		$lang_links = array();
+		$langs = $this->Language_model->get_list();
+		foreach($langs as $llang)
+		{
+			$temp_link = 'cms/field/edit/id/'.$this->Field_model->field_id.'/lang/'.$llang['ISO_639_3'];
+			if($llang['Native_Name'] != '')
+			{
+				$temp_txt = $llang['Native_Name'];
+			}
+			else
+			{
+				$temp_txt = $llang['Ref_Name'];
+			}
+			$lang_links[] = anchor($temp_link,$temp_txt);
+		}
+		
+		$sidebar = "<h2>Field metadata</h2>\r";
+		$sidebar .= ul($lang_links);
+		
+		$sidebar .= $this->load->view('cms/setup_menu',array(), true);
+		$this->data['sidebar'] = $sidebar;
+
+		// now load view
+		$this->load->view('cms/cms_form',$this->data);
+
+		//$this->load->view('cms/field_edit',$this->data);
 	}
 	
 	function _process_form()
@@ -80,7 +117,8 @@ class Field extends MY_Controller
 
 			$this->Field_model->field_id = $this->input->post('field_id');
 			$this->Field_model->field_ref_name = $this->input->post('field_ref_name');	
-			$this->Field_model->field_input_type = $this->input->post('field_input_type');	
+			$this->Field_model->field_input_type = $this->input->post('field_input_type');
+			$this->Field_model->field_needs_lang = $this->input->post('field_needs_lang');
 
 			$this->Field_model->validation_string = $this->input->post('validation_string');	
 			$this->Field_model->validation_exact = $this->input->post('validation_exact');	
@@ -98,10 +136,21 @@ class Field extends MY_Controller
 			}
 			else
 			{
-				if($this->Field_model->update_field())
+				$success_field = $this->Field_model->update_field();
+				
+				if($success_field)
 				{
-					$this->Field_model->update_field_meta();
+					$success_meta = $this->Field_model->update_field_meta();
 				}
+				if($success_field === TRUE && $success_meta === TRUE)
+				{
+					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' has been successfully updated";
+				}
+				else
+				{
+					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' could not be updated";
+				}
+
 			}
 
 		}
@@ -111,8 +160,6 @@ class Field extends MY_Controller
 	{
 
 		$this->Field_model->parse_validation();
-
-		$langs = $this->Language_model->get_list_dropdown();
 
 		$action = "cms/field/edit/id/".$this->Field_model->field_id;
 		if($this->Field_model->field_meta_id != '') {
@@ -133,22 +180,32 @@ class Field extends MY_Controller
 		// main data
 		$form .= form_fieldset('Field info');
 		$form .= "\r";
+		
 		$form .= "<p>\r";
 		$form .= form_label('Reference name', 'field_ref_name');
 		$form .= form_input('field_ref_name',$this->Field_model->field_ref_name); 
 		$form .= "</p>\r";
+		
 		$form .= "<p>\r";
 		$form .= form_label('Input type', 'field_input_type');
 		$form .= form_dropdown('field_input_type', $this->Field_model->input_types, $this->Field_model->field_input_type); 
+		$form .= "</p>\r";
+
+		$form_options = array(0 => 'No', 1 => 'Yes');
+		$form .= "<p>\r";
+		$form .= form_label('Field value requires Language', 'field_needs_lang');
+		$form .= form_dropdown('field_needs_lang', $form_options, $this->Field_model->field_needs_lang); 
 		$form .= "</p>\r";
 		$form .= form_fieldset_close("\r");
 		
 		// metadata
 		$form .= form_fieldset('Field metatdata');
 		$form .= "\r";
+
+		$form_options = $this->Language_model->get_list_dropdown();
 		$form .= "<p>\r";
 		$form .= form_label('Language', 'field_lang');
-		$form .= form_dropdown('field_lang', $langs, $this->Field_model->field_lang); 
+		$form .= form_dropdown('field_lang', $form_options, $this->Field_model->field_lang); 
 		$form .= "</p>\r";
 		$form .= "<p>\r";
 		$form .= form_label('Field name', 'field_name');

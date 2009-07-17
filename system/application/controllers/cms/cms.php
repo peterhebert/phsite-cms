@@ -10,30 +10,64 @@ class Cms extends MY_Controller
 		$this->load->helper('form');
 		$this->load->model('Field_model');
 		$this->load->model('Content_type_model');
-		$this->load->model('Content_model');
+		//$this->load->model('Content_model');
 		$this->load->model('User_model');
 		$this->load->library('session');
-
 	}
 	
 	function index()
 	{
 		//$this->_authenticate();
 
-		// get recently added pages
-		$contentdata['title'] = "Recently Added";
-		$contentdata['list'] = $this->Content_model->site_map(1,10);
-		$this->data['content'] = $this->load->view('cms/content_list',$contentdata, true);
 
-		$this->data['dropdown'] = $this->Content_type_model->get_list_dropdown_create();
+
+
+/*		// get recently added pages
+
 
 		// load list of content types
 		$this->Content_type_model->get_list();
 		$d2['list'] = $this->Content_type_model->types;
 		$this->data['objects'] = $this->load->view('cms/content_types_list',$d2, true);
+*/
 
-		// now load view
-		$this->load->view('cms/index',$this->data);
+		$form = "<h2>Content</h2>\r";
+		$form .= "<p>".anchor("cms/content","Site Map")."</p>\r";
+
+
+		$form .= "<h2>Recently Added</h2>\r";
+		//$form .= $this->Content_model->site_map(1,10);
+
+//		$form_options = $this->Content_type_model->get_list_dropdown_create();
+//		$form .= "<p>Create New ";
+//		$form .= form_dropdown('new_content',$form_options).' ';
+//		$form_options = array(
+//			'name' => 'new_go',
+//			'id' => 'new_go',
+//			'content' => 'Go',
+//			'type' => 'button',
+//		);
+//		$form .= form_button($form_options);
+//		$form .= "</p>\r";
+		$form .= "<h2>Media</h2>\r";
+		
+		$media_links[] = anchor("cms/media/manage","manage media");
+		$media_links[] = anchor("cms/media/upload","upload media");
+		$form .= ul($media_links)."\r";
+
+
+		$breadcrumb = anchor("cms","phSite CMS").' : CMS home';
+		$this->data['breadcrumb'] = $breadcrumb;
+
+		$this->data['title_h1'] = 'phSite CMS home';
+
+		$site_metadata = "Site metadata\r";
+		$site_metadata .=  $this->Language_model->site_meta_menu();
+		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
+
+		$this->data['form'] = $form;
+
+		$this->load->view('cms/cms_form',$this->data);
 	}
 
 	

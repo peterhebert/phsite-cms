@@ -4,36 +4,29 @@ class Search extends MY_Controller
 
 	function Search()
 	{
-		parent::Controller();
+		parent::MY_Controller();
 
 		// load models
 		$this->load->model('Content_model');
-		$this->load->model('Object_model');
-		$this->load->model('Site_model');
-
-		$this->Site_model->load_prefs();
+		$this->Site_model->_load_site_metadata();
 	}
 
-	function index()
+	function search()
 	{
+
+		$this->Content_model->link_mode = 1;
 		$this->data['term'] = $this->input->post('search-text');
 		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
+		$this->data['query'] = $this->db->last_query();
 
 		$view = 'themes/'.$this->Site_model->theme.'/search_results';
 		
-		$this->load->view($view,$this->data);
-
-	}
-
-	function advanced()
-	{
-		$this->data['term'] = $this->input->post('search-text');
-		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
-
-		$view = 'themes/'.$this->Site_model->theme.'/search_advanced';
+		echo $view;
 		
-		$this->load->view($view,$this->data);
+		//$this->load->view($view,$this->data);
+
 	}
+
 
 
 }
