@@ -13,14 +13,10 @@
 	<div class="page-wrap block">
 		<h1>Search Results</h1>
 		<?php
-		echo "<p>your search term was: <strong>". $term."</strong></p>\n";
-		if(count($matches) > 0 ) {
-			foreach ($matches as $result) {
-				$list[] = anchor("cms/content/edit/id/".$result['content_id'], $result['content_id'])." (".$result['score'].")";
-			}
-			echo ul($list);
-		} else {
-		echo "<p>no results found</p>\n";
+		echo "<p>your search term was: <strong>". $term."</strong></p>\r";
+
+		if(isset($matches)) {
+			echo $matches;
 		}
 		?>
 	</div>

@@ -26,6 +26,18 @@ class MY_Model extends Model {
 		$this->install_path = $docroot.$basedir;
 	}
 
+	function _output_messages()
+	{
+		if(count($this->messages) > 0)
+		{
+			$tmp_msg = "<p>";
+			$tmp_msg .= implode("</p>\r<p>",$this->messages);
+			$tmp_msg .= "</p>";
+			return $tmp_msg;
+		}
+		return FALSE;
+	}
+
 }
 // END MY_Model class
 

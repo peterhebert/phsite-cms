@@ -6,49 +6,8 @@
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-   
-    $('a[rel="external"]').click( function() {
-        window.open( $(this).attr('href') );
-        return false;
-    });
-   
-});
-
-/* ]]> */
-</script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function() {
-	
-
-	$("form input[name='required[]']").click(function() {
-	
-		if( $(this).attr('checked') == true ) {
-			$(this).parent().siblings(1).children(0).attr("checked",true);
-		}
-		
-	});
-
-	$("form input[name='exists[]']").click(function() {
-
-		if( $(this).attr('checked') == false ) {
-			$(this).parent().siblings(1).children(0).attr("checked",false);
-
-			var myIndex = $(this).parent().siblings(1).children(0).val();
-			var OrderMatch = "form input[name='order["+myIndex+"]']";
-			$(OrderMatch).val("");
-
-		}
-
-	});
-
-});
-
-/* ]]> */
-</script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_required_fields.js"></script>
 </head>
 <body>
 <?php //require_once('masthead.php'); ?>

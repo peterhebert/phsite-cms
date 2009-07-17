@@ -148,6 +148,21 @@ class MY_Form_validation extends CI_Form_validation {
 		return ( ! ereg('^([a-z]){3}$', $str)) ? FALSE : TRUE;
 	}
 
+	// --------------------
+	// test for uri
+	// --------------------
+	/*
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+	function is_uri($str)
+	{
+		$pattern = "^(http|https|ftp){0,1}(\:){0,1}(//){0,1}[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$";
+		
+		$valid = eregi($pattern, $str);
+		return $valid;
+	}
 
 }
 

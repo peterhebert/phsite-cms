@@ -2,7 +2,7 @@
 class Field_model extends MY_Model {
 
 	// main field variables
-	var $field_id, $field_ref_name, $field_input_type, $field_validation;
+	var $field_id, $field_ref_name, $field_input_type, $field_validation, $field_needs_lang;
 
 	// field metadata (by languauge)
 	var $field_meta_id, $field_name, $field_lang;
@@ -25,7 +25,8 @@ class Field_model extends MY_Model {
 	'path_file' => 'file',
 	'is_date' => 'Date / time',
 	'is_timezone' => 'Timezone',
-	'is_lang' => 'ISO 639-3 language code'
+	'is_lang' => 'ISO 639-3 language code',
+	'is_uri' => 'URI/URL internet address'
 	);
 
 	var $validation_string, $validation_exact, $validation_min, $validation_max;
@@ -63,6 +64,7 @@ class Field_model extends MY_Model {
 			'field_ref_name' => $row->field_ref_name,
 			'field_input_type' => $row->field_input_type,
 			'field_validation' => $row->field_validation,
+			'field_needs_lang' => $row->field_needs_lang,
 			'field_meta_id' => '',
 			'field_name' => '',
 			'field_lang' => ''
@@ -100,6 +102,7 @@ class Field_model extends MY_Model {
 		$this->field_ref_name = $row['field_ref_name'];
 		$this->field_input_type = $row['field_input_type'];
 		$this->field_validation = $row['field_validation'];
+		$this->field_needs_lang = $row['field_needs_lang'];
 
 		$this->parse_validation();
     }
@@ -146,7 +149,8 @@ class Field_model extends MY_Model {
 		$field_data = array(
 		'field_ref_name' => $this->field_ref_name,
 		'field_input_type' => $this->field_input_type,
-		'field_validation' => $this->field_validation
+		'field_validation' => $this->field_validation,
+		'field_needs_lang' => $this->field_needs_lang
 		);
 		
 		if( $this->field_id != '' )
@@ -155,7 +159,7 @@ class Field_model extends MY_Model {
 			$this->db->where('field_id', $this->field_id);
 			if($this->db->update('fields', $field_data))
 			{
-				$this->messages[] = "'{$this->field_ref_name}' field has been successfully updated";
+				//$this->messages[] = "'{$this->field_ref_name}' field has been successfully updated";
 				return TRUE;
 			}
 
@@ -164,12 +168,12 @@ class Field_model extends MY_Model {
 			if($this->db->insert('fields', $field_data))
 			{
 				$this->field_id = $this->db->insert_id();
-				$this->messages[] = "'{$this->field_ref_name}' field has been successfully created";
+				//$this->messages[] = "'{$this->field_ref_name}' field has been successfully created";
 				return TRUE;
 			}
 		}
 
-		$this->messages[] = "'{$this->field_ref_name}' field could not be updated";
+		//$this->messages[] = "'{$this->field_ref_name}' field could not be updated";
 		return FALSE;
 
     }
@@ -189,7 +193,7 @@ class Field_model extends MY_Model {
 			$this->db->where('field_meta_id', $this->field_meta_id);
 			if($this->db->update('fields_meta', $field_data))
 			{
-				$this->messages[] = "field name successfully updated";
+				//$this->messages[] = "field name successfully updated";
 				return TRUE;
 			}
 
@@ -198,12 +202,12 @@ class Field_model extends MY_Model {
 			if($this->db->insert('fields_meta', $field_data))
 			{
 				$this->field_meta_id = $this->db->insert_id();
-				$this->messages[] = "field name has been successfully created";
+				//$this->messages[] = "field name has been successfully created";
 				return TRUE;
 			}
 		}
 
-		$this->messages[] = "field name could not be updated";
+		//$this->messages[] = "field name could not be updated";
 		return FALSE;
 
     }

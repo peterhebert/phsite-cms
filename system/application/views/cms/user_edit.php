@@ -5,35 +5,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
+<script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-   
-    $('a[rel="external"]').click( function() {
-        window.open( $(this).attr('href') );
-        return false;
-    });
-   
-});
-
-/* ]]> */
-</script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-
-	var dateObj = new Date()
-	var currentTimeZoneOffset = dateObj.getTimezoneOffset();
-
-	//$("form select[name='timezone']").val(currentTimeZoneOffset);
-
-});
-/* ]]> */
-</script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
 </head>
 <body>
-<?php //require_once('masthead.php'); ?>
+<?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb">
 	<?php

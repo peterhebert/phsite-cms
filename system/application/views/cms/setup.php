@@ -18,7 +18,7 @@
 				<p><?php echo anchor("cms/setup/site_prefs","Edit site preferences"); ?></p>
 				<h2>Site metadata</h2>
 				<p>This is where you can change information about your site, such as description, title, footer, etc.</p>
-				<p><?php echo anchor("cms/setup/site_meta","Edit site metadata"); ?></p>
+				<ul><?php echo $site_metadata; ?></ul>
 				<h2>Data Structure</h2>
 				<p>You can define what types of content your site has, and add as many custom fields as you want.</p>
 				<p><?php echo anchor("cms/setup/structure","Edit data structure"); ?></p>
@@ -30,7 +30,11 @@
 				<p><?php echo anchor("cms/setup/languages","Edit languages"); ?></p>
 				<h2>Users</h2>
 				<p>Manage the users of your site</p>
-				<p><?php echo anchor("cms/setup/users","Edit users"); ?></p>
+				<ul>
+					<li><?php echo anchor("cms/user","Edit Users"); ?></li>
+					<li><?php echo anchor("cms/user/user_meta_fields","Edit user metadata fields"); ?></li>
+				</ul>
+
 			</div>
 		</div>
 		<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>

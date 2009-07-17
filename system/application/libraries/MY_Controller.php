@@ -25,29 +25,29 @@ class MY_Controller extends Controller {
 	function MY_Controller()
 	{	
 		parent::Controller();
+		$this->load->library('session');
+		$this->Language_model->count_active();
 	}
 
 	function _authenticate()
 	{
 		// if not logged in, redirect to login form
-		$this->load->library('session');
 		if(!$this->session->userdata('user_id'))
 		{
 			redirect('cms/login');
 			exit();
 		} else {
 			$this->data['userdata'] = $this->session->userdata;
-			// get site metadata
-			$this->Site_model->site_current_lang = $this->session->userdata('default_lang');
-			$this->Site_model->load_site();
-			$this->Site_model->load_site_title();
 
-			$this->data['site_title'] = $this->Site_model->title;
+			// get site metadata
+			$this->Site_model->site_meta_lang = $this->session->userdata('default_lang');
+			$this->_load_site_metadata();
+
 		}
 
 	}
 
-	function _load_site() {
+	function _load_site_metadata() {
 
 		$base_raw = base_url();
 		$base_array = explode('/',$base_raw);
@@ -59,9 +59,15 @@ class MY_Controller extends Controller {
 		if($base != '') {
 			$base = '/'.$base;
 		}
-
-		$this->Site_model->load_prefs();
 		$this->data['base_path'] = $base;
+
+		$this->Site_model->load_site();
+		if($this->Site_model->site_meta_lang == '')
+		{
+			$this->Site_model->site_meta_lang = $this->Site_model->site_default_lang;
+		}
+		$this->data['site_meta_lang'] = $this->Site_model->site_meta_lang;
+
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
@@ -69,18 +75,39 @@ class MY_Controller extends Controller {
 		$this->data['site_meta_title'] = $this->Site_model->title;
 		$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
 
+		// format the date according to site timezone
+
+		$this->data['site_meta_created'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone);
+		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
+
+		$tmp_cr_yr = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y");
+		$tmp_mod_yr = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y");
+
+		$tmp_site_dates = $tmp_cr_yr.'-'.$tmp_mod_yr;
+
+		$this->data['site_meta_updated'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone);
+		$this->data['site_meta_updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");
+
 		// get site metadata
-		$this->Site_model->load_meta();
+		$this->Site_model->load_site_meta();
 		
-		foreach($this->Site_model->metadata as $meta)
+		foreach($this->Site_model->site_metadata as $fd_id => $meta)
 		{
 			$key = 'site_meta_'.$meta['field_ref_name'];
-			$this->data[$key] = $meta['value'];
+			
+			if($meta['field_ref_name'] == 'copyright')
+			{
+				$val = '&copy; '.$tmp_site_dates.' '.$meta['value'];
+			}
+			else
+			{
+				$val = $meta['value'];
+			}
+			
+			$this->data[$key] = $val;
+			
 		}
 
-		$this->data['site_meta_updated'] = $this->Site_model->site_date_updated;
-		$this->data['site_meta_updated_W3C'] = substr($this->Site_model->site_date_updated,0,10);
-		$this->data['site_meta_lang'] = $this->Site_model->site_current_lang;
 
 	}
 }

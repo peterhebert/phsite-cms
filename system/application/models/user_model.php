@@ -7,12 +7,15 @@ class User_model extends MY_Model {
 	// r_sites_users - relate users to sites
 	var $site_rel_id, $site_id, $admin;
 	
-	// r_sites_fields - create custom profile fields for users 
+	// r_users_fields - create custom profile fields for users 
 	var $field_rel_id, $field_id, $required, $order;
 	
 	// users_meta table - other custom profile fields
 	var $user_meta_id, $value, $meta_lang, $date_updated;
 	
+	// temp password fields
+	var $tmp_pwd, $tmp_pwd_conf;
+
 	// misc variables
 	var $metadata, $user_list, $field_list;
 
@@ -26,12 +29,15 @@ class User_model extends MY_Model {
     }
 
     // list users for the current site
-	function get_list()
+	function get_list($admin=0)
     {
 
 		$this->db->join('r_sites_users', 'users.user_id = r_sites_users.user_id', 'left');
 		$this->db->where('site_id', $this->site_id);
-
+		if($admin != 0)
+		{
+			$this->db->where('admin', 1);
+		}
 		$this->db->order_by('name_last','asc');
 		$this->db->order_by('name_first','asc');
 		
@@ -42,18 +48,74 @@ class User_model extends MY_Model {
     // list custom fields for user profiles
 	function list_user_fields()
     {
-		$sql = "SELECT * FROM fields LEFT JOIN 
-		(fields_meta LEFT JOIN r_sites_fields ON fields_meta.field_id = r_sites_fields. field_id) 
-		ON fields. field_id = fields_meta.field_id 
-		WHERE r_sites_fields.site_id = ".$this->site_id;
+		$sql = "SELECT * FROM (fields LEFT JOIN r_users_fields ON fields.field_id = r_users_fields.field_id) 
+		LEFT JOIN fields_meta ON fields. field_id = fields_meta.field_id 
+		WHERE r_users_fields.site_id = ".$this->site_id;
 		$query = $this->db->query($sql);
 		$this->field_list = $query->result_array();
 	}
 
-   // get list of users for form drop-down
-	function get_list_dropdown($mode=0)
+    // list all available fields and see if they are assigned as site maetadata
+	function list_fields()
     {
-		$this->get_list();
+
+		$list = array();
+		$this->db->order_by('field_ref_name', 'asc');
+		$query = $this->db->get('fields');
+
+		foreach ($query->result() as $row)
+		{
+
+			$temp_field =  array(
+			'field_id' => $row->field_id,
+			'field_ref_name' => $row->field_ref_name,
+			'field_name' => '',
+			'rel_id' => '',
+			'required' => '',
+			'order' => ''
+			);
+
+			// get name if exists
+			$this->db->where('field_id', $row->field_id);
+			if($this->meta_lang != '')
+			{
+				$this->db->where('lang_ISO_639_3', $this->meta_lang);
+			}
+			$this->db->limit(1);
+			$query2 = $this->db->get('fields_meta');
+		   
+			if ($query2->num_rows() > 0)
+			{
+				$row2 = $query2->row();
+				$temp_field['field_name'] = $row2->field_name;
+			}
+
+			// get data if in this content type
+			$this->db->where('site_id', $this->site_id);
+			$this->db->where('field_id', $row->field_id);
+			$this->db->limit(1);
+			$query3 = $this->db->get('r_users_fields');
+		   
+			if ($query3->num_rows() > 0)
+			{
+				$row3 = $query3->row();
+				$temp_field['rel_id'] = $row3->rel_id;
+				$temp_field['required'] = $row3->required;
+				$temp_field['order'] = $row3->order;
+			}
+
+		   $list[] = $temp_field;
+
+		}
+
+		$this->field_list = $list;
+
+	}
+
+   // get list of users for form drop-down
+	function get_list_dropdown($mode=0,$admin=0)
+    {
+		$this->get_list($admin);
 		
 		$list = array();
 		
@@ -146,17 +208,26 @@ class User_model extends MY_Model {
 			$meta[$fd['field_id']] = $temp;
 		}
 
-		
 		$this->metadata = $meta;
     }
 
     // update user
-	function update_user($newpwd='')
+	function update_user()
     {
 
-		if($this->user_id == '' || $newpwd != '') {
-			$tmpwd = $this->hash_password($newpwd);
-			$data['password'] = $tmpwd[0];
+		if($this->user_id == '' || $this->tmp_pwd != '')
+		{
+			
+			if($this->tmp_pwd === $this->tmp_pwd_conf)
+			{
+				$tmpwd = $this->hash_password($this->tmp_pwd);
+				$data['password'] = $tmpwd[0];
+			}
+			else
+			{
+				$this->messages[] = 'password and confirm password fields must be identical';
+				return FALSE;
+			}
 		}
 		$data['name_first'] = $this->name_first;
 		$data['name_last'] = $this->name_last;
@@ -204,31 +275,6 @@ class User_model extends MY_Model {
 
 	}
 
-	function update_user_field()
-	{
-		$data = array(
-		'site_id' => $this->site_id,
-		'field_id' => $this->field_id,
-		'required' => $this->required,
-		'order' => $this->order
-		);
-
-		if($this->field_rel_id != '') {
-			$this->db->where('rel_id', $this->field_rel_id);
-			if($this->db->update('r_sites_fields', $data)) {
-				return TRUE;
-			}
-		} else {
-			if($this->db->insert('r_sites_fields', $data)) {
-				$this->field_rel_id = $this->db->insert_id();
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-
-	}
-
 	function update_meta()
 	{
 
@@ -240,17 +286,34 @@ class User_model extends MY_Model {
 		);
 
 		if($this->user_meta_id != '') {
+			$tmp_lbl = 'updated';
 			$this->db->where('user_meta_id', $this->user_meta_id);
 			if($this->db->update('users_meta', $data)) {
 				return TRUE;
 			}
 		} else {
+			$tmp_lbl = 'created';
 			if($this->db->insert('users_meta', $data)) {
 				$this->user_meta_id = $this->db->insert_id();
 				return TRUE;
 			}
 		}
 
+		// get field name if failed
+		$this->db->select('field_ref_name', 'field_name');
+		$this->db->where('fields.field_id', $this->field_id);
+		$this->db->where('lang_ISO_639_3', $this->meta_lang);
+		$this->db->join('fields_meta', 'fields.field_id = fields_meta.field_id', 'left');
+		$query = $this->db->get('fields');
+		
+		$row = $query->row();
+		$tmp_name = $row->field_ref_name;
+		if($row->field_name != '')
+		{
+			$tmp_name = $row->field_name;
+		}
+
+		$this->messages[] = "field '{$tmp_name}' could not be {$tmp_lbl}";
 		return FALSE;
 	}
 
@@ -296,7 +359,7 @@ class User_model extends MY_Model {
 		{
 
 			$this->db->join('r_sites_users', 'users.user_id = r_sites_users.user_id', 'left');
-			$this->db->where('user_id', $this->user_id);
+			$this->db->where('users.user_id', $this->user_id);
 			$this->db->where('site_id', $this->site_id);
 			$this->db->limit(1);
 		
@@ -354,8 +417,6 @@ class User_model extends MY_Model {
 		}
 	}
 
-
-
 	//	remove user from site
 	function remove_site_user() {
 
@@ -374,25 +435,62 @@ class User_model extends MY_Model {
 		}
 	}
 
-	//	remove custom field from site
-	function remove_user_field()
-	{
-
-		$this->db->where('field_id', $this->field_id);
-		$this->db->where('site_id', $this->site_id);
-
-		if($this->field_rel_id != '') {
-			$this->db->where('rel_id', $this->field_rel_id);
-		}
-
-		if($this->db->delete('r_sites_fields'))
+    function update_meta_fields()
+    {
+		
+		foreach($this->field_list as $field)
 		{
-			return true;
-		} else {
-			return false;
+
+			$db_fields = array(
+			'site_id' => $this->site_id,
+			'field_id' => $field['field_id'],
+			'required' => $field['required'],
+			'order' => $field['order']
+			);
+			
+			if($field['exists'] === TRUE)
+			{
+				// update field
+
+				if($field['rel_id'] == '')
+				{
+					// create new metadata
+					if(!$this->db->insert('r_users_fields', $db_fields) )
+					{
+						$this->messages[] = "could not create relationship for field {$field['field_id']}";
+					}
+		
+				}
+				else
+				{
+					// update metadata field
+					if(!$this->db->update('r_users_fields', $db_fields, array('rel_id' => $field['rel_id'] )) ) {
+						$this->messages[] = "could not update relationship for field {$field['field_id']}";
+					}
+				}
+
+			}
+			else
+			{
+				if($field['rel_id'] != '')
+				{
+					// remove relationship
+					$this->db->where('rel_id', $field['rel_id']);
+					if(!$this->db->delete('r_users_fields')) {
+						$this->messages[] = "could not remove relationship for field {$field['field_id']}";
+					}
+				}
+
+			}
+
+		} // end foreach()
+
+		if(count($this->messages) == 0)
+		{
+			$this->messages[] = "user metadata field info successfully updated";
 		}
 
-	}
+    }
 
 
 }

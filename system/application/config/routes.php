@@ -40,7 +40,7 @@
 |
 */
 
-$route['default_controller'] = "tests";
+$route['default_controller'] = "parser";
 $route['scaffolding_trigger'] = "";
 
 $route['cms'] = "cms/cms/index";
@@ -51,8 +51,8 @@ $route['cms/(.*)'] = "cms/$1";
 $route['cms/(:any)'] = "cms/$1";
 $route['gallery'] = "gallery/index";
 $route['sitemap'] = "home/sitemap";
-$route['(:any)'] = "home/index/$1";
 */
+$route['(:any)'] = "parser/index/$1";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

@@ -12,6 +12,8 @@ class Language_model extends MY_Model {
 	var $Native_Name;
 	var $activated;
 
+	var $lang_count;
+
     function Language_model()
     {
         // Call the Model constructor
@@ -32,6 +34,25 @@ class Language_model extends MY_Model {
 		}
 
 		return $query->result_array();
+	}
+
+    // count active languages
+	function count_active()
+    {
+		$this->db->select('count(ISO_639_3) AS count_langs');
+		$this->db->where('activated', 1);
+		$this->db->order_by("Inverted_Name", "asc");
+		$query = $this->db->get('ISO_639_LANG');
+		
+		$this->lang_count = 0;
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row(); 
+		
+			$this->lang_count = $row->count_langs;
+		}
+
 	}
 
     // get list of active languages for form drop-down
@@ -69,9 +90,10 @@ class Language_model extends MY_Model {
 	}
 
     // load the language based upon 639-3 key
-	function load($key)
+	function load()
     {
-		$query = $this->db->get_where('ISO_639_LANG', array('ISO_639_3' => $key));
+		$this->db->where('ISO_639_3', $this->ISO_639_3);
+		$query = $this->db->get('ISO_639_LANG');
  
  		if ($query->num_rows() > 0)
 		{
@@ -87,19 +109,8 @@ class Language_model extends MY_Model {
 			$this->Native_Name = $row['Native_Name'];
 			$this->activated = $row['activated'];
 			return TRUE;
-		} else {
-			$this->ISO_639_3 = '';
-			$this->ISO_639_2B = '';
-			$this->ISO_639_2T = '';
-			$this->ISO_639_1 = '';
-			$this->Scope = '';
-			$this->Type = '';
-			$this->Ref_Name = '';
-			$this->Inverted_Name = '';
-			$this->Native_Name = '';
-			$this->activated = '';
-			return FALSE;
 		}
+		return FALSE;
 
     }
 
@@ -115,6 +126,35 @@ class Language_model extends MY_Model {
 			$this->activated = $val;
 		} 
     }
+
+	function site_meta_menu()
+    {
+		// list active languages
+		$lang_links = array();
+		$langs = $this->get_list();
+		foreach($langs as $llang)
+		{
+			$temp_link = 'cms/setup/site_meta/lang/'.$llang['ISO_639_3'];
+			if($llang['Native_Name'] != '')
+			{
+				$temp_txt = $llang['Native_Name'];
+			}
+			else
+			{
+				$temp_txt = $llang['Ref_Name'];
+			}
+			$lang_links[] = anchor($temp_link,$temp_txt);
+		}
+
+		$menu =  "<ul>\r";
+		$menu .=  "<li>".anchor("cms/setup/site_meta_fields","Edit site metadata fields")."</li>\r";
+		$menu .=  "<li>Edit site metadata\r";
+		$menu .= ul($lang_links);
+		$menu .=  "</li>\r";
+		$menu .=  "</ul>\r";
+
+		return $menu;
+	}
 
 }
 

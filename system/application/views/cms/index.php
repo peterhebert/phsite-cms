@@ -6,33 +6,8 @@
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-   
-    $('a[rel="external"]').click( function() {
-        window.open( $(this).attr('href') );
-        return false;
-    });
-   
-});
-
-/* ]]> */
-</script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-
-	$("#new_go").click(function () {
-	
-		var myloc = $("select[name='new_content']").val();
-		window.location = myloc ;
-		
-	});
-
-});
-/* ]]> */
-</script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_new_content.js"></script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>

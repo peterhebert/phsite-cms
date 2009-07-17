@@ -46,6 +46,7 @@ if ( ! function_exists('csv_normalize'))
 			}
 		}
 		natcasesort($cleanVals);
+		$cleanVals = array_unique($cleanVals);
 		$csv_return = implode(', ',$cleanVals);
 		return $csv_return;
 	}
@@ -281,37 +282,6 @@ if ( ! function_exists('resize_bytes'))
 	   }
 	   $formatted = number_format($size,0,'','.')." ".$format[$count];
 	   return $formatted;
-	}
-}
-
-if(! function_exists('format_dates'))
-{
-	function format_dates($datestr,$user_zone='',$mode = 'server')
-	{
-		
-		// init time zone objects
-		$TZ_default = date_default_timezone_get();
-		$TZ_default_object = new DateTimeZone($TZ_default);
-		if($user_zone != '')
-		{
-			$TZ_user_object = new DateTimeZone($user_zone);
-		} else {
-			$TZ_user_object = new DateTimeZone($TZ_default);
-		}
-
-		if($mode == 'user')
-		{
-			// convert server time to user time
-			$date_object = new DateTime($datestr, $TZ_default_object);
-			date_timezone_set ( $date_object, $TZ_user_object );
-			$date_formatted = date_format ( $date_object, "Y-m-d H:i:s" );
-		} else {
-			// convert user time to server time
-			$date_object = new DateTime($datestr, $TZ_user_object);
-			date_timezone_set ( $date_object, $TZ_default_object );
-			$date_formatted = date_format ( $date_object, "Y-m-d H:i:s" );
-		}
-		return $date_formatted;
 	}
 }
 

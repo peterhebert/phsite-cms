@@ -5,20 +5,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
+<script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-   
-    $('a[rel="external"]').click( function() {
-        window.open( $(this).attr('href') );
-        return false;
-    });
-   
-});
-
-/* ]]> */
-</script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){
@@ -36,45 +26,6 @@ $().ready(function(){
 
 /* ]]> */
 </script>
-<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-
-tinyMCE_GZ.init({
-	plugins : 'style,layer,table,save,advhr,advimage,advlink,emotions,iespell,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras',
-	themes : 'advanced',
-	languages : 'en',
-	disk_cache : true,
-	debug : false,
-	relative_urls : false,
-	convert_urls: false
-});
-
-tinyMCE.init({
-	mode : "textareas",
-	theme : "advanced",
-	plugins : "safari,xhtmlxtras,table,fullscreen",
-	theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,image,charmap",
-	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,blockquote,cite,abbr,acronym,ins,del",
-	theme_advanced_buttons3 : "tablecontrols",
-	theme_advanced_buttons4 : "cut,copy,paste,|,undo,redo,|,link,unlink,anchor,|,code,removeformat,cleanup,fullscreen",
-	theme_advanced_toolbar_align : "left",
-	editor_selector : "richtext",
-	editor_deselector : "textarea",
-	content_css : "/css/tinymce.css",
-	relative_urls : false,
-	convert_urls : false
-});
-
-function toggleEditor(id) {
-	if (!tinyMCE.getInstanceById(id))
-		tinyMCE.execCommand('mceAddControl', false, id);
-	else
-		tinyMCE.execCommand('mceRemoveControl', false, id);
-}
-/* ]]> */
-</script>
-
 </head>
 <body>
 <?php require_once('masthead.php'); ?>

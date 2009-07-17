@@ -8,7 +8,7 @@
 		echo "<div class=\"column lh\">{$site_meta_subtitle}</div>\n";
 		} ?>
 		<div class="float-right lh">
-			<form action="<?php echo site_url("search") ?>" method="post" id="site-search">
+			<form action="/search/index" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />
 				<input name="search-submit" type="submit" id="search-submit" value="Search" />
 			</form>

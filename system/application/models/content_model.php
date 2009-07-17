@@ -4,183 +4,369 @@ class Content_model extends MY_Model {
 	// 'content' variables
 	var $content_id, $user_id, $parent_id, $type_id, $type_name, $publish_status, $splash, $index, $date_1, $date_2, $date_updated;
 	
-	// 'content_meta' content by language variables
-	var $content_meta_id, $field_id, $field_name, $value, $content_lang, $meta_updated;
-	
 	// 'content_titles' title variables
-	var $content_title_id, $title, $uri_title, $subtitle, $title_updated;
+	var $content_title_id, $content_lang, $title, $uri_title, $subtitle, $title_updated;
 
 	// misc utility variables
-	var $content_list;
+	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array();
+
+	var $link_mode; // display links for site (0) or cms (1)
+	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
+	var $limit; // limit number for query
+	var $page; // page number number for query limit
 
     function Content_model()
     {
         // Call the Model constructor
         parent::MY_Model();
+		
+		$this->link_mode = 0;
+		$this->lang_mode = 0;
     }
 
     // list content
-	function list_content($limit=0,$order='',$dir='desc',$parent_id = -1,$page=1)
+	function list_content($parent = NULL)
     {
 
-		$this->db->select('*');
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+		$list = array();
 
-		if($this->content_lang != '') {
-			$this->db->where('content_lang', $this->content_lang); 
-		}
-		if($parent_id != -1 && is_numeric($parent_id)) {
-			$this->db->where('parent_id', $parent_id); 
-		}
-		if($limit > 0) {
-			if($page > 1) {
-				$start = ($page * $limit) -1;
-				$this->db->limit($limit,$start);
-			} else {
-				$this->db->limit($limit);
-			}
-		}
-		if($order != '') {
-			$this->db->order_by($order,$dir);
-		}
-
-		$query = $this->db->get();
-		$this->content_list = $query->result_array();
-
-	}
-
-    // list site map
-	function site_map($mode=1,$limit=0,$parent_id = -1)
-    {
-
-		$this->list_content($limit,'title','asc',$parent_id);
-		$pages = $this->content_list;
-
-		$list = "";
-		if(count($pages) > 0) {
-			$list .= "<ul>\r";
-		}
-		foreach($pages as $page) {
-			$list .= "<li>";
-
-			if($mode != 1) {
-				$link = '/'.$this->get_uri_display($page['content_id'],$page['content_lang']);
-				$list .= anchor($link, $page['title'], array('title' => "view '{$page['title']}'"));
-			} else {
-				$link = "cms/content/edit/id/".$page['content_id'];
-				$link .= "/lang/".$page['content_lang'];
-				$list .= anchor($link, $page['title'], array('title' => "edit '{$page['title']}'", 'class' => 'sitemap'));
-			}
-
-			$children = $this->site_map($mode,$limit,$page['content_id']);
-
-			if($children != "") {
-				$list .=  $children;
-			}
-			$list .=  "</li>\r";
-		}
-		if(count($pages) > 0) {
-			$list .= "</ul>\r";
+		if(isset($parent))
+		{
+			$this->db->where('parent_id', $parent);
 		}
 		
-		return $list;
+		$query = $this->db->get('content');
+		
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$tmp = array(
+				'content_id' => $row->content_id,
+				'user_id' => $row->user_id,
+				'parent_id' => $row->parent_id,
+				'type_id' => $row->type_id,
+				'type_name' => $row->type_name,
+				'publish_status' => $row->publish_status,
+				'splash' => $row->splash,
+				'index' => $row->index,
+				'date_1' => $row->date_1,
+				'date_2' => $row->date_2,
+				'date_updated' => $row->date_updated,
+				'content_title_id' => '',
+				'content_lang' => '',
+				'title' => '',
+				'uri_title' => '',
+				'subtitle' => '',
+				);
+
+				$this->db->where('content_id', $row->content_id);
+				if($this->content_lang != '')
+				{
+					$this->db->where('lang_ISO_639_3', $this->content_lang);
+				}
+				$this->db->limit(1);
+				
+				$q2 = $this->db->get('content_titles');
+
+				if ($q2->num_rows() > 0)
+				{
+					$r2 = $q2->row();
+					$tmp['content_title_id'] = $r2->content_title_id;
+					$tmp['content_lang'] = $r2->lang_ISO_639_3;
+					$tmp['title'] = $r2->title;
+					$tmp['uri_title'] = $r2->uri_title;
+					$tmp['subtitle'] = $r2->subtitle;
+				} 
+
+				$list["{$row->content_id}"] = $tmp;
+		   }
+		}
+
+		$this->content_list = $list;
+
 	}
+
 
     // search for content
 	function search($str)
     {
 		$match = $this->input->xss_clean($str);
+		$scores = array();
 
-		$sql = "SELECT `content_id`, AVG( MATCH(`value`) AGAINST ('{$match}') ) AS `score` 
-		FROM `content_meta` 
-		WHERE MATCH(value) AGAINST ('{$match}') 
-		GROUP BY content_id 
-		ORDER BY score desc
-		";
+		// first match values
+		$sql_1 = "SELECT content_id, AVG(MATCH(`value`) AGAINST ('{$match}')) * 4 AS score
+        FROM content_meta
+        WHERE MATCH(`value`) AGAINST('{$match}')";
+		if($this->content_lang != '')
+		{
+			$my_lang = $this->content_lang;
+			$sql_1 .= " AND lang_ISO_639_3 = '{$this->content_lang}'";
+		}
+        $sql_1 .= " GROUP BY content_id";
 		
-		$query = $this->db->query($sql);
-		return $query->result_array();
+		$sql_2 = "SELECT content_id, COUNT(content_id) AS score FROM content_titles WHERE title LIKE '%{$match}%'";
+		if($this->content_lang != '')
+		{
+			$sql_2 .= " AND lang_ISO_639_3 = '{$this->content_lang}'";
+		}
+        $sql_2 .= " GROUP BY content_id";
+		
+		$sql_3 = "SELECT content_id, COUNT(content_id) AS score FROM content_titles WHERE subtitle LIKE '%{$match}%'";
+		if($this->content_lang != '')
+		{
+			$sql_3 .= " AND lang_ISO_639_3 = '{$this->content_lang}'";
+		}
+        $sql_3 .= " GROUP BY content_id";
+
+		
+		$query = $this->db->query($sql_1);
+		
+		if ($query->num_rows() > 0)
+		{
+
+			foreach ($query->result() as $row)
+			{
+				$key = strval($row->content_id);
+				$scores[$key] = $row->score;
+			}
+		} 		
+
+		$query = $this->db->query($sql_2);
+
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$key = strval($row->content_id);
+				$tmp_score = $row->score;
+				
+				if(array_key_exists($key,$scores))
+				{
+					$tmp_score += $scores[$key];
+				}
+				$scores[$key] = $tmp_score;
+			}
+		} 		
+
+		$query = $this->db->query($sql_3);
+
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$key = strval($row->content_id);
+				$tmp_score = $row->score;
+				
+				if(array_key_exists($key,$scores))
+				{
+					$tmp_score += $scores[$key];
+				}
+				$scores[$key] = $tmp_score;
+			}
+		}
+		arsort($scores);
+		
+		$result = '';
+		if (count($scores) > 0)
+		{
+			foreach($scores as $id => $score)
+			{
+
+				$this->db->where('content_id', $id);
+		
+				if($this->content_lang != '') {
+					$this->db->where('lang_ISO_639_3', $this->content_lang);
+				}
+				$this->db->limit(1);
+				
+				$query = $this->db->get('content_titles');
+		
+				if ($query->num_rows() > 0)
+				{
+					$row = $query->row();
+					$this->content_lang = $row->lang_ISO_639_3;
+				   
+				   
+					if($this->link_mode == 1)
+					{
+					$link = 'cms/content/edit/id/'.$id.'/lang/'.$row->lang_ISO_639_3;
+					}
+					else
+					{
+						$link = $this->_generate_uri($id);
+					}
+					
+					$tmp_item = anchor($link,$row->title);
+					$results[] = $tmp_item;
+				}
+
+
+			}
+			$result = ul($results);
+		}
+		else
+		{
+			$result = 'no results found';
+		}
+
+		return $result;		
 	}
 
     function get_content()
     {
 		$this->get_content_object();
 		$this->get_title();
-		$this->get_content_data();
+		$this->get_content_metadata();
 	}
 
     function get_content_object()
     {
 
-		// first get data from 'content' table
-		$query = $this->db->get_where('content', array('content_id' => $this->content_id));
-		if ($query->num_rows() > 0)
+		if ($this->content_id != '')
 		{
-			$row = $query->row();
-			$this->user_id = $row->user_id;
-			$this->parent_id = $row->parent_id;
-			$this->type_id = $row->type_id;
-			$this->type_name = $row->type_name;
-			$this->publish_status = $row->publish_status;
-			$this->splash = $row->splash;
-			$this->index = $row->index;
-			$this->date_1 = $row->date_1;
-			$this->date_2 = $row->date_2;
-			$this->date_updated = $row->date_updated;
+			// first get data from 'content' table
+			$query = $this->db->where('content_id', $this->content_id);
+			$query = $this->db->get('content');
+	
+			if ($query->num_rows() > 0)
+			{
+				$row = $query->row();
+	
+				$this->user_id = $row->user_id;
+				$this->parent_id = $row->parent_id;
+				$this->type_id = $row->type_id;
+				$this->type_name = $row->type_name;
+				$this->publish_status = $row->publish_status;
+				$this->splash = $row->splash;
+				$this->index = $row->index;
+				$this->date_1 = $row->date_1;
+				$this->date_2 = $row->date_2;
+				$this->date_updated = $row->date_updated;
+			}
 		}
 
 	}
 
     function get_title()
     {
-		$this->db->select('*');
-		$this->db->from('content_titles');
 
-		if($this->title_id != '') {
-			$this->db->where('title_id', $this->title_id);
-		} else {
+		if ($this->content_id != '')
+		{
 			$this->db->where('content_id', $this->content_id);
+	
+			if($this->content_title_id != '') {
+				$this->db->where('content_title_id', $this->content_title_id);
+			}
+			
 			if($this->content_lang != '') {
-				$this->db->where('content_lang', $this->content_lang);
+				$this->db->where('lang_ISO_639_3', $this->content_lang);
+			}
+			$this->db->limit(1);
+			
+			$query = $this->db->get('content_titles');
+	
+			if ($query->num_rows() > 0)
+			{
+			   $row = $query->row();
+			   $this->content_title_id = $row->content_title_id;
+			   $this->title = $row->title;
+			   $this->uri_title = $row->uri_title;
+			   $this->subtitle = $row->subtitle;
+			   $this->content_lang = $row->lang_ISO_639_3;
+			   $this->title_updated = $row->date_updated;
 			}
 		}
-		
-		$query = $this->db->get();
+
+	}
+
+    function get_content_meta_fields()
+    {
+		$this->db->where('type_id', $this->type_id);
+		$this->db->order_by("order", "asc"); 
+		$this->db->join('fields', 'r_types_fields.field_id = fields.field_id', 'left');
+		$query = $this->db->get('r_types_fields');
+
+		$fields = array();
 
 		if ($query->num_rows() > 0)
 		{
-		   $row = $query->row();
-		
-		   $this->title_id = $row->title_id;
-		   $this->title = $row->title;
-		   $this->uri_title = $row->uri_title;
-		   $this->subtitle = $row->subtitle;
-		   $this->content_lang = $row->lang_ISO_639_3;
-		   $this->title_updated = $row->date_updated;
+			foreach ($query->result() as $row)
+			{
+
+				$temp_field = array(
+				'rel_id' => $row->rel_id,
+				'field_id' => $row->field_id,
+				'required' => $row->required,
+				'order' => $row->order,
+				'field_ref_name' => $row->field_ref_name,
+				'field_input_type' => $row->field_input_type,
+				'field_validation' => $row->field_validation,
+				'field_needs_lang' => $row->field_needs_lang,
+				'field_name' => '',
+				'content_meta_id' => '',
+				'content_lang' => '',
+				'value' => '',
+				'date_updated' => ''
+				);
+			
+				// GET FIELD NAME
+				$this->db->where('field_id', $row->field_id);
+				if($this->content_lang != '')
+				{
+					$this->db->where('lang_ISO_639_3', $this->content_lang);
+				}
+				$this->db->limit(1); 
+				$q2 = $this->db->get('fields_meta');
+				
+				if ($q2->num_rows() > 0)
+				{
+					$r2 = $q2->row();
+					$temp_field['field_name'] = $r2->field_name;
+				} 
+				
+				$key = $row->field_id;
+				$fields["$key"] = $temp_field;
+			}
 		}
+		$this->content_meta_fields = $fields;
 	}
 
-    function get_content_data()
-    {
-		// get content data
-		$sql = "SELECT content_meta.*,
-		r_types_fields.validation, r_types_fields.required, r_types_fields.order,
-		field.field_name, field.input_type
-		FROM content_meta LEFT JOIN
-		(r_types_fields LEFT JOIN field ON r_types_fields.field_id = fields.field_id)
-		ON content_meta.field_id = r_types_fields.field_id
-		WHERE r_types_fields.type_id = {$this->type_id}
-		AND content_meta.content_id = ".$this->content_id;
-		if($this->content_lang != '') {
-			$sql .= " AND content_meta.content_lang = '".$this->content_lang."'";
-		}
-		$sql .= "ORDER BY r_types_fields.order";
+    function get_content_metadata()
+	{
+		$this->get_content_meta_fields();
 
+		$fields = $this->content_meta_fields;
+		
+		if ($this->content_id != '')
+		{
+			$sql = "SELECT * FROM content_meta WHERE content_id = ".$this->content_id;
+			if ($this->content_lang != '')
+			{
+				$sql .= " AND (lang_ISO_639_3 = '{$this->content_lang}' OR lang_ISO_639_3 = '')";
+			}
+			else
+			{
+				$sql .= " AND lang_ISO_639_3 = ''";
+			}
 	
-		$query = $this->db->query($sql);
+			$query = $this->db->query($sql);
 	
-		$this->content_meta = $query->result_array();
+			if ($query->num_rows() > 0)
+			{
+				foreach ($query->result() as $row)
+				{
+					$key = $row->field_id;
+					$fields["$key"]['value'] = $row->value;
+					$fields["$key"]['content_meta_id'] = $row->content_meta_id;
+					$fields["$key"]['content_lang'] = $row->lang_ISO_639_3;
+					$fields["$key"]['date_updated'] = $row->date_updated;
+				}
+			}
+		}
+
+		$this->content_metadata = $fields;
+
     }
 
     // return other languages than current language
@@ -190,9 +376,9 @@ class Content_model extends MY_Model {
 		$otherlangs = array();
 
 		if($this->content_lang == '') {
-			$sql = "select count(data_id) as num, content_lang from content_meta where content_lang != '' group by content_lang";
+			$sql = "select count(data_id) as num, lang_ISO_639_3 from content_meta where lang_ISO_639_3 != '' group by lang_ISO_639_3";
 		} else {
-			$sql = "select count(data_id) as num, content_lang from content_meta where content_lang != '{$this->content_lang}' and content_lang != '' group by content_lang";
+			$sql = "select count(data_id) as num, lang_ISO_639_3 from content_meta where lang_ISO_639_3 != '{$this->content_lang}' and lang_ISO_639_3 != '' group by lang_ISO_639_3";
 		}
 		
 		$query = $this->db->query($sql);
@@ -201,7 +387,7 @@ class Content_model extends MY_Model {
 		{
 			foreach ($query->result_array() as $row)
 			{
-			   $otherlangs[] = $row['content_lang'];
+			   $otherlangs[] = $row['lang_ISO_639_3'];
 			}
 			return $otherlangs;
 		}
@@ -242,89 +428,76 @@ class Content_model extends MY_Model {
 
     }
 
-    // update field data
-    function update_data($field_id,$value,$data_id)
+    // update metadata
+    function update_metadata()
     {
-		$data = array(
-		'content_id' => $this->content_id,
-		'field_id' => $this->field_id,
-		'value' => $this->value,
-		'lang_ISO_639_3' => $this->content_lang
-		);
 
-		if($content_meta_id == '') {
+		foreach($this->content_metadata as $meta)
+		{
 
-			if($value != '') {
-				// insert
-				if($this->db->insert('content_meta', $data)){
-					return TRUE;
-				}
-			} else {
-				return TRUE;
+			$db_fields = array(
+			'content_id' => $this->content_id,
+			'field_id' => $meta['field_id'],
+			'field_name' => $meta['field_ref_name'],
+			'value' => $meta['value'],
+			'lang_ISO_639_3' => '',
+			);
+
+			if($meta['field_needs_lang'] == 1)
+			{
+				$db_fields['lang_ISO_639_3'] = $this->content_lang;
 			}
-			
-		} else {
-
-			$this->db->where('content_meta_id', $this->content_meta_id);
-			if($value == '') {
-				// delete
-				if($this->db->delete('content_meta')){
-					return TRUE;
+	
+			if($meta['content_meta_id'] == '')
+			{
+				if($meta['required'] == 1 || $meta['value'] != '')
+				{
+					// create new metadata
+					if(!$this->db->insert('content_meta', $db_fields) )
+					{
+						$this->messages[] = "could not insert metadata '{$meta['field_name']}'";
+					}
 				}
-
-			} else {
-				// update
-				if($this->db->update('content_meta', $data)){
-					return TRUE;
-				}
+				
+				
+	
 			}
+			else
+			{
 
+				if($meta['required'] == 1 || $meta['value'] != '')
+				{
+					// update metadata
+					if(!$this->db->update('content_meta', $db_fields, array('content_meta_id' => $meta['content_meta_id'])) ) {
+						$this->messages[] = "could not update metadata '{$meta['field_name']}'";
+					}
+				}
+				else
+				{
+					// delete metadata
+					if(!$this->db->delete('content_meta', array('content_meta_id' => $meta['content_meta_id'])) ) {
+						$this->messages[] = "could not delete metadata '{$meta['field_name']}'";
+					}
+				}
+
+			}
+		
 		}
-
-		return FALSE;
 
     }
-
-    // search for content by title, parent
-	function find_by_uri_parent($str,$parent_id,$zlang='')
-    {
-
-		$uri_title = $this->input->xss_clean($str);
-		
-		$where['parent_id'] = $parent_id;
-		$where['uri_title'] = $uri_title;
-		if($zlang != '') {
-			$where['content_lang'] = $zlang;
-		}
-		
-		$this->db->select('*');
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		$this->db->where($where);
-		$this->db->limit(1);
-		$title_query = $this->db->get();
-
-		if ($title_query->num_rows() > 0)
-		{
-		   $row = $title_query->row();
-		   return $row;
-		} 
-		
-		return FALSE;
-	}
 
     // update title
     function update_title()
     {
 
 		// try to find existing title id
-		if($this->title_id == '') {
+		if($this->content_title_id == '') {
 
-			$title_query = $this->db->get_where('content_titles', array('content_id' => $this->content_id, 'content_lang' => $this->content_lang));
+			$title_query = $this->db->get_where('content_titles', array('content_id' => $this->content_id, 'lang_ISO_639_3' => $this->content_lang));
 			if ($title_query->num_rows() > 0)
 			{
 			   $trow = $title_query->row();
-			   $this->title_id = $trow->title_id;
+			   $this->content_title_id = $trow->content_title_id;
 			} 
 
 		}
@@ -338,16 +511,16 @@ class Content_model extends MY_Model {
 		);
 
 		// update or insert title
-		if($this->title_id == '') {
+		if($this->content_title_id == '') {
 			// insert
 			if($this->db->insert('content_titles', $data)){
-				$this->title_id = $this->db->insert_id();
+				$this->content_title_id = $this->db->insert_id();
 				return TRUE;
 			}
 			
 		} else {
 			// update
-			$this->db->where('title_id', $this->title_id);
+			$this->db->where('content_title_id', $this->content_title_id);
 			if($this->db->update('content_titles', $data)){
 				return TRUE;
 			}
@@ -361,24 +534,65 @@ class Content_model extends MY_Model {
     function get_parents()
     {
 
-		if($this->content_id == '')
+		$list = array();
+
+		$this->db->where('parent_id', $this->parent_id);
+		$query = $this->db->get('content');
+		if ($query->num_rows() > 0)
 		{
-			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE parent_id = '0'";
-		} else {
+			foreach ($query->result() as $row)
+			{
+				$tmp = array(
+				'content_id' => $row->content_id,
+				'user_id' => $row->user_id,
+				'parent_id' => $row->parent_id,
+				'type_id' => $row->type_id,
+				'type_name' => $row->type_name,
+				'publish_status' => $row->publish_status,
+				'splash' => $row->splash,
+				'index' => $row->index,
+				'date_1' => $row->date_1,
+				'date_2' => $row->date_2,
+				'date_updated' => $row->date_updated,
+				'content_title_id' => '',
+				'content_lang' => '',
+				'title' => '',
+				'uri_title' => '',
+				'subtitle' => '',
+				);
 
-			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id WHERE content_titles.content_lang = '{$this->content_lang}' AND content.content_id != ".$this->content_id." AND content.parent_id != ".$this->content_id;
-
-		}
+				$this->db->where('content_id', $row->content_id);
+				if($this->content_lang != '')
+				{
+					$this->db->where('lang_ISO_639_3', $this->content_lang);
+				}
+				$this->db->limit(1);
 				
-		$query = $this->db->query($sql);
-		return $query->result_array();
+				$q2 = $this->db->get('content_titles');
+
+				if ($q2->num_rows() > 0)
+				{
+					$r2 = $q2->row();
+					$tmp['content_title_id'] = $r2->content_title_id;
+					$tmp['content_lang'] = $r2->lang_ISO_639_3;
+					$tmp['title'] = $r2->title;
+					$tmp['uri_title'] = $r2->uri_title;
+					$tmp['subtitle'] = $r2->subtitle;
+				} 
+
+				$list["{$row->content_id}"] = $tmp;
+		   }
+		}
+
+		$this->content_list = $list;
+
 	}
 
     function get_parents_dropdown()
     {
 
-		$parents = $this->get_parents();
-
+		$this->get_parents();
+		$parents = $this->content_list;
 		$list[0] = "site root";
 		
 		if(is_array($parents) && count($parents) > 0) {
@@ -389,81 +603,119 @@ class Content_model extends MY_Model {
 					$pname = $row['content_id'];
 				}
 
-				$list[$row['content_id']] = $pname;
+				$list["{$row['content_id']}"] = $pname;
 			}
 		}
 
 		return $list;
 	}
 
-    function get_uri_display($content_id,$content_lang='')
+    // search for content by title, parent
+	function find_by_uri()
     {
 
-		// first get data about supplied id
-		
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		$this->db->where('content.content_id', $content_id); 
-		if($content_lang != '') {
-			$this->db->where('content_lang', $content_lang); 
-		}
-		$query = $this->db->get();
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			
-			$uriArray[] = $row->uri_title;
-			$content_id = $row->parent_id;
-			$content_lang = $row->content_lang;
+		$this->db->where('uri_title',$this->uri_title);
+		$this->db->where('publish_status',1);
 
+		if($this->parent_id != '')
+		{
+			$this->db->where('parent_id',$this->parent_id);
+		}		
+
+		if($this->content_lang != '')
+		{
+			$this->db->where('lang_ISO_639_3',$this->content_lang);
+		}		
+
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
+		$this->db->limit(1);
+		$title_query = $this->db->get('content');
+
+		if ($title_query->num_rows() > 0)
+		{
+		   $row = $title_query->row();
+		   return $row;
 		} 
+		
+		return FALSE;
+	}
 
-		// now get uri path
-		while ($content_id != 0)
+	function site_map($parent = 0,$current_level = 1,$levels = 0)
+	{
+
+		$this->list_content($parent);
+
+		$site_map = "";
+		
+		foreach($this->content_list as $content)
 		{
-
-		$this->db->from('content');
-		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
-		$this->db->where('content.content_id', $content_id); 
-		if($content_lang != '') {
-			$this->db->where('content_lang', $content_lang); 
-		}
-		$query = $this->db->get();
-
-			if ($query->num_rows() > 0)
+			$this->content_lang = $content['content_lang'];
+			
+			if($this->link_mode == 1)
 			{
-			   $row = $query->row();
+				$link = 'cms/content/edit/id/'.$content['content_id'].'/lang/'.$content['content_lang'];
+			}
+			else
+			{
+				$link = $this->_generate_uri($content['content_id']);
+			}
 			
-			   $uriArray[] = $row->uri_title;
-			   $content_id = $row->parent_id;
-			} 
+			$tmp_item = "<li>".anchor($link,$content['title']);
+			
+			if($levels > 0)
+			{
+				$children = '';
+				if( $current_level < $levels )
+				{
+					$children = $this->site_map($content['content_id'],$current_level + 1, $levels);
+				}
+			}
+			else
+			{
+				$children = $this->site_map($content['content_id']);
+			}
+			
+			if($children != '')
+			{
+				$tmp_item .= "\r".$children;
+			}
+			
+			$tmp_item .= "</li>\r";
 
-		} 
+			if($this->link_mode === 1 || ($content['index'] == 1 && $content['publish_status'] == 1) )
+			{
+				$site_map .= $tmp_item;
+			}
+
+		}
 		
-		$uriArray2 = array_reverse($uriArray);
-		$uri = implode('/',$uriArray2);
+		if($site_map != '')
+		{
+			$site_map = "<ul>\r".$site_map."</ul>\r";
+		}
+		
+		return $site_map;
 
-		return $uri;
+	}
 
-    }
-
-    function get_uri()
+    function _generate_uri($id)
     {
+
+		$this->content_id = $id;
+		$this->get_content_object();
+		$this->get_title();
 		
 		$uriArray[] = $this->uri_title;
 
 		$content_id = $this->parent_id;
-		$content_lang = $this->content_lang;
-
+		
 		while ($content_id != 0)
 		{
 
-			$sql = "SELECT * FROM content LEFT JOIN content_titles ON content.content_id = content_titles.content_id 
-			WHERE content.content_id = ".$content_id;
-			if($content_lang != '') {
-				$sql .= " AND content_lang = '{$content_lang}'";
-			}
-			$query = $this->db->query($sql);
+			$this->db->where('content.content_id', $content_id);
+			$this->db->where('lang_ISO_639_3', $this->content_lang);
+			$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');			
+			$query = $this->db->get('content');
 
 			if ($query->num_rows() > 0)
 			{
@@ -476,27 +728,17 @@ class Content_model extends MY_Model {
 		} 
 		
 		$uriArray2 = array_reverse($uriArray);
-		$uri = implode('/',$uriArray2);
+
+		$uri = '';
+
+		if($this->lang_mode > 0) {
+			$uri .= $this->content_lang.'/';
+		}
+		$uri .= implode('/',$uriArray2);
 
 		return $uri;
 
     }
-
-	function get_site_creation_date()
-    {
-
-		$sql = "SELECT MIN(created) as 'site_created'  FROM content";
-		$query = $this->db->query($sql);
-
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			return $row->site_created;
-		} else {
-			return FALSE;
-		}
-
-	}
 
 }
 
