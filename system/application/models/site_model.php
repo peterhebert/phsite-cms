@@ -6,6 +6,7 @@ class Site_model extends MY_Model {
 	var $site_themes;
 	
 	var $site_id, $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id;
+	var $default_content_type;
 	var $site_admin_id, $site_editor_id;
 	var $img_size_th, $img_size_sm, $img_size_md, $img_size_lg;
 	var $limit_posts, $limit_thumbs;
@@ -48,6 +49,7 @@ class Site_model extends MY_Model {
 			$this->site_editor_id = $row['site_editor_id'];
 			$this->theme = $row['theme'];
 			$this->site_default_lang = $row['default_lang'];
+			$this->default_content_type = $row['default_content_type'];
 			$this->site_date_created = $row['date_created'];
 			$this->site_date_updated = $row['date_updated'];
 			$this->home_content_id = $row['home_content_id'];
@@ -127,6 +129,7 @@ class Site_model extends MY_Model {
 		'theme' => $this->theme,
 		'timezone' => $this->site_timezone,
 		'default_lang' => $this->site_default_lang,
+		'default_content_type' => $this->default_content_type,
 		'date_created' => $this->site_date_created,
 		'home_content_id' => $this->home_content_id,
 		'img_size_th' => $this->img_size_th,

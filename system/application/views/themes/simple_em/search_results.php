@@ -35,15 +35,21 @@ echo "<meta name=\"dc.creator\" content=\"{$site_meta_creator}\" />\n";
 	<div class="page-wrap block">
 		<h1>Search Results</h1>
 		<?php
-		echo "<p>your search term was: <strong>". $term."</strong></p>\r";
+		if(isset($term)) {
+			echo "<p>{$term}</p>\r";
+		}
 
 		if(isset($matches)) {
 			echo $matches;
 		}
 		?>
 	</div>
-	
-	<div class="page-wrap block" id="footer">footer</div>
+	<div class="page-wrap block" id="footer"><?php
+	if (isset($site_meta_copyright) ) {
+		echo "<p>".$site_meta_copyright."</p>\r";
+	}
+	echo POWERED_BY;
+	?></div>
 </div>
 </body>
 </html>

@@ -23,7 +23,7 @@ class Content extends MY_Controller
 		$this->Content_model->lang_mode = $this->Language_model->lang_count;
 		$this->Content_model->content_lang = $this->Site_model->site_default_lang;
 		
-		$body = $this->Content_model->site_map();
+		$body = $this->Content_model->site_map(0,1,0);
 
 		$this->data['form'] = $body;
 
@@ -52,14 +52,25 @@ class Content extends MY_Controller
 		$this->data['title_h1'] = 'Content editor';
 		
 		$params = $this->uri->uri_to_assoc(4);
-		if( array_key_exists('id',$params) ) {
+		if( array_key_exists('id',$params) )
+		{
 			$this->Content_model->content_id = $params['id'];
 		}
-		if( array_key_exists('lang',$params) ) {
+		if( array_key_exists('lang',$params) )
+		{
 			$this->Content_model->content_lang = $params['lang'];
 		}
-		if( array_key_exists('type',$params) ) {
+		else
+		{
+			$this->Content_model->content_lang = $this->Site_model->site_default_lang;
+		}
+		if( array_key_exists('type',$params) )
+		{
 			$this->Content_model->type_id = $params['type'];
+		}
+		else
+		{
+			$this->Content_model->type_id = 1;
 		}
 
 		$this->_process_form();
@@ -202,8 +213,10 @@ class Content extends MY_Controller
 		$form .= form_fieldset_close();
 
 		$form .= form_fieldset('Content');
-		$form .= $delete;
-
+		if(isset($delete))
+		{
+			$form .= $delete;
+		}
 		$form_options = $this->Language_model->get_list_dropdown();
 		$form .= "<p>";
 		$form .=  form_label('Language', 'content_lang');

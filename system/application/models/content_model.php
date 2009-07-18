@@ -530,84 +530,46 @@ class Content_model extends MY_Model {
 
     }
 
-    // return list of possible parents
-    function get_parents()
+    function get_parents_dropdown()
     {
 
-		$list = array();
+		$parents['0'] = "site root";
 
-		$this->db->where('parent_id', $this->parent_id);
+		if($this->content_id != '')
+		{
+			$this->db->where('parent_id !=',$this->content_id);
+			$this->db->where('content.content_id !=',$this->content_id);
+
+			// eliminate this content and all descendants
+			$children  = $this->get_descendants($this->content_id);
+			foreach($children as $id)
+			{
+				$this->db->where('content.content_id !=',$id);
+			}
+		}
+
+		if($this->content_lang != '')
+		{
+			$this->db->where('lang_ISO_639_3',$this->content_lang);
+		}
+
+		$this->db->join('content_titles', 'content.content_id = content_titles.content_id', 'left');
 		$query = $this->db->get('content');
+
+		echo $this->db->last_query();
+		
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
 			{
-				$tmp = array(
-				'content_id' => $row->content_id,
-				'user_id' => $row->user_id,
-				'parent_id' => $row->parent_id,
-				'type_id' => $row->type_id,
-				'type_name' => $row->type_name,
-				'publish_status' => $row->publish_status,
-				'splash' => $row->splash,
-				'index' => $row->index,
-				'date_1' => $row->date_1,
-				'date_2' => $row->date_2,
-				'date_updated' => $row->date_updated,
-				'content_title_id' => '',
-				'content_lang' => '',
-				'title' => '',
-				'uri_title' => '',
-				'subtitle' => '',
-				);
 
-				$this->db->where('content_id', $row->content_id);
-				if($this->content_lang != '')
-				{
-					$this->db->where('lang_ISO_639_3', $this->content_lang);
-				}
-				$this->db->limit(1);
-				
-				$q2 = $this->db->get('content_titles');
-
-				if ($q2->num_rows() > 0)
-				{
-					$r2 = $q2->row();
-					$tmp['content_title_id'] = $r2->content_title_id;
-					$tmp['content_lang'] = $r2->lang_ISO_639_3;
-					$tmp['title'] = $r2->title;
-					$tmp['uri_title'] = $r2->uri_title;
-					$tmp['subtitle'] = $r2->subtitle;
-				} 
-
-				$list["{$row->content_id}"] = $tmp;
+				$key = strval($row->content_id);
+				$parents[$key] = $row->title;
 		   }
+		   
 		}
 
-		$this->content_list = $list;
-
-	}
-
-    function get_parents_dropdown()
-    {
-
-		$this->get_parents();
-		$parents = $this->content_list;
-		$list[0] = "site root";
-		
-		if(is_array($parents) && count($parents) > 0) {
-			foreach($parents as $row) {
-				if(array_key_exists('title',$row) && $row['title'] != '') {
-					$pname = $row['title'];
-				} else {
-					$pname = $row['content_id'];
-				}
-
-				$list["{$row['content_id']}"] = $pname;
-			}
-		}
-
-		return $list;
+		return $parents;
 	}
 
     // search for content by title, parent
@@ -638,6 +600,26 @@ class Content_model extends MY_Model {
 		} 
 		
 		return FALSE;
+	}
+
+	function get_descendants($parent = '0')
+	{
+
+		$this->list_content($parent);
+
+		$descendants = array();
+		
+		foreach($this->content_list as $content)
+		{
+			$descendants[] = $content['content_id'];
+
+			$children = $this->get_descendants($content['content_id']);
+			$descendants = array_merge($descendants,$children);
+			
+		}
+		
+		return $descendants;
+
 	}
 
 	function site_map($parent = 0,$current_level = 1,$levels = 0)

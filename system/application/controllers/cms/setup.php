@@ -334,6 +334,12 @@ class Setup extends MY_Controller
 		$form .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
 		$form .= "</p>\r";
 
+		$form_options = $this->Content_type_model->get_list_dropdown();
+		$form .= "<p>";
+		$form .= form_label('Default Content Type', 'default_content_type');
+		$form .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);		
+		$form .= "</p>\r";
+
 		$form_options = $this->User_model->get_list_dropdown(0,1);
 		$form .= "<p>";
 		$form .= form_label('Webmaster', 'site_admin_id');
@@ -430,6 +436,7 @@ class Setup extends MY_Controller
 			$this->form_validation->set_rules('site_admin_id', 'Webmaster', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('site_editor_id', 'Editor', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('site_default_lang', 'Default Language', 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('default_content_type', 'Default Content Type', 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('theme', 'Theme', 'required|alpha_dash');
 			$this->form_validation->set_rules('site_timezone', 'Time Zone', 'required');
 			$this->form_validation->set_rules('limit_posts', 'Posts per page (blogs)', 'required|is_natural_no_zero');
@@ -462,7 +469,7 @@ class Setup extends MY_Controller
 				$this->Site_model->site_timezone = $this->input->post('site_timezone');
 				$this->Site_model->theme = $this->input->post('theme');
 				$this->Site_model->site_default_lang = $this->input->post('site_default_lang');
-				
+				$this->Site_model->default_content_type = $this->input->post('default_content_type');
 				$this->Site_model->site_admin_id = $this->input->post('site_admin_id');
 				$this->Site_model->site_editor_id = $this->input->post('site_editor_id');
 				$this->Site_model->limit_posts = $this->input->post('limit_posts');

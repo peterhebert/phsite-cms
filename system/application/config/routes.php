@@ -52,6 +52,7 @@ $route['cms/(:any)'] = "cms/$1";
 $route['gallery'] = "gallery/index";
 $route['sitemap'] = "home/sitemap";
 */
+$route['search'] = "parser/search";
 $route['(:any)'] = "parser/index/$1";
 
 /* End of file routes.php */
