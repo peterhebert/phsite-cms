@@ -11,6 +11,7 @@ class Language_model extends MY_Model {
 	var $Inverted_Name;
 	var $Native_Name;
 	var $activated;
+	var $ci_lang_name;
 
 	var $lang_count;
 
@@ -108,6 +109,8 @@ class Language_model extends MY_Model {
 			$this->Inverted_Name = $row['Inverted_Name'];
 			$this->Native_Name = $row['Native_Name'];
 			$this->activated = $row['activated'];
+			$this->ci_lang_name = $row['ci_lang_name'];
+			
 			return TRUE;
 		}
 		return FALSE;
@@ -127,31 +130,30 @@ class Language_model extends MY_Model {
 		} 
     }
 
-	function site_meta_menu()
+	function meta_menu($base_uri)
     {
 		// list active languages
 		$lang_links = array();
 		$langs = $this->get_list();
-		foreach($langs as $llang)
+		$menu = '';
+		if(count($langs) > 0)
 		{
-			$temp_link = 'cms/setup/site_meta/lang/'.$llang['ISO_639_3'];
-			if($llang['Native_Name'] != '')
+			foreach($langs as $llang)
 			{
-				$temp_txt = $llang['Native_Name'];
+				$temp_link = $base_uri.'/lang/'.$llang['ISO_639_3'];
+				if($llang['Native_Name'] != '')
+				{
+					$temp_txt = $llang['Native_Name'];
+				}
+				else
+				{
+					$temp_txt = $llang['Ref_Name'];
+				}
+				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
-			else
-			{
-				$temp_txt = $llang['Ref_Name'];
-			}
-			$lang_links[] = anchor($temp_link,$temp_txt);
+	
+			$menu = ul($lang_links);
 		}
-
-		$menu =  "<ul>\r";
-		$menu .=  "<li>".anchor("cms/setup/site_meta_fields","Edit site metadata fields")."</li>\r";
-		$menu .=  "<li>Edit site metadata\r";
-		$menu .= ul($lang_links);
-		$menu .=  "</li>\r";
-		$menu .=  "</ul>\r";
 
 		return $menu;
 	}

@@ -8,16 +8,16 @@ class User_model extends MY_Model {
 	var $site_rel_id, $site_id, $admin;
 	
 	// r_users_fields - create custom profile fields for users 
-	var $field_rel_id, $field_id, $required, $order;
+	//var $field_rel_id, $field_id, $required, $order;
 	
 	// users_meta table - other custom profile fields
-	var $user_meta_id, $value, $meta_lang, $date_updated;
+	var $meta_lang, $date_updated;
 	
 	// temp password fields
 	var $tmp_pwd, $tmp_pwd_conf;
 
 	// misc variables
-	var $metadata, $user_list, $field_list;
+	var $metadata = array(), $user_list = array(), $field_list = array();
 
     function User_model()
     {
@@ -55,7 +55,7 @@ class User_model extends MY_Model {
 		$this->field_list = $query->result_array();
 	}
 
-    // list all available fields and see if they are assigned as site maetadata
+    // list all available fields and see if they are assigned as user metadata
 	function list_fields()
     {
 
@@ -178,37 +178,42 @@ class User_model extends MY_Model {
 		
 		foreach($this->field_list as $fd)
 		{
-			$temp = $fd;
+			$temp = array(
+			'field_id' => $fd['field_id'],
+			'field_ref_name' => $fd['field_ref_name'],
+			'field_name' => $fd['field_name'],
+			'field_input_type' => $fd['field_input_type'],
+			'field_validation' => $fd['field_validation'],
+			'field_needs_lang' => $fd['field_needs_lang'],
+			'required' => $fd['required'],
+			'order' => $fd['order']
+			);
 
-			$this->db->join('fields', 'users_meta.field_id = fields.field_id', 'left');
 			$this->db->where('users_meta.field_id', $fd['field_id']);
 			$this->db->where('user_id', $this->user_id);
-			if($this->meta_lang != '')
+
+			if($fd['field_needs_lang'] == 1 && $this->meta_lang != '')
 			{
 				$this->db->where('lang_ISO_639_3', $this->meta_lang);
 			}
 			$this->db->limit(1);
 			$query = $this->db->get('users_meta');
-	
+
 			if ($query->num_rows() > 0)
 			{
 				$row = $query->row();
 				$temp['user_meta_id'] = $row->user_meta_id;
-				$temp['user_id'] = $row->user_id;
 				$temp['value'] = $row->value;
-				$temp['meta_lang'] = $row->lang_ISO_639_3;
-
 			} else {
 				$temp['user_meta_id'] = '';
-				$temp['user_id'] = '';
 				$temp['value'] = '';
-				$temp['meta_lang'] = '';
 			}
 
-			$meta[$fd['field_id']] = $temp;
+			$meta["{$fd['field_id']}"] = $temp;
 		}
 
 		$this->metadata = $meta;
+		
     }
 
     // update user
@@ -277,44 +282,47 @@ class User_model extends MY_Model {
 
 	function update_meta()
 	{
-
-		$data = array(
-		'user_id' => $this->user_id,
-		'field_id' => $this->field_id,
-		'value' => $this->value,
-		'lang_ISO_639_3' => $this->meta_lang
-		);
-
-		if($this->user_meta_id != '') {
-			$tmp_lbl = 'updated';
-			$this->db->where('user_meta_id', $this->user_meta_id);
-			if($this->db->update('users_meta', $data)) {
-				return TRUE;
-			}
-		} else {
-			$tmp_lbl = 'created';
-			if($this->db->insert('users_meta', $data)) {
-				$this->user_meta_id = $this->db->insert_id();
-				return TRUE;
-			}
-		}
-
-		// get field name if failed
-		$this->db->select('field_ref_name', 'field_name');
-		$this->db->where('fields.field_id', $this->field_id);
-		$this->db->where('lang_ISO_639_3', $this->meta_lang);
-		$this->db->join('fields_meta', 'fields.field_id = fields_meta.field_id', 'left');
-		$query = $this->db->get('fields');
-		
-		$row = $query->row();
-		$tmp_name = $row->field_ref_name;
-		if($row->field_name != '')
+		foreach($this->metadata as $fd_id => $row)
 		{
-			$tmp_name = $row->field_name;
+			$data = array(
+			'user_id' => $this->user_id,
+			'field_id' => $row['field_id'],
+			'field_name' => $row['field_name'],
+			'value' => $row['value'],
+			'lang_ISO_639_3' => $row['lang_ISO_639_3'],
+			);
+			
+			if($row['required'] == 0 && $row['value'] == '' && $row['user_meta_id'] != '')
+			{
+				// not required, delete meta
+				$this->db->where('user_meta_id',$row['user_meta_id']);
+				if(!$this->db->delete('users_meta'))
+				{
+					$this->messages[] = "field '{$row['field_name']}' could not be deleted";
+				}
+			}
+			else
+			{
+				if($row['user_meta_id'] != '')
+				{
+					// update
+					$this->db->where('user_meta_id',$row['user_meta_id']);
+					if(!$this->db->update('users_meta', $data))
+					{
+						$this->messages[] = "field '{$row['field_name']}' could not be updated";
+					}
+				}
+				else
+				{
+					// insert
+					if(!$this->db->insert('users_meta', $data))
+					{
+						$this->messages[] = "field '{$row['field_name']}' could not be inserted";
+					}
+				}
+			}
 		}
-
-		$this->messages[] = "field '{$tmp_name}' could not be {$tmp_lbl}";
-		return FALSE;
+		
 	}
 
     function hash_password($str='') {

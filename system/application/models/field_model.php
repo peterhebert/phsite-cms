@@ -7,46 +7,46 @@ class Field_model extends MY_Model {
 	// field metadata (by languauge)
 	var $field_meta_id, $field_name, $field_lang;
 
+	// field data types
+	var $data_types = array();
+	
 	// field validation rules
-	var $validation_rules = array(
-	'' => 'any value',
-	'alpha ' => 'alphabetical characters',
-	'alpha_numeric ' => 'alpha-numeric characters',
-	'alpha_dash ' => 'alpha-numeric, underscores or dashes',
-	'alpha_num_spaces' => 'alpha-numeric, spaces, underscores or dashes',
-	'numeric ' => 'numeric characters',
-	'integer ' => 'integer',
-	'is_natural ' => 'natural number: 0, 1, 2, 3, etc.',
-	'is_natural_no_zero ' => 'natural number, no zeroes: 1, 2, 3, etc.',
-	'valid_email ' => 'email address',
-	'valid_emails ' => 'comma separated list of valid email addresses',
-	'valid_ip ' => 'Internet Protocol address',
-	'path_dir' => 'directory',
-	'path_file' => 'file',
-	'is_date' => 'Date / time',
-	'is_timezone' => 'Timezone',
-	'is_lang' => 'ISO 639-3 language code',
-	'is_uri' => 'URI/URL internet address'
-	);
-
 	var $validation_string, $validation_exact, $validation_min, $validation_max;
 
 	// field input types
-	var $input_types = array(
-	'text' => 'text',
-	'textarea' => 'textarea',
-	'richtext' => 'rich text editor',
-	'checkbox' => 'checkbox',
-	'radio' => 'radio',
-	'password' => 'password',
-	'file' => 'file path',
-	'directory' => 'directory path',
-	);
+	var $input_types = array();
 
     function Field_model()
     {
         // Call the Model constructor
         parent::MY_Model();
+
+		$this->field_lang = 'eng';
+		$this->load_values();
+	}
+	
+	function load_values()
+	{	
+
+		// load validation rules and input types from language files
+
+		$this->db->where('ISO_639_3', $this->field_lang);
+		$query = $this->db->get('ISO_639_LANG');
+ 
+ 		$load_lang = 'english';
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			if($row['ci_lang_name'] != '')
+			{
+				$load_lang = $row['ci_lang_name'];
+			}
+		}
+
+		$this->lang->load('form_input', $load_lang);
+		$this->data_types = $this->lang->line('data_types');
+		$this->input_types = $this->lang->line('input_types');
+		
     }
 
     // get all fields
@@ -159,7 +159,6 @@ class Field_model extends MY_Model {
 			$this->db->where('field_id', $this->field_id);
 			if($this->db->update('fields', $field_data))
 			{
-				//$this->messages[] = "'{$this->field_ref_name}' field has been successfully updated";
 				return TRUE;
 			}
 
@@ -168,12 +167,10 @@ class Field_model extends MY_Model {
 			if($this->db->insert('fields', $field_data))
 			{
 				$this->field_id = $this->db->insert_id();
-				//$this->messages[] = "'{$this->field_ref_name}' field has been successfully created";
 				return TRUE;
 			}
 		}
 
-		//$this->messages[] = "'{$this->field_ref_name}' field could not be updated";
 		return FALSE;
 
     }
@@ -193,7 +190,6 @@ class Field_model extends MY_Model {
 			$this->db->where('field_meta_id', $this->field_meta_id);
 			if($this->db->update('fields_meta', $field_data))
 			{
-				//$this->messages[] = "field name successfully updated";
 				return TRUE;
 			}
 
@@ -202,12 +198,10 @@ class Field_model extends MY_Model {
 			if($this->db->insert('fields_meta', $field_data))
 			{
 				$this->field_meta_id = $this->db->insert_id();
-				//$this->messages[] = "field name has been successfully created";
 				return TRUE;
 			}
 		}
 
-		//$this->messages[] = "field name could not be updated";
 		return FALSE;
 
     }
@@ -221,7 +215,7 @@ class Field_model extends MY_Model {
 		
 			foreach($valid as $rule) {
 			
-				if(array_key_exists($rule,$this->validation_rules)){
+				if(in_array($rule,$this->data_types)){
 					$this->validation_string = $rule;
 				}
 				if(ereg ( 'exact_length\[([0-9]+)\]', $rule)) {
