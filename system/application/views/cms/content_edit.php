@@ -1,7 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Content editor | phSite</title>
+<title><?php
+if(isset($title_tag))
+{
+echo $title_tag.' | '; 
+}
+?>phSite CMS</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
@@ -13,7 +18,7 @@
 /* <![CDATA[ */
 $().ready(function(){
 
-	$("form select[name='object_id']").change(function () {
+	$("form select[name='type_id']").change(function () {
 	
 		var myloc = $("form input[name='my_url']").val();
 		var myval = $(this).val();
@@ -30,56 +35,48 @@ $().ready(function(){
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Content editor</div>
-	<div class="page-wrap golden block">
-		<h1>Content editor</h1>
-		<?php
-		if(isset($msg)) {
-			echo"<div class=\"msg\">";
-			echo $msg;
-			echo"</div>\n";
+	<div class="page-wrap block" id="breadcrumb">
+	<?php
+		if (isset($breadcrumb)){
+			echo $breadcrumb;
 		}
-		if(isset($uri)) {
-			echo "<p>";
-			echo anchor($uri,"Preview this page", array('rel' => 'external','title' => 'Preview this page in a new browser window'));
-			echo "</p>\n";
-		}
+	 ?>
+	</div>
+	<div class="page-wrap six block">
+			<h1><?php echo $title_h1; ?></h1>
+			<?php 
+			if (isset($msg)){
+				echo "<div class=\"msg\">{$msg}</div>\n";
+			}
+			if (isset($form_open)){
+				echo $form_open;
+			}
+			?>
+		<div class="column w4">
+			<?php 
+			if (isset($form)){
+				echo $form;
+			}
+			?>
+		</div>
 
-		if(isset($delete_links)) {
-			echo $delete_links;
+		<div class="float w2">
+			<?php 
+			if (isset($sidebar)) {
+				echo $sidebar;
+			}
+			if (isset($form_meta)) {
+				echo $form_meta;
+			}
+			?>
+		</div>
+
+		<?php
+
+		if(isset($form_close)) {
+			echo $form_close;
 		}
 		
-		// open form
-		echo form_open($action);
-
-		echo form_hidden('content_id', $content_id);
-		echo form_hidden('title_id', $title_id);
-		echo form_hidden('my_url', $action);
-
-		// do main content fields
-		?>
-		<div class="column g1"><fieldset><legend>Content</legend>
-		<?php echo $content; ?>
-		</fieldset></div>
-		<div class="float g2">
-			<fieldset>
-				<legend>Meta</legend>
-				<?php echo $meta; ?>
-			</fieldset>
-			<fieldset>
-				<legend>Properties</legend>
-				<?php echo $properties; ?>
-			</fieldset>
-		</div>
-		<?php
-
-
-		// close form
-		echo "<p>";
-		echo form_submit('submit', 'Save');
-		echo "</p>\n";
-
-		echo form_close();
 		?>
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
