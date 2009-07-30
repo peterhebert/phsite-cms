@@ -24,6 +24,7 @@ $lang['is_date']	= "'%s' must contain a valid date.";
 $lang['alpha_num_spaces']	= "'%s' may only contain alpha-numeric characters, spaces, underscores, and dashes.";
 $lang['path_file'] = "'%s' must be an existing file.";
 $lang['path_dir'] = "'%s' must be an existing directory.";
+$lang['any_value'] = "any value";
 
 /* End of file form_validation_lang.php */
 /* Location: ./system/application/language/english/form_validation_lang.php */
