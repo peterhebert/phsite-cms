@@ -9,6 +9,7 @@ class Field_model extends MY_Model {
 
 	// field data types
 	var $data_types = array();
+	var $validation_rules = array();
 	
 	// field validation rules
 	var $validation_string, $validation_exact, $validation_min, $validation_max;
@@ -46,6 +47,7 @@ class Field_model extends MY_Model {
 		$this->lang->load('form_input', $load_lang);
 		$this->data_types = $this->lang->line('data_types');
 		$this->input_types = $this->lang->line('input_types');
+		$this->validation_rules = array_keys($this->lang->line('data_types'));
 		
     }
 
@@ -206,59 +208,6 @@ class Field_model extends MY_Model {
 
     }
 
-	function parse_validation()
-	{
-
-		$valid = explode('|',$this->field_validation);
-
-		if ( is_array($valid) && count($valid > 0) ) {
-		
-			foreach($valid as $rule) {
-			
-				if(in_array($rule,$this->data_types)){
-					$this->validation_string = $rule;
-				}
-				if(ereg ( 'exact_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
-					$this->validation_exact = ereg_replace($pattern,'\\2',$rule);
-				}
-		
-				if(ereg ( 'min_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
-					$this->validation_min = ereg_replace($pattern,'\\2',$rule);
-				}
-		
-				if(ereg ( 'max_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
-					$this->validation_max = ereg_replace($pattern,'\\2',$rule);
-				}
-				
-			}
-		}
-
-	}
-
-	function merge_validation()
-	{
-		$validArray = array();
-
-		if($this->validation_string != ''){
-			$validArray[] = $this->validation_string;
-		}
-		if($this->validation_exact != ''){
-			$validArray[] = 'exact_length['.$this->validation_string.']';
-		}
-
-		if($this->validation_min != ''){
-			$validArray[] = 'min_length['.$this->validation_min.']';
-		}
-		if($this->validation_max != ''){
-			$validArray[] = 'max_length['.$this->validation_max.']';
-		}
-
-		$this->field_validation = implode('|',$validArray);
-
-	}
 
 
 }

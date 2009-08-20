@@ -32,7 +32,7 @@ class User_model extends MY_Model {
 	function get_list($admin=0)
     {
 
-		$this->db->join('r_sites_users', 'users.user_id = r_sites_users.user_id', 'left');
+		$this->db->join('r_sites_users', 's_users.user_id = r_sites_users.user_id', 'left');
 		$this->db->where('site_id', $this->site_id);
 		if($admin != 0)
 		{
@@ -41,7 +41,7 @@ class User_model extends MY_Model {
 		$this->db->order_by('name_last','asc');
 		$this->db->order_by('name_first','asc');
 		
-		$query = $this->db->get('users');
+		$query = $this->db->get('s_users');
 		$this->user_list = $query->result_array();
 	}
 
@@ -69,10 +69,13 @@ class User_model extends MY_Model {
 			$temp_field =  array(
 			'field_id' => $row->field_id,
 			'field_ref_name' => $row->field_ref_name,
+			'field_input_type' => $row->field_input_type,
+			'field_validation' => $row->field_validation,
+			'field_needs_lang' => $row->field_needs_lang,
 			'field_name' => '',
 			'rel_id' => '',
 			'required' => '',
-			'order' => ''
+			'order' => '',
 			);
 
 			// get name if exists
@@ -366,8 +369,8 @@ class User_model extends MY_Model {
 		if(isset($usr) && isset($pwd))
 		{
 
-			$this->db->join('r_sites_users', 'users.user_id = r_sites_users.user_id', 'left');
-			$this->db->where('users.user_id', $this->user_id);
+			$this->db->join('r_sites_users', 's_users.user_id = r_sites_users.user_id', 'left');
+			$this->db->where('s_users.user_id', $this->user_id);
 			$this->db->where('site_id', $this->site_id);
 			$this->db->limit(1);
 		

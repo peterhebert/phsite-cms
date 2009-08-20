@@ -1,56 +1,37 @@
 <?php
-class Media_model extends Model {
+class Media_model extends MY_Model {
 
-	/* directory / file managment */
-	var $dir_base, $dir_current, $dir_list, $dir_list_rel, $file_list, $file_count;
+	// media variables
+	var $media_id, $file_uri, $external, $mime_type, $date_created, $creator;
+	var $media_title_id, $title, $uri_title, $subtitle;
+	//var $media_meta_id, $field_id, $field_name, $value;
+	var $date_updated, $media_lang;
 
-	/* folder info */
-	var $path_id, $path_uri, $path_title, $path_lang;
+	// misc utility variables
+	var $media_list = array(), $media_metadata = array(), $media_meta_fields = array();
+	var $mime_categories = array('application','audio','image','text','video');
 
-	/* media info */
-	var $media_id, $file_uri, $external, $mime, $created, $creator;
-
-	/* media metadata */
-	var $data_id, $media_lang, $title, $uri_title, $description, $keywords, $copyright, $city, $prov_state, $country;
+	// iptc / exif metadata
 	var $iptc, $exif;
 
-	var $media_types = array(
-	'dcr' => array('application/x-director','Shockwave Director'),
-	'swf' => array('application/x-shockwave-flash','Flash'),
-	'flac' => array('audio/flac','<acronym title="Free Lossless Audio Codec">FLAC</acronym> audio'),
-	'mp3' => array('audio/mpeg3','MP3 audio'),
-	'oga' => array('audio/ogg','Ogg audio'),
-	'ogg' => array('audio/ogg','Ogg Vorbis audio'),
-	'gif' => array('image/gif','<acronym title="Graphical Interchange Format">GIF</acronym>'),
-	'jpg' => array('image/jpeg','<acronym title="Joint Photographic Experts Group">JPEG</acronym> image'),
-	'png' => array('image/png','<acronym title="Portable Network Graphics">PNG</acronym> image'),
-	'mpeg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
-	'mpg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
-	'ogv' => array('video/ogg','Ogg video'),
-	'mov' => array('video/quicktime','QuickTime video'),
-	'flv' => array('video/x-flv','Flash video'),
-	'tgz' => array('application/gnutar','Tar Gzip archive'),
-	'doc' => array('application/msword','Microsoft Word document'),
-	'pdf' => array('application/pdf','Portable Document Format'),
-	'rtf' => array('application/rtf','Rich text format'),
-	'xls' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
-	'ppt' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
-	'zip' => array('application/zip','Zip archive'),
-	'txt' => array('text/plain','plain text'),
-	'odt' => array('application/vnd.oasis.opendocument.text','OpenDocument Text'),
-	'odp' => array('application/vnd.oasis.opendocument.presentation','OpenDocument Presentation'),
-	'ods' => array('application/vnd.oasis.opendocument.spreadsheet','OpenDocument Spreadsheet'),
-	);
+	// directory / file managment 
+	var $dir_base, $dir_current, $dir_list, $dir_list_rel, $file_list, $file_count;
 
     function Media_model()
     {
         // Call the Model constructor
-        parent::Model();
+        parent::MY_Model();
 
 		$this->dir_base = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG;
 		$this->dir_current = $this->dir_base;
-    }
 
+		$this->config->load('phsite_prefs');
+		$this->mime_types = $this->config->item('mime_types');
+
+    }
+	
+// directory / file functions
+	
 	// get list of subdirectories
 	function list_dirs($filepath='') {
 		if($filepath == '')
@@ -160,243 +141,6 @@ class Media_model extends Model {
 		$this->file_list = $new_list;
 	}
 
-	/* update folder info */
-    function update_path()
-    {
-		$data = array(
-		'path_uri' => $this->path_uri,
-		'path_title' => $this->path_title,
-		'path_lang' => $this->path_lang
-		);
-
-		if($this->media_id == '') {
-			// insert
-			if($this->db->insert('media_paths', $data)){
-				$this->path_id = $this->db->insert_id();
-				return TRUE;
-			}
-		} else {
-			// update
-			$this->db->where('path_id', $this->path_id);
-			if($this->db->update('media_paths', $data)){
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-	}
-
-    function get_path_by_uri()
-    {
-
-		$this->db->where('path_uri', $this->path_uri);
-		if($this->path_lang != '') {
-			$this->db->where('path_lang', $this->path_lang);
-		}
-		$this->db->limit(1);
-		
-		$query = $this->db->get('media_paths');
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			$this->path_id = $row->path_id;
-			$this->path_uri = $row->path_uri;
-			$this->path_title = $row->path_title;
-			$this->path_lang = $row->path_lang;
-			return TRUE;
-		} else {
-			$this->path_id = '';
-			$this->path_uri = '';
-			$this->path_title = '';
-			$this->path_lang = '';
-			return FALSE;
-		}
-
-	}
-
-    function get_path_langs()
-    {
-
-		$this->db->where('path_uri', $this->path_uri);
-		if($this->path_lang != '') {
-			$this->db->where('path_lang !=', $this->path_lang);
-		}
-		
-		$query = $this->db->get('media_paths');
-		if ($query->num_rows() > 0)
-		{
-			foreach ($query->result() as $row)
-			{
-				$other_langs[] = $row->path_lang;
-			}
-			return $other_langs;
-		} else {
-			return FALSE;
-		}
-
-	}
-
-    function update_media()
-    {
-
-		$data = array(
-		'file_uri' => $this->file_uri,
-		'external' => $this->external,
-		'mime' => $this->mime,
-		'created' => $this->created,
-		'creator' => $this->creator,
-		);
-
-		if($this->media_id == '') {
-			// insert
-			if($this->db->insert('media', $data)){
-				$this->media_id = $this->db->insert_id();
-				return TRUE;
-			}
-		} else {
-			// update
-			$this->db->where('media_id', $this->media_id);
-			if($this->db->update('media', $data)){
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-	}
-
-    function update_meta()
-    {
-
-		$data = array(
-		'media_id' => $this->media_id,
-		'media_lang' => $this->media_lang,
-		'title' => $this->title,
-		'uri_title' => convert_uri($this->title),
-		'description' => $this->description,
-		'keywords' => $this->keywords,
-		'copyright' => $this->copyright,
-		'city' => $this->city,
-		'prov_state' => $this->prov_state,
-		'country' => $this->country
-		);
-		if($this->data_id == '') {
-			// insert
-			if($this->db->insert('media_data', $data)){
-				$this->data_id = $this->db->insert_id();
-				return TRUE;
-			}
-		} else {
-			// update
-			$this->db->where('data_id', $this->data_id);
-			if($this->db->update('media_data', $data)){
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-    }
-
-
-    function get_media()
-    {
-
-		// first get data from 'media' table
-		$query = $this->db->get_where('media', array('media_id' => $this->media_id));
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			$this->file_uri = $row->file_uri;
-			$this->external = $row->external;
-			$this->mime = $row->mime;
-			$this->created = $row->created;
-			$this->creator = $row->creator;
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-
-	}
-
-    function get_media_by_uri()
-    {
-
-		// first get data from 'media' table
-		$query = $this->db->get_where('media', array('file_uri' => $this->file_uri));
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			$this->media_id = $row->media_id;
-			$this->external = $row->external;
-			$this->mime = $row->mime;
-			$this->created = $row->created;
-			$this->creator = $row->creator;
-			return TRUE;
-		} else {
-			return FALSE;
-		}
-
-	}
-
-    function get_meta()
-    {
-		$success = FALSE;
-
-		$this->db->select('*');
-		$this->db->from('media_data');
-
-		if($this->data_id != '') {
-			$this->db->where('data_id', $this->data_id);
-		} else {
-			$this->db->where('media_id', $this->media_id);
-			$this->db->where('media_lang', $this->media_lang);
-		}
-		
-		$query = $this->db->get();
-
-		if ($query->num_rows() > 0)
-		{
-			$success = TRUE;
-			$row = $query->row();
-			
-			$this->data_id = $row->data_id;
-			$this->media_lang = $row->media_lang;
-			$this->title = $row->title;
-			$this->uri_title = $row->uri_title;
-			$this->description = $row->description;
-			$this->keywords = $row->keywords;
-			$this->copyright = $row->copyright;
-			$this->city = $row->city;
-			$this->prov_state = $row->prov_state;
-			$this->country = $row->country;
-		}
-		
-		return $success;
-	}
-
-    // return other languages than current language
-    function get_other_langs()
-    {
-		
-		$otherlangs = array();
-
-		$this->db->select('*');
-		$this->db->from('media_data');
-
-		$this->db->where('media_id', $this->media_id);
-		$this->db->where('media_lang !=', $this->media_lang);
-		
-		$query = $this->db->get();
-
-		if ($query->num_rows() > 0)
-		{
-			foreach ($query->result_array() as $row)
-			{
-			   $otherlangs[] = $row['content_lang'];
-			}
-		}
-		return $otherlangs;
-    }
-
     function read_file_info()
     {
 
@@ -421,57 +165,7 @@ class Media_model extends Model {
 		
 	}
 
-	function get_file_metadata()
-	{
-		$this->read_file_info();
-
-		if(is_array($this->iptc)) {
-			if(array_key_exists('2#105', $this->iptc)) {
-				$this->title = $this->iptc['2#105'][0];
-			}
-			if(array_key_exists('2#120', $this->iptc)) {
-				$this->description = $this->iptc['2#120'][0];
-			}
-			if(array_key_exists('2#025', $this->iptc)) {
-				$this->keywords = implode(', ',$this->iptc['2#025']);
-			}
-			if(array_key_exists('2#080', $this->iptc)) {
-				$this->creator = $this->iptc['2#080'][0];
-			}
-			if(array_key_exists('2#090', $this->iptc)) {
-				$this->city = $this->iptc['2#090'][0];
-			}
-			if(array_key_exists('2#095', $this->iptc)) {
-				$this->prov_state = $this->iptc['2#095'][0];
-			}
-			if(array_key_exists('2#101', $this->iptc)) {
-				$this->country = $this->iptc['2#101'][0];
-			}
-			if(array_key_exists('2#116', $this->iptc)) {
-				$this->copyright = $this->iptc['2#116'][0];
-			}
-		}
-		
-		if(is_array($this->exif)) {
-			if(array_key_exists('MimeType', $this->exif)) {
-				$this->mime = $this->exif['MimeType'];
-			}
-			if(array_key_exists('DateTimeOriginal', $this->exif)) {
-				$this->created = $this->exif['DateTimeOriginal'];
-			}
-		}
-
-		if($this->title == '') {
-			$this->title = basename($this->file_uri);
-		}
-		
-		if($this->created == '') {
-			$this->created = date('Y-m-d H:i:s');
-		}
-
-	}
-
-	function get_mime($filename,$mode=0) {
+	function get_mime($filename) {
 		if(file_exists($filename) && !is_dir($filename))
 		{
 
@@ -483,7 +177,7 @@ class Media_model extends Model {
 
 			if(array_key_exists($ext,$this->media_types))
 			{
-				$mime_ext = $this->media_types[$ext][$mode];
+				$mime_ext = $this->media_types[$ext];
 
 				if ($mime != FALSE )
 				{
@@ -506,82 +200,143 @@ class Media_model extends Model {
 		return FALSE;
 	}
 
-    function delete_media()
-    {
-		$tables = array('media', 'media_data');
-		$this->db->where('media_id', $this->media_id);
-		$this->db->delete($tables);
-    }
+	function get_file_metadata()
+	{
+		$this->read_file_info();
 
-    function embed_media($id,$size='thumb')
-    {
-		$this->media_id = $id;
-		$this->get_media();
-		$this->get_meta();
-		
-		$file_path = MEDIA_PATH_ORIG.$this->file_uri;
-		
-		switch ($size) {
-		case 0 || 'thumb':
-			$size = $this->Site_model->img_size_thumb;
-			break;
-		case 'display':
-			$size = $this->Site_model->img_size_display;
-			break;
-		default:
-			if(is_numeric($size)) {
-				$size = intval($size);
-			} else {
-				$size = $this->Site_model->img_size_display;
+		if(is_array($this->iptc)) {
+
+			if(array_key_exists('2#005', $this->iptc)) {
+				$this->title = $this->iptc['2#005'][0];
 			}
-			break;
-		}
-		
-		switch ($this->mime) {
-		case '':
-			break;
-		case 'image/gif' || 'image/jpeg' || 'image/png':
-			$embed = view_image($file_path,$size, array ('alt' => $this->title) );
-			break;
-		default:
+			else if(array_key_exists('2#105', $this->iptc))
+			{
+				$this->title = $this->iptc['2#105'][0];
+			}
 			
-			$embed = anchor(MEDIA_PATH_ORIG.$this->file_uri,$this->title);
-			break;
+			if(array_key_exists('2#080', $this->iptc)) {
+				$this->creator = $this->iptc['2#080'][0];
+			}
+
+			/*if(array_key_exists('2#120', $this->iptc)) {
+				$this->description = $this->iptc['2#120'][0];
+			}
+			if(array_key_exists('2#025', $this->iptc)) {
+				$this->keywords = implode(', ',$this->iptc['2#025']);
+			}
+			if(array_key_exists('2#090', $this->iptc)) {
+				$this->city = $this->iptc['2#090'][0];
+			}
+			if(array_key_exists('2#095', $this->iptc)) {
+				$this->prov_state = $this->iptc['2#095'][0];
+			}
+			if(array_key_exists('2#101', $this->iptc)) {
+				$this->country = $this->iptc['2#101'][0];
+			}
+			if(array_key_exists('2#116', $this->iptc)) {
+				$this->copyright = $this->iptc['2#116'][0];
+			}*/
 		}
 		
-		return $embed;
+		if(is_array($this->exif)) {
+			if(array_key_exists('MimeType', $this->exif)) {
+				$this->mime_type = $this->exif['MimeType'];
+			}
+			if(array_key_exists('DateTimeOriginal', $this->exif)) {
+				$this->created = $this->exif['DateTimeOriginal'];
+			}
+		}
+
+		if($this->title == '') {
+			$this->title = basename($this->file_uri);
+		}
+		
+		if($this->date_created == '') {
+			$this->date_created = date('Y-m-d H:i:s');
+		}
+
+	}
+
+
+
+// database functions
+	function update_media_db()
+	{
+		foreach($this->file_list as $file)
+		{
+			$this->file_uri = str_replace($this->dir_base,'',$dir);
+			// if file not in database, add to database
+			if(!$this->find_media_by_uri())
+			{
+				$this->external = 0;
+				$this->mime_type = $this->get_mime($file);
+				$this->date_created = $row->date_created;
+				$this->creator = $row->creator;
+			}
+
+		}
+	}
+
+	function find_media_by_uri()
+	{
+		$this->db->where('file_uri',$this->file_uri);
+		$this->db->limit(1);
+		$query = $this->db->get('media');
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$this->media_id = $row->media_id;
+			$this->file_uri = $row->file_uri;
+			$this->external = $row->external;
+			$this->mime_type = $row->mime_type;
+			$this->date_created = $row->date_created;
+			$this->creator = $row->creator;
+			return TRUE;
+		} 
+
+		return FALSE;
+	}
+	
+    // list all available fields and see if they are assigned as media metadata
+	function list_meta_fields()
+    {
+
+		$list = array();
+		
+		// get lst of all fields
+		$query = $this->db->get('fields');
+		$field_list = $query->result_array();
+
+
 /*
-
-	var $iptc;
-	var $exif;
-
-	'flac' => array('audio/flac','<acronym title="Free Lossless Audio Codec">FLAC</acronym> audio'),
-	'mp3' => array('audio/mpeg3','MP3 audio'),
-	'oga' => array('audio/ogg','Ogg audio'),
-	'ogg' => array('audio/ogg','Ogg Vorbis audio'),
-
-	'mpeg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
-	'mpg' => array('video/mpeg','<acronym title="Moving Picture Experts Group">MPEG</acronym> video'),
-	'ogv' => array('video/ogg','Ogg video'),
-	'mov' => array('video/quicktime','QuickTime video'),
-	'flv' => array('video/x-flv','Flash video'),
-
-	'dcr' => array('application/x-director','Shockwave Director'),
-	'swf' => array('application/x-shockwave-flash','Flash'),
-	'tgz' => array('application/gnutar','Tar Gzip archive'),
-	'doc' => array('application/msword','Microsoft Word document'),
-	'pdf' => array('application/pdf','Portable Document Format'),
-	'rtf' => array('application/rtf','Rich text format'),
-	'xls' => array('application/x-msexcel','Microsoft Excel spreadsheet'),
-	'ppt' => array('application/x-mspowerpoint','Microsoft PowerPoint presentation'),
-	'zip' => array('application/zip','Zip archive'),
-	'txt' => array('text/plain','plain text'),
-	'odt' => array('application/vnd.oasis.opendocument.text','OpenDocument Text'),
-	'odp' => array('application/vnd.oasis.opendocument.presentation','OpenDocument Presentation'),
-	'ods' => array('application/vnd.oasis.opendocument.spreadsheet','OpenDocument Spreadsheet'),
+CREATE TABLE `fields` (
+  `field_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `field_ref_name` text NOT NULL,
+  `field_input_type` varchar(9) NOT NULL,
+  `field_validation` text,
+  `field_needs_lang` tinyint(1) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`field_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8
 */
-    }
+		foreach($this->mime_categories as $mime_cat)
+		{
+			$this->db->where('mime_category',$mime_cat);
+		}
+/*CREATE TABLE `r_mime_fields` (
+  `mime_category` varchar(12) default 'image/jpeg',
+  `field_id` mediumint(8) unsigned NOT NULL,
+  `required` tinyint(1) NOT NULL default '0',
+  `order` smallint(5) default '0',
+  KEY `mime_category` (`mime_category`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='media file info'
+*/
+		$this->media_meta_fields = $list;
 
+	}
+
+	
 }
 
 ?>
