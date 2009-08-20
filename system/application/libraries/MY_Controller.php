@@ -11,11 +11,11 @@
  * @author		Peter Hebert
  * @link		http://www.peterhebert.com/
  
- only change is to add $data variable (array) to store data that goes into views
  */
 class MY_Controller extends Controller {
 
 	var $data = array();
+	var $cms_labels = array();
 	
 	/**
 	 * Constructor
@@ -26,10 +26,16 @@ class MY_Controller extends Controller {
 	{	
 		parent::Controller();
 		$this->load->library('session');
-		$this->Language_model->count_active();
+
+		$this->scope = 'site';
+
+		$this->_load_cms_labels();
+		$this->_load_site_metadata();
+		//$this->Language_model->count_active();
+
 	}
 
-	function _authenticate()
+/*	function _authenticate()
 	{
 		// if not logged in, redirect to login form
 		if(!$this->session->userdata('user_id'))
@@ -42,11 +48,12 @@ class MY_Controller extends Controller {
 			// get site metadata
 			$this->Site_model->site_meta_lang = $this->session->userdata('default_lang');
 			$this->_load_site_metadata();
+			$this->_load_cms_labels();
 
 		}
 
 	}
-
+*/
 	function _load_site_metadata() {
 
 		$base_raw = base_url();
@@ -62,22 +69,26 @@ class MY_Controller extends Controller {
 		$this->data['base_path'] = $base;
 
 		$this->Site_model->load_site();
-		if($this->Site_model->site_meta_lang == '')
+		if($this->Site_model->temp_lang == '')
 		{
-			$this->Site_model->site_meta_lang = $this->Site_model->site_default_lang;
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		$this->data['site_meta_lang'] = $this->Site_model->site_meta_lang;
+		$this->data['site_meta_lang'] = $this->Site_model->temp_lang;
 
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
-		$this->Site_model->load_site_title();
+		$this->Site_model->temp_id = $this->Site_model->site_id;
+		$this->Site_model->scope = 'site';
+		$this->Site_model->load_title();
+
 		$this->data['site_meta_title'] = $this->Site_model->title;
 		$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
 
 		// format the date according to site timezone
 
 		$this->data['site_meta_created'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone);
+		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
 		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
 
 		$tmp_cr_yr = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y");
@@ -89,15 +100,18 @@ class MY_Controller extends Controller {
 		$this->data['site_meta_updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");
 
 		// get site metadata
-		$this->Site_model->load_site_meta();
+		$this->Site_model->load_site_metadata();
 		
-		foreach($this->Site_model->site_metadata as $fd_id => $meta)
+		foreach($this->Site_model->metadata as $fd_id => $meta)
 		{
 			$key = 'site_meta_'.$meta['field_ref_name'];
 			
 			if($meta['field_ref_name'] == 'copyright')
 			{
-				$val = '&copy; '.$tmp_site_dates.' '.$meta['value'];
+				$val = '&#169; '.$tmp_site_dates.' '.$meta['value'];
+				
+				$val_xml = '&#x00A9;'.$tmp_site_dates.' '.$meta['value'];
+				$this->data['site_meta_copyright_xml'] = $val_xml;
 			}
 			else
 			{
@@ -108,8 +122,30 @@ class MY_Controller extends Controller {
 			
 		}
 
-
 	}
+
+
+	function _load_cms_labels()
+	{	
+		if($this->Site_model->temp_lang == '')
+		{
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+		}
+		$this->Site_model->lang_load();
+		
+		// load validation rules and input types from language files
+		$load_lang = $this->Site_model->lang_CI_Name;
+		if($load_lang == '')
+		{
+			$load_lang = 'english';
+		}
+
+		$this->lang->load('phsite', $load_lang);
+		$this->cms_labels = $this->lang->line('cms_labels');
+		$this->data['cms_labels'] = $this->lang->line('cms_labels');
+
+    }
+	
 }
 // END _Controller class
 

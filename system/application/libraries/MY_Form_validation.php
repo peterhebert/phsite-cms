@@ -160,10 +160,22 @@ class MY_Form_validation extends CI_Form_validation {
 	{
 		$pattern = "^(http|https|ftp){0,1}(\:){0,1}(//){0,1}[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$";
 		
-		$valid = eregi($pattern, $str);
-		return $valid;
+		return ( ! ereg($pattern, $str)) ? FALSE : TRUE;
 	}
 
+	// --------------------
+	// valid phone numbers (just checks valid characters, should work for all international formats)
+	// --------------------
+	/*
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+	function is_phone($str)
+	{
+		$pattern = "^[\(\)\+0-9A-Z\.[:blank:]-]+(ext)?[\(\)\+0-9A-Z\.[:blank:]-]+$";
+		return ereg( $pattern  ,  $str );	
+	}
 }
 
 // END Form Validation Class
