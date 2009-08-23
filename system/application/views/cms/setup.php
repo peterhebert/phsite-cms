@@ -15,14 +15,16 @@
 			<div class="column w3">
 				<h2>Site preferences</h2>
 				<p>This is where you can change site-wide prefrences, such as designating a home page, choosing default languages, designating a Webmaster and Editor users, and selecting a site theme.</p>
-				<p><?php echo anchor("cms/setup/site_prefs","Edit site preferences"); ?></p>
+				<p><?php echo anchor("cms/setup/site_preferences","Edit site preferences"); ?></p>
 				<h2>Site metadata</h2>
 				<p>This is where you can change information about your site, such as description, title, footer, etc.</p>
 				<ul><?php echo $site_metadata; ?></ul>
 				<h2>Data Structure</h2>
 				<p>You can define what types of content your site has, and add as many custom fields as you want.</p>
-				<p><?php echo anchor("cms/setup/structure","Edit data structure"); ?></p>
-	
+				<ul>
+					<li><?php echo anchor("cms/setup/content_types","Edit content types"); ?></li>
+					<li><?php echo anchor("cms/setup/fields","Edit fields"); ?></li>
+				</ul>
 			</div>
 			<div class="float w3">
 				<h2>Languages</h2>
@@ -31,8 +33,8 @@
 				<h2>Users</h2>
 				<p>Manage the users of your site</p>
 				<ul>
-					<li><?php echo anchor("cms/user","Edit Users"); ?></li>
-					<li><?php echo anchor("cms/user/user_meta_fields","Edit user metadata fields"); ?></li>
+					<li><?php echo anchor("cms/setup/users","Edit Users"); ?></li>
+					<li><?php echo anchor("cms/setup/user_fields","Edit user metadata fields"); ?></li>
 				</ul>
 
 			</div>

@@ -4,7 +4,8 @@
 	<?php
 	if (isset($site_metadata))
 	{
-		echo "<li>".$site_metadata."</li>\r";
+		echo "<li>".$cms_labels['site_metadata']."\r";
+		echo $site_metadata."</li>\r";
 	}
 	?>
 	<li><?php echo anchor("cms/setup/languages",$cms_labels['languages']); ?></li>
