@@ -158,7 +158,7 @@ list-style-type: none;
 #page form p, #page form div.row { display: block; }
 /* close commented backslash hack */
 
-#page form fieldset { border: 1px solid #999; padding: 1ex .666em; margin-bottom: 1em;}
+#page form fieldset { border: 1px solid #999; padding: .5em .666em; margin-bottom: 1em;}
 #page form fieldset legend { padding: 0 1ex; }
 #page form fieldset p label {
 margin-right:0.5em;
@@ -176,16 +176,17 @@ display: inline;
 margin: 0 1ex; width: auto;
 white-space:nowrap;
 }
+
 /*
 form input types 
 text,textarea,richtext,checkbox,radio,password,file
 */
-#page form .small_input { width: 9.5em;}
+#page form .small_input { width: 9.875em;}
 #page form .tiny_input { width: 2.5em;}
 #page form .text, #page form .password { width: 22em;}
 #page form .large_input { width: 28em;}
 #page form .textarea { width: 22em; height: 8em; }
-#page form .richtext { width: 22em; height: 24em; }
+#page form .richtext { width: 22em; height: 20em; }
 
 #page form div.row label, div.row div {
 	float: left;
@@ -220,6 +221,11 @@ div.msg strong {
 .mg-right { margin-right: 0.5em; }
 
 /* CMS only - properties table */
+#page form table#properties 
+{
+margin-bottom:1em;
+}
+
 #page form table#properties td,
 #page form table#properties thead th
 {
@@ -243,6 +249,7 @@ div.msg strong {
 	padding: 1ex;
 	border-bottom:1px dotted #999999;
 	vertical-align: top;
+	text-align: left;
 }
 #page form table#properties td input,
 #page form table#properties td select
