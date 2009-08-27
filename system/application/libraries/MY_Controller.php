@@ -25,17 +25,12 @@ class MY_Controller extends Controller {
 	function MY_Controller()
 	{	
 		parent::Controller();
-		$this->load->library('session');
-
 		$this->scope = 'site';
-
 		$this->_load_cms_labels();
 		$this->_load_site_metadata();
-		//$this->Language_model->count_active();
-
 	}
 
-/*	function _authenticate()
+	function _authenticate()
 	{
 		// if not logged in, redirect to login form
 		if(!$this->session->userdata('user_id'))
@@ -46,14 +41,14 @@ class MY_Controller extends Controller {
 			$this->data['userdata'] = $this->session->userdata;
 
 			// get site metadata
-			$this->Site_model->site_meta_lang = $this->session->userdata('default_lang');
+			$this->Site_model->temp_lang = $this->session->userdata('default_lang');
 			$this->_load_site_metadata();
 			$this->_load_cms_labels();
 
 		}
 
 	}
-*/
+
 	function _load_site_metadata() {
 
 		$base_raw = base_url();
@@ -127,10 +122,18 @@ class MY_Controller extends Controller {
 
 	function _load_cms_labels()
 	{	
-		if($this->Site_model->temp_lang == '')
+		$this->load->library('session');
+		$user_lang = $this->session->userdata('default_lang');
+
+		if($user_lang)
+		{
+			$this->Site_model->temp_lang = $user_lang;
+		}
+		else
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
+
 		$this->Site_model->lang_load();
 		
 		// load validation rules and input types from language files
@@ -145,7 +148,7 @@ class MY_Controller extends Controller {
 		$this->data['cms_labels'] = $this->lang->line('cms_labels');
 
     }
-	
+
 }
 // END _Controller class
 

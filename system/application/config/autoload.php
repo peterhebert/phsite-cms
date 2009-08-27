@@ -79,7 +79,7 @@ $autoload['plugin'] = array();
 |
 */
 
-$autoload['config'] = array();
+$autoload['config'] = array('phsite_prefs');
 
 
 /*
@@ -108,7 +108,7 @@ $autoload['language'] = array();
 |
 */
 
-$autoload['model'] = array('Site_model','Language_model');
+$autoload['model'] = array('Site_model');
 
 
 /*

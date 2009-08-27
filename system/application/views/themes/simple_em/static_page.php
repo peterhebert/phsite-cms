@@ -13,26 +13,35 @@ echo $html_header;
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
 	<div class="page-wrap block">
-		<?php
-		if(isset($title))
-		{
-			echo "<h1>{$title}</h1>\r";
-		}
-		if(isset($content_id))
-		{
-			echo "<p>content_id: {$content_id}</p>\r";
-		}
-
-		if(isset($content_body))
-		{
-			echo $content_body;
-		}
-		if(isset($content_keywords))
-		{
-			echo "<p>Keywords: {$content_keywords}</p>\r";
-		}
-
-		?>
+		<div class="column g2">
+			<?php
+			if(isset($menu))
+			{
+				echo $menu;
+			}
+			?>
+		</div>
+		<div class="float g1" id="content">
+			<?php
+			if(isset($title))
+			{
+				echo "<h1>{$title}</h1>\r";
+			}
+	
+			if(isset($tech_info))
+			{
+				echo $tech_info;
+			}
+			if(isset($content_body))
+			{
+				echo $content_body;
+			}
+			if(isset($content_keyword_links))
+			{
+				echo "<p>Keywords: {$content_keyword_links}</p>\r";
+			}
+			?>
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php 
 	if (isset($copyright)) {

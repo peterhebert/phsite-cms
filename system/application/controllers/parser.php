@@ -6,13 +6,14 @@ class Parser extends MY_Controller {
 	var $view;
 	var $segments = array();
 	var $breadcrumb_links = array();
+	var $page;
+
+	var $parent_title;
 	
 	function Parser()
 	{
 		parent::MY_Controller();	
 		$this->load->model('Content_model');
-		$this->load->model('Content_type_model');
-		
 		$this->load->helper('url');
 
 		$this->_load_site_metadata();
@@ -20,14 +21,30 @@ class Parser extends MY_Controller {
 	
     function index()
     {
+		$this->Content_model->link_mode = 0;
+		$this->Content_model->lang_mode = $this->Content_model->lang_count;
 
-		
-		$this->temp_uri = $this->uri->uri_string();
+		// check if language parameter is present
+		$this->segments = $this->uri->segment_array();
+
+		if(count($this->segments) > 0)
+		{
+			$this->Content_model->temp_lang = $this->segments[1];
+			if($this->Content_model->lang_load())
+			{
+				$remove_me = array_shift($this->segments);
+			} else
+			{
+				$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
+				$this->Content_model->lang_load();
+			}
+		}
+
+		$this->temp_uri = implode('/',$this->segments);
 
 		if($this->temp_uri != '')
 		{
 			$this->_process_uri();
-
 		}
 		else
 		{
@@ -35,178 +52,200 @@ class Parser extends MY_Controller {
 		}
 
 		$this->data['html_header'] = $this->load->view('embed_html_header',$this->data,true);
+		
 
 		$this->load->view($this->view,$this->data);
     }
 
 	function _process_uri()
 	{
-		
-		$body = "<p>Your requested URI is: ".$this->temp_uri."</p>\r";
-
-		$this->segments = $this->uri->segment_array();
-
-		// check if language parameter is present
-		$this->Language_model->ISO_639_3 = $this->uri->segment(1);
-		if($this->Language_model->load())
+		// check uri for page variable
+		$last_segment = count($this->segments) - 1;
+		$params = $this->uri->uri_to_assoc($last_segment);
+		if( array_key_exists('p',$params) && is_numeric($params['p']) )
 		{
-			$body .= "<p>Language: ".$this->Language_model->Ref_Name."</p>\r";
-			$this->Content_model->content_lang = array_shift($this->segments);
+			$this->page = array_pop($this->segments);
+			$remove_me  = array_pop($this->segments);
+		}
+		else
+		{
+			$this->page = 1;
 		}
 
-		$this->_uri_parent_loop();
-		
-		$this->data['breadcrumb'] = implode(' : ', $this->breadcrumb_links);
+		$this->_get_content_by_uri();
 
+		$this->data['breadcrumb'] = implode(' : ', $this->breadcrumb_links);
 		$this->data['content_id'] = $this->Content_model->content_id;
 		$this->data['user_id'] = $this->Content_model->user_id;
 		$this->data['parent_id'] = $this->Content_model->parent_id;
 		$this->data['type_id'] = $this->Content_model->type_id;
-		$this->data['type_name'] = $this->Content_model->type_name;
+		
+		$this->Content_model->scope = 'content';
+		$this->Content_model->load_type();
+		$this->data['type_uri_name'] = $this->Content_model->type_uri_name;
 		$this->data['title'] = $this->Content_model->title;
 		$this->data['subtitle'] = $this->Content_model->subtitle;
 
-		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_name;
+		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
-		$this->data['content_date_created'] = convert_time($this->Content_model->date_1, $this->Site_model->site_timezone);
-		if($this->Content_model->date_2 != '0000-00-00 00:00:00')
+		$this->data['content_date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
+		$this->data['content_date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
+
+		if($this->Content_model->date_end_expiry != '0000-00-00 00:00:00')
 		{
-			$this->data['content_date_expiry'] = convert_time($this->Content_model->date_2, $this->Site_model->site_timezone,DATE_RFC1123);
+			$this->data['content_date_expiry'] = convert_time($this->Content_model->date_end_expiry, $this->Site_model->site_timezone,DATE_RFC1123);
+			$this->data['content_date_expiry_RFC850'] = convert_time($this->Content_model->date_end_expiry, 'UTC',DATE_RFC850);
 		}
 
-		foreach($this->Content_model->content_metadata as $id => $field) {
+		foreach($this->Content_model->metadata as $id => $field) {
 			$tmp_field_label = 'content_'.$field['field_ref_name'];
 			$this->data[$tmp_field_label] = $field['value'];
 			
+			if($field['field_ref_name'] == 'keywords') {
+				$this->data['content_keyword_links'] = $this->Content_model->keyword_links($field['value']);
+			}
+
 			if($field['date_updated'] > $this->Content_model->date_updated) {
 				$this->Content_model->date_updated = $field['date_updated'];
 			}
+
 		}
 
 		$this->data['content_date_updated'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone);
+		$this->data['content_date_updated_W3C'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
 
+		// menu options by content type
+		switch ($this->Content_model->type_uri_name)
+		{
+			case '':
+				$menu = '';
+				break;
+			default:
+				$menu = "<h2>";
+				if($this->Content_model->parent_id == 0)
+				{
+					$menu .= $this->Site_model->title;
+				}
+				else
+				{
+					$menu .= $this->parent_title;
+				}
+				$menu .= "</h2>\r";
+				$this->Content_model->temp_id = $this->Content_model->parent_id;
+				$this->Content_model->current_level = 1;
+				$this->Content_model->levels = 2;
+				$menu .= $this->Content_model->site_map();
+		}
+		$this->data['menu'] = $menu;
+
+/*
+
+		
+		// children options by content type
+		switch ($this->Content_model->type_uri_name) {
+			case 'blog':
+				break;
+			case 'static_page':
+				break;
+			default:
+		}
+*/
 	}
 	
 	function _home()
 	{
 		$this->view = 'themes/'.$this->Site_model->theme.'/home';
 		
-		// list content
-		$this->Content_model->link_mode = 0;
-		$this->Content_model->lang_mode = $this->Language_model->lang_count;
-
-		$body = $this->Content_model->site_map(0,1,2);
-
-		if($body == '')
+		if($this->Content_model->lang_ISO_639_3 == '')
 		{
-			$body = 'no content';
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		}
-		
+
+		$body = $this->Content_model->site_map();
+
 		$this->data['body'] = $body;
+
 	}
 
-	function _uri_parent_loop()
+	function _get_content_by_uri()
 	{
 		$this->temp_uri = '';
-		$this->breadcrumb_links = array(anchor($this->temp_uri,'Home'));
+		$this->breadcrumb_links = array(anchor($this->temp_uri,$this->cms_labels['home']));
 		$current_path = 1;
 
 		$pathcount = count($this->segments);
 
-		foreach ($this->segments as $path) {
-
-			$this->Content_model->uri_title = $path;
+		foreach ($this->segments as $uri_title) {
+		
+			$this->Content_model->temp_value = $uri_title;
+			
 			$info = $this->Content_model->find_by_uri();
-
+			
 			if($info) {
-				$this->temp_uri .= '/'.$path;
-				
-				if($this->Content_model->content_lang != '')
+
+				if(count($info) == 1)
 				{
-					$this->Content_model->content_lang = $info->lang_ISO_639_3;
+					$this->Content_model->temp_id = $info[0]['content_id'];
+				}
+
+				$this->temp_uri .= '/'.$uri_title;
+				
+				if($this->Content_model->temp_lang != '')
+				{
+					if(count($info) == 1)
+					{
+						$this->Content_model->temp_lang = $info[0]['lang_ISO_639_3'];
+					}
 				}
 
 				if ($current_path < $pathcount) {
-					$this->breadcrumb_links[] = anchor($this->temp_uri, $info->title);
-					$this->Content_model->parent_id = $info->content_id;
+	
+					if(count($info) == 1)
+					{
+						$this->Content_model->parent_id = $info[0]['content_id'];
+						$this->breadcrumb_links[] = anchor($this->temp_uri, $info[0]['title']);
+						$this->parent_title = $info[0]['title'];
+					}
 					
 				} else {
-					$this->breadcrumb_links[] = $info->title;
-					$this->Content_model->content_id = $info->content_id;
+
+					if(count($info) == 1)
+					{
+						$this->Content_model->content_id = $info[0]['content_id'];
+						$this->Content_model->user_id = $info[0]['user_id'];
+						$this->Content_model->parent_id = $info[0]['parent_id'];
+						$this->Content_model->type_id = $info[0]['type_id'];
+						$this->Content_model->type_uri_name = $info[0]['type_uri_name'];
+						$this->Content_model->date_created = $info[0]['date_created'];
+						$this->Content_model->date_end_expiry = $info[0]['date_end_expiry'];
+						$this->Content_model->date_updated = $info[0]['date_updated'];
+						$this->Content_model->publish = $info[0]['publish'];
+						$this->Content_model->title_id = $info[0]['title_id'];
+						$this->Content_model->title = $info[0]['title'];
+						$this->Content_model->subtitle = $info[0]['subtitle'];
+						$this->Content_model->uri_title = $info[0]['uri_title'];
+						$this->Content_model->title_updated = $info[0]['title_updated'];
+
+						$this->breadcrumb_links[] = $info[0]['title'];
+					}
 				}
-				$current_path = $current_path + 1;
 
 			}
-
-
+			$current_path = $current_path + 1;
 		}
 		
-		$this->Content_model->get_content();
-
-	}
-
-
-	function search()
-	{
-
-		if($this->input->post('search-text') != '')
+		if($this->Content_model->content_id != '')
 		{
-			$term = "your search term was: <strong>".$this->input->post('search-text')."</strong>";
-			$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
+			$this->Content_model->temp_id = $this->Content_model->type_id;
+			$this->Content_model->scope = 'types';
+			$this->Content_model->list_fields_related();
+	
+			$this->Content_model->scope = 'content';
+			$this->Content_model->temp_id = $this->Content_model->content_id;
+			$this->Content_model->load_metadata();
 		}
-		else
-		{
-			$term = 'no search term entered';
-		}
-		$this->data['term'] = $term;
-
-		$this->view = 'themes/'.$this->Site_model->theme.'/search_results';
-
-		$this->load->view($this->view,$this->data);
+	
 	}
-
-// parsing models
-/*
-
-
-hierarchical:
-
-
-	if only one language:
-	
-		/uri_title/uri_title/uri_title
-		
-	multiple languages:
-	
-		/lang/uri_title/uri_title/uri_title
-
-
-no hierarchy
-
-	if only one language:
-	
-		/uri_title
-		
-	multiple languages:
-	
-		/lang/uri_title
-
-
-date based
-
-	yyyy/mm/dd/uri_title
-
-tags:
-
-uri_title	sanitized version of title
-hierarchy	hierarchical path based upon uri_title
-yyyy
-yyyy-mm
-yyyy-mm-dd	posted date values
-lang		ISO 639-3 3-digit language code
-
-
-*/
 
 }
 ?>

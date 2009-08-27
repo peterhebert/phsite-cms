@@ -5,21 +5,24 @@ class Setup extends MY_Controller
 	function Setup()
 	{
 		parent::MY_Controller();
-
 		$this->load->helper('form');
-
-		// load objects
 		$this->load->model('Content_model');
-		$this->load->model('Content_type_model');
-		$this->load->model('Field_model');
-		$this->load->model('User_model');
-
+		$this->load->library('form_validation');		
+	
 		//$this->_authenticate();
-		$this->_load_site_metadata();
 	}
 	
 	function index()
 	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['setup'];
+
 		if($this->session->userdata('default_lang'))
 		{
 			$this->data['site_meta_lang'] = $this->session->userdata('default_lang');
@@ -28,280 +31,53 @@ class Setup extends MY_Controller
 		{
 			$this->data['site_meta_lang'] = $this->Site_model->site_default_lang;
 		}
-		
-		$this->data['site_metadata'] =  $this->Language_model->site_meta_menu();
+		$this->Site_model->temp_value = 'cms/setup/site_metadata';
+		$this->data['site_metadata'] =  $this->Site_model->lang_meta_menu();
 
 		$this->load->view('cms/setup',$this->data);
+
+
 	}
-
-	function structure()
-	{
-	
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : 	Data Structure';
-		$this->data['breadcrumb'] = $breadcrumb;
-
-		$this->data['title_tag'] = 'Data Structure | Setup ';
-		$this->data['title_h1'] = 'Data Structure';
-
-		$form = "<p>You can define what types of content your CMS stores, and the individual data fields. Fields can be assinged to any content type.</p>\r";
-
-		$form .= "\t<div class=\"column w2\">";
-
-		// load list of content types
-		$this->Content_type_model->get_list();
-		$d2['list'] = $this->Content_type_model->types;
-		$form .= $this->load->view('cms/content_types_list',$d2, true);
-
-		$form .= "</div>\r";
-		$form .= "\t<div class=\"float w2\">";
-
-		// load list of fields
-		$d2['list'] = $this->Field_model->get_list();
-		$form .= $this->load->view('cms/field_list',$d2, true);
-
-		$form .= "</div>\r";
-
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata), true);
-
-		$this->data['form'] = $form;
-
-		// now load view
-		$this->load->view('cms/cms_form',$this->data);
-	}
-	
-	function languages()
-	{
-
-		if($this->input->post('submit')) {
-			$enabled_langs = explode(',',$this->input->post('enabled_langs'));
-			$sel_lang = $this->input->post('lang');
-
-			$new_lang = $this->input->post('new_lang');
-
-			if(is_array($sel_lang)) {
-				foreach($enabled_langs as $lang) {
-					if(in_array($lang,$sel_lang)) {
-						$activated = 1;
-					} else {
-						$activated = 0;
-					}
-					$this->Language_model->ISO_639_3 = $lang;
-					$this->Language_model->set_active($activated);
-				}
-			}
-
-			if(is_array($new_lang)) {
-				foreach($new_lang as $lang) {
-					$this->Language_model->ISO_639_3 = $lang;
-					$this->Language_model->set_active(1);
-				}
-			}
-
-		}
-		if($this->input->post('search_submit')) {
-			$matches_label = "Matches for '".$this->input->post('find')."'";
-			$matches = $this->Language_model->find_matches($this->input->post('find'));
-		}
-
-		$enabled = $this->Language_model->get_list();
-		$action = site_url('cms/setup/languages');
-		$attributes = array('name' => 'search_langs');
-
-		// search for matches
-		$form = form_open($action, $attributes);
-
-		$form .= "<p>";
-		$form .= form_label('Type to find languages', 'search');
-		$params = array(
-		'name'        => 'find',
-		'id'          => 'find',
-		);
-		$form .= form_input($params);
-		$form .= "</p>\n";
-
-		$form .= "<p>";
-		$form .= form_submit('search_submit', 'Search');
-		$form .= "</p>\n";
-		$form .= form_close();
-
-		// enable or disable - list of enabled languages
-		$attributes = array('name' => 'langform');
-		$active = array();
-		foreach($enabled as $lang) {
-			$active[] = $lang['ISO_639_3'];
-		}
-		$hidden_list = implode(',',$active);
-		$hidden = array(
-			'enabled_langs' => $hidden_list,
-		);
-		
-		$form .= form_open($action, $attributes,$hidden);
-
-		if(isset($matches)) {
-			$form .= "<p>";
-			$form .= form_label($matches_label);
-			$form .= "<span class=\"radiogroup w4\">";
-
-			foreach($matches as $lang) {
-				$params = array(
-				'name'        => "new_lang[]",
-				'id'        => "new_lang[]",
-				'value'       => $lang['ISO_639_3'],
-				'checked'     => $lang['activated'],
-				);
-				$form .= "<label>";
-				$form .= form_checkbox($params);
-				$form .= ' '.$lang['Inverted_Name'];
-				if($lang['Native_Name'] != '') {
-					$form .= " ({$lang['Native_Name']})";
-				}
-				$form .= "</label> ";
-			}
-			$form .= "</span></p>\n";
-		}
-
-		if(count($active) > 0) {
-			$form .= "<p>";
-			$form .= form_label('Activated Languages');
-			$form .= "<span class=\"radiogroup w4\">";
-
-			foreach($enabled as $lang) {
-				$params = array(
-				'name'        => "lang[]",
-				'id'        => "lang[]",
-				'value'       => $lang['ISO_639_3'],
-				'checked'     => TRUE,
-				);
-				$form .= "<label>";
-				$form .= form_checkbox($params);
-				$form .= ' '.$lang['Inverted_Name'];
-				if($lang['Native_Name'] != '') {
-					$form .= " ({$lang['Native_Name']})";
-				}
-				$form .= "</label> ";
-			}
-			$form .= "</span></p>\n";
-		} else {
-			$form .= "<p>No Activated Languages</p>\n";
-		}
-
-		$form .= "<p>";
-		$form .= form_submit('submit', 'Save');
-		$form .= "</p>\n";
-		$form .= form_close();
-
-		$this->data['form'] = $form;
-
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : 	Languages';
-		$this->data['breadcrumb'] = $breadcrumb;
-
-		$this->data['title_tag'] = 'Languages | Setup ';
-		$this->data['title_h1'] = 'Languages';
-
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
-
-		$this->load->view('cms/cms_form',$this->data);
-	
-	} // end languages()
-
-    // update site prefs
-	function site_prefs()
+	function site_preferences()
     {
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['site_prefs'];
 
-		$this->_process_prefs();		
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['site_prefs'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['site_prefs'];
+
+		$this->load->model('User_model');
+		$this->_process_site_preferences();		
 
 		$this->Site_model->load_site();
-		$this->data['form'] = $this->_form_prefs();
+		$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+		$this->data['form'] = $this->_form_site_preferences();
 
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : 	Site preferences';
-		$this->data['breadcrumb'] = $breadcrumb;
-
-		$this->data['title_tag'] = 'Site preferences | Setup ';
-		$this->data['title_h1'] = 'Site preferences';
-		
 		$msg = $this->Site_model->_output_messages();
-		
+
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
 		}
-
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
-
 		$this->load->view('cms/cms_form',$this->data);
 	}
-    // end site prefs
-
-    // update site metadata
-	function site_meta()
+	function _form_site_preferences()
     {
-
-		$params = $this->uri->uri_to_assoc(4);
-		if(array_key_exists('id',$params)) {
-			$this->Site_model->site_title_id = $params['id'];
-		}
-		$this->Site_model->reset_meta();
-		if(array_key_exists('lang',$params))
-		{
-			$this->Site_model->site_meta_lang = $params['lang'];
-		}
-		if($this->Site_model->site_meta_lang == '')
-		{
-			$this->Site_model->site_meta_lang = $this->Site_model->site_default_lang;
-		}
-
-
-		$this->_process_meta();
-
-		$this->Site_model->load_site_title();
-		$this->Site_model->load_site_meta();
-
-		$this->data['form'] =  $this->_form_meta();
-
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : 	Site metadata';
-		$this->data['breadcrumb'] = $breadcrumb;
-
-		$this->data['title_tag'] = 'Site metadata | Setup ';
-		$this->data['title_h1'] = 'Site metadata';
-		
-		$msg = $this->Site_model->_output_messages();
-		
-		if($msg)
-		{
-			$this->data['msg'] = $msg;
-		}
-
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
-
-		$this->load->view('cms/cms_form',$this->data);
-	}
-    // end site metadata
-
-    // generate form for site preferences
-	function _form_prefs()
-    {
-		$action = 'cms/setup/site_prefs';
+		$action = 'cms/setup/site_preferences';
 		$hidden = array('site_id' => $this->Site_model->site_id);
 		$attributes = array('name' => 'site_prefs','id' => 'site_prefs');
 
-		$form = form_open($action, $attributes, $hidden);
+		$form = form_open($action, $attributes);
 
 		// get list of top level pages for home page
 		$form_options = array();
-		$form_options['0'] = 'Auto-generate';
+		$form_options['0'] = $this->cms_labels['auto_generate'];
 
 		$this->Content_model->list_content(0,'','asc',0);
 		
@@ -311,43 +87,43 @@ class Setup extends MY_Controller
 		}
 		
 		$form .= "<p>";
-		$form .= form_label('Home Page', 'home_content_id');
+		$form .= form_label($this->cms_labels['home_page'], 'home_content_id');
 		$form .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);		
 		$form .= "</p>\r";
 
 		$this->Site_model->list_themes();
 		$form_options = $this->Site_model->site_themes;
 		$form .= "<p>";
-		$form .= form_label('Theme', 'theme');
+		$form .= form_label($this->cms_labels['theme'], 'theme');
 		$form .= form_dropdown('theme', $form_options, $this->Site_model->theme);		
 		$form .= "</p>\r";
 
 		$form_options = timezone_dropdown();
 		$form .= "<p>";
-		$form .= form_label('Time zone', 'site_timezone');
+		$form .= form_label($this->cms_labels['timezone'], 'site_timezone');
 		$form .= form_dropdown('site_timezone', $form_options, $this->Site_model->site_timezone);		
 		$form .= "</p>\r";
 
-		$form_options = $this->Language_model->get_list_dropdown();
+		$form_options = $this->Site_model->langs_dropdown();
 		$form .= "<p>";
-		$form .= form_label('Default language', 'site_default_lang');
+		$form .= form_label($this->cms_labels['default_lang'], 'site_default_lang');
 		$form .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
 		$form .= "</p>\r";
 
-		$form_options = $this->Content_type_model->get_list_dropdown();
+		$form_options = $this->Content_model->types_dropdown();
 		$form .= "<p>";
-		$form .= form_label('Default Content Type', 'default_content_type');
+		$form .= form_label($this->cms_labels['default_content_type'], 'default_content_type');
 		$form .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);		
 		$form .= "</p>\r";
 
 		$form_options = $this->User_model->get_list_dropdown(0,1);
 		$form .= "<p>";
-		$form .= form_label('Webmaster', 'site_admin_id');
+		$form .= form_label($this->cms_labels['webmaster'], 'site_admin_id');
 		$form .= form_dropdown('site_admin_id', $form_options, $this->Site_model->site_admin_id);		
 		$form .= "</p>\r";
 
 		$form .= "<p>";
-		$form .= form_label('Editor', 'site_editor_id');
+		$form .= form_label($this->cms_labels['editor'], 'site_editor_id');
 		$form .= form_dropdown('site_editor_id', $form_options, $this->Site_model->site_editor_id);		
 		$form .= "</p>\r";
 
@@ -358,7 +134,7 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->site_date_created
 		);
 		$form .= "<p>";
-		$form .= form_label('Date site created', 'site_date_created');
+		$form .= form_label($this->cms_labels['site_date_created'], 'site_date_created');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -369,7 +145,7 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->limit_posts
 		);
 		$form .= "<p>";
-		$form .= form_label('Posts per page (blogs)', 'limit_posts');
+		$form .= form_label($this->cms_labels['limit_posts'], 'limit_posts');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -380,7 +156,7 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->limit_thumbs
 		);
 		$form .= "<p>";
-		$form .= form_label('Thumbnails per page (galleries)', 'limit_thumbs');
+		$form .= form_label($this->cms_labels['limit_thumbs'], 'limit_thumbs');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -391,7 +167,18 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->img_size_th
 		);
 		$form .= "<p>";
-		$form .= form_label('Thumbnail image size', 'img_size_th');
+		$form .= form_label($this->cms_labels['img_size_th'], 'img_size_th');
+		$form .= form_input($form_options);
+		$form .= "</p>\n";
+
+		$form_options = array(
+		'class'        => 'tiny_input align-right',
+		'name'        => 'img_size_sm',
+		'id'          => 'img_size_sm',
+		'value'       => $this->Site_model->img_size_sm
+		);
+		$form .= "<p>";
+		$form .= form_label($this->cms_labels['img_size_sm'], 'img_size_sm');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -402,7 +189,7 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->img_size_md
 		);
 		$form .= "<p>";
-		$form .= form_label('Medium image size', 'img_size_md');
+		$form .= form_label($this->cms_labels['img_size_md'], 'img_size_md');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -413,37 +200,35 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->img_size_lg
 		);
 		$form .= "<p>";
-		$form .= form_label('Large image size', 'img_size_lg');
+		$form .= form_label($this->cms_labels['img_size_lg'], 'img_size_lg');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
-
 		$form .= "<p>";
-		$form .= form_submit('submit', 'Save');
+		$form .= form_submit('submit', $this->cms_labels['save']);
 		$form .= "</p>\n";
 
 		$form .= form_close();
 		return $form;
-
 	}
 
-	function _process_prefs()
-	{
+	function _process_site_preferences()
+    {
 		if( $this->input->post('submit') != '' )
 		{
-			$this->load->library('form_validation');		
 			// set validation rules
-			$this->form_validation->set_rules('home_content_id', 'Home Page', 'required|is_natural');
-			$this->form_validation->set_rules('site_admin_id', 'Webmaster', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('site_editor_id', 'Editor', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('site_default_lang', 'Default Language', 'required|alpha|exact_length[3]');
-			$this->form_validation->set_rules('default_content_type', 'Default Content Type', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('theme', 'Theme', 'required|alpha_dash');
-			$this->form_validation->set_rules('site_timezone', 'Time Zone', 'required');
-			$this->form_validation->set_rules('limit_posts', 'Posts per page (blogs)', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('limit_thumbs', 'Images per page (galleries)', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('img_size_th', 'Thumbnail image  size', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('img_size_md', 'Medium image size', 'required|is_natural_no_zero');
-			$this->form_validation->set_rules('img_size_lg', 'Large image size', 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('home_content_id', $this->cms_labels['home_page'], 'required|is_natural');
+			$this->form_validation->set_rules('site_admin_id', $this->cms_labels['webmaster'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('site_editor_id', $this->cms_labels['editor'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('site_default_lang', $this->cms_labels['default_lang'], 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('default_content_type', $this->cms_labels['default_content_type'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('theme', $this->cms_labels['theme'], 'required|alpha_dash');
+			$this->form_validation->set_rules('site_timezone', $this->cms_labels['timezone'], 'required');
+			$this->form_validation->set_rules('limit_posts', $this->cms_labels['limit_posts'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('limit_thumbs', $this->cms_labels['limit_thumbs'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_th', $this->cms_labels['img_size_th'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_sm', $this->cms_labels['img_size_sm'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_md', $this->cms_labels['img_size_md'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('img_size_lg', $this->cms_labels['img_size_lg'], 'required|is_natural_no_zero');
 
 			// validate
 			if ($this->form_validation->run() == FALSE)
@@ -475,32 +260,68 @@ class Setup extends MY_Controller
 				$this->Site_model->limit_posts = $this->input->post('limit_posts');
 				$this->Site_model->limit_thumbs = $this->input->post('limit_thumbs');
 				$this->Site_model->img_size_th = $this->input->post('img_size_th');
+				$this->Site_model->img_size_sm = $this->input->post('img_size_sm');
 				$this->Site_model->img_size_md = $this->input->post('img_size_md');
 				$this->Site_model->img_size_lg = $this->input->post('img_size_lg');
 
 				$success = $this->Site_model->update_site();
 				if($success)
 				{
-					$this->Site_model->messages[] = 'Site preferences updated successfully';
+					$this->Site_model->messages[] = $this->cms_labels['site_prefs_update_success'];
 				}
 
 			} // end validation
 		} // end form processing
+	}
 
-	} // end _process_prefs()
+	function site_metadata()
+    {
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['site_metadata'];
 
-	function _form_meta()
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['site_metadata'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['site_metadata'];
+
+		$this->_process_site_metadata();		
+		$this->data['form'] = $this->_form_site_metadata();
+		
+		$msg = $this->Site_model->_output_messages();
+		
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+		$this->data['sidebar'] = $this->_site_meta_menu();
+
+		$this->load->view('cms/content_edit',$this->data);
+	}
+	
+	function _form_site_metadata()
 	{
-		$action = 'cms/setup/site_meta';
-		$hidden = array('site_id' => $this->Site_model->site_id, 'site_title_id' => $this->Site_model->site_title_id);
-		$attributes = array('name' => 'site_meta','id' => 'site_meta');
+		// first determine lang
+		if($this->uri->total_segments() == 5)
+		{
+			$this->Site_model->temp_lang = $this->uri->segment(5);
+		}
+		
+		$this->Site_model->load_site_metadata();
+
+		$action = $this->uri->uri_string();
+		$hidden = array('site_id' => $this->Site_model->site_id, 'title_id' => $this->Site_model->title_id);
+		$attributes = array('name' => 'site_metadata','id' => 'site_metadata');
 
 		$form = form_open($action, $attributes, $hidden);
 
-		$form_options = $this->Language_model->get_list_dropdown();
+		$form_options = $this->Site_model->langs_dropdown();
 		$form .= "<p>\r";
-		$form .= form_label('Language', 'site_meta_lang');
-		$form .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->site_meta_lang);		
+		$form .= form_label($this->cms_labels['language'], 'site_meta_lang');
+		$form .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->temp_lang);		
 		$form .= "</p>\r";
 
 		$form_options = array(
@@ -510,7 +331,7 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->title
 		);
 		$form .= "<p>";
-		$form .= form_label('Title', 'title');
+		$form .= form_label($this->cms_labels['title'], 'title');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
@@ -521,29 +342,31 @@ class Setup extends MY_Controller
 		'value'       => $this->Site_model->subtitle
 		);
 		$form .= "<p>";
-		$form .= form_label('Subtitle', 'subtitle');
+		$form .= form_label($this->cms_labels['subtitle'], 'subtitle');
 		$form .= form_input($form_options);
 		$form .= "</p>\n";
 
-		$fd_meta = $this->Site_model->site_metadata;
+		$fd_meta = $this->Site_model->metadata;
 
 		foreach($fd_meta as $index => $fd)
 		{
-
 			// hidden fields
 			$form_options = array(
-			'site_meta_id[]' => $fd['site_meta_id'],
 			'field_id[]' =>  $index,
-			'field_name[]' =>  $fd['field_name'],
+			'field_ref_name[]' =>  $fd['field_ref_name'],
+			'meta_id[]' => $fd['meta_id'],
 			'required[]' =>  $fd['required'],
+			'field_needs_lang[]' => $fd['field_needs_lang']
 			);
-
 			$form .= form_hidden($form_options);
 
+			$this->Site_model->label_scope = 'field';
+			$this->Site_model->temp_id = $index;
+
 			$tmp_label = $fd['field_ref_name'];
-			if($fd['field_name'] != '')
+			if($this->Site_model->load_label())
 			{
-				$tmp_label = $fd['field_name'];
+				$tmp_label = $this->Site_model->label;
 			}
 			$form .= "<p>\r";
 			$form .= form_label($tmp_label, $fd['field_ref_name']);
@@ -553,6 +376,7 @@ class Setup extends MY_Controller
 			'value' => $fd['value'],
 			'class' => $fd['field_input_type']
 			);
+
 			switch($fd['field_input_type']) {
 
 			case 'directory':
@@ -601,10 +425,10 @@ class Setup extends MY_Controller
 			default:
 				$form .=  form_input($form_options);
 			}
+
 			$form .= "</p>\r";
 		}
-		$form .= form_fieldset_close();
-
+		
 		$form .= "<p>";
 		$form .= form_submit('submit', 'Save');
 		$form .= "</p>\n";
@@ -613,24 +437,76 @@ class Setup extends MY_Controller
 		return $form;
 	}
 	
-	function _process_meta()
+	function _site_meta_menu()
     {
+		$menu = '';
+		
+		if($this->Site_model->site_id != '')
+		{
+		
+			// list active languages
+			$lang_links = array();
+			$this->Site_model->list_langs();
+			foreach($this->Site_model->lang_list as $llang)
+			{
+
+				$temp_link = 'cms/setup/site_metadata/lang/'.$llang['ISO_639_3'];
+				if($llang['Native_Name'] != '')
+				{
+					$temp_txt = $llang['Native_Name'];
+				}
+				else
+				{
+					$temp_txt = $llang['Ref_Name'];
+				}
+				$lang_links[] = anchor($temp_link,$temp_txt);
+			}
+	
+			$menu .=  "<ul>\r";
+			$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
+			$menu .= ul($lang_links);
+			$menu .=  "</li>\r";
+	
+			$del_base = 'cms/setup/site_meta_delete/';
+			if($this->Site_model->temp_lang != '')
+			{
+				$del_lang = $del_base.'/lang/'.$this->Site_model->temp_lang;
+				$this->Site_model->lang_load();
+				$del_links[] = anchor($del_lang,$this->Site_model->lang_Ref_Name, array('title' => $this->cms_labels['delete_this_lang']));
+			}
+
+			$del_links[] = anchor($del_base,$this->cms_labels['all_langs'], array('title' => $this->cms_labels['delete_site_meta_all_langs']));
+
+			$menu .= "<li>".$this->cms_labels['delete'];
+			$menu .= ul($del_links);
+			$menu .= "</li>\r";
+
+			$menu .=  "</ul>\r";
+
+		}
+
+		return $menu;
+	}
+
+	function _process_site_metadata()
+    {
+		//echo "processsing";
 
 		// process form
 		if( $this->input->post('submit') != '' )
 		{
-			// validate
-			$this->load->library('form_validation');		
 
 			// set validation rules
-			$this->form_validation->set_rules('site_meta_lang', 'Language', 'required|alpha|exact_length[3]');
-			$this->form_validation->set_rules('title', 'Site Title', 'required');
+			$this->form_validation->set_rules('site_meta_lang', $this->cms_labels['language'], 'required|alpha|exact_length[3]');
+			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 
 			// load custom field list and add validation rules
-			$this->Site_model->load_meta_fields();
-			
-			$meta_fields = $this->Site_model->site_meta_fields;
 
+			$this->Site_model->scope = 'site';
+			$this->Site_model->temp_id = $this->input->post('site_id');
+			$this->Site_model->list_fields_related();
+			
+			$meta_fields = $this->Site_model->field_list;
 			foreach($meta_fields as $fd)
 			{
 				$tmp_valid = array();
@@ -644,70 +520,86 @@ class Setup extends MY_Controller
 				{
 					$tmp_valid[] = $fd['field_validation'];
 				}
+				
+				$lbl_name = $fd['field_ref_name'];
+	
+				$this->Site_model->label_scope = 'field';
+				$this->Site_model->temp_id = $fd['field_id'];
+	
+				if($this->Site_model->load_label())
+				{
+					$lbl_name = $this->Site_model->label;
+				}
+
 				$concat_valid = implode('|', $tmp_valid);
 
 				if($concat_valid != '')
 				{
-					$this->form_validation->set_rules('value_'.$fd['field_id'], $fd['field_name'], $concat_valid);
+					$this->form_validation->set_rules('value_'.$fd['field_id'], $lbl_name, $concat_valid);
 				}
 
 			}
 
 			// run validation and load field values
 			$form_is_valid = $this->form_validation->run();
-
-			$this->Site_model->site_id = $this->input->post('site_id');
-			$this->Site_model->site_title_id = $this->input->post('site_title_id');
-			$this->Site_model->site_meta_lang = $this->input->post('site_meta_lang');
-			$this->Site_model->title = $this->input->post('title');
-			$this->Site_model->subtitle = $this->input->post('subtitle');
-
-			$tmp_field_id = $this->input->post('field_id');
-			$tmp_field_name = $this->input->post('field_name');
-			$tmp_meta_id = $this->input->post('site_meta_id');
-			$tmp_required = $this->input->post('required');
-			$tmp_field_needs_lang = $this->input->post('field_needs_lang');
 			
-			$form_meta = array();
-			foreach($tmp_field_id as $index => $tmp_id)
-			{
-				$val_lbl = 'value_'.$tmp_id;
-				$value = $this->input->post($val_lbl);
-				
-				$this->Field_model->field_id = $tmp_id;
-				$this->Field_model->load();
-				
-				if($this->Field_model->field_ref_name == 'keywords')
-				{
-					$value = csv_normalize($value);
-				}
-				
-				$tmp_meta = array(
-				'site_meta_id' => $tmp_meta_id[$index],
-				'field_id' => $tmp_id,
-				'field_name' => $tmp_field_name[$index],
-				'value' => $value,
-				'required' => $tmp_required[$index],
-				'field_ref_name' => $this->Field_model->field_ref_name,
-				'field_needs_lang' => $tmp_field_needs_lang[$index],
-				);
-
-				$form_meta["$tmp_id"] = $tmp_meta;
-
-			}
-			$this->Site_model->site_metadata = $form_meta;
-
-			// on valid, write metadata
 			if ($form_is_valid)
 			{
+				$this->Site_model->site_id = $this->input->post('site_id');
+				$this->Site_model->title_rel_id = $this->input->post('site_id');
+				$this->Site_model->title_id = $this->input->post('title_id');
+				$this->Site_model->temp_lang = $this->input->post('site_meta_lang');
+				$this->Site_model->title = $this->input->post('title');
+				$this->Site_model->subtitle = $this->input->post('subtitle');
+	
+				$tmp_field_id = $this->input->post('field_id');
+				$tmp_field_name = $this->input->post('field_name');
+				$tmp_meta_id = $this->input->post('meta_id');
+				$tmp_required = $this->input->post('required');
+				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+			
+				$this->Site_model->scope = 'site';
+				$form_meta = array();
+				foreach($tmp_field_id as $index => $fd_id)
+				{
+					$val_lbl = 'value_'.$fd_id;
+					$value = $this->input->post($val_lbl);
+					
+					$this->Site_model->temp_id = $fd_id;
+					$this->Site_model->load_field();
+					
+					if($this->Site_model->field_ref_name == 'keywords')
+					{
+						$value = csv_normalize($value);
+					}
+					
+
+					$tmp_meta = array(
+					'meta_id' => $tmp_meta_id[$index],
+					'scope' => $this->Site_model->scope,
+					'meta_rel_id' => $this->Site_model->site_id,
+					'field_id' => $this->Site_model->field_id,
+					'field_ref_name' => $this->Site_model->field_ref_name,
+					'value' => $value,
+					'required' => $tmp_required[$index],
+					'field_input_type' => $this->Site_model->field_input_type,
+					'field_validation' => $this->Site_model->field_validation,
+					'field_needs_lang' => $this->Site_model->field_needs_lang,
+					);
+	
+					$form_meta["$fd_id"] = $tmp_meta;
+	
+				}
+				
+				$this->Site_model->metadata = $form_meta;
 
 				// update site metadata 
 				$this->Site_model->update_title();
-				$this->Site_model->update_meta();
+				$this->Site_model->update_metadata();
 
 				if(count($this->Site_model->messages) == 0)
 				{
-					$this->Site_model->messages[] = "site metadata updated successfully";
+					$this->Site_model->messages[] = $this->cms_labels['site_meta_update_success'];
 				}
 
 
@@ -719,14 +611,331 @@ class Setup extends MY_Controller
 
 	} // end _process_meta()
 
+
+	function fields()
+	{
+
+		$this->Content_model->list_fields();
+		$temp_list = $this->Content_model->field_list;
+		
+		$fields = array();
+		
+		foreach($temp_list as $field)
+		{
+			$this->Content_model->reset_label();
+			$this->Content_model->label_scope = 'field';
+
+			$this->Content_model->temp_id = $field['field_id'];
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+			$lbl = $this->Content_model->load_label();
+
+			$uri = "cms/setup/field_edit/id/".$field['field_id'];
+		
+			if($lbl) {
+				$uri .= "/lang/".$this->Content_model->temp_lang;
+				$text = $this->Content_model->label;
+			} else {
+				$text = $field['field_ref_name'];
+			}
+			$attr = array('title' => sprintf($this->cms_labels['edit_field'],$text));
+			
+			$fields[] = anchor($uri,$text,$attr);
+		
+		}
+
+		$form = "<h3 class=\"first\">".$this->cms_labels['fields']."</h3>\r";
+		$form .= '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
+		$form .= ul($fields);
+		$this->data['form'] =  $form;
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['fields'];
+		
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['fields'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
+		$this->data['title_h1'] = $this->cms_labels['fields'];
+		
+		$this->load->view('cms/cms_form',$this->data);
+
+	}
+
+	function field_edit()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = anchor("cms/setup/fields",$this->cms_labels['fields']);
+		$breadcrumb[] = $this->cms_labels['field_editor'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag = array(
+		$this->cms_labels['field_editor'],
+		$this->cms_labels['fields'],
+		$this->cms_labels['setup']
+		);
+		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
+		$this->data['title_h1'] = $this->cms_labels['field_editor'];
+
+		$this->_process_field_edit();
+		$this->_load_field_data_types();
+
+		$params = $this->uri->uri_to_assoc(4);
+
+		if($this->Content_model->field_id != '')
+		{
+			$this->Content_model->temp_id = $this->Content_model->field_id;
+		}
+		else
+		{
+			if(array_key_exists('id',$params))
+			{
+				$this->Content_model->temp_id = $params['id'];
+			}
+		}
+
+		$loaded = $this->Content_model->load_field();
+
+		if(array_key_exists('lang',$params))
+		{
+			$this->Content_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		}
+
+		if($loaded)
+		{
+			$this->Content_model->label_scope = 'field';
+			$this->Content_model->label_rel_id = $this->Content_model->field_id;
+			$this->Content_model->load_label();
+		}
+
+		$this->data['form'] = $this->_form_field_edit();
+
+		$sidebar = '<h2>'.$this->cms_labels['edit_by_lang']."</h2>\r";
+		$uri = 'cms/setup/field_edit';
+		if($this->Content_model->field_id != '')
+		{
+			$uri .= '/id/'.$this->Content_model->field_id;
+		}
+		$this->Content_model->temp_value = $uri;
+		
+		$sidebar .= $this->Content_model->lang_meta_menu();
+		$this->data['sidebar'] = $sidebar;
+		
+		$msg = $this->Content_model->_output_messages();
+		
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+		$this->load->view('cms/cms_form',$this->data);
+	}
+
+	function _load_field_data_types()
+	{	
+		$user_lang = $this->session->userdata('default_lang');
+
+		if($user_lang)
+		{
+			$this->Site_model->temp_lang = $user_lang;
+		}
+		else
+		{
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+		}
+
+		$this->Site_model->lang_load();
+		
+		// load validation rules and input types from language files
+		$load_lang = $this->Site_model->lang_CI_Name;
+		if($load_lang == '')
+		{
+			$load_lang = 'english';
+		}
+
+		$this->lang->load('form_input', $load_lang);
+		$this->Content_model->data_types = $this->lang->line('data_types');
+		$this->Content_model->input_types = $this->lang->line('input_types');
+		$this->Content_model->validation_rules = array_keys($this->lang->line('data_types'));
+    }
+
+	function _form_field_edit()
+	{
+
+		$action = "cms/setup/field_edit/id/".$this->Content_model->field_id;
+		$action .= "/lang/".$this->Content_model->temp_lang;
+		
+		$attributes = array('name' => "field_editor", 'id' => "field_editor");
+		$hidden = array(
+		'field_id'  => $this->Content_model->field_id,
+		'label_id'  => $this->Content_model->label_id
+		);
+
+		$form = form_open($action,$attributes,$hidden)."\r";
+
+		// main data
+		$form .= form_fieldset($this->cms_labels['field_info']);
+		$form .= "\r";
+		
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['ref_name'], 'field_ref_name');
+		$form .= form_input('field_ref_name',$this->Content_model->field_ref_name); 
+		$form .= "</p>\r";
+		
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['input_type'], 'field_input_type');
+		$form .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type); 
+		$form .= "</p>\r";
+
+		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
+		if($this->Content_model->field_needs_lang == '')
+		{
+			$needs_lang = 1;
+		}
+		else
+		{
+			$needs_lang = $this->Content_model->field_needs_lang;
+		}
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
+		$form .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+		
+		// metadata
+		$form .= form_fieldset($this->cms_labels['field_metadata']);
+		$form .= "\r";
+
+		$form_options = $this->Content_model->langs_dropdown();
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['language'], 'field_lang');
+		$form .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['field_label'], 'field_label');
+		$form .= form_input('field_label',$this->Content_model->label); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		// validation
+		$form .= form_fieldset($this->cms_labels['validation']);
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['data_type'], 'validation_string');
+		$form .= form_dropdown('validation_string', $this->Content_model->data_types, $this->Content_model->validation_string); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['exact_length'], 'validation_exact');
+		$form .= form_input('validation_exact',$this->Content_model->validation_exact); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['min_length'], 'validation_min');
+		$form .= form_input('validation_min',$this->Content_model->validation_min); 
+		$form .= "</p>\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['max_length'], 'validation_max');
+		$form .= form_input('validation_max',$this->Content_model->validation_max); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		$form .= "<p>\r";
+		$submit_data = array(
+		'name'  => 'submit',
+		'id'  => 'submit'
+		);
+		$form .= form_submit($submit_data, $this->cms_labels['save']);
+		$form .= "</p>\r";
+		$form .= form_close("\r");
+
+		return $form;
+	}
+
+	function _process_field_edit()
+	{
+		// do validation if form submitted
+		if($this->input->post('submit') != '')
+		{
+			// set validation rules
+			$this->form_validation->set_rules('field_ref_name', $this->cms_labels['ref_name'], 'required');
+			$this->form_validation->set_rules('field_input_type', $this->cms_labels['input_type'], 'required|callback_valid_input');
+			$this->form_validation->set_rules('validation_string', $this->cms_labels['data_type'], 'callback_valid_valid');
+			$this->form_validation->set_rules('validation_exact', $this->cms_labels['exact_length'], 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_min', $this->cms_labels['min_length'], 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_max', $this->cms_labels['max_length'], 'is_natural_no_zero');
+
+			$this->form_validation->set_rules('field_lang', $this->cms_labels['language'], 'required|is_lang');
+			$this->form_validation->set_rules('field_label', $this->cms_labels['field_label'], 'required');
+
+			$form_is_valid = $this->form_validation->run();
+		
+			// run validation rules
+			if ($form_is_valid)
+			{
+
+				$this->Content_model->field_id = $this->input->post('field_id');
+				$this->Content_model->field_ref_name = $this->input->post('field_ref_name');	
+				$this->Content_model->field_input_type = $this->input->post('field_input_type');
+				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang');
+				$this->Content_model->validation_string = $this->input->post('validation_string');	
+				$this->Content_model->validation_exact = $this->input->post('validation_exact');	
+				$this->Content_model->validation_min = $this->input->post('validation_min');	
+				$this->Content_model->validation_max = $this->input->post('validation_max');	
+
+				$this->Content_model->label_id = $this->input->post('label_id');	
+				$this->Content_model->label = $this->input->post('field_label');
+				$this->Content_model->label_scope = 'field';
+				$this->Content_model->label_rel_id = $this->input->post('field_id');
+				$this->Content_model->label_rel_name = $this->Content_model->field_ref_name;
+				$this->Content_model->temp_lang = $this->input->post('field_lang');	
+
+				$success_field = $this->Content_model->update_field();
+				if($success_field)
+				{
+					$success_meta = $this->Content_model->update_label();
+					if(!$success_meta)
+					{
+						$this->Content_model->messages[] = sprintf($this->cms_labels['update_failure'], $this->cms_labels['field_label']);
+					}
+				}
+				else
+				{
+					$this->Content_model->messages[] = sprintf($this->cms_labels['update_failure'], $this->Content_model->field_ref_name);
+				}
+
+				if(count($this->Content_model->messages) == 0)
+				{
+					$this->Content_model->messages[] = sprintf($this->cms_labels['update_success'], $this->Content_model->field_ref_name);
+				}
+
+			}
+			else
+			{
+				$this->Content_model->messages[] = validation_errors(); 
+			}
+		}
+
+	}
+
 	function site_meta_fields()
 	{
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : Site metadata fields';
-		$this->data['breadcrumb'] = $breadcrumb;
 
-		$this->data['title_tag'] = 'Site metadata fields | Setup ';
-		$this->data['title_h1'] = 'Site metadata fields';
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['site_meta_fields'];
+
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['site_meta_fields'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['site_meta_fields'];
 
 		$this->_process_meta_fields();
 		
@@ -739,10 +948,8 @@ class Setup extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
 
+		
 		$this->load->view('cms/cms_form',$this->data);
 	}
 
@@ -756,49 +963,47 @@ class Setup extends MY_Controller
 		$form = form_open($action, $attributes, $hidden);
 
 		// fields
-		$form .= form_fieldset('Fields');
-		$form .= "\r";
+
+		$this->Site_model->list_site_meta_fields();
+		
+		$fieldCount = count($this->Site_model->field_list);
+		$fieldNo = 1;
 
 		$form .= "<table id=\"properties\">\r";
 		$form .= "<thead>\r";
 		$form .= "<tr>\r";
-		$form .= "<th scope=\"col\" id=\"hd_name\">field name</th>\r";
-		$form .= "<th scope=\"col\" id=\"hd_exists\">use for site metadata?</th>\r";
-		$form .= "<th scope=\"col\" id=\"hd_req\">required?</th>\r";
-		$form .= "<th scope=\"col\" id=\"hd_order\">order</th>\r";
+		$form .= "<th id=\"fd_name\">".$this->cms_labels['field']."</th>\r";
+		$form .= "<th id=\"fd_exists\">".$this->cms_labels['field_use_for_metadata']."</th>\r";
+		$form .= "<th id=\"fd_req\">".$this->cms_labels['required']."</th>\r";
+		$form .= "<th id=\"fd_order\">".$this->cms_labels['order']."</th>\r";
 		$form .= "</tr>\r";
 		$form .= "</thead>\r";
+		
 		$form .= "<tbody>\r";
 
-		$this->Site_model->list_fields();
-		
-		$fieldCount = count($this->Site_model->site_meta_fields);
-		$fieldNo = 1;
-
-		foreach($this->Site_model->site_meta_fields as $field)
+		foreach($this->Site_model->field_list as $field)
 		{
+			$row_header = form_hidden('field_id[]', $field['field_id']);
+			$row_header .= form_hidden('rf_id[]', $field['rf_id']);
 
-			if($field['field_name'] != '') {
-				$temp_name = $field['field_name'];
+			/* get label for field */
+			$this->Site_model->reset_label();
+			$this->Site_model->label_scope = 'field';
+			$this->Site_model->temp_id = $field['field_id'];
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->Site_model->load_label();
+
+			if($this->Site_model->label_id != '') {
+				$row_header .= $this->Site_model->label;
 			} else {
-				$temp_name = $field['field_ref_name'];
+				$row_header .= $field['field_ref_name'];
 			}
 
-			if($fieldNo < $fieldCount) {
-			$form .= "<tr>\n";
-			} else {
-			$form .= "<tr class=\"last\">\n";
-			}
-			$fieldNo = $fieldNo + 1;
-	
-			$form .= form_hidden('field_id[]', $field['field_id']);
-	
-			if($field['rel_id'] != '') {
+			if($field['rf_id'] != '') {
 				$exists = true;
 			} else {
 				$exists = false;
 			}
-			$form .= form_hidden('rel_id[]', $field['rel_id']);
 
 			$params = array(
 			'name'        => 'exists[]',
@@ -807,8 +1012,7 @@ class Setup extends MY_Controller
 			'checked'     => $exists
 			);
 	
-			$form .= "<th headers=\"hd_name\" id=\"{$temp_name}\" scope=\"row\">{$temp_name}</th>\n";
-			$form .= "<td headers=\"hd_exists\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+			$chk_exist = form_checkbox($params);
 
 			$params = array(
 			'name'        => 'required[]',
@@ -817,7 +1021,7 @@ class Setup extends MY_Controller
 			'checked'     => $field['required']
 			);
 
-			$form .= "<td headers=\"{$temp_name} hd_req\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+			$chk_req = form_checkbox($params);
 
 			$params = array(
 			'name'        => "order[]",
@@ -827,22 +1031,26 @@ class Setup extends MY_Controller
 			'size'        => '3'
 			);
 
-			$form .= "<td headers=\"{$temp_name} hd_order\">".form_input($params)."</td>\n";
+			$input_order = form_input($params);
+			
+			$form .= "<tr>\r";
+			$form .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$form .= "<td headers=\"fd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$form .= "<td headers=\"fd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$form .= "<td headers=\"fd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$form .= "</tr>\r";
 
-
-			$form .= "</tr>\n";
+			$fieldNo += 1;
 
 		}
+		$form .= "</tbody>\r";
+		$form .= "</table>\r";
 
-		$form .= "</tbody></table>\n";
 
-
-		$form .= form_fieldset_close("\r");
 		$form .= form_submit('submit', 'Save');
 		$form .= form_close();
 		return $form;
 	}
-
 
 	function _process_meta_fields()
 	{
@@ -850,10 +1058,8 @@ class Setup extends MY_Controller
 		if($this->input->post('submit') != '')
 		{
 			// get values from form post data
-			$this->Site_model->site_id = $this->input->post('site_id');
-			
 			$temp_fields = $this->input->post('field_id');
-			$temp_rels = $this->input->post('rel_id');
+			$temp_rels = $this->input->post('rf_id');
 			$temp_exists = $this->input->post('exists');
 			$temp_required = $this->input->post('required');
 			$temp_order = $this->input->post('order');
@@ -863,7 +1069,7 @@ class Setup extends MY_Controller
 			{
 				$temp_field = array(
 				'field_id' => $id,
-				'rel_id' => $temp_rels[$index],
+				'rf_id' => $temp_rels[$index],
 				'exists' => FALSE,
 				'required' => 0,
 				'order' => $temp_order[$index],
@@ -879,12 +1085,512 @@ class Setup extends MY_Controller
 				
 				$field_updates[] = $temp_field;
 			}
-			$this->Site_model->site_meta_fields = $field_updates;
-			$this->Site_model->update_meta_fields();
+
+			$this->Site_model->field_list = $field_updates;
+			$this->Site_model->scope = 'site';
+			$this->Site_model->update_fields_related();
 
 		}
 		
 	}// end _process_meta_fields()
+
+	function languages()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['languages'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['languages'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['languages'];
+
+		$this->_process_languages();
+		$this->data['form'] = $this->_form_languages();
+
+		$msg = $this->Site_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+
+	function _form_languages()
+	{
+		$this->Site_model->list_langs();
+		$enabled = $this->Site_model->lang_list;
+
+		$action = "cms/setup/languages";
+		$attributes = array('name' => "search_langs", 'id' => "search_langs");
+		
+		// search for lang matches
+		$form = form_open($action,$attributes)."\r";
+		$form .= "<p>";
+		$form .= form_label($this->cms_labels['lang_find'], 'search');
+		$params = array(
+		'name'        => 'find',
+		'id'          => 'find',
+		);
+		$form .= form_input($params);
+		$form .= "</p>\n";
+
+		$form .= "<p>";
+		$form .= form_submit('search_submit', $this->cms_labels['search']);
+		$form .= "</p>\n";
+		$form .= form_close();
+		
+		// enable or disable - list of enabled languages
+		$attributes = array('name' => "langform", 'id' => "langform");
+		$active = array();
+
+		foreach($enabled as $lang) {
+			$active[] = $lang['ISO_639_3'];
+		}
+
+		$hidden_list = implode(',',$active);
+
+		$hidden = array(
+			'enabled_langs' => $hidden_list,
+		);
+
+		$form .= form_open($action, $attributes,$hidden);
+		$matches = $this->Site_model->matches;
+		if(is_array($matches) && count($matches) > 0)
+		{
+			$form .= "<p>";
+			$form .= form_label($this->Site_model->label);
+			$form .= "<span class=\"radiogroup w4\">";
+			
+			foreach($matches as $lang)
+			{
+				$params = array(
+				'name'        => "new_lang[]",
+				'id'        => "new_lang[]",
+				'value'       => $lang['ISO_639_3'],
+				'checked'     => $lang['activated'],
+				);
+				$form .= "<label>";
+				$form .= form_checkbox($params);
+				$form .= ' '.$lang['Inverted_Name'];
+				if($lang['Native_Name'] != '') {
+					$form .= " ({$lang['Native_Name']})";
+				}
+				$form .= "</label> ";
+			}
+			
+			$form .= "</span></p>\r";
+		}
+
+		if(count($active) > 0) {
+			$form .= "<p>";
+			$form .= form_label($this->cms_labels['langs_activated']);
+			$form .= "<span class=\"radiogroup w4\">";
+
+			foreach($enabled as $lang) {
+				$params = array(
+				'name'        => "lang[]",
+				'id'        => "lang[]",
+				'value'       => $lang['ISO_639_3'],
+				'checked'     => TRUE,
+				);
+				$form .= "<label>";
+				$form .= form_checkbox($params);
+				$form .= ' '.$lang['Inverted_Name'];
+				if($lang['Native_Name'] != '') {
+					$form .= " ({$lang['Native_Name']})";
+				}
+				$form .= "</label> ";
+			}
+			$form .= "</span></p>\n";
+		} else {
+			$form .= "<p>".$this->cms_labels['no_langs_activated']."</p>\n";
+		}
+
+		$form .= "<p>";
+		$form .= form_submit('submit', $this->cms_labels['save']);
+		$form .= "</p>\n";
+		$form .= form_close();
+		return $form;
+	}
+
+	function _process_languages()
+	{
+		if($this->input->post('submit')) {
+			$enabled_langs = explode(',',$this->input->post('enabled_langs'));
+			$sel_lang = $this->input->post('lang');
+
+			$new_lang = $this->input->post('new_lang');
+
+			if(is_array($sel_lang)) {
+				foreach($enabled_langs as $lang) {
+					if(in_array($lang,$sel_lang)) {
+						$activated = 1;
+					} else {
+						$activated = 0;
+					}
+					$this->Site_model->temp_lang = $lang;
+					$this->Site_model->temp_value = $activated;
+					$this->Site_model->lang_set_active();
+				}
+			}
+
+			if(is_array($new_lang)) {
+				foreach($new_lang as $lang) {
+					$this->Site_model->temp_lang = $lang;
+					$this->Site_model->temp_value = 1;
+					$this->Site_model->lang_set_active();
+				}
+			}
+
+		}
+		if($this->input->post('search_submit')) {
+			$this->Site_model->label = sprintf($this->cms_labels['matches'], $this->input->post('find'));
+			$this->Site_model->temp_value = $this->input->post('find');
+			$this->Site_model->lang_matches();
+		}
+	}
+
+	function content_types()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['content_types'];
+
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['content_types'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['content_types'];
+
+		$this->Content_model->scope = 'content';
+		$this->Content_model->list_types();
+		$temp_list = $this->Content_model->type_list;
+		
+		$types = array();
+		
+		foreach($temp_list as $type)
+		{
+			$this->Content_model->label_id = '';
+			$this->Content_model->label_scope = 'types';
+			$this->Content_model->label_rel_id = '';
+			$this->Content_model->label_rel_name = '';
+			$this->Content_model->label = '';
+
+			$this->Content_model->temp_id = $type['type_id'];
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+			$lbl = $this->Content_model->load_label();
+
+			$uri = "cms/setup/type_edit/id/".$type['type_id'];
+		
+			if($lbl) {
+				$uri .= "/lang/".$this->Content_model->temp_lang;
+				$text = $this->Content_model->label;
+			} else {
+				$text = $type['type_uri_name'];
+			}
+			$attr = array('title' => sprintf($this->cms_labels['content_type_edit'],$text));
+			
+			$types[] = anchor($uri,$text,$attr);
+		
+		}
+
+		$form = "<h3 class=\"first\">".$this->cms_labels['content_types']."</h3>\r";
+		$form .= '<p>'. anchor("cms/setup/type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
+		$form .= ul($types);
+		$this->data['form'] =  $form;
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+	
+	function type_edit()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = anchor("cms/setup/content_types",$this->cms_labels['content_types']);
+		$breadcrumb[] = $this->cms_labels['content_type_editor'];
+
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['content_type_editor'];
+		$title_tag[] = $this->cms_labels['content_types'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['content_type_editor'];
+
+		$this->_process_content_type();
+
+		$params = $this->uri->uri_to_assoc(4);
+		if(array_key_exists('id',$params) && $this->Content_model->type_id == '') {
+			$this->Content_model->type_id = $params['id'];
+		}
+		if(array_key_exists('lang',$params))
+		{
+			$this->Content_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		}
+
+		$this->data['form'] = $this->_form_content_type();
+
+		$msg = $this->Content_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+	
+	function _form_content_type()
+	{
+
+		if($this->Content_model->type_id != '') {
+			$loaded = $this->Content_model->load_type();
+		}
+		
+		$langs = $this->Content_model->langs_dropdown();
+
+		$action = "/cms/setup/type_edit";
+		if($this->Content_model->type_id != '')
+		{
+			$action .= "/id/".$this->Content_model->type_id;
+		}
+		if($this->Content_model->temp_lang != '')
+		{
+			$action .= "/lang/".$this->Content_model->temp_lang;
+		}
+
+		$attributes = array('name' => "type_editor", 'id' => "type_editor");
+		$hidden = array(
+		'type_id' => $this->Content_model->type_id,
+		'label_id' => $this->Content_model->label_id
+		);
+		
+		$form = form_open($action,$attributes,$hidden)."\r";
+
+		// main data
+		$form .= "<p class=\"nomargin\">\r";
+		$form .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
+		$form .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
+		$form .= "</p>\r";
+		$form .= "<p class=\"indent\">".$this->cms_labels['note_type_uri_name'];
+		$form .= "</p>\r";
+
+		// metadata
+		$form .= form_fieldset($this->cms_labels['content_type_metadata']);
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['language'], 'type_lang');
+		$form .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang); 
+		$form .= "</p>\r";
+		
+		if($this->Content_model->type_id != '')
+		{
+			$this->Content_model->reset_label();
+			$this->Content_model->label_scope = "types";
+			$this->Content_model->temp_id = $this->Content_model->type_id;
+			$this->Content_model->load_label();
+		}
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['content_type_label'], 'label');
+		$form .= form_input('label',$this->Content_model->label); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		// fields
+		$form .= form_fieldset($this->cms_labels['fields']);
+		$form .= "\r";
+
+		$form .= "<table id=\"properties\">\r";
+		$form .= "<thead>\r";
+		$form .= "<tr>\r";
+		$form .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$form .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
+		$form .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
+		$form .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
+		$form .= "</tr>\r";
+		$form .= "</thead>\r";
+
+		$this->Content_model->list_type_meta_fields();
+		
+		$fieldCount = count($this->Content_model->field_list);
+		$fieldNo = 1;
+
+		$form .= "<tbody>\r";
+
+		foreach($this->Content_model->field_list as $field)
+		{
+			$row_header = form_hidden('field_id[]', $field['field_id']);
+			$row_header .= form_hidden('rf_id[]', $field['rf_id']);
+
+			// get label for field
+			$this->Content_model->reset_label();
+			$this->Content_model->label_scope = 'field';
+
+			$this->Content_model->temp_id = $field['field_id'];
+			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->Content_model->load_label();
+
+			if($this->Content_model->label_id != '') {
+				$row_header .= $this->Content_model->label;
+			} else {
+				$row_header .= $field['field_ref_name'];
+			}
+
+			if($field['rf_id'] != '') {
+				$exists = true;
+			} else {
+				$exists = false;
+			}
+
+			$params = array(
+			'name'        => 'exists[]',
+			'id'          => 'exists[]',
+			'value'       => $field['field_id'],
+			'checked'     => $exists
+			);
+	
+			$chk_exist = form_checkbox($params);
+
+			$params = array(
+			'name'        => 'required[]',
+			'id'          => 'required[]',
+			'value'       => $field['field_id'],
+			'checked'     => $field['required']
+			);
+
+			$chk_req = form_checkbox($params);
+
+			$params = array(
+			'name'        => "order[]",
+			'id'          => "order[]",
+			'value'       => $field['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			$input_order = form_input($params);
+			
+			$form .= "<tr>\r";
+			$form .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$form .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$form .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$form .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$form .= "</tr>\r";
+
+			$fieldNo += 1;
+
+		}
+		$form .= "</tbody>\r";
+		$form .= "</table>\r";
+
+		$form .= form_fieldset_close("\r");
+		$form .= "<p>";
+		$form .= form_submit('submit', $this->cms_labels['save']);
+		$form .= "</p>\n";
+		$form .= form_close();
+
+		return $form;
+	}
+
+	function _process_content_type()
+	{
+
+		if($this->input->post('submit') != '')
+		{
+			// set validation rules
+			$this->load->library('form_validation');
+
+			$this->form_validation->set_rules('type_uri_name', $this->cms_labels['type_uri_name'], 'required|alpha_num_spaces');
+			$this->form_validation->set_rules('label', $this->cms_labels['content_type_label'], 'required');
+
+			$form_is_valid = $this->form_validation->run();
+			
+			// get values from form post data
+			$this->Content_model->type_id = $this->input->post('type_id');
+			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
+
+			$this->Content_model->label_scope = 'types';
+			$this->Content_model->label_rel_id = $this->Content_model->type_id;
+			$this->Content_model->label_rel_name = $this->Content_model->type_uri_name;
+			$this->Content_model->label_id = $this->input->post('label_id');
+			$this->Content_model->label = $this->input->post('label');
+			$this->Content_model->temp_lang = $this->input->post('type_lang');
+			
+			if ($form_is_valid)
+			{
+
+				$temp_fields = $this->input->post('field_id');
+				$temp_rels = $this->input->post('rf_id');
+				$temp_exists = $this->input->post('exists');
+				$temp_required = $this->input->post('required');
+				$temp_order = $this->input->post('order');
+	
+				$field_updates = array();
+				foreach($temp_fields as $index => $id)
+				{
+					$temp_field = array(
+					'field_id' => $id,
+					'rf_id' => $temp_rels[$index],
+					'exists' => FALSE,
+					'required' => 0,
+					'order' => $temp_order[$index],
+					);
+					
+					if(is_array($temp_exists) && in_array($id,$temp_exists)){
+						$temp_field['exists'] = TRUE;
+					}
+	
+					if(is_array($temp_required) && in_array($id,$temp_required)){
+						$temp_field['required'] = 1;
+					}
+					
+					$field_updates[] = $temp_field;
+				}
+				$this->Content_model->reset_label();
+
+				$this->Content_model->scope = 'content';
+				if($this->Content_model->update_type())
+				{
+	
+					$this->Content_model->field_list = $field_updates;
+					$this->Content_model->scope = 'types';
+					$this->Content_model->update_fields_related();
+
+					if(!$this->Content_model->update_label())
+					{
+						$this->Content_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['content_type_label']);
+					}
+				}
+				else
+				{
+					$this->Content_model->messages[] = $this->cms_labels['content_type_update_failure'];
+				}
+
+			}
+			else
+			{
+				$this->Content_model->messages[] = validation_errors();
+			}
+			
+			if(count($this->Content_model->messages) == 0)
+			{
+				$this->Content_model->messages[] = $this->cms_labels['content_type_update_success'];
+			}
+			
+		}
+		
+	}
+
 
 
 }

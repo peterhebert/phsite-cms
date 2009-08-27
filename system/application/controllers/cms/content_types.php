@@ -10,6 +10,8 @@ class Content_types extends MY_Controller
 		$this->load->model('Field_model');
 		$this->load->helper('form');
 		//$this->_authenticate();
+		$this->_load_site_metadata();
+		$this->_load_cms_labels();
 	}
 
 	function index()
@@ -53,7 +55,13 @@ class Content_types extends MY_Controller
 			$this->data['msg'] .= implode("</p>\r<p>", $msg);
 			$this->data['msg'] .= "</p>";
 		}
-		$this->load->view('cms/content_types_edit',$this->data);
+
+
+		$this->data['title_tag'] = 'Content type editor ';
+		$this->data['title_h1'] = 'Content type editor';
+		
+
+		$this->load->view('cms/cms_form',$this->data);
 
 	}
 

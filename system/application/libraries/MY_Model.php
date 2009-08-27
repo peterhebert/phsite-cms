@@ -31,7 +31,7 @@ class MY_Model extends Model {
 
 	// language variables
 	var $lang_ISO_639_3, $lang_ISO_639_2B, $lang_ISO_639_2T, $lang_ISO_639_1, $lang_Scope, $lang_Type, $lang_Ref_Name, $lang_Inverted_Name, $lang_Native_Name, $lang_CI_Name, $lang_activated;
-	var $lang_count, $lang_list = array();
+	var $lang_count, $lang_list = array(), $matches = array();
 
 	// content_types
 
@@ -84,84 +84,6 @@ class MY_Model extends Model {
 
 	}
 
-	// content / media type functions
-	function load_type()
-    {
-
-		$this->db->where('type_id', $this->type_id);
-		$this->db->where('scope', $this->scope);
-		$query = $this->db->get('s_types');
- 
- 		if ($query->num_rows() > 0)
-		{
-			$row = $query->row_array();
-			$this->type_uri_name = $row['type_uri_name'];
-			
-			return TRUE;
-		}
-		return FALSE;
-
-	}
-
-
-	function list_types()
-    {
-
-		$list = array();
-		$this->db->where('scope',$this->scope);
-		$query = $this->db->get('s_types');
-
-		foreach ($query->result() as $row)
-		{
-
-			$temp =  array(
-			'type_id' => $row->type_id,
-			'type_uri_name' => $row->type_uri_name,
-			'label_id' => '',
-			'label' => '',
-			'lang_ISO_639_3' => '',
-			);
-
-			$this->db->where('scope', 'type');
-			$this->db->where('rel_id', $row->type_id);
-			$this->db->where('lang_ISO_639_3', $this->temp_lang);
-			$this->db->limit(1);
-			$query2 = $this->db->get('s_labels');
-		   
-			if ($query2->num_rows() > 0)
-			{
-				$row2 = $query2->row();
-				$temp['label_id'] = $row2->label_id;
-				$temp['label'] = $row2->label;
-				$temp['lang_ISO_639_3'] = $row2->lang_ISO_639_3;
-			}
-
-		   $list[] = $temp;
-
-		}
-
-		$this->type_list = $list;
-
-	}
-	
-	function types_dropdown()
-    {
-		$this->list_types();
-		$list = array();
-		foreach($this->type_list as $row)
-		{
-			if($row['label'] != '')
-			{
-				$list[$row['type_id']] = $row['label'];
-			} else {
-				$list[$row['type_id']] = $row['type_uri_name'];
-			}
-		}
-
-		return $list;
-	}
-
-
     // get list of active languages for form drop-down
 	function langs_dropdown()
     {
@@ -182,9 +104,9 @@ class MY_Model extends Model {
 	}
 
     // find matching languages
-	function lang_matches($str)
+	function lang_matches()
     {
-		$match = $this->input->xss_clean($str);
+		$match = $this->input->xss_clean($this->temp_value);
 		
 		$sql = "SELECT * FROM `ISO_639_LANG` WHERE (
 		`Ref_Name` LIKE '%{$match}%' OR
@@ -193,7 +115,8 @@ class MY_Model extends Model {
 		) AND `activated` = 0";
 
 		$query = $this->db->query($sql);
-		return $query->result_array();
+		
+		$this->matches = $query->result_array();
 	}
 
 	function lang_load()
@@ -267,6 +190,114 @@ class MY_Model extends Model {
 
 		return $menu;
 	}
+	
+	// content / media type functions
+	function load_type()
+    {
+
+		$this->db->where('type_id', $this->type_id);
+		$this->db->where('scope', $this->scope);
+		$query = $this->db->get('s_types');
+ 
+ 		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			$this->type_uri_name = $row['type_uri_name'];
+			
+			return TRUE;
+		}
+		return FALSE;
+
+	}
+
+    function update_type()
+    {
+		
+		$type_data = array(
+		'scope' => $this->scope,
+		'type_uri_name' => $this->type_uri_name
+		);
+
+		if( $this->type_id != '' )
+		{
+			// update
+			$this->db->where('type_id', $this->type_id);
+			if($this->db->update('s_types', $type_data))
+			{
+				return TRUE;
+			}
+
+		} else {
+			// insert
+			if($this->db->insert('s_types', $type_data))
+			{
+				$this->type_id = $this->db->insert_id();
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+
+    }
+
+	function list_types()
+    {
+
+		$list = array();
+		$this->db->where('scope',$this->scope);
+		$query = $this->db->get('s_types');
+
+		foreach ($query->result() as $row)
+		{
+
+			$temp =  array(
+			'type_id' => $row->type_id,
+			'type_uri_name' => $row->type_uri_name,
+			'label_id' => '',
+			'label' => '',
+			'lang_ISO_639_3' => '',
+			);
+
+			$this->db->where('scope', 'type');
+			$this->db->where('rel_id', $row->type_id);
+			$this->db->where('lang_ISO_639_3', $this->temp_lang);
+			$this->db->limit(1);
+			$query2 = $this->db->get('s_labels');
+		   
+			if ($query2->num_rows() > 0)
+			{
+				$row2 = $query2->row();
+				$temp['label_id'] = $row2->label_id;
+				$temp['label'] = $row2->label;
+				$temp['lang_ISO_639_3'] = $row2->lang_ISO_639_3;
+			}
+
+		   $list[] = $temp;
+
+		}
+
+		$this->type_list = $list;
+
+	}
+
+	function types_dropdown()
+    {
+		$this->list_types();
+		$list = array();
+		foreach($this->type_list as $row)
+		{
+			if($row['label'] != '')
+			{
+				$list[$row['type_id']] = $row['label'];
+			} else {
+				$list[$row['type_id']] = $row['type_uri_name'];
+			}
+		}
+
+		return $list;
+	}
+
+
 
 	// field functions
 	function list_fields()
@@ -290,7 +321,10 @@ class MY_Model extends Model {
 		$list = array();
 		
 		$this->db->where('scope',$this->scope);
-		$this->db->where('rf_rel_id',$this->temp_id);
+		if ($this->temp_id != '' && $this->scope != 'users' && $this->scope != 'site')
+		{
+			$this->db->where('rf_rel_id',$this->temp_id);
+		}
 		$this->db->join('s_fields', 'r_fields.field_id = s_fields.field_id', 'left');
 		$query = $this->db->get('r_fields');
 		
@@ -299,10 +333,20 @@ class MY_Model extends Model {
 		   foreach ($query->result() as $row)
 		   {
 				$key = strval($row->field_id);
+				
+				if($row->rf_rel_id == 0)
+				{
+					$tmp_rf_rel_id = '';
+				}
+				else
+				{
+					$tmp_rf_rel_id = $row->rf_rel_id;
+				}
+				
 				$list[$key] = array(
 				'rf_id' => $row->rf_id,
 				'scope' => $row->scope,
-				'rf_rel_id' => $row->rf_rel_id,
+				'rf_rel_id' => $tmp_rf_rel_id,
 				'rf_rel_ref_name' => $row->rf_rel_ref_name,
 				'field_id' => $row->field_id,
 				'field_ref_name' => $row->field_ref_name,
@@ -325,13 +369,48 @@ class MY_Model extends Model {
 
 	}
 
-/*
+    function update_field()
+    {
+		$this->field_merge_validation();
+		
+		$field_data = array(
+		'field_ref_name' => $this->field_ref_name,
+		'field_input_type' => $this->field_input_type,
+		'field_validation' => $this->field_validation,
+		'field_needs_lang' => $this->field_needs_lang
+		);
+		
+		if( $this->field_id != '' )
+		{
+			// update
+			$this->db->where('field_id', $this->field_id);
+			if($this->db->update('s_fields', $field_data))
+			{
+				return TRUE;
+			}
+
+		} else {
+			// insert
+			if($this->db->insert('s_fields', $field_data))
+			{
+				$this->field_id = $this->db->insert_id();
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+
+    }
+
 	function update_fields_related()
     {
 
 
 		foreach($this->field_list as $field)
 		{
+
+			$this->temp_id = $field['field_id'];
+			$this->load_field();
 
 			$this->temp_id = $field['field_id'];
 			$this->label_scope = 'field';
@@ -342,22 +421,36 @@ class MY_Model extends Model {
 			}
 			else
 			{
-				$field_label = $field['field_ref_name'];
+				$field_label = $this->field_ref_name;
 			}
+
 
 			$db_fields = array(
 			'scope' => $this->scope,
-			'rf_rel_id' => $field['rf_rel_id'],
-			'rf_rel_ref_name' => $field['rf_rel_ref_name'],
+			'rf_rel_id' => '',
+			'rf_rel_ref_name' => '',
 			'field_id' => $field['field_id'],
-			'field_ref_name' => $field['field_ref_name'],
-			'field_input_type' => $field['field_input_type'],
-			'field_validation' => $field['field_validation'],
-			'field_needs_lang' => $field['field_needs_lang'],
+			'field_ref_name' => '',
 			'required' => $field['required'],
 			'order' => $field['order'],
 			);
 			
+			if($this->field_id != '')
+			{
+				$db_fields['field_ref_name'] = $this->field_ref_name;
+			}
+
+			if(array_key_exists('rf_rel_id',$field))
+			{
+				$db_fields['rf_rel_id'] = $field['rf_rel_id'];
+			}
+			if(array_key_exists('rf_rel_ref_name',$field))
+			{
+				$db_fields['rf_rel_ref_name'] = $field['rf_rel_ref_name'];
+			}
+			
+			$cms_labels = $this->lang->line('cms_labels');
+
 			if($field['exists'] === TRUE)
 			{
 				// update field
@@ -367,7 +460,8 @@ class MY_Model extends Model {
 					// create new metadata
 					if(!$this->db->insert('r_fields', $db_fields) )
 					{
-						$this->messages[] = "could not create relationship for field {$field_label}";
+
+						$this->messages[] = sprintf($cms_labels['rel_insert_failure'], $field_label);
 					}
 		
 				}
@@ -375,7 +469,7 @@ class MY_Model extends Model {
 				{
 					// update metadata field
 					if(!$this->db->update('r_fields', $db_fields, array('rf_id' => $field['rf_id'] )) ) {
-						$this->messages[] = "could not update relationship for field {$field_label}";
+						$this->messages[] = sprintf($cms_labels['rel_update_failure'], $field_label);
 					}
 				}
 
@@ -385,33 +479,39 @@ class MY_Model extends Model {
 				if($field['rf_id'] != '')
 				{
 					// remove relationship
-					$this->db->where('rel_id', $field['rf_id']);
+					$this->db->where('rf_id', $field['rf_id']);
 					if(!$this->db->delete('r_fields')) {
-						$this->messages[] = "could not remove relationship for field {$field_label}";
+						$this->messages[] = sprintf($cms_labels['rel_delete_failure'], $field_label);
 					}
 				} 
 
 			}
 
+			$this->field_id == '';
 		} // end foreach()
 
-		if(count($this->messages) == 0)
-		{
-			$this->messages[] = "field relationships successfully updated";
-		}
 	}
-*/
+
 	function load_field()
     {
 		$query = $this->db->get_where('s_fields', array('field_id' => $this->temp_id));
-		$row = $query->row_array();
-		$this->field_id = $row['field_id'];
-		$this->field_ref_name = $row['field_ref_name'];
-		$this->field_input_type = $row['field_input_type'];
-		$this->field_validation = $row['field_validation'];
-		$this->field_needs_lang = $row['field_needs_lang'];
 
-		$this->field_parse_validation();
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			$this->field_id = $row['field_id'];
+			$this->field_ref_name = $row['field_ref_name'];
+			$this->field_input_type = $row['field_input_type'];
+			$this->field_validation = $row['field_validation'];
+			$this->field_needs_lang = $row['field_needs_lang'];
+	
+			$this->field_parse_validation();
+			return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		} 
     }
 
 	function field_parse_validation()
@@ -472,11 +572,27 @@ class MY_Model extends Model {
 	function load_label()
     {
 		$this->db->where('scope',$this->label_scope);
-		$this->db->where('label_id',$this->temp_id);
-		$this->db->where('lang_ISO_639_3',$this->temp_lang);
+		if($this->temp_id != '')
+		{
+			$this->db->where('rel_id',$this->temp_id);
+		}
+		if($this->label_id != '')
+		{
+			$this->db->where('label_id',$this->label_id);
+		}
+
+		if($this->session->userdata('default_lang'))
+		{
+			$this->db->where('lang_ISO_639_3',$this->session->userdata('default_lang'));
+		}
+		else
+		{
+			$this->db->where('lang_ISO_639_3',$this->temp_lang);
+		}
+		
 		$this->db->limit(1);
 		$query = $this->db->get('s_labels');
-
+				
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();
@@ -486,6 +602,7 @@ class MY_Model extends Model {
 			$this->label_rel_id = $row->rel_id;
 			$this->label_rel_name = $row->rel_name;
 			$this->label = $row->label;
+			$this->temp_lang = $row->lang_ISO_639_3;
 			return TRUE;
 		}
 		else
@@ -499,40 +616,80 @@ class MY_Model extends Model {
 		}
 	}
 
+	function reset_label()
+    {
+		$this->temp_id = '';
+		$this->label_id = '';
+		$this->label_scope = '';
+		$this->label_rel_id = '';
+		$this->label_rel_name = '';
+		$this->label = '';
+	}
+
+
+    function update_label()
+    {
+		
+		$data = array(
+		'scope' => $this->label_scope,
+		'rel_id' => $this->label_rel_id,
+		'rel_name' => $this->label_rel_name,
+		'label' => $this->label,
+		'lang_ISO_639_3' => $this->temp_lang
+		);
+
+		// update or insert title
+		if($this->label_id == '') {
+			// insert
+			if($this->db->insert('s_labels', $data)){
+				$this->label_id = $this->db->insert_id();
+				return TRUE;
+			}
+			
+		} else {
+			// update
+			$this->db->where('label_id', $this->label_id);
+			if($this->db->update('s_labels', $data)){
+				return TRUE;
+			}
+
+		}
+		return FALSE;
+
+    }
+
+
+
 	// metadata functions
 	function load_metadata()
     {
 		$fields = $this->field_list;
 
+		$this->db->where('scope',$this->scope);
+
 		if ($this->temp_id != '')
 		{
-
-			$this->db->where('scope',$this->scope);
 			$this->db->where('meta_rel_id',$this->temp_id);
+		}
 
-			if ($this->temp_lang != '')
+		if ($this->temp_lang != '')
+		{
+			$where = "(lang_ISO_639_3 = '{$this->temp_lang}' OR lang_ISO_639_3 = '')";
+			$this->db->where($where);
+		}
+
+		$query = $this->db->get('c_metadata');
+		
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
 			{
-				$where = "(lang_ISO_639_3 = '{$this->temp_lang}' OR lang_ISO_639_3 = '')";
-				$this->db->where($where);
-			}
-			else
-			{
-				$this->db->where('lang_ISO_639_3',$this->temp_lang);
-			}
-	
-			$query = $this->db->get('c_metadata');
-	
-			if ($query->num_rows() > 0)
-			{
-				foreach ($query->result() as $row)
-				{
-					$key = $row->field_id;
-					$fields["$key"]['meta_id'] = $row->meta_id;
-					$fields["$key"]['meta_rel_id'] = $row->meta_rel_id;
-					$fields["$key"]['value'] = $row->value;
-					$fields["$key"]['lang_ISO_639_3'] = $row->lang_ISO_639_3;
-					$fields["$key"]['date_updated'] = $row->date_updated;
-				}
+				$key = $row->field_id;
+				$fields["$key"]['meta_id'] = $row->meta_id;
+				$fields["$key"]['meta_rel_id'] = $row->meta_rel_id;
+				$fields["$key"]['value'] = $row->value;
+				$fields["$key"]['lang_ISO_639_3'] = $row->lang_ISO_639_3;
+				$fields["$key"]['date_updated'] = $row->date_updated;
 			}
 		}
 
@@ -545,6 +702,9 @@ class MY_Model extends Model {
 
 		foreach($this->metadata as $meta)
 		{
+			$this->temp_id = $meta['field_id'];
+			$this->load_field();
+
 			$this->temp_id = $meta['field_id'];
 			$this->label_scope = 'field';
 			$this->load_label();
@@ -566,9 +726,13 @@ class MY_Model extends Model {
 			'lang_ISO_639_3' => '',
 			);
 
-			if($meta['field_needs_lang'] == 1)
+			if($this->field_needs_lang == 1)
 			{
 				$db_fields['lang_ISO_639_3'] = $this->temp_lang;
+			}
+			if($this->field_id != '')
+			{
+				$db_fields['field_ref_name'] = $this->field_ref_name;
 			}
 	
 			$cms_labels = $this->lang->line('cms_labels');
@@ -604,6 +768,8 @@ class MY_Model extends Model {
 				}
 
 			}
+			$this->field_id = '';
+			$this->field_needs_lang = '';
 		
 		}
 
@@ -641,22 +807,6 @@ class MY_Model extends Model {
     // update title
     function update_title()
     {
-		// try to find existing title id
-		if($this->title_id == '') {
-		
-			$data = array(
-			'rel_id' => $this->title_rel_id,
-			'lang_ISO_639_3' => $this->temp_lang
-			);
-			
-			$title_query = $this->db->get_where('c_titles', $data);
-			if ($title_query->num_rows() > 0)
-			{
-			   $trow = $title_query->row();
-			   $this->title_id = $trow->title_id;
-			} 
-
-		}
 		
 		$data = array(
 		'scope' => $this->scope,

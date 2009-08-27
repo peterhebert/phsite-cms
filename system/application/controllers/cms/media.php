@@ -4,15 +4,16 @@ class Media extends MY_Controller {
 		
 	function Media()
 	{
-		parent::Controller();
+		parent::MY_Controller();
 		$this->load->helper(array('form','url','file','image'));
 		$this->load->model('Media_model');
-		$this->load->model('Language_model');
 	}
 	
 	function index()
 	{	
-		$this->manage();
+		echo "Media controller";
+		
+		//$this->manage();
 /*		$this->_authenticate();
 
 		$this->Media_model->media_lang = $this->Site_model->default_lang;
@@ -54,12 +55,127 @@ class Media extends MY_Controller {
 		$this->load->view('cms/media', $this->data);
 */	}
 
+
+	function media_fields()
+	{	
+
+		$breadcrumb = array(
+		anchor("cms","phSite CMS"),
+		anchor("cms/media","Media"),
+		'Edit media metadata fields'
+		);
+		
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$this->data['title_tag'] = 'Edit media metadata fields ';
+		$this->data['title_h1'] = 'Edit media metadata fields';
+		
+
+		$this->load->view('cms/cms_form',$this->data);
+
+	}
+
+/*	function _form_meta_fields()
+	{
+
+		$action = "/cms/user/user_meta_fields";
+		$hidden = array('site_id' => $this->Media_model->site_id);
+		$attributes = array('name' => 'user_meta_fields','id' => 'user_meta_fields');
+
+		$form = form_open($action, $attributes, $hidden);
+
+		// fields
+
+		$form .= "<table id=\"properties\">\r";
+		$form .= "<thead>\r";
+		$form .= "<tr>\r";
+		$form .= "<th scope=\"col\" id=\"hd_name\">field name</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_exists\">use for user metadata?</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_req\">required?</th>\r";
+		$form .= "<th scope=\"col\" id=\"hd_order\">order</th>\r";
+		$form .= "</tr>\r";
+		$form .= "</thead>\r";
+		$form .= "<tbody>\r";
+
+		$this->Media_model->list_fields();
+		
+		$fieldCount = count($this->Media_model->field_list);
+		$fieldNo = 1;
+
+		foreach($this->Media_model->field_list as $field)
+		{
+
+			if($field['field_name'] != '') {
+				$temp_name = $field['field_name'];
+			} else {
+				$temp_name = $field['field_ref_name'];
+			}
+
+			if($fieldNo < $fieldCount) {
+			$form .= "<tr>\n";
+			} else {
+			$form .= "<tr class=\"last\">\n";
+			}
+			$fieldNo = $fieldNo + 1;
+	
+			$form .= form_hidden('field_id[]', $field['field_id']);
+	
+			if($field['rel_id'] != '') {
+				$exists = true;
+			} else {
+				$exists = false;
+			}
+			$form .= form_hidden('rel_id[]', $field['rel_id']);
+
+			$params = array(
+			'name'        => 'exists[]',
+			'id'          => 'exists[]',
+			'value'       => $field['field_id'],
+			'checked'     => $exists
+			);
+	
+			$form .= "<th headers=\"hd_name\" id=\"{$temp_name}\" scope=\"row\">{$temp_name}</th>\n";
+			$form .= "<td headers=\"hd_exists\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+
+			$params = array(
+			'name'        => 'required[]',
+			'id'          => 'required[]',
+			'value'       => $field['field_id'],
+			'checked'     => $field['required']
+			);
+
+			$form .= "<td headers=\"{$temp_name} hd_req\" class=\"align-center\">".form_checkbox($params)."</td>\n";
+
+			$params = array(
+			'name'        => "order[]",
+			'id'          => "order[]",
+			'value'       => $field['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			$form .= "<td headers=\"{$temp_name} hd_order\">".form_input($params)."</td>\n";
+
+
+			$form .= "</tr>\n";
+
+		}
+
+
+		$form .= "</tbody></table>\n";
+		$form .= form_submit('submit', 'Save');
+		$form .= form_close();
+		return $form;
+	}
+*/
+
+
 	
 	function manage() {
-		$this->_authenticate();
+
 		$this->data['msg'] = '';
-		
-		$this->Media_model->media_lang = $this->Site_model->default_lang;
+
+		$this->Media_model->media_lang = $this->Site_model->site_default_lang;
 		$media_root = $this->Media_model->dir_base;
 		
 		$this->_get_dir();
@@ -715,7 +831,7 @@ class Media extends MY_Controller {
 		
 
 		if($this->uri->total_segments() <= 3) {
-			$this->Media_model->path_lang = $this->Site_model->default_lang;
+			$this->Media_model->path_lang = $this->Site_model->site_default_lang;
 			$dir = '/';
 		} else {
 			if($this->Language_model->load($uri_array[0]) === TRUE) {
@@ -725,21 +841,6 @@ class Media extends MY_Controller {
 		}
 
 		$this->Media_model->path_uri = $dir;
-	}
-
-	function get_langs()
-	{
-		// get list of enabled languages
-		$languages = $this->Language_model->get_list();
-		foreach($languages as $row) {
-			if($row['Native_Name'] != '') {
-				$langArray[$row['ISO_639_3']] = $row['Native_Name'];
-			} else {
-				$langArray[$row['ISO_639_3']] = $row['Inverted_Name'];
-			}
-		}
-		return $langArray;
-
 	}
 
 }

@@ -14,12 +14,11 @@ if ( ! function_exists('file_is_image'))
 		'application/x-shockwave-flash' => 'swf',  
 		'image/psd' => 'psd',  
 		'image/bmp' => 'bmp',  
-		'image/tiff' => 'tiff',  
+		'image/tiff' => 'tif',  
 		'image/tiff' => 'tiff',  
 		'image/jp2' => 'jp2',  
 		'image/iff' => 'iff',  
 		'image/vnd.wap.wbmp' => 'bmp',  
-		'image/xbm' => 'xbm',  
 		'image/vnd.microsoft.icon' => 'ico'
 		); 
 
@@ -59,7 +58,9 @@ if ( ! function_exists('view_image'))
 		}
 
 		// Path to original image and to resized version
-		$orig_image_path = $_SERVER["DOCUMENT_ROOT"].$path;
+		$orig_image_path = $path;
+		$path_rel = str_replace($_SERVER["DOCUMENT_ROOT"],'',$path);
+
 		$orig_image_path_rel = trim($path,'/');
 		
 		if(file_exists($orig_image_path)) {

@@ -66,10 +66,14 @@ class Content_model extends MY_Model {
 				'date_end_expiry' => $row->date_end_expiry,
 				'date_updated' => $row->date_updated,
 				'publish' => $row->publish,
+				'title_id' => '',
+				'scope' => '',
+				'title_rel_id' => '',
 				'title' => '',
 				'uri_title' => '',
 				'subtitle' => '',
 				'title_updated' => '',
+				'lang_ISO_639_3' => '',
 				);
 
 				$this->db->where('scope', 'content');
@@ -340,7 +344,7 @@ class Content_model extends MY_Model {
 					{
 						$this->temp_id = $row['content_id'];
 						$this->temp_lang = $r2['lang_ISO_639_3'];
-						$link = $this->_generate_uri();
+						$link = $this->generate_uri();
 					}
 					
 					$site_map .= '<li>'.anchor($link,$r2['title']);
@@ -367,7 +371,7 @@ class Content_model extends MY_Model {
 
 	}
 
-    function _generate_uri()
+    function generate_uri()
     {
 		// get content info
 		$this->db->where('content_id', $this->temp_id);
@@ -450,30 +454,6 @@ class Content_model extends MY_Model {
 		return $keyword_links;
 
 	}
-
-/*	function get_parent_title()
-	{
-		$parent_title = '';
-		
-		$this->db->where('content_id', $this->parent_id);
-
-		if($this->temp_lang != '') {
-			$this->db->where('lang_ISO_639_3', $this->temp_lang);
-		}
-		$this->db->limit(1);
-		
-		$query = $this->db->get('c_titles');
-
-		if ($query->num_rows() > 0)
-		{
-		   $row = $query->row();
-		   $parent_title = $row->title;
-		}
-	   return $parent_title;
-
-	}
-
-*/
 
     // search for content
 	function search($str,$keyword = FALSE)
@@ -600,7 +580,7 @@ class Content_model extends MY_Model {
 					{
 						$this->content_id = $id;
 						$this->content_title_id = $row->content_title_id;
-						$link = $this->_generate_uri();
+						$link = $this->generate_uri();
 					}
 					
 					$tmp_item = anchor($link,$row->title);
@@ -617,6 +597,48 @@ class Content_model extends MY_Model {
 		}
 
 		return $result;		
+	}
+
+
+    function list_type_meta_fields()
+    {
+
+		$this->list_fields();
+		$list = $this->field_list;
+		$this->scope = 'types';
+		
+		$field_info = array();
+		
+		foreach ($list as $fd)
+		{
+			$temp_field = array(
+			'field_id' => $fd['field_id'],
+			'field_ref_name' => $fd['field_ref_name'],
+			'field_input_type' => $fd['field_input_type'],
+			'field_validation' => $fd['field_validation'],
+			'field_needs_lang' => $fd['field_needs_lang'],
+			'rf_id' => '',
+			'required' => '',
+			'order' => ''
+			);
+	
+			$this->db->where('scope',$this->scope);
+			$this->db->where('field_id',$fd['field_id']);
+			$query = $this->db->get('r_fields');
+
+			if ($query->num_rows() > 0)
+			{
+				$row = $query->row();
+				$temp_field['rf_id'] = $row->rf_id;
+				$temp_field['required'] = $row->required;
+				$temp_field['order'] = $row->order;
+			}
+			$field_info[] = $temp_field;
+			 
+		}
+
+		$this->field_list = $field_info;
+
 	}
 
 }

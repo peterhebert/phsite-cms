@@ -52,6 +52,67 @@ body.gallery a:hover { color:#EEEEEE; }
 body.gallery h1,body.gallery h2,body.gallery h3,body.gallery h4,body.gallery h5,body.gallery h6 {
 	color:#FFFFFF;
 }
+/* thumbnail lists */
+	ul.thumbnails {
+	list-style:none inside;
+	margin:0;
+	padding:0 0 1ex 0;
+	clear:both;
+	display:table;
+	}
+	ul.thumbnails:after {
+		 visibility: hidden;
+		 display: block;
+		 font-size: 0;
+		 content: " ";
+		 clear: both;
+		 height: 0;
+		 }
+	ul.thumbnails { display: inline-block; }
+	/* start commented backslash hack \*/
+	* html ul.thumbnails { height: 1%; }
+	ul.thumbnails { display: block; }
+	/* close commented backslash hack */
+	
+	ul.thumbnails li { float: left; list-style-type: none; margin: 1ex; padding: 0; text-align: center; }
+
+	ul.thumbnails li .thumb {
+		margin:0;
+		padding:0;
+		overflow: visible;
+		position: relative;
+		display: table;
+	}
+	ul.thumbnails li .thumb a {
+		display:table-cell;
+		vertical-align:middle;
+		position: static;
+	}
+
+	* html ul.thumbnails li .thumb a {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+	}
+	
+	* html ul.thumbnails li .thumb a img {
+		position: relative;
+		top:-49%;
+		left:-50%;
+	}
+	
+	ul.thumbnails li .thumb a img {
+		border:1px solid #666666;
+		margin:0;
+		padding:0;
+	}
+	.thumbnails .title {
+		margin: 1ex 0 0 0;
+		padding:0;
+		text-align:center;
+		font-size:0.8em;
+		white-space:normal;
+	}
 
 
 /* image containers */
@@ -231,4 +292,52 @@ ul.posts ul.social-icons li
 	list-style-type:none;
 	float: left;
 	margin-right: .5em;
+}
+/*  EXIF / IPTC INFO */
+dl.exif-itpc dt
+{
+	margin-right: 1em;
+	margin-bottom:0.5em;
+	width:17em;
+	float: left;
+	clear:left;
+	text-align: right;
+	font-weight: bold;
+}
+dl.exif-itpc dd
+{
+	margin-bottom:0.5em;
+	width:35em;
+	float: left;
+	
+}
+
+/* tables in main content area */
+#content table
+{
+	border-top: 1px solid #cccccc;
+	border-left: 1px solid #cccccc;
+	margin-bottom: 1em;
+}
+#content table caption
+{
+	margin-bottom: 0.5em;
+	font-weight: bold;
+	text-align: center;
+}
+#content table td,
+#content table th
+{
+	border-bottom: 1px solid #cccccc;
+	border-right: 1px solid #cccccc;
+	padding: 0.125em;
+	vertical-align: top;
+}
+#content table th
+{
+	font-weight: bold;
+}
+#content table thead th
+{
+	vertical-align: bottom;
 }

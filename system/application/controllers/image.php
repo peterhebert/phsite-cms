@@ -4,7 +4,7 @@ class Image extends MY_Controller {
 
 	function Image()
 	{
-		parent::Controller();	
+		parent::MY_Controller();	
 		$this->load->helper('file');
 	}
 	
@@ -41,6 +41,7 @@ class Image extends MY_Controller {
 					switch($key)  {
 					case 'src':
 						$src = rtrim($rawval,'/');
+						$src_rel = MEDIA_PATH_ORIG.$src;
 						break;
 					case 'size':
 						$size = $myval;
@@ -56,11 +57,15 @@ class Image extends MY_Controller {
 	
 	
 			}
-	$size = 150;
+			if($size == '')
+			{
+				$size = $this->Site_model->media_;
+			}
+			echo "source image: $src<br />\r";
 
-			$image_html = view_image($src,$size,$ratio,$attr);
+			$image_html = view_image($src_rel,$size,$ratio,$attr);
 			echo $image_html;
-			$metadata = get_metadata($src);
+			$metadata = get_metadata($src_rel);
 			echo "<br />\n<pre>";
 			print_r ($metadata);
 			echo "</pre>";

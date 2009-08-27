@@ -1,29 +1,54 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><?php echo $title; ?></title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo $theme_path; ?>simple_em.css" rel="stylesheet" type="text/css" />
+<?php
+if(isset($html_header))
+{
+echo $html_header;
+}
+?>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
 	<div class="page-wrap block">
-		<h1><?php echo $title; ?></h1>
-		<p>Posted <?php echo $created ?> by <?php echo $author['name_first'].' '.$author['name_last']; ?></p>
-		<?php echo $content_data['body']; ?>
-		<p>Keywords: <?php echo $content_data['keywords']; ?>
+		<div class="column g2">
+			<?php
+			if(isset($menu))
+			{
+				echo $menu;
+			}
+			?>
+		</div>
+		<div class="float g1">
+			<?php
+			if(isset($title))
+			{
+				echo "<h1>{$title}</h1>\r";
+			}
+	
+			if(isset($content_date_created))
+			{
+				echo '<p>'.$content_date_created."</p>\r";
+			}
+			if(isset($content_body))
+			{
+				echo $content_body;
+			}
+			if(isset($content_keyword_links))
+			{
+				echo "<p>Keywords: {$content_keyword_links}</p>\r";
+			}
+			?>
+		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php 
-	echo "<p>";
-	if (array_key_exists('copyright',$content_data) && $content_data['copyright'] != '') {
-		echo $content_data['copyright'];
+	if (isset($copyright)) {
+		echo "<p>{$content_copyright}</p>\r";
 	} else {
-		echo $site_meta_copyright;
+		echo "<p>{$site_meta_copyright}</p>\r";
 	}
-	echo "</p>\r";
 	echo POWERED_BY;
 	?></div>
 </div>

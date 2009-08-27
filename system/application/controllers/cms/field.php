@@ -7,11 +7,11 @@ class Field extends MY_Controller
 		parent::Controller();
 
 		$this->load->model('Field_model');
-		$this->load->model('Site_model');
 
 		// if not logged in, redirect to login form
 		//$this->_authenticate();
 		$this->_load_site_metadata();
+		$this->_load_cms_labels();
 	}
 
 	function index()
@@ -25,17 +25,23 @@ class Field extends MY_Controller
 
 	function edit()
 	{
-
-	
+		$this->_load_cms_labels();
+		
 		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/setup","Setup").' : ';
-		$breadcrumb .= anchor("cms/setup/structure","Data Structure").' : ';
-		$breadcrumb .= 'Field editor';
+		$breadcrumb .= anchor("cms/setup",$this->cms_labels['setup']).' : ';
+		$breadcrumb .= anchor("cms/setup/structure",$this->cms_labels['data_structure']).' : ';
+		$breadcrumb .= $this->cms_labels['field_editor'];
 
 		$this->data['breadcrumb'] = $breadcrumb;
+		
+		$title_tag = array(
+		$this->cms_labels['field_editor'],
+		$this->cms_labels['data_structure'],
+		$this->cms_labels['setup']
+		);
 
-		$this->data['title_tag'] = 'Field editor | Data Structure | Setup ';
-		$this->data['title_h1'] = 'Field editor';
+		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
+		$this->data['title_h1'] = $this->cms_labels['field_editor'];
 
 		$this->load->library('form_validation');
 		$params = $this->uri->uri_to_assoc(4);
@@ -54,8 +60,14 @@ class Field extends MY_Controller
 
 		$this->_process_form();
 
-		$this->Field_model->load();
-		$this->Field_model->load_meta();
+		if($this->Field_model->field_id != '') {
+			$this->Field_model->load();
+			$this->Field_model->load_meta();
+		}	
+
+		if($this->Field_model->field_lang != '') {
+			$this->Field_model->load_values();
+		}	
 
 		$this->data['form'] = $this->_edit_form();
 
@@ -84,10 +96,10 @@ class Field extends MY_Controller
 			$lang_links[] = anchor($temp_link,$temp_txt);
 		}
 		
-		$sidebar = "<h2>Field metadata</h2>\r";
+		$sidebar = "<h2>".$this->cms_labels['field_metadata']."</h2>\r";
 		$sidebar .= ul($lang_links);
 		
-		$sidebar .= $this->load->view('cms/setup_menu',array(), true);
+		$sidebar .= $this->load->view('cms/setup_menu',$this->data, true);
 		$this->data['sidebar'] = $sidebar;
 
 		// now load view
@@ -98,20 +110,22 @@ class Field extends MY_Controller
 	
 	function _process_form()
 	{
+
 		// do validation if form submitted
 		if($this->input->post('submit') != '') {
 			
 			// set validation rules
-			$this->form_validation->set_rules('field_ref_name', 'Field Reference Name', 'required');
-			$this->form_validation->set_rules('field_input_type', 'Input Type', 'required|callback_valid_input');
+			$this->form_validation->set_rules('field_ref_name', $this->cms_labels['ref_name'], 'required');
+/*			$this->form_validation->set_rules('field_input_type', $this->cms_labels['input_type'], 'required|callback_valid_input');
+			$this->form_validation->set_rules('validation_string', $this->cms_labels['data_type'], 'callback_valid_valid');
+*/
+			$this->validation->set_message('validation_string', 'Your custom message here');
+			$this->form_validation->set_rules('validation_exact', $this->cms_labels['exact_length'], 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_min', $this->cms_labels['min_length'], 'is_natural_no_zero');
+			$this->form_validation->set_rules('validation_max', $this->cms_labels['max_length'], 'is_natural_no_zero');
 
-			$this->form_validation->set_rules('validation_string', 'Value type', 'callback_valid_valid');
-			$this->form_validation->set_rules('validation_exact', 'Exact Length', 'is_natural_no_zero');
-			$this->form_validation->set_rules('validation_min', 'Minimum Length', 'is_natural_no_zero');
-			$this->form_validation->set_rules('validation_max', 'Maximum Length', 'is_natural_no_zero');
-
-			$this->form_validation->set_rules('field_name', 'Field Name', 'required');
-			$this->form_validation->set_rules('field_lang', 'Language', 'required|is_lang');
+			$this->form_validation->set_rules('field_name', $this->cms_labels['field_name'], 'required');
+			$this->form_validation->set_rules('field_lang', $this->cms_labels['language'], 'required|is_lang');
 
 			$form_is_valid = $this->form_validation->run();
 
@@ -144,11 +158,11 @@ class Field extends MY_Controller
 				}
 				if($success_field === TRUE && $success_meta === TRUE)
 				{
-					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' has been successfully updated";
+					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' ".$this->cms_labels['update_success'];
 				}
 				else
 				{
-					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' could not be updated";
+					$this->Field_model->messages[] = "'{$this->Field_model->field_ref_name}' ".$this->cms_labels['update_failure'];
 				}
 
 			}
@@ -162,6 +176,7 @@ class Field extends MY_Controller
 		$this->Field_model->parse_validation();
 
 		$action = "cms/field/edit/id/".$this->Field_model->field_id;
+
 		if($this->Field_model->field_meta_id != '') {
 			$action .= "/lang/".$this->Field_model->field_meta_id;
 		} else if($this->Field_model->field_lang != '') {
@@ -178,58 +193,66 @@ class Field extends MY_Controller
 		$form = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
-		$form .= form_fieldset('Field info');
+		$form .= form_fieldset($this->cms_labels['field_info']);
 		$form .= "\r";
 		
 		$form .= "<p>\r";
-		$form .= form_label('Reference name', 'field_ref_name');
+		$form .= form_label($this->cms_labels['ref_name'], 'field_ref_name');
 		$form .= form_input('field_ref_name',$this->Field_model->field_ref_name); 
 		$form .= "</p>\r";
 		
 		$form .= "<p>\r";
-		$form .= form_label('Input type', 'field_input_type');
+		$form .= form_label($this->cms_labels['input_type'], 'field_input_type');
 		$form .= form_dropdown('field_input_type', $this->Field_model->input_types, $this->Field_model->field_input_type); 
 		$form .= "</p>\r";
 
-		$form_options = array(0 => 'No', 1 => 'Yes');
+		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
+		if($this->Field_model->field_needs_lang == '')
+		{
+			$needs_lang = 1;
+		}
+		else
+		{
+			$needs_lang = $this->Field_model->field_needs_lang;
+		}
 		$form .= "<p>\r";
-		$form .= form_label('Field value requires Language', 'field_needs_lang');
-		$form .= form_dropdown('field_needs_lang', $form_options, $this->Field_model->field_needs_lang); 
+		$form .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
+		$form .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
 		$form .= "</p>\r";
 		$form .= form_fieldset_close("\r");
 		
 		// metadata
-		$form .= form_fieldset('Field metatdata');
+		$form .= form_fieldset($this->cms_labels['field_metadata']);
 		$form .= "\r";
 
 		$form_options = $this->Language_model->get_list_dropdown();
 		$form .= "<p>\r";
-		$form .= form_label('Language', 'field_lang');
+		$form .= form_label($this->cms_labels['language'], 'field_lang');
 		$form .= form_dropdown('field_lang', $form_options, $this->Field_model->field_lang); 
 		$form .= "</p>\r";
 		$form .= "<p>\r";
-		$form .= form_label('Field name', 'field_name');
+		$form .= form_label($this->cms_labels['field_name'], 'field_name');
 		$form .= form_input('field_name',$this->Field_model->field_name); 
 		$form .= "</p>\r";
 		$form .= form_fieldset_close("\r");
 
 		// validation
-		$form .= form_fieldset('Validation');
+		$form .= form_fieldset($this->cms_labels['validation']);
 		$form .= "\r";
 		$form .= "<p>\r";
-		$form .= form_label('Field value is', 'validation_string');
-		$form .= form_dropdown('validation_string', $this->Field_model->validation_rules, $this->Field_model->validation_string); 
+		$form .= form_label($this->cms_labels['data_type'], 'validation_string');
+		$form .= form_dropdown('validation_string', $this->Field_model->data_types, $this->Field_model->validation_string); 
 		$form .= "</p>\r";
 		$form .= "<p>\r";
-		$form .= form_label('Exact Length', 'validation_exact');
+		$form .= form_label($this->cms_labels['exact_length'], 'validation_exact');
 		$form .= form_input('validation_exact',$this->Field_model->validation_exact); 
 		$form .= "</p>\r";
 		$form .= "<p>\r";
-		$form .= form_label('Minimum Length', 'validation_min');
+		$form .= form_label($this->cms_labels['min_length'], 'validation_min');
 		$form .= form_input('validation_min',$this->Field_model->validation_min); 
 		$form .= "</p>\r";
 		$form .= "<p>\r";
-		$form .= form_label('Maximum Length', 'validation_max');
+		$form .= form_label($this->cms_labels['max_length'], 'validation_max');
 		$form .= form_input('validation_max',$this->Field_model->validation_max); 
 		$form .= "</p>\r";
 		$form .= form_fieldset_close("\r");
@@ -239,15 +262,14 @@ class Field extends MY_Controller
 		'name'  => 'submit',
 		'id'  => 'submit'
 		);
-		$form .= form_submit($submit_data, 'save');
+		$form .= form_submit($submit_data, $this->cms_labels['save']);
 		$form .= "</p>\r";
 		$form .= form_close("\r");
 
 		return $form;
 	}
 
-
-	function valid_input($value)
+/*	function valid_input($value)
 	{
 		return array_key_exists($value,$this->Field_model->input_types);
 	}
@@ -257,6 +279,6 @@ class Field extends MY_Controller
 		return array_key_exists($value,$this->Field_model->validation_rules);
 	}
 
-
+*/
 }
 ?>

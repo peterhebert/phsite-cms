@@ -8,65 +8,77 @@ class Cms extends MY_Controller
 
 		// load necessary resources
 		$this->load->helper('form');
-		$this->load->model('Field_model');
-		$this->load->model('Content_type_model');
-		//$this->load->model('Content_model');
+		$this->load->model('Content_model');
 		$this->load->model('User_model');
 		$this->load->library('session');
+
+		$this->_load_site_metadata();
+		$this->_load_cms_labels();
 	}
 	
 	function index()
 	{
 		//$this->_authenticate();
 
-
-
-
-/*		// get recently added pages
-
-
 		// load list of content types
-		$this->Content_type_model->get_list();
-		$d2['list'] = $this->Content_type_model->types;
-		$this->data['objects'] = $this->load->view('cms/content_types_list',$d2, true);
-*/
+		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		$this->Content_model->list_types();
 
-		$form = "<h2>Content</h2>\r";
-		$form .= "<p>".anchor("cms/content","Site Map")."</p>\r";
+		$this->data['type_list'] = $this->Content_model->type_list;
+		$this->data['objects'] = $this->load->view('cms/content_types_list',$this->data, true);
+
+		$form = "<h2>{$this->cms_labels['content']}</h2>\r";
+
+		// get recently added pages
+		$form .= "<ul>\r";
+		$form .= "<li>".anchor("cms/content",$this->cms_labels['site_map'])."</li>\r";
+		$this->Content_model->list_content(NULL,TRUE);
+
+		if(count($this->Content_model->content_list) > 0)
+		{
+
+			$form_options = array();
+			$form .= "<li>{$this->cms_labels['recent_content']}\r";
+			foreach ($this->Content_model->content_list as $tc)
+			{
+				$link = 'cms/content/edit/id/'.$tc['content_id'].'/lang/'.$tc['lang_ISO_639_3'];
+				$form_options[] = anchor($link, $tc['title'], array('title' => $this->cms_labels['edit']." '{$tc['title']}'"));
+			}
+			$form .= ul($form_options);
+			$form .= "</li>\r";
+		}
+		$form .= "</ul>\r";
 
 
-		$form .= "<h2>Recently Added</h2>\r";
-		//$form .= $this->Content_model->site_map(1,10);
+		$form_options = $this->Content_model->types_dropdown();
+		$form .= "<p>Create New ";
+		$form .= form_dropdown('new_content',$form_options).' ';
+		$form_options = array(
+			'name' => 'new_go',
+			'id' => 'new_go',
+			'content' => 'Go',
+			'type' => 'button',
+		);
+		$form .= form_button($form_options);
+		$form .= "</p>\r";
 
-//		$form_options = $this->Content_type_model->get_list_dropdown_create();
-//		$form .= "<p>Create New ";
-//		$form .= form_dropdown('new_content',$form_options).' ';
-//		$form_options = array(
-//			'name' => 'new_go',
-//			'id' => 'new_go',
-//			'content' => 'Go',
-//			'type' => 'button',
-//		);
-//		$form .= form_button($form_options);
-//		$form .= "</p>\r";
-		$form .= "<h2>Media</h2>\r";
+		$form .= "<h2>{$this->cms_labels['media']}</h2>\r";
 		
-		$media_links[] = anchor("cms/media/manage","manage media");
-		$media_links[] = anchor("cms/media/upload","upload media");
+		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
+		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
 		$form .= ul($media_links)."\r";
 
+		$this->Content_model->temp_value = 'cms/setup/site_metadata';
+		$site_metadata = $this->Content_model->lang_meta_menu();
+		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
 
-		$breadcrumb = anchor("cms","phSite CMS").' : CMS home';
+		$breadcrumb = anchor("",$this->cms_labels['home'],array('rel' => 'external','title' => $this->cms_labels['site_external_link'])).' : ';
+		$breadcrumb .= anchor("cms",$this->cms_labels['phsite_cms']).' : '.$this->cms_labels['phsite_cms_home'];
 		$this->data['breadcrumb'] = $breadcrumb;
 
-		$this->data['title_h1'] = 'phSite CMS home';
-
-		$site_metadata = "Site metadata\r";
-		$site_metadata .=  $this->Language_model->site_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata),true);
-
+		$this->data['title_h1'] = $this->cms_labels['phsite_cms_home'];
+		
 		$this->data['form'] = $form;
-
 		$this->load->view('cms/cms_form',$this->data);
 	}
 

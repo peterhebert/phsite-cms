@@ -49,25 +49,64 @@ class Site_model extends MY_Model {
 
 		$this->temp_id = $this->site_id;
 		$this->scope = 'site';
-		
 		$this->list_fields_related();
-
+		
 		$this->load_metadata();
+	}
+
+
+    function list_site_meta_fields()
+    {
+
+		$this->list_fields();
+		$list = $this->field_list;
+		$this->scope = 'site';
+		
+		$field_info = array();
+		
+		foreach ($list as $fd)
+		{
+			$temp_field = array(
+			'field_id' => $fd['field_id'],
+			'field_ref_name' => $fd['field_ref_name'],
+			'field_input_type' => $fd['field_input_type'],
+			'field_validation' => $fd['field_validation'],
+			'field_needs_lang' => $fd['field_needs_lang'],
+			'rf_id' => '',
+			'required' => '',
+			'order' => ''
+			);
+	
+			$this->db->where('scope',$this->scope);
+			$this->db->where('field_id',$fd['field_id']);
+			$query = $this->db->get('r_fields');
+
+			if ($query->num_rows() > 0)
+			{
+				$row = $query->row();
+				$temp_field['rf_id'] = $row->rf_id;
+				$temp_field['required'] = $row->required;
+				$temp_field['order'] = $row->order;
+			}
+			$field_info[] = $temp_field;
+			 
+		}
+
+		$this->field_list = $field_info;
 
 	}
-/*
 
 	function update_site()
     {
 		$db_fields = array(
-		'site_admin_id' => $this->site_admin_id,
-		'site_editor_id' => $this->site_editor_id,
 		'theme' => $this->theme,
 		'timezone' => $this->site_timezone,
 		'default_lang' => $this->site_default_lang,
 		'default_content_type' => $this->default_content_type,
 		'date_created' => $this->site_date_created,
 		'home_content_id' => $this->home_content_id,
+		'site_admin_id' => $this->site_admin_id,
+		'site_editor_id' => $this->site_editor_id,
 		'img_size_th' => $this->img_size_th,
 		'img_size_sm' => $this->img_size_sm,
 		'img_size_md' => $this->img_size_md,
@@ -79,14 +118,14 @@ class Site_model extends MY_Model {
 		if($this->site_id == '')
 		{
 			// create new site
-			if($this->db->insert('sites', $db_fields)) {
+			if($this->db->insert('s_site_prefs', $db_fields)) {
 				$this->site_id = $this->db->insert_id();
 				return TRUE;
 			}
 
 		} else {
 			// update site
-			if( $this->db->update('sites', $db_fields, array('site_id' => $this->site_id)) ) {
+			if( $this->db->update('s_site_prefs', $db_fields, array('site_id' => $this->site_id)) ) {
 				return TRUE;
 			}
 		}
@@ -96,7 +135,7 @@ class Site_model extends MY_Model {
 	// end update_site()
 
 
-*/
+
 	// get list of themes
 	function list_themes()
     {

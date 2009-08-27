@@ -32,11 +32,21 @@ else
 	}
 }
 
+if(isset($content_date_created_W3C))
+{
+echo "<meta name=\"dcterms.issued\" scheme=\"W3CDTF\" content=\"{$content_date_created_W3C}\" />\r";
+}
+if(isset($content_date_updated_W3C))
+{
+echo "<meta name=\"dcterms.modified\" scheme=\"W3CDTF\" content=\"{$content_date_updated_W3C}\" />\r";
+}
+if(isset($content_date_expiry_RFC850))
+{
+echo "<meta http-equiv=\"expires\" content=\"{$content_date_expiry_RFC850}\">\r";
+}
 
 /*
-<meta name=\"dcterms.issued\" scheme=\"W3CDTF\" content=\"2008-12-11\" />
 
-<meta name=\"dcterms.modified\" scheme=\"W3CDTF\" content=\"2009-07-16\" />
 <meta name=\"review_date\" content=\"2010-07-16\" />
 
 

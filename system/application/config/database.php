@@ -43,8 +43,9 @@ $db['default']['password'] = "fr3akw3b";
 
 /*$db['default']['username'] = "root";
 $db['default']['password'] = "r00tpwd";
-*/
 $db['default']['database'] = "phsite_ci";
+*/
+$db['default']['database'] = "phsite_minimal";
 $db['default']['dbdriver'] = "mysql";
 $db['default']['dbprefix'] = "";
 $db['default']['pconnect'] = TRUE;

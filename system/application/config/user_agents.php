@@ -11,10 +11,10 @@
 */
 
 $platforms = array (
-					'windows nt 6.0'	=> 'Windows Longhorn',
-					'windows nt 5.2'	=> 'Windows 2003',
-					'windows nt 5.0'	=> 'Windows 2000',
+					'windows nt 6.0'	=> 'Windows Vista',
+					'windows nt 5.2'	=> 'Windows Server 2003 / Windows XP x64 Edition',
 					'windows nt 5.1'	=> 'Windows XP',
+					'windows nt 5.0'	=> 'Windows 2000',
 					'windows nt 4.0'	=> 'Windows NT 4.0',
 					'winnt4.0'			=> 'Windows NT 4.0',
 					'winnt 4.0'			=> 'Windows NT',
