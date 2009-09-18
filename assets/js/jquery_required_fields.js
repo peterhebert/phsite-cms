@@ -12,12 +12,9 @@ $().ready(function() {
 	$("form input[name='exists[]']").click(function() {
 
 		if( $(this).attr('checked') == false ) {
-			$(this).parent().siblings(1).children(0).attr("checked",false);
 
-			var myIndex = $(this).parent().siblings(1).children(0).val();
-			var OrderMatch = "form input[name='order["+myIndex+"]']";
-			$(OrderMatch).val("");
-
+			$(this).parent().siblings().next().next().children(0).attr("checked",false);
+			$(this).parent().siblings().next().next().next().children(0).val("");
 		}
 
 	});
