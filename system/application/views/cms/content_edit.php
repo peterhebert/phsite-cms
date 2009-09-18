@@ -21,8 +21,8 @@ $().ready(function(){
 	$("form select[name='type_id']").change(function () {
 	
 		var myloc = $("form input[name='my_url']").val();
-		var myval = $(this).val();
-		var newloc = myloc + '/type/' + myval;
+		var new_type = $(this).val();
+		var newloc = myloc + '/type/' + new_type;
 		window.location = newloc ;
 		
 	});
