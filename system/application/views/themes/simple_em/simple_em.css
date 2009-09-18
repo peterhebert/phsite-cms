@@ -12,15 +12,27 @@ a:hover { color:#990000; text-decoration:none; }
 
 /*
 fluid grid  / 'normal' text size at 15px
-Page designed to approximate golden ratio in 2-column split (using .g1 and .g2 classes),
-with the larger section having a optimal line length of approximately 
+
+5-column grid - columns of 150px with 15px (1em) gutter
+3/2 split approximates golden ratio 
+3 column section having a optimal line length of approximately 
+
+6-column grid - columns of 120px (8em) with 18px (1.2em) gutter
+
 70 characters, which is longest size for comfortable reading
-Page width at 'normal' will be 795px
-can also have 6-column grid (120px each) with 15px gutter
+Page width at 'normal' will be 810px
 em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
 */
 
-#masthead { padding:1ex 2em; margin-bottom:1.5em; background-color:#222222; color:#eeeeee; border-bottom:1px solid #666666; text-align:center; }
+#masthead {
+padding:1ex 2em;
+margin-bottom:1.5em;
+background-color:#222222;
+color:#eeeeee;
+border-bottom:1px solid #666666;
+text-align:center;
+}
+
 #page {
 	padding: 0 2em;
 	text-align:center;
@@ -28,21 +40,20 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .page-wrap {
 	margin: 1ex auto;
 	text-align:left;
-	width:53em;
+	width:54em;
 }
 
-.column, .golden .block .column { float: left; margin-right: 1em; }
-.golden .column { margin-right: 2em; }
-.g1 { width: 32em; }
-.g2 { width: 19em; }
-.w1 { width: 8em; }
-.w2 { width: 17em; }
-.w3 { width: 26em; }
-.w4 { width: 35em; }
-.w5 { width: 44em; }
-.w6 { width: 53em; }
-.nomargin { margin: 0; }
-.padded { padding: 0.5em }
+.column { float: left; margin-right: 1em; }
+
+.five .w1 { width: 10em; }
+.five .w2 { width: 21em; }
+.five .w3 { width: 32em; }
+.five .w4 { width: 43em; }
+.six .w1 { width: 8em; }
+.six .w2 { width: 17.2em; }
+.six .w3 { width: 26.4em; }
+.six .w4 { width: 35.6em; }
+.six .w5 { width: 44.8em; }
 
 /* gallery styles (reverse dark grey background with almost-white grey text */
 body.gallery { background-color: #1A1A1A; color:#EEEEEE; }

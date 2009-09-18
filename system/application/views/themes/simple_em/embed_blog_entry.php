@@ -1,4 +1,21 @@
-<h2><?php echo $title; ?></h2>
-<p>Posted <?php echo $created ?> by <?php echo $author['name_first'].' '.$author['name_last']; ?></p>
-<p><?php echo $content_data['teaser']; ?></p>
-<p><?php echo anchor($uri,'Read More'); ?></p>
+<?php
+if(isset($title)) 
+{
+	echo "<h3>{$title}</h3>\r";
+}
+if(isset($byline)) 
+{
+	echo "<p>{$byline}</p>\r";
+}
+if(isset($content_body)) 
+{
+	echo $content_body;
+}
+
+if(isset($content_keyword_links)) 
+{
+	echo "<p>{$content_keyword_links}</p>\r";
+}
+
+
+?>

@@ -24,23 +24,42 @@ class Content_model extends MY_Model {
 		$this->link_mode = 0;
 		$this->lang_mode = 0;
 		$this->scope = 'content';
+		$this->page = 1;
+		$this->limit = 10;
     }
 
     // list content
-	function list_content($parent = NULL,$recent = FALSE)
+	function list_content($parent = NULL, $recent = FALSE, $include_meta = FALSE)
     {
 
 		$list = array();
 
-		if(isset($parent) && $parent != '')
+		if(isset($parent) && is_integer($parent))
 		{
 			$this->db->where('parent_id', $parent);
+		}
+
+		if($this->type_id != '')
+		{
+			$this->db->where('type_id', $this->type_id);
 		}
 
 		if($recent)
 		{
 			$this->db->order_by("date_created", "desc");
-			$this->db->limit(10);
+			$this->db->limit($this->limit);
+
+			if($this->page > 1)
+			{
+				// page 1: 0-9
+				// page 2: 10-19
+				// page 3: 20-29
+				
+				$offset = ($this->page - 1) * $this->limit;
+				
+				$this->db->limit($this->limit, $offset);
+			}
+
 
 			if($this->link_mode == 0)
 			{
@@ -80,20 +99,34 @@ class Content_model extends MY_Model {
 				$this->db->where('rel_id', $row->content_id);
 				$this->db->where('lang_ISO_639_3', $this->temp_lang);
 				$this->db->limit(1);
-				$query = $this->db->get('c_titles');
+				$q2 = $this->db->get('c_titles');
 		
 				if ($query->num_rows() > 0)
 				{
-				   $row = $query->row();
+				   $r2 = $q2->row();
 				   
-				   $tmp['title_id'] = $row->title_id;
-				   $tmp['scope'] = $row->scope;
-				   $tmp['title_rel_id'] = $row->rel_id;
-				   $tmp['title'] = $row->title;
-				   $tmp['uri_title'] = $row->uri_title;
-				   $tmp['subtitle'] = $row->subtitle;
-				   $tmp['title_updated'] = $row->title_updated;
-				   $tmp['lang_ISO_639_3'] = $row->lang_ISO_639_3;
+				   $tmp['title_id'] = $r2->title_id;
+				   $tmp['scope'] = $r2->scope;
+				   $tmp['title_rel_id'] = $r2->rel_id;
+				   $tmp['title'] = $r2->title;
+				   $tmp['uri_title'] = $r2->uri_title;
+				   $tmp['subtitle'] = $r2->subtitle;
+				   $tmp['title_updated'] = $r2->title_updated;
+				   $tmp['lang_ISO_639_3'] = $r2->lang_ISO_639_3;
+				}
+				
+				// if metadata included, get it
+				if($include_meta)
+				{
+					$this->temp_id = $row->type_id;
+					$this->scope = 'types';
+					$this->list_fields_related();
+			
+					$this->scope = 'content';
+					$this->temp_id = $row->content_id;
+					$this->load_metadata();
+					
+					$tmp['metadata'] = $this->metadata;
 				}
 
 				$list[$key] = $tmp;
@@ -215,10 +248,9 @@ class Content_model extends MY_Model {
 
 		$parents['0'] = "site root";
 
+
 		if($this->content_id != '')
 		{
-			$this->db->where('parent_id !=',$this->content_id);
-			$this->db->where('c_content.content_id !=',$this->content_id);
 
 			// eliminate this content and all descendants
 			$children  = $this->get_descendants($this->content_id);
@@ -226,6 +258,9 @@ class Content_model extends MY_Model {
 			{
 				$this->db->where('c_content.content_id !=',$id);
 			}
+			
+			$this->db->where('parent_id !=',$this->content_id);
+			$this->db->where('c_content.content_id !=',$this->content_id);
 		}
 
 		if($this->temp_lang != '')
@@ -281,22 +316,23 @@ class Content_model extends MY_Model {
 		return FALSE;
 	}
 
-
-
-	function get_descendants($parent = '0')
+	function get_descendants($parent = 0)
 	{
-
-		$this->list_content($parent);
-
 		$descendants = array();
-		
-		foreach($this->content_list as $content)
-		{
-			$descendants[] = $content['content_id'];
 
-			$children = $this->get_descendants($content['content_id']);
-			$descendants = array_merge($descendants,$children);
-			
+		$this->db->where('parent_id', $parent);
+		$this->db->where('content_id !=', $parent);
+		
+		$query = $this->db->get('c_content');
+		
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$descendants[] = $row->content_id;
+				$children = $this->get_descendants($row->content_id);
+				$descendants = array_merge($descendants,$children);
+		   }
 		}
 		
 		return $descendants;
@@ -305,6 +341,7 @@ class Content_model extends MY_Model {
 
 	function site_map()
 	{
+		$this->scope = 'content';
 
 		$site_map = "";
 		
@@ -333,7 +370,7 @@ class Content_model extends MY_Model {
 				$this->db->limit(1);
 				$q2 = $this->db->get('c_titles');
 				$r2 = $q2->row_array();
-				
+
 				if ($q2->num_rows() > 0)
 				{
 					if($this->link_mode == 1)
@@ -373,6 +410,7 @@ class Content_model extends MY_Model {
 
     function generate_uri()
     {
+		$uriArray = array();
 		// get content info
 		$this->db->where('content_id', $this->temp_id);
 		$query = $this->db->get('c_content');
@@ -602,15 +640,19 @@ class Content_model extends MY_Model {
 
     function list_type_meta_fields()
     {
-
 		$this->list_fields();
-		$list = $this->field_list;
+		$field_list_full = $this->field_list;
+		
 		$this->scope = 'types';
-		
-		$field_info = array();
-		
-		foreach ($list as $fd)
+		$this->temp_id = $this->type_id;
+		$this->list_fields_related();
+		$field_list_related = $this->field_list;
+
+		$field_list_final = array();
+		foreach ($field_list_full as $index => $fd)
 		{
+			
+			$key = $fd['field_id'];
 			$temp_field = array(
 			'field_id' => $fd['field_id'],
 			'field_ref_name' => $fd['field_ref_name'],
@@ -621,24 +663,19 @@ class Content_model extends MY_Model {
 			'required' => '',
 			'order' => ''
 			);
-	
-			$this->db->where('scope',$this->scope);
-			$this->db->where('field_id',$fd['field_id']);
-			$query = $this->db->get('r_fields');
+			
+			$field_list_final["$key"] = $temp_field;
 
-			if ($query->num_rows() > 0)
-			{
-				$row = $query->row();
-				$temp_field['rf_id'] = $row->rf_id;
-				$temp_field['required'] = $row->required;
-				$temp_field['order'] = $row->order;
-			}
-			$field_info[] = $temp_field;
-			 
 		}
 
-		$this->field_list = $field_info;
-
+		foreach ($field_list_related as $index => $fd)
+		{
+			$field_list_final[$index]['rf_id'] = $fd['rf_id'];
+			$field_list_final[$index]['required'] = $fd['required'];
+			$field_list_final[$index]['order'] = $fd['order'];
+		}
+		$this->field_list = $field_list_final;
+		
 	}
 
 }

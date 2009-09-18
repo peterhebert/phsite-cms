@@ -544,7 +544,6 @@ class User extends MY_Controller
 		$this->data['form'] = $this->_form_meta_fields();
 
 		$msg = $this->User_model->_output_messages();
-		
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -673,6 +672,7 @@ class User extends MY_Controller
 				$temp_field = array(
 				'field_id' => $id,
 				'rf_id' => $temp_rels[$index],
+				'rf_rel_id' => $this->Site_model->site_id,
 				'exists' => FALSE,
 				'required' => 0,
 				'order' => $temp_order[$index],

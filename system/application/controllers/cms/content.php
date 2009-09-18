@@ -66,15 +66,19 @@ class Content extends MY_Controller
 		}
 		if( array_key_exists('type',$params) )
 		{
-			$this->Content_model->type_id = $params['type'];
+			$this->Content_model->temp_id = $params['type'];
 		}
 		else
 		{
-			$this->Content_model->type_id = 1;
+			$this->Content_model->temp_id = 1;
 		}
 
 		$this->_process_edit();
-		$this->Content_model->load_content();
+		if($this->Content_model->content_id != '')
+		{
+			$this->Content_model->load_content();
+		}
+
 		$this->_form_edit();
 
 		$msg = $this->Content_model->_output_messages();
@@ -98,19 +102,25 @@ class Content extends MY_Controller
 		'name' => 'content_editor',
 		'id' => 'content_editor'
 		);
+		
 
 		$form = form_open($action, $attributes);
 		
+		$my_url = 'cms/content/edit';
 		if($this->Content_model->content_id != '')
 		{
 			$form .= form_hidden('content_id', $this->Content_model->content_id);
-
+			$my_url .= '/id/'.$this->Content_model->content_id;
 		}
-
 		if($this->Content_model->title_id != '')
 		{
 			$form .= form_hidden('content_title_id', $this->Content_model->title_id);
 		}
+		if( $this->Content_model->temp_lang != '')
+		{
+			$my_url .= '/lang/'.$this->Content_model->temp_lang;
+		}
+		$form .= form_hidden('my_url', site_url($my_url));
 
 		$this->data['form_open'] = $form;
 
@@ -144,38 +154,79 @@ class Content extends MY_Controller
 		$form .= form_input($form_options);
 		$form .= "</p>";
 
-		$fd_meta = $this->Content_model->metadata;
+		if($this->Content_model->content_id != '')
+		{
+			$fd_meta = $this->Content_model->metadata;
+			$this->Content_model->temp_id = $this->Content_model->type_id;
+		}
+		else
+		{
+			$this->Content_model->scope = 'types';
+			$this->Content_model->list_fields_related();
+			$fd_meta = $this->Content_model->field_list;
 
+			$this->Content_model->type_id = $this->Content_model->temp_id;
+
+		}
+		$this->Content_model->scope = 'content';
+		$this->Content_model->load_type();
+		
 		foreach($fd_meta as $index => $fd)
 		{
+			// get field data if it does not exist
+			if(array_key_exists('field_id',$fd))
+			{
+				$tmp_ref_name = $fd['field_ref_name'];
+				$tmp_label = $fd['field_ref_name'];
+				$tmp_needs_lang = $fd['field_needs_lang'];
+				$tmp_meta_id = $fd['meta_id'];
+				$tmp_required = $fd['required'];
+				$tmp_input_type = $fd['field_input_type'];
+			}
+			else
+			{
+				$this->Content_model->temp_id = $index;
+				$this->Content_model->load_field();
+
+				$tmp_ref_name = $this->Content_model->field_ref_name;
+				$tmp_needs_lang = $this->Content_model->field_needs_lang;
+				$tmp_input_type = $this->Content_model->field_input_type;
+				$tmp_label = $tmp_ref_name;
+				$tmp_meta_id = '';
+				$tmp_required = '';
+			}
+
 			// hidden fields
 			$form_options = array(
 			'field_id[]' =>  $index,
-			'field_ref_name[]' =>  $fd['field_ref_name'],
-			'meta_id[]' => $fd['meta_id'],
-			'required[]' =>  $fd['required'],
-			'field_needs_lang[]' => $fd['field_needs_lang']
+			'field_ref_name[]' =>  $tmp_ref_name,
+			'meta_id[]' => $tmp_meta_id,
+			'required[]' =>  $tmp_required,
+			'field_needs_lang[]' => $tmp_needs_lang
 			);
 			$form .= form_hidden($form_options);
 
 			$this->Content_model->label_scope = 'field';
 			$this->Content_model->temp_id = $index;
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 
-			$tmp_label = $fd['field_ref_name'];
 			if($this->Content_model->load_label())
 			{
 				$tmp_label = $this->Content_model->label;
 			}
+
 			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $fd['field_ref_name']);
+			$form .= form_label($tmp_label, $tmp_ref_name);
+			$this->Content_model->reset_label();
+
 			$form_options = array(
-			'id' => $fd['field_ref_name'],
+			'id' => $tmp_ref_name,
 			'name' => 'value_'.$index,
 			'value' => $fd['value'],
-			'class' => $fd['field_input_type']
+			'class' => $tmp_input_type
 			);
 
-			switch($fd['field_input_type']) {
+			switch($tmp_input_type) {
 
 			case 'directory':
 				$this->load->model('Media_model');
@@ -224,6 +275,7 @@ class Content extends MY_Controller
 				$form .=  form_input($form_options);
 			}
 
+
 			$form .= "</p>\r";
 		}
 		$form .= form_fieldset_close();
@@ -245,7 +297,6 @@ class Content extends MY_Controller
 		$form .= "</p>\n";
 	
 		$form_options = array(1 => $this->cms_labels['yes'], 0 => $this->cms_labels['no']);
-
 		$form .= "<p>";
 		$form .=  form_label($this->cms_labels['publish'], 'publish');
 		$form .=  form_dropdown('publish', $form_options, $this->Content_model->publish);
@@ -257,6 +308,7 @@ class Content extends MY_Controller
 		$form .=  form_dropdown('user_id', $form_options, $this->Content_model->user_id);
 		$form .= "</p>\n";
 		
+
 		// convert dates to user timezone
 		$sys_zone = date_default_timezone_get();
 		$usr_zone = $this->session->userdata('timezone');
@@ -305,8 +357,8 @@ class Content extends MY_Controller
 		$form .=  form_input($form_options);
 		$form .= "</p>\n";
 
-		$form .= form_fieldset_close();
 
+		$form .= form_fieldset_close();
 		$this->data['form_meta'] = $form;
 
 		$form = "<p>";
@@ -316,7 +368,6 @@ class Content extends MY_Controller
 		$form .= form_close();
 
 		$this->data['form_close'] = $form;
-
 	}
 
 	function _process_edit()

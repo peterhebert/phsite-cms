@@ -1,5 +1,5 @@
 <?php
-
+$lang['cms_labels']['about_this_site'] = "About this site";
 $lang['cms_labels']['admin'] = "Administrator";
 $lang['cms_labels']['all_langs'] = "all languages";
 $lang['cms_labels']['author'] = "Author";
@@ -68,6 +68,7 @@ $lang['cms_labels']['media_no_file'] = "no file";
 $lang['cms_labels']['media_root'] = "Media root";
 $lang['cms_labels']['media_upload'] = "upload media";
 $lang['cms_labels']['media'] = "Media";
+$lang['cms_labels']['menu'] = "Menu";
 $lang['cms_labels']['metadata_delete_failure'] = "Could not delete metadata '%s'";
 $lang['cms_labels']['metadata_insert_failure'] = "Could not insert metadata '%s'";
 $lang['cms_labels']['metadata_update_failure'] = "Could not update metadata '%s'";
@@ -137,8 +138,8 @@ $lang['cms_labels']['rel_insert_failure'] = "Could not create relationship for f
 $lang['cms_labels']['rel_update_failure'] = "Could not update relationship for field '%s'";
 $lang['cms_labels']['rel_update_success'] = "Field relationships successfully updated";
 
-//$lang['cms_labels'][''] = "";
-//$lang['cms_labels'][''] = "";
+$lang['cms_labels']['posted_by'] = "Posted %s by %s";
+//$lang['cms_labels']['by'] = "";
 //$lang['cms_labels'][''] = "";
 //$lang['cms_labels'][''] = "";
 //$lang['cms_labels'][''] = "";

@@ -50,7 +50,7 @@ define('SALT_LENGTH', 10);
 // document root relative path to media files
 define('MEDIA_PATH_ORIG', '/media/originals');
 define('MEDIA_PATH_CACHE', '/media/cache');
-define('POWERED_BY', "<p>Powered by <a href=\"phsite.peterhebert.com\">phSite CMS</a></p>\r");
+define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\">phSite CMS</a></p>\r");
 
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */

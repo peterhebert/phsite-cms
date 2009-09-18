@@ -12,25 +12,16 @@ echo $html_header;
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
-	<div class="page-wrap block">
-		<div class="column g2">
-			<?php
-			if(isset($menu))
-			{
-				echo $menu;
-			}
-			?>
-		</div>
-		<div class="float g1" id="content">
+	<div class="page-wrap block five">
+		<div class="column w3">
 			<?php
 			if(isset($title))
 			{
 				echo "<h1>{$title}</h1>\r";
 			}
-	
-			if(isset($tech_info))
+			if(isset($view))
 			{
-				echo $tech_info;
+				echo "<p>view: {$view}</p>\r";
 			}
 			if(isset($content_body))
 			{
@@ -39,6 +30,14 @@ echo $html_header;
 			if(isset($content_keyword_links))
 			{
 				echo "<p>Keywords: {$content_keyword_links}</p>\r";
+			}
+			?>
+		</div>
+		<div class="float w2">
+			<?php
+			if(isset($menu))
+			{
+				echo $menu;
 			}
 			?>
 		</div>

@@ -14,6 +14,7 @@ class Parser extends MY_Controller {
 	{
 		parent::MY_Controller();	
 		$this->load->model('Content_model');
+		$this->load->model('User_model');
 		$this->load->helper('url');
 
 		$this->_load_site_metadata();
@@ -98,10 +99,23 @@ class Parser extends MY_Controller {
 		}
 
 		foreach($this->Content_model->metadata as $id => $field) {
-			$tmp_field_label = 'content_'.$field['field_ref_name'];
+		
+			if(array_key_exists('field_ref_name',$field))
+			{
+				$tmp_field_label = 'content_'.$field['field_ref_name'];
+				$tmp_field_name = $field['field_ref_name'];
+			}
+			else
+			{
+				$this->Content_model->temp_id = $id;
+				$this->Content_model->load_field();
+				$tmp_field_label = 'content_'.$this->Content_model->field_ref_name;;
+				$tmp_field_name = $this->Content_model->field_ref_name;;
+			}
+
 			$this->data[$tmp_field_label] = $field['value'];
 			
-			if($field['field_ref_name'] == 'keywords') {
+			if($tmp_field_name == 'keywords') {
 				$this->data['content_keyword_links'] = $this->Content_model->keyword_links($field['value']);
 			}
 
@@ -137,19 +151,18 @@ class Parser extends MY_Controller {
 				$menu .= $this->Content_model->site_map();
 		}
 		$this->data['menu'] = $menu;
-
-/*
-
 		
 		// children options by content type
 		switch ($this->Content_model->type_uri_name) {
 			case 'blog':
+				$this->data['blog'] = $this->_blog();
 				break;
 			case 'static_page':
 				break;
 			default:
 		}
-*/
+		$this->data['view'] = $this->view;
+
 	}
 	
 	function _home()
@@ -161,9 +174,84 @@ class Parser extends MY_Controller {
 			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		}
 
-		$body = $this->Content_model->site_map();
 
-		$this->data['body'] = $body;
+		$menu = $this->Content_model->site_map();
+
+		$this->data['menu'] = $menu;
+		$this->data['breadcrumb'] = $this->cms_labels['home'];
+		
+		$this->data['recent'] = $this->_blog();
+
+	}
+
+	function _blog()
+	{
+		$temp_view = 'themes/'.$this->Site_model->theme.'/embed_blog_excerpt';
+
+		$this->Content_model->type_id = 2;
+		$this->Content_model->list_content(NULL,TRUE,TRUE);
+		
+		$recent = $this->Content_model->content_list;
+		$blog = '';
+		
+		if(count($recent) > 0)
+		{
+			foreach($recent as $index => $post)
+			{
+				$blog_data = array();
+				$blog_data['title'] = $post['title'];
+				$blog_data['metadata'] = $post['metadata'];
+				
+				$this->User_model->temp_id = $post['user_id'];
+				$this->User_model->load_user();
+				$user_name_formatted = $this->User_model->name_first.' '.$this->User_model->name_last;
+				$date_created = convert_time($post['date_created'], $this->Site_model->site_timezone);
+	
+				$blog_data['byline'] = sprintf($this->cms_labels['posted_by'],$date_created,$user_name_formatted);
+	
+				$date_updated = $post['date_updated'];
+	
+				foreach($post['metadata'] as $id => $field) {
+				
+					if(array_key_exists('field_ref_name',$field))
+					{
+						$tmp_field_label = 'content_'.$field['field_ref_name'];
+						$tmp_field_name = $field['field_ref_name'];
+					}
+					else
+					{
+						$this->Content_model->temp_id = $id;
+						$this->Content_model->load_field();
+						$tmp_field_label = 'content_'.$this->Content_model->field_ref_name;;
+						$tmp_field_name = $this->Content_model->field_ref_name;;
+					}
+		
+					$blog_data[$tmp_field_label] = $field['value'];
+					
+					if($tmp_field_name == 'keywords') {
+						$blog_data['content_keyword_links'] = $this->Content_model->keyword_links($field['value']);
+					}
+					
+		
+					if($field['date_updated'] > $date_updated) {
+						$date_updated = $field['date_updated'];
+					}
+		
+				}
+	
+				$blog_data['date_updated'] = convert_time($date_updated, $this->Site_model->site_timezone);
+				
+				$blog .= $this->load->view($temp_view,$blog_data,true);
+			
+			}
+		}
+		else
+		{
+			$blog = $this->cms_labels['no_content'];
+		}
+
+		
+		return $blog;
 
 	}
 
@@ -233,7 +321,7 @@ class Parser extends MY_Controller {
 			}
 			$current_path = $current_path + 1;
 		}
-		
+
 		if($this->Content_model->content_id != '')
 		{
 			$this->Content_model->temp_id = $this->Content_model->type_id;

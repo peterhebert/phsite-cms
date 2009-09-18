@@ -79,7 +79,9 @@ class Setup extends MY_Controller
 		$form_options = array();
 		$form_options['0'] = $this->cms_labels['auto_generate'];
 
-		$this->Content_model->list_content(0,'','asc',0);
+		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		
+		$this->Content_model->list_content(0, TRUE);
 		
 		$homePages = $this->Content_model->content_list;
 		foreach($homePages as $row) {
@@ -110,6 +112,7 @@ class Setup extends MY_Controller
 		$form .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
 		$form .= "</p>\r";
 
+		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		$form_options = $this->Content_model->types_dropdown();
 		$form .= "<p>";
 		$form .= form_label($this->cms_labels['default_content_type'], 'default_content_type');
@@ -1058,6 +1061,7 @@ class Setup extends MY_Controller
 		if($this->input->post('submit') != '')
 		{
 			// get values from form post data
+			$this->Site_model->site_id = $this->input->post('site_id');
 			$temp_fields = $this->input->post('field_id');
 			$temp_rels = $this->input->post('rf_id');
 			$temp_exists = $this->input->post('exists');
@@ -1070,6 +1074,7 @@ class Setup extends MY_Controller
 				$temp_field = array(
 				'field_id' => $id,
 				'rf_id' => $temp_rels[$index],
+				'rf_rel_id' => $this->Site_model->site_id,
 				'exists' => FALSE,
 				'required' => 0,
 				'order' => $temp_order[$index],
@@ -1327,8 +1332,8 @@ class Setup extends MY_Controller
 		$this->_process_content_type();
 
 		$params = $this->uri->uri_to_assoc(4);
-		if(array_key_exists('id',$params) && $this->Content_model->type_id == '') {
-			$this->Content_model->type_id = $params['id'];
+		if(array_key_exists('id',$params)) {
+			$this->Content_model->temp_id = $params['id'];
 		}
 		if(array_key_exists('lang',$params))
 		{
@@ -1352,9 +1357,22 @@ class Setup extends MY_Controller
 	
 	function _form_content_type()
 	{
+		if($this->Content_model->type_id != '')
+		{
+			$this->Content_model->temp_id = $this->Content_model->type_id;
+		}
+		$this->Content_model->load_type();
 
 		if($this->Content_model->type_id != '') {
-			$loaded = $this->Content_model->load_type();
+			$this->Content_model->list_type_meta_fields();
+			
+			echo '<p>'.$this->db->last_query()."</p>\r";
+
+
+			$this->Content_model->reset_label();
+			$this->Content_model->label_scope = "types";
+			$this->Content_model->temp_id = $this->Content_model->type_id;
+			$this->Content_model->load_label();
 		}
 		
 		$langs = $this->Content_model->langs_dropdown();
@@ -1393,13 +1411,6 @@ class Setup extends MY_Controller
 		$form .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang); 
 		$form .= "</p>\r";
 		
-		if($this->Content_model->type_id != '')
-		{
-			$this->Content_model->reset_label();
-			$this->Content_model->label_scope = "types";
-			$this->Content_model->temp_id = $this->Content_model->type_id;
-			$this->Content_model->load_label();
-		}
 		$form .= "<p>\r";
 		$form .= form_label($this->cms_labels['content_type_label'], 'label');
 		$form .= form_input('label',$this->Content_model->label); 
@@ -1420,8 +1431,6 @@ class Setup extends MY_Controller
 		$form .= "</tr>\r";
 		$form .= "</thead>\r";
 
-		$this->Content_model->list_type_meta_fields();
-		
 		$fieldCount = count($this->Content_model->field_list);
 		$fieldNo = 1;
 
@@ -1519,13 +1528,6 @@ class Setup extends MY_Controller
 			$this->Content_model->type_id = $this->input->post('type_id');
 			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
 
-			$this->Content_model->label_scope = 'types';
-			$this->Content_model->label_rel_id = $this->Content_model->type_id;
-			$this->Content_model->label_rel_name = $this->Content_model->type_uri_name;
-			$this->Content_model->label_id = $this->input->post('label_id');
-			$this->Content_model->label = $this->input->post('label');
-			$this->Content_model->temp_lang = $this->input->post('type_lang');
-			
 			if ($form_is_valid)
 			{
 
@@ -1541,6 +1543,8 @@ class Setup extends MY_Controller
 					$temp_field = array(
 					'field_id' => $id,
 					'rf_id' => $temp_rels[$index],
+					'rf_rel_id' => $this->Content_model->type_id,
+					'rf_rel_ref_name' => $this->Content_model->type_uri_name,
 					'exists' => FALSE,
 					'required' => 0,
 					'order' => $temp_order[$index],
@@ -1556,7 +1560,7 @@ class Setup extends MY_Controller
 					
 					$field_updates[] = $temp_field;
 				}
-				$this->Content_model->reset_label();
+				//$this->Content_model->reset_label();
 
 				$this->Content_model->scope = 'content';
 				if($this->Content_model->update_type())
@@ -1566,10 +1570,21 @@ class Setup extends MY_Controller
 					$this->Content_model->scope = 'types';
 					$this->Content_model->update_fields_related();
 
+					// update type label
+					$this->Content_model->label_scope = 'types';
+					$this->Content_model->label_rel_id = $this->Content_model->type_id;
+					$this->Content_model->label_rel_name = $this->Content_model->type_uri_name;
+					$this->Content_model->label_id = $this->input->post('label_id');
+					$this->Content_model->label = $this->input->post('label');
+					$this->Content_model->temp_lang = $this->input->post('type_lang');
+
 					if(!$this->Content_model->update_label())
 					{
 						$this->Content_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['content_type_label']);
 					}
+
+					//$this->Content_model->temp_id = $this->Content_model->type_id;
+
 				}
 				else
 				{

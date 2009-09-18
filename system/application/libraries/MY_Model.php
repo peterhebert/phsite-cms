@@ -195,13 +195,14 @@ class MY_Model extends Model {
 	function load_type()
     {
 
-		$this->db->where('type_id', $this->type_id);
+		$this->db->where('type_id', $this->temp_id);
 		$this->db->where('scope', $this->scope);
 		$query = $this->db->get('s_types');
  
  		if ($query->num_rows() > 0)
 		{
 			$row = $query->row_array();
+			$this->type_id = $row['type_id'];
 			$this->type_uri_name = $row['type_uri_name'];
 			
 			return TRUE;
@@ -258,12 +259,12 @@ class MY_Model extends Model {
 			'lang_ISO_639_3' => '',
 			);
 
-			$this->db->where('scope', 'type');
+			$this->db->where('scope', 'types');
 			$this->db->where('rel_id', $row->type_id);
 			$this->db->where('lang_ISO_639_3', $this->temp_lang);
 			$this->db->limit(1);
 			$query2 = $this->db->get('s_labels');
-		   
+
 			if ($query2->num_rows() > 0)
 			{
 				$row2 = $query2->row();
@@ -321,13 +322,15 @@ class MY_Model extends Model {
 		$list = array();
 		
 		$this->db->where('scope',$this->scope);
-		if ($this->temp_id != '' && $this->scope != 'users' && $this->scope != 'site')
+		if ($this->temp_id != '' && $this->scope == 'types')
 		{
 			$this->db->where('rf_rel_id',$this->temp_id);
 		}
 		$this->db->join('s_fields', 'r_fields.field_id = s_fields.field_id', 'left');
+
+		$this->db->order_by("order");
 		$query = $this->db->get('r_fields');
-		
+
 		if ($query->num_rows() > 0)
 		{
 		   foreach ($query->result() as $row)
@@ -404,7 +407,6 @@ class MY_Model extends Model {
 
 	function update_fields_related()
     {
-
 
 		foreach($this->field_list as $field)
 		{
@@ -629,7 +631,6 @@ class MY_Model extends Model {
 
     function update_label()
     {
-		
 		$data = array(
 		'scope' => $this->label_scope,
 		'rel_id' => $this->label_rel_id,
@@ -655,7 +656,6 @@ class MY_Model extends Model {
 
 		}
 		return FALSE;
-
     }
 
 

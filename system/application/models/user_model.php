@@ -64,9 +64,11 @@ class User_model extends MY_Model {
 	function load_user()
     {
 
+
 		$this->db->where('user_id', $this->temp_id);
 
 		$query = $this->db->get('s_users');
+
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();

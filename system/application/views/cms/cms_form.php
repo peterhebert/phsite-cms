@@ -16,6 +16,11 @@ echo $title_tag.' | ';
 <script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
 <script type="text/javascript" src="/assets/js/jquery_required_fields.js"></script>
 <script type="text/javascript" src="/assets/js/jquery_new_content.js"></script>
+<?php
+if (isset($custom_js)){
+	echo $custom_js;
+}
+?>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
