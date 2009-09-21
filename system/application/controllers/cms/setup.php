@@ -1366,9 +1366,6 @@ class Setup extends MY_Controller
 		if($this->Content_model->type_id != '') {
 			$this->Content_model->list_type_meta_fields();
 			
-			echo '<p>'.$this->db->last_query()."</p>\r";
-
-
 			$this->Content_model->reset_label();
 			$this->Content_model->label_scope = "types";
 			$this->Content_model->temp_id = $this->Content_model->type_id;
@@ -1560,7 +1557,6 @@ class Setup extends MY_Controller
 					
 					$field_updates[] = $temp_field;
 				}
-				//$this->Content_model->reset_label();
 
 				$this->Content_model->scope = 'content';
 				if($this->Content_model->update_type())

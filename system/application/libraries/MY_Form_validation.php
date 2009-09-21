@@ -145,7 +145,7 @@ class MY_Form_validation extends CI_Form_validation {
 
 	function is_lang($str)
 	{
-		return ( ! ereg('^([a-z]){3}$', $str)) ? FALSE : TRUE;
+		return ( ! preg_match('/^([a-z]){3}$/', $str)) ? FALSE : TRUE;
 	}
 
 	// --------------------
@@ -158,9 +158,9 @@ class MY_Form_validation extends CI_Form_validation {
 	 */	
 	function is_uri($str)
 	{
-		$pattern = "^(http|https|ftp){0,1}(\:){0,1}(//){0,1}[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$";
+		$pattern = "/^(http|https|ftp){0,1}(\:){0,1}(//){0,1}[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$/";
 		
-		return ( ! ereg($pattern, $str)) ? FALSE : TRUE;
+		return ( ! preg_match($pattern, $str)) ? FALSE : TRUE;
 	}
 
 	// --------------------
@@ -173,8 +173,8 @@ class MY_Form_validation extends CI_Form_validation {
 	 */	
 	function is_phone($str)
 	{
-		$pattern = "^[\(\)\+0-9A-Z\.[:blank:]-]+(ext)?[\(\)\+0-9A-Z\.[:blank:]-]+$";
-		return ereg( $pattern  ,  $str );	
+		$pattern = "/^[\(\)\+0-9A-Z\.[:blank:]-]+(ext)?[\(\)\+0-9A-Z\.[:blank:]-]+$/";
+		return preg_match( $pattern  ,  $str );	
 	}
 }
 

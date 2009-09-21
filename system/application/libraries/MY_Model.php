@@ -412,7 +412,7 @@ class MY_Model extends Model {
 		{
 
 			$this->temp_id = $field['field_id'];
-			$this->load_field();
+			$this->load_field(FALSE);
 
 			$this->temp_id = $field['field_id'];
 			$this->label_scope = 'field';
@@ -494,7 +494,7 @@ class MY_Model extends Model {
 
 	}
 
-	function load_field()
+	function load_field($parse = TRUE)
     {
 		$query = $this->db->get_where('s_fields', array('field_id' => $this->temp_id));
 
@@ -507,7 +507,10 @@ class MY_Model extends Model {
 			$this->field_validation = $row['field_validation'];
 			$this->field_needs_lang = $row['field_needs_lang'];
 	
-			$this->field_parse_validation();
+			if($parse)
+			{
+				$this->field_parse_validation();
+			}
 			return TRUE;
 		}
 		else
@@ -528,19 +531,19 @@ class MY_Model extends Model {
 				if(in_array($rule,$this->data_types)){
 					$this->validation_string = $rule;
 				}
-				if(ereg ( 'exact_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)exact_length\[([0-9]+)\](.*)$';
-					$this->validation_exact = ereg_replace($pattern,'\\2',$rule);
+				
+				$pattern_exact = '/exact_length\[([0-9]+)\]/';
+				$pattern_min = '/min_length\[([0-9]+)\]/';
+				$pattern_max = '/max_length\[([0-9]+)\]/';
+				
+				if( preg_match($pattern_exact,$rule) ) {
+					$this->validation_exact = preg_replace($pattern_exact, '\\1',$rule);
 				}
-		
-				if(ereg ( 'min_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)min_length\[([0-9]+)\](.*)$';
-					$this->validation_min = ereg_replace($pattern,'\\2',$rule);
+				if( preg_match($pattern_min,$rule) ) {
+					$this->validation_min = preg_replace($pattern_min, '\\1',$rule);
 				}
-		
-				if(ereg ( 'max_length\[([0-9]+)\]', $rule)) {
-					$pattern = '^(.*)max_length\[([0-9]+)\](.*)$';
-					$this->validation_max = ereg_replace($pattern,'\\2',$rule);
+				if( preg_match($pattern_max,$rule) ) {
+					$this->validation_max = preg_replace($pattern_max, '\\1',$rule);
 				}
 				
 			}

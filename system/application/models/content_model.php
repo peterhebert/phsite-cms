@@ -69,7 +69,6 @@ class Content_model extends MY_Model {
 		}
 		
 		$query = $this->db->get('c_content');
-			echo '<p>'.$this->db->last_query()."</p>\r";
 		
 		if ($query->num_rows() > 0)
 		{
