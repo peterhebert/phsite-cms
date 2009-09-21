@@ -80,14 +80,15 @@ class Parser extends MY_Controller {
 		$this->data['user_id'] = $this->Content_model->user_id;
 		$this->data['parent_id'] = $this->Content_model->parent_id;
 		$this->data['type_id'] = $this->Content_model->type_id;
-		
+		$this->Content_model->temp_id = $this->Content_model->type_id;
+	
 		$this->Content_model->scope = 'content';
 		$this->Content_model->load_type();
+		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
+
 		$this->data['type_uri_name'] = $this->Content_model->type_uri_name;
 		$this->data['title'] = $this->Content_model->title;
 		$this->data['subtitle'] = $this->Content_model->subtitle;
-
-		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
 		$this->data['content_date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
 		$this->data['content_date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
@@ -151,11 +152,13 @@ class Parser extends MY_Controller {
 				$menu .= $this->Content_model->site_map();
 		}
 		$this->data['menu'] = $menu;
+
 		
 		// children options by content type
 		switch ($this->Content_model->type_uri_name) {
 			case 'blog':
-				$this->data['blog'] = $this->_blog();
+				$this->data['blog'] = $this->_blog($this->Content_model->content_id);
+
 				break;
 			case 'static_page':
 				break;
@@ -184,12 +187,20 @@ class Parser extends MY_Controller {
 
 	}
 
-	function _blog()
+	function _blog($parent=NULL)
 	{
 		$temp_view = 'themes/'.$this->Site_model->theme.'/embed_blog_excerpt';
 
 		$this->Content_model->type_id = 2;
-		$this->Content_model->list_content(NULL,TRUE,TRUE);
+
+		if(isset($parent))
+		{
+			$this->Content_model->list_content($parent,TRUE,TRUE);
+		}
+		else
+		{
+			$this->Content_model->list_content(NULL,TRUE,TRUE);
+		}
 		
 		$recent = $this->Content_model->content_list;
 		$blog = '';
@@ -263,6 +274,7 @@ class Parser extends MY_Controller {
 
 		$pathcount = count($this->segments);
 
+		$this->temp_id = '';
 		foreach ($this->segments as $uri_title) {
 		
 			$this->Content_model->temp_value = $uri_title;

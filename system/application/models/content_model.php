@@ -34,7 +34,7 @@ class Content_model extends MY_Model {
 
 		$list = array();
 
-		if(isset($parent) && is_integer($parent))
+		if(isset($parent))
 		{
 			$this->db->where('parent_id', $parent);
 		}
@@ -69,6 +69,7 @@ class Content_model extends MY_Model {
 		}
 		
 		$query = $this->db->get('c_content');
+			echo '<p>'.$this->db->last_query()."</p>\r";
 		
 		if ($query->num_rows() > 0)
 		{
@@ -637,7 +638,6 @@ class Content_model extends MY_Model {
 		return $result;		
 	}
 
-
     function list_type_meta_fields()
     {
 		$this->list_fields();
@@ -676,6 +676,25 @@ class Content_model extends MY_Model {
 		}
 		$this->field_list = $field_list_final;
 		
+	}
+
+	function new_content_dropdown()
+    {
+		$this->scope = 'content';
+		$this->list_types();
+		$list = array();
+		foreach($this->type_list as $row)
+		{
+			$type_url = site_url('cms/content/edit/type/'.$row['type_id']);
+			if($row['label'] != '')
+			{
+				$list[$type_url] = $row['label'];
+			} else {
+				$list[$type_url] = $row['type_uri_name'];
+			}
+		}
+
+		return $list;
 	}
 
 }
