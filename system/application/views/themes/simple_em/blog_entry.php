@@ -11,17 +11,16 @@ echo $html_header;
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
-	<div class="page-wrap block">
-		<div class="column g2">
-			<?php
-			if(isset($menu))
-			{
-				echo $menu;
-			}
-			?>
-		</div>
-		<div class="float g1">
+	<div class="page-wrap block" id="breadcrumb">
+		<?php
+		if (isset($breadcrumb)){
+			echo $breadcrumb;
+		}
+	 ?>
+	</div>
+	<div class="page-wrap">
+		<div class="block five">
+			<div class="column w3">
 			<?php
 			if(isset($title))
 			{
@@ -41,16 +40,25 @@ echo $html_header;
 				echo "<p>Keywords: {$content_keyword_links}</p>\r";
 			}
 			?>
+			</div>
+			<div class="float w2">
+				<?php
+				if(isset($menu) && $menu != '')
+				{
+					echo $menu;
+				}
+				?>
+			</div>
 		</div>
 	</div>
-	<div class="page-wrap block" id="footer"><?php 
-	if (isset($copyright)) {
-		echo "<p>{$content_copyright}</p>\r";
-	} else {
-		echo "<p>{$site_meta_copyright}</p>\r";
+	<div class="page-wrap block" id="footer">
+		<?php
+	if (isset($site_meta_copyright) ) {
+		echo "<p>".$site_meta_copyright."</p>\r";
 	}
 	echo POWERED_BY;
-	?></div>
+	?>
+	</div>
 </div>
 </body>
 </html>

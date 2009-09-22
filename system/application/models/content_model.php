@@ -69,7 +69,7 @@ class Content_model extends MY_Model {
 		}
 		
 		$query = $this->db->get('c_content');
-		
+	
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
@@ -168,7 +168,7 @@ class Content_model extends MY_Model {
 
 				$this->user_id = $row->user_id;
 				$this->parent_id = $row->parent_id;
-				$this->type_id = $row->type_id;
+				$this->temp_id = $row->type_id;
 				$this->date_created = $row->date_created;
 				$this->date_end_expiry = $row->date_end_expiry;
 				$this->date_updated = $row->date_updated;
@@ -262,6 +262,7 @@ class Content_model extends MY_Model {
 			$this->db->where('parent_id !=',$this->content_id);
 			$this->db->where('c_content.content_id !=',$this->content_id);
 		}
+		$this->db->where('type_id !=',2);
 
 		if($this->temp_lang != '')
 		{
@@ -272,7 +273,7 @@ class Content_model extends MY_Model {
 		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
 
 		$query = $this->db->get('c_content');
-		
+
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
@@ -285,6 +286,32 @@ class Content_model extends MY_Model {
 		}
 
 		return $parents;
+	}
+
+    function get_parent_title()
+    {
+
+		if($this->content_id != '')
+		{
+			$this->db->where('c_content.content_id',$this->parent_id);
+		}
+		if($this->temp_lang != '')
+		{
+			$this->db->where('lang_ISO_639_3',$this->temp_lang);
+		}
+
+		$this->db->where('scope','content');
+		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+
+		$query = $this->db->get('c_content');
+		
+		if ($query->num_rows() > 0)
+		{
+		   $row = $query->row();
+		
+		   return $row->title;
+		}
+		return FALSE; 
 	}
 
     // search for content by title, parent
@@ -434,7 +461,6 @@ class Content_model extends MY_Model {
 			$row = $query->row();
 			$uriArray[] = $row->uri_title;
 		}
-
 
 		//now loop through to top level		
 		do

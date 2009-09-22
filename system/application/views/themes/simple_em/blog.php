@@ -39,18 +39,8 @@ echo $html_header;
 			</div>
 			<div class="float w2">
 				<?php
-				if (isset($site_meta_description) && $site_meta_description != '') {
-					echo "<h2 class=\"first\">";
-					echo $cms_labels['about_this_site'];
-					echo "</h2>\r";
-					echo "<p>{$site_meta_description}</p>\r";
-				}
-
 				if(isset($menu) && $menu != '')
 				{
-					echo "<h3>";
-					echo $cms_labels['menu'];
-					echo "</h3>\r";
 					echo $menu;
 				}
 				?>

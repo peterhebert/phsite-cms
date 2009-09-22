@@ -49,8 +49,7 @@ class Cms extends MY_Controller
 		}
 		$form .= "</ul>\r";
 
-
-		$form_options = $this->Content_model->types_dropdown();
+		$form_options = $this->Content_model->new_content_dropdown();
 		$form .= "<p>Create New ";
 		$form .= form_dropdown('new_content',$form_options).' ';
 		$form_options = array(

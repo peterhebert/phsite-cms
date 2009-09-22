@@ -11,6 +11,10 @@ if(isset($content_excerpt))
 {
 	echo $content_excerpt;
 }
+if(isset($permalink)) 
+{
+	echo "<p>{$permalink}</p>\r";
+}
 
 if(isset($content_keyword_links)) 
 {

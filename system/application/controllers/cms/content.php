@@ -168,6 +168,7 @@ class Content extends MY_Controller
 			$this->Content_model->type_id = $this->Content_model->temp_id;
 
 		}
+		
 		$this->Content_model->scope = 'content';
 		$this->Content_model->load_type();
 		
@@ -217,7 +218,7 @@ class Content extends MY_Controller
 
 			$form .= "<p>\r";
 			$form .= form_label($tmp_label, $tmp_ref_name);
-			$this->Content_model->reset_label();
+			//$this->Content_model->reset_label();
 
 			$form_options = array(
 			'id' => $tmp_ref_name,
@@ -285,7 +286,7 @@ class Content extends MY_Controller
 		$form = form_fieldset($this->cms_labels['general_info']);
 
 		$form_options = $this->Content_model->types_dropdown();
-		$form .= "<p>";
+		$form .= "<p>".$this->Content_model->type_id;
 		$form .=  form_label($this->cms_labels['content_type'], 'type_id');
 		$form .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
 		$form .= "</p>\n";
@@ -429,15 +430,18 @@ class Content extends MY_Controller
 				$this->Content_model->content_id = $this->input->post('content_id');
 				$this->Content_model->user_id = $this->input->post('user_id');
 				$this->Content_model->parent_id = $this->input->post('parent_id');
-				$this->Content_model->type_id = $this->input->post('type_id');
 				$this->Content_model->date_created = $this->input->post('date_created');
 				$this->Content_model->date_end_expiry = $this->input->post('date_end_expiry');
 				$this->Content_model->publish = $this->input->post('publish');
 
-				$this->Content_model->content_title_id = $this->input->post('content_title_id');
+				$this->Content_model->title_id = $this->input->post('content_title_id');
 				$this->Content_model->temp_lang = $this->input->post('content_lang');
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->subtitle = $this->input->post('subtitle');
+
+				$this->Content_model->temp_id = $this->input->post('type_id');
+				$this->Content_model->scope = 'content';
+				$this->Content_model->load_type();
 	
 				$tmp_field_id = $this->input->post('field_id');
 				$tmp_field_name = $this->input->post('field_name');

@@ -139,8 +139,10 @@ $lang['cms_labels']['rel_update_failure'] = "Could not update relationship for f
 $lang['cms_labels']['rel_update_success'] = "Field relationships successfully updated";
 
 $lang['cms_labels']['posted_by'] = "Posted %s by %s";
-//$lang['cms_labels']['by'] = "";
-//$lang['cms_labels'][''] = "";
+$lang['cms_labels']['read_more'] = "Read More";
+$lang['cms_labels']['permalink_title'] = "Permanent link to full post '%s'";
+$lang['cms_labels']['keywords'] = "Keywords";
+$lang['cms_labels']['recently_posted_to'] = "Recently posted to %s";
 //$lang['cms_labels'][''] = "";
 //$lang['cms_labels'][''] = "";
 //$lang['cms_labels'][''] = "";
