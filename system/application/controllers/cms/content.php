@@ -124,7 +124,7 @@ class Content extends MY_Controller
 
 		$form_options = $this->Content_model->langs_dropdown();
 		$form .= "<p>";
-		$form .=  form_label('Language', 'content_lang');
+		$form .=  form_label($this->cms_labels['language'], 'content_lang');
 		$form .=  form_dropdown('content_lang', $form_options, $this->Content_model->temp_lang);
 		$form .= "</p>\n";
 
@@ -135,7 +135,7 @@ class Content extends MY_Controller
 		'value' => $this->Content_model->title
 		);
 		$form .= "<p>";
-		$form .= form_label('Title','title');
+		$form .= form_label($this->cms_labels['title'],'title');
 		$form .= form_input($form_options);
 		$form .= "</p>";
 
@@ -146,7 +146,7 @@ class Content extends MY_Controller
 		'value' => $this->Content_model->subtitle
 		);
 		$form .= "<p>";
-		$form .= form_label('Subitle','subtitle');
+		$form .= form_label($this->cms_labels['subtitle'],'subtitle');
 		$form .= form_input($form_options);
 		$form .= "</p>";
 
@@ -260,6 +260,18 @@ class Content extends MY_Controller
 
 			$form .= "</p>\r";
 		}
+
+		$form_options = array(
+		'id' => 'keywords',
+		'name' => 'keywords',
+		'class' => 'textarea',
+		'value' => $this->Content_model->keywords
+		);
+		$form .= "<p>";
+		$form .= form_label($this->cms_labels['keywords'],'keywords');
+		$form .=  form_textarea($form_options);
+		$form .= "</p>";
+
 		$form .= form_fieldset_close();
 
 		$this->data['form'] = $form;
@@ -367,10 +379,6 @@ class Content extends MY_Controller
 			$this->form_validation->set_rules('parent_id', $this->cms_labels['parent'], 'required|is_natural');
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 
-//			$this->Content_model->scope = 'types';
-//			$this->Content_model->temp_id = $this->input->post('type_id');
-//			$this->Content_model->list_fields_related();
-
 			$tmp_field_id = $this->input->post('field_id');
 			$tmp_field_ref_name = $this->input->post('field_ref_name');
 			$tmp_meta_id = $this->input->post('meta_id');
@@ -433,6 +441,7 @@ class Content extends MY_Controller
 				$this->Content_model->temp_lang = $this->input->post('content_lang');
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->subtitle = $this->input->post('subtitle');
+				$this->Content_model->keywords = $this->input->post('keywords');
 
 				$this->Content_model->temp_id = $this->input->post('type_id');
 				$this->Content_model->scope = 'content';
@@ -467,11 +476,6 @@ class Content extends MY_Controller
 						$this->Content_model->temp_id = $fd_id;
 						$this->Content_model->load_field();
 						
-						if($this->Content_model->field_ref_name == 'keywords')
-						{
-							$value = csv_normalize($value);
-						}
-						
 						$tmp_meta = array(
 						'meta_id' => $tmp_meta_id[$index],
 						'scope' => $this->Content_model->scope,
@@ -491,7 +495,6 @@ class Content extends MY_Controller
 							$tmp_meta["lang_ISO_639_3"] = $this->Content_model->temp_lang;
 						}
 
-		
 						$form_meta["$fd_id"] = $tmp_meta;
 		
 					}

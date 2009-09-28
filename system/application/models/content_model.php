@@ -11,6 +11,7 @@ class Content_model extends MY_Model {
 	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
 	var $limit; // limit number for query
 	var $page; // page number number for query limit
+	var $date_filter; // date range (YYYY, YYYY-MM or YYYY-MM-DD format)
 
 	// variables for site map
 	var $current_level = 1;
@@ -91,6 +92,7 @@ class Content_model extends MY_Model {
 				'title' => '',
 				'uri_title' => '',
 				'subtitle' => '',
+				'keywords' => '',
 				'title_updated' => '',
 				'lang_ISO_639_3' => '',
 				);
@@ -111,6 +113,7 @@ class Content_model extends MY_Model {
 				   $tmp['title'] = $r2->title;
 				   $tmp['uri_title'] = $r2->uri_title;
 				   $tmp['subtitle'] = $r2->subtitle;
+				   $tmp['keywords'] = $r2->keywords;
 				   $tmp['title_updated'] = $r2->title_updated;
 				   $tmp['lang_ISO_639_3'] = $r2->lang_ISO_639_3;
 				}

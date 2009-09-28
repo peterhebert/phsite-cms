@@ -4,7 +4,7 @@
 #
 # Host: localhost (MySQL 5.0.67)
 # Database: phsite_minimal
-# Generation Time: 2009-08-27 17:40:54 -0700
+# Generation Time: 2009-09-28 12:58:02 -0700
 # ************************************************************
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -7937,21 +7937,26 @@ CREATE TABLE `c_content` (
   `user_id` mediumint(9) unsigned NOT NULL default '1',
   `parent_id` mediumint(9) NOT NULL default '0' COMMENT '0 is root, -1 is non-hierarchical',
   `type_id` mediumint(9) unsigned NOT NULL default '1',
-  `type_uri_name` text NOT NULL,
+  `type_uri_name` text,
   `date_created` datetime NOT NULL,
   `date_end_expiry` datetime default NULL,
-  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `publish` mediumint(9) unsigned NOT NULL default '1',
   PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_content` WRITE;
 /*!40000 ALTER TABLE `c_content` DISABLE KEYS */;
 INSERT INTO `c_content` (`content_id`,`user_id`,`parent_id`,`type_id`,`type_uri_name`,`date_created`,`date_end_expiry`,`date_updated`,`publish`)
 VALUES
-	(1,1,2,1,'static_page','2009-07-09 13:37:56','0000-00-00 00:00:00','2009-07-17 17:40:59',1),
-	(2,1,0,1,'static_page','2009-07-09 13:39:52','0000-00-00 00:00:00','2009-07-17 12:05:11',1),
-	(3,1,0,2,'blog_entry','2009-07-21 14:18:14','0000-00-00 00:00:00','2009-07-21 14:18:14',1);
+	(1,1,2,1,'static_page','2009-07-09 13:37:56',NULL,'2009-09-24 12:03:29',1),
+	(2,1,0,1,'static_page','2009-07-09 13:39:52',NULL,'2009-09-24 12:03:29',1),
+	(3,1,0,1,'static_page','2009-07-21 14:18:14',NULL,'2009-09-24 12:03:29',1),
+	(4,1,0,3,'blog','2009-09-18 17:13:30','0000-00-00 00:00:00','2009-09-24 15:48:55',1),
+	(5,1,1,1,'static_page','2009-09-18 17:21:44','0000-00-00 00:00:00','2009-09-25 14:58:46',1),
+	(6,1,0,1,'static_page','2009-09-23 17:47:50',NULL,'2009-09-24 12:03:29',1),
+	(7,1,0,1,'static_page','2009-09-23 18:10:19',NULL,'2009-09-24 12:03:29',1),
+	(8,1,0,2,'blog_entry','2009-09-25 16:11:24','0000-00-00 00:00:00','2009-09-25 16:15:34',1);
 
 /*!40000 ALTER TABLE `c_content` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -7987,30 +7992,33 @@ CREATE TABLE `c_metadata` (
   `field_ref_name` text NOT NULL,
   `value` mediumtext NOT NULL,
   `lang_ISO_639_3` varchar(3) default NULL,
-  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`meta_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_metadata` WRITE;
 /*!40000 ALTER TABLE `c_metadata` DISABLE KEYS */;
 INSERT INTO `c_metadata` (`meta_id`,`scope`,`meta_rel_id`,`field_id`,`field_ref_name`,`value`,`lang_ISO_639_3`,`date_updated`)
 VALUES
-	(1,'users',1,1,'biography','<p>Peter is a web developer and filmmaker based in Vancouver, BC</p>','eng','2009-07-30 21:07:20'),
-	(4,'content',3,2,'body','<p>I am just testing out my new CMS, and would like to use this as my first blog entry.</p>\n<p>The first post is just a dummy placeholder, and this is the extended text.</p>','','2009-07-30 21:07:20'),
-	(5,'content',1,8,'description','Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He’s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?','eng','2009-07-30 21:07:20'),
-	(8,'content',1,14,'keywords','crime, DV, film, harness racing, horses, luck, lucky, mob, Ottawa, racing, short','eng','2009-07-30 21:07:20'),
-	(9,'content',3,14,'keywords','blog, CMS, post, testing','','2009-07-30 21:07:20'),
-	(10,'users',1,15,'location','Vancouver, British Columbia','eng','2009-07-30 21:07:20'),
-	(11,'content',3,11,'excerpt','I am just testing out my new CMS, and would like to use this as my first blog entry.','','2009-07-30 21:07:20'),
-	(12,'users',1,18,'website_url','http://www.peterhebert.com','','2009-07-30 21:07:20'),
-	(6,'content',2,2,'body','<p>Here are some of my films, and others that I have worked on.</p>\n<table border=\"0\">\n<thead> \n<tr>\n<th scope=\"col\">Year</th> <th scope=\"col\">Production title</th> <th scope=\"col\">format</th> <th scope=\"col\">Position(s)</th> <th scope=\"col\">Producer</th>\n</tr>\n</thead> \n<tbody>\n<tr>\n<td>2008</td>\n<td><a rel=\"external\" href=\"http://www.thegreenfilm.com/\">The Green Film</a> (Crazy 8s festival intro film)</td>\n<td>4K (RED)</td>\n<td>PA, Grip, Set dressing</td>\n<td>Juggernaut Pictures Inc. / Scott Renyard</td>\n</tr>\n<tr>\n<td>2007</td>\n<td><a rel=\"external\" href=\"http://pastperfectpro.com/roth.html\">Revenge of the Hunted</a></td>\n<td>HD</td>\n<td>Lighting, grip</td>\n<td>Aaron Floresco</td>\n</tr>\n<tr>\n<td>2006</td>\n<td><a href=\"/film/the_leaves\">The Leaves</a></td>\n<td>16mm</td>\n<td>Director, camera</td>\n<td>Peter Hebert</td>\n</tr>\n<tr>\n<td>2005</td>\n<td><a href=\"/film/lucky_or_not/\">Lucky - or Not?</a></td>\n<td>DV</td>\n<td>Producer, director, editor, camera</td>\n<td>Peter Hebert (PH new media)</td>\n</tr>\n</tbody>\n</table>\n<p><a href=\"http://www.imdb.com/name/nm2451928/\">View my IMDB profile</a></p>','eng','2009-08-18 10:53:09'),
-	(2,'content',2,8,'description','Information about Peter\'s films.','eng','2009-08-18 11:20:37'),
-	(3,'content',2,14,'keywords','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-08-18 11:20:37'),
-	(7,'content',1,2,'body','<p>Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He&rsquo;s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?</p>','eng','2009-08-18 11:22:14'),
-	(13,'site',1,5,'copyright','Peter Hebert. All rights reserved unless stated otherwise','eng','2009-08-23 10:00:36'),
-	(14,'site',1,8,'description','This site is the online home of Peter Hebert','eng','2009-08-23 10:00:36'),
-	(15,'site',1,14,'keywords','accessibility, CSS, design, development, PHP, web','eng','2009-08-23 10:00:36');
+	(1,'content',1,2,'body','<p>Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He&rsquo;s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?</p>','eng','2009-09-24 12:03:29'),
+	(2,'content',1,8,'description','Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He’s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?','eng','2009-09-24 12:03:29'),
+	(4,'content',2,8,'description','Information about Peter\'s films.','eng','2009-09-24 12:03:29'),
+	(6,'content',3,2,'body','<p>Here are the various ways you can find me:</p>\n<ul>\n<li><a href=\\mailto:mail@peterhebert.com\">E-mail</a></li>\n<li><a href=\"\"http://www.facebook.com/profile.php?id=527077494\"\">Facebook</a></li>\n<li><a href=\"\"http://www.linkedin.com/in/peterhebert\"\">LinkedIn</a></li>\n<li><a href=\"\"xmpp:mail@peterhebert.com\"\">Jabber</a></li>\n<li><a href=\"\"gtalk:chat?hebert.pj@gmail.com\"\">Google Talk</a></li>\n<li><a href=\"\"callto://peterhebert\"\">Skype</a></li>\n<li><a href=\"\"msnim:add?contact=peterhebert@hotmail.com\"\">MSN</a></li>\n</ul>\n<p>You can add me to your address book by <a href=\"\"/Peter_Hebert.vcf\"\">downloading my vCard</a>.</p>\"\"\"',NULL,'2009-09-24 12:03:29'),
+	(7,'content',3,8,'description','Here are the different ways you can get hold of Peter Hebert.','eng','2009-09-24 12:03:29'),
+	(8,'content',3,11,'excerpt','<p>I am just testing out my new CMS, and would like to use this as my first blog entry.</p>','eng','2009-09-24 12:03:29'),
+	(10,'content',4,2,'body','<p>Here you will find all the updates and news about phSite CMS.</p>','eng','2009-09-24 12:03:29'),
+	(11,'content',4,8,'description','A blog where you will find all the updates and news about phSite CMS.\n','eng','2009-09-24 12:03:29'),
+	(13,'content',5,2,'body','<dl> <dt>Executive Producer</dt> <dd>Peter Hebert</dd> <dt>Associate Producer</dt> <dd>Mark McKay</dd> <dt>Screenwriters</dt> <dd>Stef Faro</dd> <dd>Peter Hebert</dd> <dt>Director</dt> <dd>Peter Hebert</dd> <dt>Director of Photography</dt> <dd>Peter Hebert</dd> <dt>Camera</dt> <dd>Peter Hebert</dd> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dt>Lighting</dt> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dd>Jason Tetro</dd> <dd>Joyce MacPhee</dd> <dd>Jeff Miles</dd> <dt>Sound recording</dt> <dd>Mark McKay</dd> <dd>Bryon Hunter</dd> <dd>Joyce MacPhee</dd> <dt>Properties</dt> <dd>Bryon Hunter</dd> <dd>Peter Hebert</dd> <dt>Set construction</dt> <dd>Steven Giouras</dd> <dt>Catering /craft service</dt> <dd>Peter Hebert</dd> <dt>Video Editing</dt> <dd>Peter Hebert</dd> <dt>Colorist</dt> <dd>Peter Hebert</dd> <dt>Sound Editing</dt> <dd>Peter Hebert</dd> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Music by </dt> <dd>Mark Bolton</dd> <dt>Music Supervisor </dt> <dd>Scott Payne</dd> <dt>Audio mix</dt> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Documentary videographer</dt> <dd>Christophe Forget</dd> <dt>Documentary interviews</dt> <dd>Joyce MacPhee</dd> <dt>Still photography</dt> <dd>Maggie Euteneier</dd> <dd>Peter Hebert</dd> <dd>Jamie Douglas</dd> <dt>Casting</dt> <dd>Peter Hebert</dd> <dd>Guy Marsan</dd> <dt>Production Assistants</dt> <dd>Maggie Euteneier</dd> <dd>Guy Marsan</dd> <dd>Jeff Miles</dd> </dl>','eng','2009-09-25 15:27:00'),
+	(15,'content',6,8,'description','Peter\'s commitment to making his website accessbile to all.','eng','2009-09-24 12:03:29'),
+	(17,'content',7,8,'description','A list of the cast from the movie \'Lucky - or Not?\'.','eng','2009-09-24 12:03:29'),
+	(19,'site',1,5,'copyright','Peter Hebert. All rights reserved unless stated otherwise','eng','2009-09-24 12:03:29'),
+	(20,'site',1,8,'description','This site is the online home of Peter Hebert, a web developer, designer and filmmaker based in Vancouver, BC.','eng','2009-09-24 12:03:29'),
+	(22,'users',1,1,'biography','<p>Peter is a web developer and filmmaker based in Vancouver, BC</p>','eng','2009-09-24 12:03:29'),
+	(23,'users',1,15,'location','Vancouver, British Columbia','eng','2009-09-24 12:03:29'),
+	(24,'users',1,18,'website_url','http://www.peterhebert.com','','2009-09-24 12:03:29'),
+	(25,'content',8,2,'body','<p>In developing this <acronym title=\"Content Management System\">CMS</acronym>, I had quite the dilemma in writing my URI routing scheme. Many questions arose:</p>\n<ul>\n<li>Should I use the built-in Routing class?</li>\n<li>Should I direct all requests to one controller and then roll my own URI segment parser?</li>\n<li>What are all the possible SEO\'d URIs that I might use?</li>\n<li>What are the performace implications of each approach?</li>\n</ul>\n<p>In the end, I made some assumptions, and baked my own parser class as the main controller. It is based upon a hierarchical structure for static pages, and a parameter-based scheme for non-static content.</p>\n<p>What do you think?</p>','eng','2009-09-25 15:54:24'),
+	(26,'content',8,11,'excerpt','<p>In developing this <acronym title=\"Content Management System\">CMS</acronym>, I had quite the dilemma in writing my URI routing scheme. Many questions arose:</p>\n<ul>\n<li>Should I use the built-in Routing class?</li>\n<li>Should I direct all requests to one controller and then roll my own URI segment parser?</li>\n<li>What are all the possible SEO\'d URIs that I might use?</li>\n<li>What are the performace implications of each approach?</li>\n</ul>','eng','2009-09-25 15:54:24');
 
 /*!40000 ALTER TABLE `c_metadata` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8028,20 +8036,26 @@ CREATE TABLE `c_titles` (
   `title` text NOT NULL,
   `uri_title` text NOT NULL,
   `subtitle` text,
+  `keywords` text,
   `lang_ISO_639_3` varchar(3) NOT NULL,
   `title_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`title_id`),
   FULLTEXT KEY `title` (`title`,`subtitle`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_titles` WRITE;
 /*!40000 ALTER TABLE `c_titles` DISABLE KEYS */;
-INSERT INTO `c_titles` (`title_id`,`scope`,`rel_id`,`title`,`uri_title`,`subtitle`,`lang_ISO_639_3`,`title_updated`)
+INSERT INTO `c_titles` (`title_id`,`scope`,`rel_id`,`title`,`uri_title`,`subtitle`,`keywords`,`lang_ISO_639_3`,`title_updated`)
 VALUES
-	(1,'site',1,'Peter Hebert','peter_hebert','Web, film and design','eng','2009-08-23 09:57:27'),
-	(5,'content',1,'Lucky - or Not?','lucky_or_not','','eng','2009-08-24 09:10:48'),
-	(3,'content',2,'Film','film','','eng','2009-08-18 11:20:37'),
-	(4,'content',3,'My first blog entry','my_first_blog_entry','','eng','2009-07-30 21:13:41');
+	(1,'site',1,'Peter Hebert','peter-hebert','Web, film and design','accessibility, CSS, design, development, PHP, web','eng','2009-09-25 15:36:00'),
+	(5,'content',1,'Lucky - or Not?','lucky-or-not','','crime, DV, film, harness racing, horses, luck, lucky, mob, Ottawa, racing, short','eng','2009-09-28 12:37:07'),
+	(3,'content',2,'Film','film','','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-09-28 12:37:07'),
+	(4,'content',3,'Contact','contact','','contact info, email, IM, social media','eng','2009-09-28 12:37:07'),
+	(6,'content',4,'development blog','development-blog','Updates on the development of phSite CMS','development, news, phSite CMS','eng','2009-09-28 12:37:07'),
+	(2,'content',5,'Crew','crew','Production credits for \'Lucky - or Not?\'','credits, crew, film, Lucky - or Not?, production','eng','2009-09-28 12:37:07'),
+	(7,'content',6,'Accessibility','accessibility','','accessibility, disabilities, web standards','eng','2009-09-28 12:37:07'),
+	(8,'content',7,'Cast','cast','','cast, Lucky - or Not?, movie, short','eng','2009-09-28 12:37:07'),
+	(9,'content',8,'Optimum URI routing in CodeIgniter','optimum-uri-routing-in-codeigniter','','CMS, CodeIgniter, parsing, php, routing, URI','eng','2009-09-28 12:37:07');
 
 /*!40000 ALTER TABLE `c_titles` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8062,25 +8076,26 @@ CREATE TABLE `r_fields` (
   `required` tinyint(1) NOT NULL default '0',
   `order` smallint(5) NOT NULL default '0',
   PRIMARY KEY  (`rf_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8 COMMENT='relate fields to content, user, media, or site for metadata';
+) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COMMENT='relate fields to content, user, media, or site for metadata';
 
 LOCK TABLES `r_fields` WRITE;
 /*!40000 ALTER TABLE `r_fields` DISABLE KEYS */;
 INSERT INTO `r_fields` (`rf_id`,`scope`,`rf_rel_id`,`rf_rel_ref_name`,`field_id`,`field_ref_name`,`required`,`order`)
 VALUES
-	(1,'types',0,'',2,'body',1,2),
-	(2,'types',0,'',8,'description',1,1),
-	(3,'types',0,'',14,'keywords',0,4),
+	(1,'types',2,'blog_entry',2,'body',1,1),
+	(22,'types',4,'gallery',8,'description',1,2),
 	(4,'types',2,'blog_entry',2,'body',1,0),
-	(5,'types',2,'blog_entry',14,'keywords',0,0),
-	(6,'types',0,'',11,'excerpt',0,3),
+	(6,'types',2,'blog_entry',11,'excerpt',0,2),
 	(7,'types',3,'blog',8,'description',1,2),
-	(8,'site',0,'',5,'copyright',0,3),
-	(9,'site',0,'',8,'description',1,1),
-	(10,'site',0,'',14,'keywords',1,2),
-	(11,'users',0,'',1,'biography',0,1),
-	(12,'users',0,'',15,'location',0,2),
-	(13,'users',0,'',18,'website_url',0,3);
+	(8,'site',1,'',5,'copyright',0,3),
+	(9,'site',1,'',8,'description',1,1),
+	(11,'users',1,'',1,'biography',0,1),
+	(12,'users',1,'',15,'location',0,2),
+	(13,'users',1,'',14,'website_url',0,3),
+	(17,'types',1,'static_page',2,'body',1,1),
+	(18,'types',1,'static_page',8,'description',0,2),
+	(23,'types',4,'gallery',9,'directory',1,1),
+	(24,'types',4,'gallery',13,'image_poster',0,3);
 
 /*!40000 ALTER TABLE `r_fields` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8121,7 +8136,7 @@ CREATE TABLE `s_fields` (
   `field_validation` text,
   `field_needs_lang` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `s_fields` WRITE;
 /*!40000 ALTER TABLE `s_fields` DISABLE KEYS */;
@@ -8137,14 +8152,13 @@ VALUES
 	(8,'description','textarea','',1),
 	(9,'directory','directory','path_dir',0),
 	(10,'e-mail','text','valid_email ',0),
-	(11,'excerpt','textarea','',1),
+	(11,'excerpt','richtext','max_length[512]',1),
 	(12,'image_banner','file','path_file',0),
 	(13,'image_poster','file','path_file',0),
-	(14,'keywords','textarea','',1),
 	(15,'location','text','',1),
 	(16,'province_state','text','',1),
 	(17,'transcript','richtext','',1),
-	(18,'website_url','text','is_uri',0);
+	(14,'website_url','text','is_uri',0);
 
 /*!40000 ALTER TABLE `s_fields` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8163,7 +8177,7 @@ CREATE TABLE `s_labels` (
   `label` text NOT NULL,
   `lang_ISO_639_3` char(3) NOT NULL default 'eng',
   PRIMARY KEY  (`label_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
 
 LOCK TABLES `s_labels` WRITE;
 /*!40000 ALTER TABLE `s_labels` DISABLE KEYS */;
@@ -8182,11 +8196,10 @@ VALUES
 	(11,'field',11,'excerpt','Excerpt','eng'),
 	(12,'field',12,'image_banner','Image Banner','eng'),
 	(13,'field',13,'image_poster','Image Poster','eng'),
-	(14,'field',14,'keywords','Keywords','eng'),
 	(15,'field',15,'location','Location','eng'),
 	(16,'field',16,'province_state','Province/State','eng'),
 	(17,'field',17,'transcript','Transcript','eng'),
-	(18,'field',18,'website_url','Website URL','eng'),
+	(18,'field',14,'website_url','Website URL','eng'),
 	(19,'types',1,'static_page','Static Page','eng'),
 	(20,'types',2,'blog_entry','Blog Entry','eng'),
 	(21,'types',3,'blog','Blog','eng'),
@@ -8197,11 +8210,7 @@ VALUES
 	(26,'types',8,'image','Image','eng'),
 	(27,'types',9,'text','Text','eng'),
 	(28,'types',10,'video','Video','eng'),
-	(29,'field',1,'biography','biographie','fra'),
-	(30,'',0,'','','eng'),
-	(31,'',0,'','','eng'),
-	(32,'',0,'','','eng'),
-	(33,'',0,'','','eng');
+	(29,'field',1,'biography','biographie','fra');
 
 /*!40000 ALTER TABLE `s_labels` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8236,7 +8245,7 @@ LOCK TABLES `s_site_prefs` WRITE;
 /*!40000 ALTER TABLE `s_site_prefs` DISABLE KEYS */;
 INSERT INTO `s_site_prefs` (`site_id`,`theme`,`timezone`,`default_lang`,`default_content_type`,`date_created`,`date_updated`,`home_content_id`,`site_admin_id`,`site_editor_id`,`img_size_th`,`img_size_sm`,`img_size_md`,`img_size_lg`,`limit_posts`,`limit_thumbs`)
 VALUES
-	(1,'simple_em','America/Vancouver','eng',1,'1997-07-06 00:00:00','2009-08-22 16:45:59',0,1,1,90,180,360,640,5,30);
+	(1,'simple_em','America/Vancouver','eng',1,'1997-07-06 00:00:00','2009-09-24 12:03:29',0,1,1,90,180,360,640,5,30);
 
 /*!40000 ALTER TABLE `s_site_prefs` ENABLE KEYS */;
 UNLOCK TABLES;

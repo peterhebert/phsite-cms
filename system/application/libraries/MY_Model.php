@@ -39,8 +39,8 @@ class MY_Model extends Model {
 	var $metadata = array();
 	var $meta_id, $meta_rel_id, $value;
 
-	// titles
-	var $title_id, $title_rel_id, $title, $uri_title, $subtitle, $title_updated;
+	// titles & keywords
+	var $title_id, $title_rel_id, $title, $uri_title, $subtitle, $keywords, $title_updated;
 	
 	// Constructor
 	function MY_Model()
@@ -826,6 +826,7 @@ class MY_Model extends Model {
 		   $this->title = $row->title;
 		   $this->uri_title = $row->uri_title;
 		   $this->subtitle = $row->subtitle;
+		   $this->keywords = $row->keywords;
 		   $this->temp_lang = $row->lang_ISO_639_3;
 		   $this->title_updated = $row->title_updated;
 		}
@@ -842,6 +843,7 @@ class MY_Model extends Model {
 		'title' => $this->title,
 		'uri_title' => convert_uri($this->title,URI_SEPARATOR),
 		'subtitle' => $this->subtitle,
+		'keywords' => csv_normalize($this->keywords),
 		'lang_ISO_639_3' => $this->temp_lang
 		);
 
