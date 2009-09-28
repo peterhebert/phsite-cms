@@ -13,15 +13,11 @@ echo $html_header;
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
 	<div class="page-wrap block five">
-		<div class="column w3">
+		<div class="column w3">static_page
 			<?php
 			if(isset($title))
 			{
 				echo "<h1>{$title}</h1>\r";
-			}
-			if(isset($view))
-			{
-				echo "<p>view: {$view}</p>\r";
 			}
 			if(isset($content_body))
 			{

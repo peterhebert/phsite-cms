@@ -44,6 +44,10 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 | These constants are custom to the phSite CMS application
 |
 */
+// set your uri word separator - default is dash '-' (SEO-friendly),
+// but you could use an underscore '_' if you like
+define('URI_SEPARATOR', '-');
+
 // salt length for password hashes - DO NOT CHANGE!
 define('SALT_LENGTH', 10);
 

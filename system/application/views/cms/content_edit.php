@@ -14,23 +14,7 @@ echo $title_tag.' | ';
 <script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
-<script type="text/javascript">
-/* <![CDATA[ */
-$().ready(function(){
-
-	$("form select[name='type_id']").change(function () {
-	
-		var myloc = $("form input[name='my_url']").val();
-		var new_type = $(this).val();
-		var newloc = myloc + '/type/' + new_type;
-		window.location = newloc ;
-		
-	});
-
-});
-
-/* ]]> */
-</script>
+<script type="text/javascript" src="/assets/js/jquery_change_type.js"></script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
@@ -62,11 +46,11 @@ $().ready(function(){
 
 		<div class="float w2">
 			<?php 
-			if (isset($sidebar)) {
-				echo $sidebar;
-			}
 			if (isset($form_meta)) {
 				echo $form_meta;
+			}
+			if (isset($sidebar)) {
+				echo $sidebar;
 			}
 			?>
 		</div>

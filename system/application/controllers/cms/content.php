@@ -1,13 +1,16 @@
 <?php
 class Content extends MY_Controller
 {
-
+	
 	function Content()
 	{
 		parent::Controller();
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
 		$this->load->helper('image');
+
+		$this->load->helper('timezone');
+		$this->load->library('session');
 
 		//$this->_authenticate();
 		$this->_load_site_metadata();
@@ -40,21 +43,23 @@ class Content extends MY_Controller
 
 	function edit()
 	{
-		$this->load->helper('timezone');
-		$this->load->library('session');
+		if($this->session->userdata('message'))
+		{
+			$this->Content_model->messages[] = $this->session->userdata('message');
+			$this->session->unset_userdata('message');
+		}
+		
 
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/content","Content").' : ';
-		$breadcrumb .= 'Content editor';
-		$this->data['breadcrumb'] = $breadcrumb;
-
-		$this->data['title_tag'] = 'Content editor ';
-		$this->data['title_h1'] = 'Content editor';
+		$this->_process_edit();
 		
 		$params = $this->uri->uri_to_assoc(4);
-		if( array_key_exists('id',$params) )
+		if( array_key_exists('id',$params) && $this->Content_model->content_id == '')
 		{
 			$this->Content_model->content_id = $params['id'];
+		}
+		if( array_key_exists('type',$params) )
+		{
+			$this->Content_model->temp_value = $params['type'];
 		}
 		if( array_key_exists('lang',$params) )
 		{
@@ -64,21 +69,9 @@ class Content extends MY_Controller
 		{
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		if( array_key_exists('type',$params) )
-		{
-			$this->Content_model->temp_id = $params['type'];
-		}
-		else
-		{
-			$this->Content_model->temp_id = 1;
-		}
 
-		$this->_process_edit();
-		if($this->Content_model->content_id != '')
-		{
-			$this->Content_model->load_content();
-		}
-
+		$this->Content_model->load_content_form();
+		
 		$this->_form_edit();
 
 		$msg = $this->Content_model->_output_messages();
@@ -87,43 +80,46 @@ class Content extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 
+		$breadcrumb = anchor("cms","phSite CMS").' : ';
+		$breadcrumb .= anchor("cms/content","Content").' : ';
+		$breadcrumb .= 'Content editor';
+		$this->data['breadcrumb'] = $breadcrumb;
+		$this->data['title_tag'] = 'Content editor ';
+		$this->data['title_h1'] = 'Content editor';
+		
 		$this->data['sidebar'] = $this->_content_meta_menu();
 
 		$this->load->view('cms/content_edit',$this->data);
 
 	}
-
 	function _form_edit()
 	{
 		$this->load->helper('form');
 
-		$action = $this->uri->uri_string();
+		$action = 'cms/content/edit';
+		$my_url = $action;
 		$attributes = array(
 		'name' => 'content_editor',
 		'id' => 'content_editor'
 		);
-		
 
-		$form = form_open($action, $attributes);
-		
-		$my_url = 'cms/content/edit';
 		if($this->Content_model->content_id != '')
 		{
-			$form .= form_hidden('content_id', $this->Content_model->content_id);
-			$my_url .= '/id/'.$this->Content_model->content_id;
+			$action .= '/id/'.$this->Content_model->content_id;
 		}
-		if($this->Content_model->title_id != '')
+		if($this->Content_model->temp_lang != '')
 		{
-			$form .= form_hidden('content_title_id', $this->Content_model->title_id);
+			$action .= '/lang/'.$this->Content_model->temp_lang;
 		}
-		if( $this->Content_model->temp_lang != '')
-		{
-			$my_url .= '/lang/'.$this->Content_model->temp_lang;
-		}
-		$form .= form_hidden('my_url', site_url($my_url));
 
+		$form = form_open($action, $attributes);
+		$form .= form_hidden('content_id',$this->Content_model->content_id);
+		$form .= form_hidden('title_id',$this->Content_model->title_id);
+		
+		$form .= form_hidden('my_url',site_url($my_url));
+		
 		$this->data['form_open'] = $form;
-
+		
 		$form = form_fieldset('Content');
 
 		$form_options = $this->Content_model->langs_dropdown();
@@ -154,25 +150,8 @@ class Content extends MY_Controller
 		$form .= form_input($form_options);
 		$form .= "</p>";
 
-		if($this->Content_model->content_id != '')
-		{
-			$fd_meta = $this->Content_model->metadata;
-			$this->Content_model->temp_id = $this->Content_model->type_id;
-		}
-		else
-		{
-			$this->Content_model->scope = 'types';
-			$this->Content_model->list_fields_related();
-			$fd_meta = $this->Content_model->field_list;
-
-			$this->Content_model->type_id = $this->Content_model->temp_id;
-
-		}
-		
-		$this->Content_model->scope = 'content';
-		$this->Content_model->load_type();
-		
-		foreach($fd_meta as $index => $fd)
+		// fields
+		foreach($this->Content_model->metadata as $index => $fd)
 		{
 			// get field data if it does not exist
 			if(array_key_exists('field_id',$fd))
@@ -183,6 +162,7 @@ class Content extends MY_Controller
 				$tmp_meta_id = $fd['meta_id'];
 				$tmp_required = $fd['required'];
 				$tmp_input_type = $fd['field_input_type'];
+				$tmp_validation = $fd['field_validation'];
 			}
 			else
 			{
@@ -192,6 +172,7 @@ class Content extends MY_Controller
 				$tmp_ref_name = $this->Content_model->field_ref_name;
 				$tmp_needs_lang = $this->Content_model->field_needs_lang;
 				$tmp_input_type = $this->Content_model->field_input_type;
+				$tmp_validation = $this->Content_model->field_validation;
 				$tmp_label = $tmp_ref_name;
 				$tmp_meta_id = '';
 				$tmp_required = '';
@@ -203,6 +184,7 @@ class Content extends MY_Controller
 			'field_ref_name[]' =>  $tmp_ref_name,
 			'meta_id[]' => $tmp_meta_id,
 			'required[]' =>  $tmp_required,
+			'field_validation[]' =>  $tmp_validation,
 			'field_needs_lang[]' => $tmp_needs_lang
 			);
 			$form .= form_hidden($form_options);
@@ -218,7 +200,6 @@ class Content extends MY_Controller
 
 			$form .= "<p>\r";
 			$form .= form_label($tmp_label, $tmp_ref_name);
-			//$this->Content_model->reset_label();
 
 			$form_options = array(
 			'id' => $tmp_ref_name,
@@ -282,11 +263,13 @@ class Content extends MY_Controller
 		$form .= form_fieldset_close();
 
 		$this->data['form'] = $form;
-		
+
 		$form = form_fieldset($this->cms_labels['general_info']);
 
+		$this->Content_model->scope = 'content';
 		$form_options = $this->Content_model->types_dropdown();
-		$form .= "<p>".$this->Content_model->type_id;
+		
+		$form .= "<p>";
 		$form .=  form_label($this->cms_labels['content_type'], 'type_id');
 		$form .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
 		$form .= "</p>\n";
@@ -358,17 +341,17 @@ class Content extends MY_Controller
 		$form .=  form_input($form_options);
 		$form .= "</p>\n";
 
-
 		$form .= form_fieldset_close();
 		$this->data['form_meta'] = $form;
+
 
 		$form = "<p>";
 		$form .= form_submit('submit', $this->cms_labels['save']);
 		$form .= "</p>\n";
-
 		$form .= form_close();
 
 		$this->data['form_close'] = $form;
+
 	}
 
 	function _process_edit()
@@ -384,29 +367,40 @@ class Content extends MY_Controller
 			$this->form_validation->set_rules('parent_id', $this->cms_labels['parent'], 'required|is_natural');
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 
-			$this->Content_model->scope = 'types';
-			$this->Content_model->temp_id = $this->input->post('type_id');
-			$this->Content_model->list_fields_related();
+//			$this->Content_model->scope = 'types';
+//			$this->Content_model->temp_id = $this->input->post('type_id');
+//			$this->Content_model->list_fields_related();
 
-			$meta_fields = $this->Content_model->field_list;
-			foreach($meta_fields as $fd)
+			$tmp_field_id = $this->input->post('field_id');
+			$tmp_field_ref_name = $this->input->post('field_ref_name');
+			$tmp_meta_id = $this->input->post('meta_id');
+			$tmp_required = $this->input->post('required');
+			$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+			$tmp_validation = $this->input->post('field_validation');
+
+			// set validation of field data
+			foreach($tmp_field_id as $index => $fd_id)
 			{
 				$tmp_valid = array();
 
-				if($fd['required'] == 1)
+				//is the field required?
+				if($tmp_required[$index] == 1)
 				{
 					$tmp_valid[] = 'required';
 				}
 
-				if($fd['field_validation'] != '')
+				// get field validation
+				if($tmp_validation[$index] != '')
 				{
-					$tmp_valid[] = $fd['field_validation'];
+					$tmp_valid[] = $tmp_validation[$index];
 				}
 				
-				$lbl_name = $fd['field_ref_name'];
+				$lbl_name = $tmp_field_ref_name[$index];
+				
+				// load label
 	
 				$this->Content_model->label_scope = 'field';
-				$this->Content_model->temp_id = $fd['field_id'];
+				$this->Content_model->temp_id = $fd_id;
 	
 				if($this->Content_model->load_label())
 				{
@@ -417,16 +411,17 @@ class Content extends MY_Controller
 
 				if($concat_valid != '')
 				{
-					$this->form_validation->set_rules('value_'.$fd['field_id'], $lbl_name, $concat_valid);
+					$this->form_validation->set_rules('value_'.$fd_id, $lbl_name, $concat_valid);
 				}
 
 			}
 
 			// validate and process if all valid
 			$form_is_valid = $this->form_validation->run();
-			
+
 			if ($form_is_valid)
 			{
+
 				$this->Content_model->content_id = $this->input->post('content_id');
 				$this->Content_model->user_id = $this->input->post('user_id');
 				$this->Content_model->parent_id = $this->input->post('parent_id');
@@ -434,7 +429,7 @@ class Content extends MY_Controller
 				$this->Content_model->date_end_expiry = $this->input->post('date_end_expiry');
 				$this->Content_model->publish = $this->input->post('publish');
 
-				$this->Content_model->title_id = $this->input->post('content_title_id');
+				$this->Content_model->title_id = $this->input->post('title_id');
 				$this->Content_model->temp_lang = $this->input->post('content_lang');
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->subtitle = $this->input->post('subtitle');
@@ -448,64 +443,9 @@ class Content extends MY_Controller
 				$tmp_meta_id = $this->input->post('meta_id');
 				$tmp_required = $this->input->post('required');
 				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
-			
-				$this->Content_model->scope = 'content';
-				$form_meta = array();
-				foreach($tmp_field_id as $index => $fd_id)
-				{
-					$val_lbl = 'value_'.$fd_id;
-					$value = $this->input->post($val_lbl);
-					
-					$this->Content_model->temp_id = $fd_id;
-					$this->Content_model->load_field();
-					
-					if($this->Content_model->field_ref_name == 'keywords')
-					{
-						$value = csv_normalize($value);
-					}
-					
 
-					$tmp_meta = array(
-					'meta_id' => $tmp_meta_id[$index],
-					'scope' => $this->Content_model->scope,
-					'meta_rel_id' => $this->Content_model->content_id,
-					'field_id' => $this->Content_model->field_id,
-					'field_ref_name' => $this->Content_model->field_ref_name,
-					'value' => $value,
-					'required' => $tmp_required[$index],
-					'field_input_type' => $this->Content_model->field_input_type,
-					'field_validation' => $this->Content_model->field_validation,
-					'field_needs_lang' => $this->Content_model->field_needs_lang,
-					);
-	
-					$form_meta["$fd_id"] = $tmp_meta;
-	
-				}
 				
-				$this->Content_model->metadata = $form_meta;
-
-				// convert dates to system timezone
-				$sys_zone = date_default_timezone_get();
-				$usr_zone = $this->session->userdata('timezone');
-
-				if($usr_zone !== FALSE && $usr_zone != $sys_zone)
-				{
-					if($this->Content_model->date_created != '')
-					{
-						$this->Content_model->date_created = convert_time($this->Content_model->date_created, $sys_zone, "Y-m-d H:i:s", $usr_zone);
-					}
-					if($this->Content_model->date_end_expiry != '')
-					{
-						$this->Content_model->date_end_expiry = convert_time($this->Content_model->date_end_expiry, $sys_zone, "Y-m-d H:i:s", $usr_zone);
-					}
-			
-				}
-				if($this->Content_model->date_created == '')
-				{
-					$this->Content_model->date_created = date('Y-m-d H:i:s');
-				}
-
-				// update Content 
+				// first update content object, then title, then field metadata
 				if($this->Content_model->update_content())
 				{
 					$this->Content_model->title_rel_id = $this->Content_model->content_id;
@@ -515,18 +455,61 @@ class Content extends MY_Controller
 					{
 						$this->Content_model->messages[] = $this->cms_labels['title_update_failure'];
 					}
+					
+					// build metadata
+
+					$form_meta = array();
+					foreach($tmp_field_id as $index => $fd_id)
+					{
+						$val_lbl = 'value_'.$fd_id;
+						$value = $this->input->post($val_lbl);
+						
+						$this->Content_model->temp_id = $fd_id;
+						$this->Content_model->load_field();
+						
+						if($this->Content_model->field_ref_name == 'keywords')
+						{
+							$value = csv_normalize($value);
+						}
+						
+						$tmp_meta = array(
+						'meta_id' => $tmp_meta_id[$index],
+						'scope' => $this->Content_model->scope,
+						'meta_rel_id' => $this->Content_model->content_id,
+						'field_id' => $this->Content_model->field_id,
+						'field_ref_name' => $this->Content_model->field_ref_name,
+						'value' => $value,
+						'lang_ISO_639_3' => '',
+						'required' => $tmp_required[$index],
+						'field_input_type' => $this->Content_model->field_input_type,
+						'field_validation' => $this->Content_model->field_validation,
+						'field_needs_lang' => $this->Content_model->field_needs_lang,
+						);
+
+						if($tmp_field_needs_lang[$index] == 1)
+						{
+							$tmp_meta["lang_ISO_639_3"] = $this->Content_model->temp_lang;
+						}
+
+		
+						$form_meta["$fd_id"] = $tmp_meta;
+		
+					}
+
+					$this->Content_model->metadata = $form_meta;
+
 					$this->Content_model->update_metadata();
-				}
-				else
-				{
-					$this->Content_model->messages[] = $this->cms_labels['content_update_failure'];
+
+					if(count($this->Content_model->messages) == 0)
+					{
+						$this->session->set_userdata('message', $this->Content_model->cms_labels['content_update_success']);
+						$my_url = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$this->Content_model->temp_lang;
+						redirect($my_url);
+					}
+					
 				}
 
-				if(count($this->Content_model->messages) == 0)
-				{
-					$this->Content_model->messages[] = $this->cms_labels['content_update_success'];
-				}
-
+				
 			}
 			else
 			{
@@ -536,62 +519,6 @@ class Content extends MY_Controller
 		}
 
 	}
-
-/*	function delete()
-	{
-
-		$form_uri = $this->uri->uri_string();
-		$params = $this->uri->uri_to_assoc(4);
-		if(array_key_exists('id',$params)) {
-			$this->Content_model->content_id = $params['id'];
-			$this->data['msg'] = "<p>Are you sure you want to delete this content?</p>\r";
-		}
-		if(array_key_exists('lang',$params)) {
-			$this->Content_model->temp_lang = $params['lang'];
-			$this->Language_model->load( $params['lang']);
-
-			$this->data['msg'] = "<p>Are you sure you want to delete the '{$this->Language_model->Ref_Name}' version of this content?</p>\r";
-		}
-
-		if($this->Content_model->content_id != '') {
-			$this->Content_model->get_content();
-		}
-		
-		$temp_title = $this->Content_model->title;
-		$this->data['title'] = $temp_title;
-
-		$deleted = FALSE;
-
-		// if confirmed, please delete appropriate content
-		if($this->input->post('confirm') != '') {
-			if(array_key_exists('lang',$params)) {
-				$deleted = $this->Content_model->delete_lang();
-			} else {
-				$deleted = $this->Content_model->delete_content();
-			}
-		}
-
-		if($deleted) {
-			$this->data['msg'] = "The content '{$temp_title}' has been successfully deleted";
-		} else {
-			if($this->input->post('submit') != '') {
-				$this->data['msg'] .= "<p>You must confirm the deletion</p>";
-			}
-			$body = "<form action=\"{$form_uri}\" method=\"post\" name=\"delete\">";
-			$body .=  "<p><label><input name=\"confirm\" type=\"checkbox\" value=\"1\" /> yes</label></p>\r";
-			$body .=  "<p><input name=\"submit\" type=\"submit\" value=\"Submit\" /></p>\r";
-			$body .= "</form>\r";
-			$this->data['body'] = $body;
-		}
-
-		$this->load->view('cms/content_delete',$this->data);
-
-	}
-
-	
-	
-
-*/
 
 	function _content_meta_menu()
     {
@@ -617,8 +544,6 @@ class Content extends MY_Controller
 				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
 	
-			//$menu .=  "<h2>".$this->cms_labels['content']."</h2>\r";
-			
 			$this->Content_model->temp_id = $this->Content_model->content_id;
 			$my_uri = $this->Content_model->generate_uri();
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
@@ -629,7 +554,7 @@ class Content extends MY_Controller
 			$menu .= ul($lang_links);
 			$menu .=  "</li>\r";
 	
-			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
+/*			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
 			if($this->Content_model->temp_lang != '')
 			{
 				$del_lang = $del_base.'/lang/'.$this->Content_model->temp_lang;
@@ -642,7 +567,7 @@ class Content extends MY_Controller
 			$menu .= "<li>".$this->cms_labels['delete'];
 			$menu .= ul($del_links);
 			$menu .= "</li>\r";
-
+*/
 			$menu .=  "</ul>\r";
 
 		}

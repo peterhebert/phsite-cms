@@ -320,6 +320,8 @@ class MY_Model extends Model {
     {
 
 		$list = array();
+
+// select * from r_fields left join s_fields on r_fields.field_id = s_fields.field_id where scope = 'types' and rf_rel_id = 3
 		
 		$this->db->where('scope',$this->scope);
 		if ($this->temp_id != '' && $this->scope == 'types')
@@ -366,7 +368,6 @@ class MY_Model extends Model {
 			  );
 		   }
 		} 
-
 
 		$this->field_list = $list;
 
@@ -669,11 +670,7 @@ class MY_Model extends Model {
 		$fields = $this->field_list;
 
 		$this->db->where('scope',$this->scope);
-
-		if ($this->temp_id != '')
-		{
-			$this->db->where('meta_rel_id',$this->temp_id);
-		}
+		$this->db->where('meta_rel_id',$this->temp_id);
 
 		if ($this->temp_lang != '')
 		{
@@ -683,21 +680,49 @@ class MY_Model extends Model {
 
 		$query = $this->db->get('c_metadata');
 		
+		$meta_all = array();
 		if ($query->num_rows() > 0)
 		{
-			foreach ($query->result() as $row)
+			$meta_all = $query->result_array();
+		}
+
+		foreach($meta_all as $meta)
+		{
+
+			$key = strval($meta['field_id']);
+			
+			if(array_key_exists($key,$fields))
 			{
-				$key = $row->field_id;
-				$fields["$key"]['meta_id'] = $row->meta_id;
-				$fields["$key"]['meta_rel_id'] = $row->meta_rel_id;
-				$fields["$key"]['value'] = $row->value;
-				$fields["$key"]['lang_ISO_639_3'] = $row->lang_ISO_639_3;
-				$fields["$key"]['date_updated'] = $row->date_updated;
+				$fields[$key] = array_merge($fields[$key],$meta);
 			}
+			else
+			{
+				$temp_meta_1 = array($key => array());
+				
+				$temp_meta['rf_id'] = '';
+				$temp_meta['scope'] = $this->scope;
+				$temp_meta['rf_rel_id'] = '';
+				$temp_meta['rf_rel_ref_name'] = '';
+				
+				$this->temp_id = $meta['field_id'];
+				$this->load_field();
+				
+				$temp_meta['field_id'] = $this->field_id;
+				$temp_meta['field_ref_name'] = $this->field_ref_name;
+				$temp_meta['field_input_type'] = $this->field_input_type;
+				$temp_meta['field_validation'] = $this->field_validation;
+				$temp_meta['field_needs_lang'] = $this->field_needs_lang;
+				$temp_meta['required'] = 0;
+				$temp_meta['order'] = '';
+				
+				$fields[$key] = array_merge($meta,$temp_meta);
+				unset($temp_meta);
+				
+			}
+			
 		}
 
 		$this->metadata = $fields;
-
 	}
 
 	function update_metadata()
@@ -815,7 +840,7 @@ class MY_Model extends Model {
 		'scope' => $this->scope,
 		'rel_id' => $this->title_rel_id,
 		'title' => $this->title,
-		'uri_title' => convert_uri($this->title),
+		'uri_title' => convert_uri($this->title,URI_SEPARATOR),
 		'subtitle' => $this->subtitle,
 		'lang_ISO_639_3' => $this->temp_lang
 		);

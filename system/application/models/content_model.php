@@ -143,6 +143,11 @@ class Content_model extends MY_Model {
 		$this->temp_id = $this->content_id;
 		$this->load_title();
 		
+		if($this->temp_value != '')
+		{
+			$this->type_id = $this->temp_value;
+		}
+		
 		$this->temp_id = $this->type_id;
 		$this->scope = 'types';
 		
@@ -150,6 +155,44 @@ class Content_model extends MY_Model {
 		$this->scope = 'content';
 		$this->temp_id = $this->content_id;
 		$this->load_metadata();
+
+	}
+
+    function load_content_form()
+    {
+		if($this->content_id != '')
+		{
+			$this->load_content_object();
+			$this->temp_id = $this->content_id;
+			$this->load_title();
+		}
+
+		if($this->temp_value != '')
+		{
+			$this->type_id = $this->temp_value;
+		}
+		
+		if($this->type_id != '')
+		{
+			$this->temp_id = $this->type_id;
+		}
+		else
+		{
+			$this->temp_id = 1;
+		}
+		$this->scope = 'types';
+		$this->list_fields_related();
+
+		if($this->content_id != '')
+		{
+			$this->scope = 'content';
+			$this->temp_id = $this->content_id;
+			$this->load_metadata();
+		}
+		else
+		{
+			$this->metadata = $this->field_list;
+		}
 
 	}
 
@@ -214,6 +257,11 @@ class Content_model extends MY_Model {
 		// first get type name
 		$this->scope = 'content';
 		$this->load_type();
+		
+		if($this->date_created == '' || $this->date_created == '0000-00-00 00:00:00')
+		{
+			$this->date_created = date('Y-m-d H:i:s');
+		}
 
 		$data = array(
 		'user_id' => $this->user_id,
@@ -248,41 +296,72 @@ class Content_model extends MY_Model {
 
 		$parents['0'] = "site root";
 
-
-		if($this->content_id != '')
+		if($this->type_id == 2)
 		{
-
-			// eliminate this content and all descendants
-			$children  = $this->get_descendants($this->content_id);
-			foreach($children as $id)
+			if($this->content_id != '')
 			{
-				$this->db->where('c_content.content_id !=',$id);
+				$this->db->where('c_content.content_id !=',$this->content_id);
 			}
-			
-			$this->db->where('parent_id !=',$this->content_id);
-			$this->db->where('c_content.content_id !=',$this->content_id);
-		}
-		$this->db->where('type_id !=',2);
-
-		if($this->temp_lang != '')
-		{
-			$this->db->where('lang_ISO_639_3',$this->temp_lang);
-		}
-
-		$this->db->where('scope','content');
-		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
-
-		$query = $this->db->get('c_content');
-
-		if ($query->num_rows() > 0)
-		{
-			foreach ($query->result() as $row)
+			$this->db->where('type_id',3);
+	
+			if($this->temp_lang != '')
 			{
-
-				$key = strval($row->content_id);
-				$parents[$key] = $row->title;
-		   }
-		   
+				$this->db->where('lang_ISO_639_3',$this->temp_lang);
+			}
+	
+			$this->db->where('scope','content');
+			$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+	
+			$query = $this->db->get('c_content');
+	
+			if ($query->num_rows() > 0)
+			{
+				foreach ($query->result() as $row)
+				{
+	
+					$key = strval($row->content_id);
+					$parents[$key] = $row->title;
+			   }
+			   
+			}
+		}
+		else
+		{
+			if($this->content_id != '')
+			{
+	
+				// eliminate this content and all descendants
+				$children  = $this->get_descendants($this->content_id);
+				foreach($children as $id)
+				{
+					$this->db->where('c_content.content_id !=',$id);
+				}
+				
+				$this->db->where('parent_id !=',$this->content_id);
+				$this->db->where('c_content.content_id !=',$this->content_id);
+			}
+			$this->db->where('type_id !=',2);
+	
+			if($this->temp_lang != '')
+			{
+				$this->db->where('lang_ISO_639_3',$this->temp_lang);
+			}
+	
+			$this->db->where('scope','content');
+			$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+	
+			$query = $this->db->get('c_content');
+	
+			if ($query->num_rows() > 0)
+			{
+				foreach ($query->result() as $row)
+				{
+	
+					$key = strval($row->content_id);
+					$parents[$key] = $row->title;
+			   }
+			   
+			}
 		}
 
 		return $parents;
@@ -377,6 +456,7 @@ class Content_model extends MY_Model {
 			$this->temp_id = 0;
 		}
 
+		$this->db->where('type_id !=', 2);
 		$this->db->where('parent_id', $this->temp_id);
 
 		if($this->link_mode == 0)

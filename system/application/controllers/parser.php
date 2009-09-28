@@ -133,8 +133,6 @@ class Parser extends MY_Controller {
 		// menu options by content type
 		switch ($this->Content_model->type_uri_name)
 		{
-			case '':
-				break;
 
 			case 'blog_entry':
 				$entries = $this->_blog_menu($this->Content_model->parent_id);
@@ -206,9 +204,9 @@ class Parser extends MY_Controller {
 
 	}
 
-	function _blog($parent=NULL)
+	function _blog($parent=NULL,$mode='excerpt')
 	{
-		$temp_view = 'themes/'.$this->Site_model->theme.'/embed_blog_excerpt';
+		$temp_view = 'themes/'.$this->Site_model->theme.'/embed_blog_entry';
 
 		$this->Content_model->type_id = 2;
 
@@ -229,6 +227,7 @@ class Parser extends MY_Controller {
 			foreach($recent as $index => $post)
 			{
 				$blog_data = array();
+				$blog_data['mode'] = $mode;
 				$blog_data['metadata'] = $post['metadata'];
 				
 				$this->User_model->temp_id = $post['user_id'];

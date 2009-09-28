@@ -43,6 +43,7 @@
 $route['default_controller'] = "parser";
 $route['scaffolding_trigger'] = "";
 
+$route['test_uri'] = "test";
 $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
