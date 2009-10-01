@@ -17,78 +17,211 @@ class Parser extends MY_Controller {
 		$this->load->model('User_model');
 		$this->load->helper('url');
 
-		$this->_load_site_metadata();
+		$this->Content_model->list_langs();
+		//$this->_load_site_metadata();
 	}
 	
     function index()
     {
+		$this->view = 'test';
 		$this->Content_model->link_mode = 0;
 		$this->Content_model->lang_mode = $this->Content_model->lang_count;
 
-		// check if language parameter is present
-		$this->segments = $this->uri->segment_array();
 
-		if(count($this->segments) > 0)
+		// get all parameters from uri
+		$this->_parse_uri();
+		
+		if($this->Content_model->content_id != '')
 		{
-			$this->Content_model->temp_lang = $this->segments[1];
-			if($this->Content_model->lang_load())
-			{
-				$remove_me = array_shift($this->segments);
-			} else
-			{
-				$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
-				$this->Content_model->lang_load();
-			}
-		}
-
-		$this->temp_uri = implode('/',$this->segments);
-
-		if($this->temp_uri != '')
-		{
-			$this->_process_uri();
+			$this->_prepare_view();
 		}
 		else
 		{
 			$this->_home();
 		}
 
+		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
+		{
+			$this->data['breadcrumb_links'] = $this->breadcrumb_links;
+		}
+		
 		$this->data['html_header'] = $this->load->view('embed_html_header',$this->data,true);
 		
-
 		$this->load->view($this->view,$this->data);
+
     }
 
-	function _process_uri()
+	function _parse_uri()
 	{
-		// check uri for page variable
-		$last_segment = count($this->segments) - 1;
-		$params = $this->uri->uri_to_assoc($last_segment);
-		if( array_key_exists('p',$params) && is_numeric($params['p']) )
+
+		$this->segments = $this->uri->segment_array();
+		$seg_count = count($this->segments);
+		
+		$params = array();
+		$uri_patterns = array(
+		'date' => "/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/",
+		'month' => "/^([0-9]{4})-([0-9]{2})$/",
+		'year' => "/^([0-9]{4})$/",
+		'page' => "/^([0-9]+)$/",
+		);
+		
+		if($seg_count > 0)
 		{
-			$this->page = array_pop($this->segments);
-			$remove_me  = array_pop($this->segments);
+			$current_path = 1;
+			
+			foreach($this->segments as $segment)
+			{
+				$match = FALSE;
+
+				foreach($uri_patterns as $key => $pattern)
+				{
+					// test for lang match
+					if($current_path == 1 && preg_match("/^([a-z]{3})$/", $segment) )
+					{
+						$params['lang'] = $segment;
+						$match = TRUE;
+					}
+					
+					// test for pattern match
+					if (preg_match($pattern, $segment) && $match === FALSE && !array_key_exists($key,$params))
+					{
+						$params[$key] = $segment;
+						$match = TRUE;
+					}
+					
+				}
+
+				if ($match === FALSE)
+				{
+					$params['titles'][] = $segment;
+				}
+				
+				$current_path = $current_path + 1;
+			}
+			
+		}
+		$this->data['params'] = $params;
+
+		$this->segments = array();
+
+		if(array_key_exists('lang',$params))
+		{
+			$this->Content_model->temp_lang = $params['lang'];
+			$this->Site_model->temp_lang = $params['lang'];
+		} else {
+			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+		}
+
+		$this->_load_cms_labels();
+		$this->_load_site_metadata();
+
+		if(array_key_exists('year',$params))
+		{
+			$this->Content_model->date_filter = $params['year'];
+		}
+		if(array_key_exists('month',$params))
+		{
+			$this->Content_model->date_filter = $params['month'];
+		}
+		if(array_key_exists('date',$params))
+		{
+			$this->Content_model->date_filter = $params['date'];
+		}
+		if( array_key_exists('page',$params))
+		{
+			$this->Content_model->page = $params['page'];
 		}
 		else
 		{
-			$this->page = 1;
+			$this->Content_model->page = 1;
+		}
+		
+		if( array_key_exists('titles',$params))
+		{
+			$this->segments = $params['titles'];
+		}
+		$seg_count = count($this->segments);
+		$msg = '';
+		
+		$tree = array();
+
+		if($seg_count > 0)
+		{
+		
+			foreach($this->segments as $index => $uri_segment)
+			{
+
+				$this->Content_model->temp_value = $uri_segment;
+				$info = $this->Content_model->find_by_uri();
+				if($info)
+				{
+					$this->Content_model->temp_id = $info[0]['content_id'];
+					$tree[$index] = $info[0];
+				}
+				else
+				{
+					$tree[$index] = NULL;
+				}
+
+			}
 		}
 
-		$this->_get_content_by_uri();
+		$result_count = count($tree);
+		$last_index = $result_count - 1;
 
-		$this->data['breadcrumb'] = implode(' : ', $this->breadcrumb_links);
-		$this->data['content_id'] = $this->Content_model->content_id;
-		$this->data['user_id'] = $this->Content_model->user_id;
-		$this->data['parent_id'] = $this->Content_model->parent_id;
-		$this->data['type_id'] = $this->Content_model->type_id;
+		$this->temp_uri = '';
+		if($result_count > 0)
+		{
+			$this->breadcrumb_links = array(anchor($this->temp_uri,$this->cms_labels['home']));
+
+			foreach($tree as $index => $vals)
+			{
+				if(is_array($vals))
+				{
+					$this->temp_uri .= '/'.$vals['uri_title'];
+					$this->breadcrumb_links[] = anchor($this->temp_uri, $info[0]['title']);
+					
+					$this->Content_model->content_id = $vals['content_id'];
+					$this->Content_model->user_id = $vals['user_id'];
+					$this->Content_model->parent_id = $vals['parent_id'];
+					$this->Content_model->type_id = $vals['type_id'];
+					$this->Content_model->type_uri_name = $vals['type_uri_name'];
+					$this->Content_model->date_created = $vals['date_created'];
+					$this->Content_model->date_end_expiry = $vals['date_end_expiry'];
+					$this->Content_model->date_updated = $vals['date_updated'];
+					$this->Content_model->publish = $vals['publish'];
+					$this->Content_model->title_id = $vals['title_id'];
+					$this->Content_model->title = $vals['title'];
+					$this->Content_model->subtitle = $vals['subtitle'];
+					$this->Content_model->uri_title = $vals['uri_title'];
+					$this->Content_model->keywords = $vals['keywords'];
+					$this->Content_model->title_updated = $vals['title_updated'];
+		
+				}
+			}
+
+		}
+
+	}
+
+	function _prepare_view()
+	{
+		// load data for view
 		$this->Content_model->temp_id = $this->Content_model->type_id;
-	
 		$this->Content_model->scope = 'content';
 		$this->Content_model->load_type();
 		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
 		$this->data['type_uri_name'] = $this->Content_model->type_uri_name;
 		$this->data['title'] = $this->Content_model->title;
-		$this->data['subtitle'] = $this->Content_model->subtitle;
+		if($this->Content_model->subtitle != '') {
+			$this->data['subtitle'] = $this->Content_model->subtitle;
+		}
+
+		if($this->Content_model->keywords != '') {
+			$this->data['content_keyword_links'] = $this->Content_model->keyword_links();
+		}
 
 		$this->data['content_date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
 		$this->data['content_date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
@@ -99,27 +232,21 @@ class Parser extends MY_Controller {
 			$this->data['content_date_expiry_RFC850'] = convert_time($this->Content_model->date_end_expiry, 'UTC',DATE_RFC850);
 		}
 
-		foreach($this->Content_model->metadata as $id => $field) {
+		$this->Content_model->temp_id = $this->Content_model->type_id;
+		$this->Content_model->scope = 'types';
+		$this->Content_model->list_fields_related();
+
+		$this->Content_model->scope = 'content';
+		$this->Content_model->temp_id = $this->Content_model->content_id;
+		$this->Content_model->load_metadata();
+
+		$c_meta = $this->Content_model->metadata;
 		
-			if(array_key_exists('field_ref_name',$field))
-			{
-				$tmp_field_label = 'content_'.$field['field_ref_name'];
-				$tmp_field_name = $field['field_ref_name'];
-			}
-			else
-			{
-				$this->Content_model->temp_id = $id;
-				$this->Content_model->load_field();
-				$tmp_field_label = 'content_'.$this->Content_model->field_ref_name;;
-				$tmp_field_name = $this->Content_model->field_ref_name;;
-			}
+		foreach($c_meta as $id => $field) {
+			$tmp_field_label = 'content_'.$field['field_ref_name'];
 
-			$this->data[$tmp_field_label] = $field['value'];
+			$this->data["$tmp_field_label"] = $field['value'];
 			
-			if($tmp_field_name == 'keywords') {
-				$this->data['content_keyword_links'] = $this->Content_model->keyword_links($field['value']);
-			}
-
 			if($field['date_updated'] > $this->Content_model->date_updated) {
 				$this->Content_model->date_updated = $field['date_updated'];
 			}
@@ -181,19 +308,12 @@ class Parser extends MY_Controller {
 				break;
 			default:
 		}
-		$this->data['view'] = $this->view;
 
 	}
-	
+
 	function _home()
 	{
 		$this->view = 'themes/'.$this->Site_model->theme.'/home';
-		
-		if($this->Content_model->lang_ISO_639_3 == '')
-		{
-			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
-		}
-
 
 		$menu = $this->Content_model->site_map();
 
@@ -332,98 +452,7 @@ class Parser extends MY_Controller {
 		return $blog_menu;
 
 	}
-	
 
-	function _get_content_by_uri()
-	{
-		$this->temp_uri = '';
-		$this->breadcrumb_links = array(anchor($this->temp_uri,$this->cms_labels['home']));
-		$current_path = 1;
-
-		$pathcount = count($this->segments);
-
-		$this->temp_id = '';
-		foreach ($this->segments as $uri_title) {
-		
-			$this->Content_model->temp_value = $uri_title;
-			
-			$info = $this->Content_model->find_by_uri();
-			
-			if($info) {
-			
-				$info_count = count($info);
-				$parent_index = $info_count - 1;
-
-				if($info_count == 1)
-				{
-					$this->Content_model->temp_id = $info[0]['content_id'];
-				}
-
-				$this->temp_uri .= '/'.$uri_title;
-				
-				if($this->Content_model->temp_lang != '')
-				{
-					if(count($info) == 1)
-					{
-						$this->Content_model->temp_lang = $info[0]['lang_ISO_639_3'];
-					}
-				}
-
-				if ($current_path < $pathcount) {
-	
-					if(count($info) == 1)
-					{
-						$this->Content_model->parent_id = $info[0]['content_id'];
-						$this->breadcrumb_links[] = anchor($this->temp_uri, $info[0]['title']);
-						$this->parent_title = $info[0]['title'];
-					}
-					
-				} else {
-
-					if(count($info) == 1)
-					{
-						$this->Content_model->content_id = $info[0]['content_id'];
-						$this->Content_model->user_id = $info[0]['user_id'];
-						$this->Content_model->parent_id = $info[0]['parent_id'];
-						$this->Content_model->type_id = $info[0]['type_id'];
-						$this->Content_model->type_uri_name = $info[0]['type_uri_name'];
-						$this->Content_model->date_created = $info[0]['date_created'];
-						$this->Content_model->date_end_expiry = $info[0]['date_end_expiry'];
-						$this->Content_model->date_updated = $info[0]['date_updated'];
-						$this->Content_model->publish = $info[0]['publish'];
-						$this->Content_model->title_id = $info[0]['title_id'];
-						$this->Content_model->title = $info[0]['title'];
-						$this->Content_model->subtitle = $info[0]['subtitle'];
-						$this->Content_model->uri_title = $info[0]['uri_title'];
-						$this->Content_model->title_updated = $info[0]['title_updated'];
-
-						$this->breadcrumb_links[] = $info[0]['title'];
-					}
-				}
-				
-				if(count($info) > 1)
-				{
-					$this->Content_model->parent_id = $info[$parent_index]['content_id'];
-					$this->parent_title = $info[$parent_index]['title'];
-				}
-
-			}
-			$current_path = $current_path + 1;
-		}
-
-
-		if($this->Content_model->content_id != '')
-		{
-			$this->Content_model->temp_id = $this->Content_model->type_id;
-			$this->Content_model->scope = 'types';
-			$this->Content_model->list_fields_related();
-	
-			$this->Content_model->scope = 'content';
-			$this->Content_model->temp_id = $this->Content_model->content_id;
-			$this->Content_model->load_metadata();
-		}
-	
-	}
 
 }
 ?>

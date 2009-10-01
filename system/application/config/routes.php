@@ -40,23 +40,22 @@
 |
 */
 
-$route['default_controller'] = "parser";
+$route['default_controller'] = "test";
 $route['scaffolding_trigger'] = "";
 
-$route['test_uri'] = "test";
 $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
 $route['cms/(.*)'] = "cms/$1";
 $route['feed(.*)'] = "feed$1";
 
+/*
 $route['gallery/media/(.*)'] = "gallery/media/$1";
 $route['gallery(.*)'] = "gallery/index$1";
-/*
 $route['sitemap'] = "home/sitemap";
 */
 $route['search(.*)'] = "search$1";
-$route['(:any)'] = "parser/index/$1";
+$route['(:any)'] = "test/index/$1";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

@@ -67,6 +67,11 @@ class Content_model extends MY_Model {
 				$this->db->where('publish', 1);
 			}
 
+			if($this->date_filter != '')
+			{
+				$this->db->like('date_created', $this->date_filter, 'after'); 
+			}
+
 		}
 		
 		$query = $this->db->get('c_content');
@@ -103,10 +108,10 @@ class Content_model extends MY_Model {
 				$this->db->limit(1);
 				$q2 = $this->db->get('c_titles');
 		
-				if ($query->num_rows() > 0)
+				if ($q2->num_rows() > 0)
 				{
 				   $r2 = $q2->row();
-				   
+
 				   $tmp['title_id'] = $r2->title_id;
 				   $tmp['scope'] = $r2->scope;
 				   $tmp['title_rel_id'] = $r2->rel_id;
@@ -413,10 +418,17 @@ class Content_model extends MY_Model {
 			$this->db->where('lang_ISO_639_3',$this->temp_lang);
 		}		
 
+		if($this->date_filter != '')
+		{
+			$this->db->like('date_created',$this->date_filter, 'after'); 
+		}		
+/*		$this->db->order_by("date_created", "desc");
+*/
 		$this->db->where('scope','content');
 		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
 
 		$query = $this->db->get('c_content');
+//echo '<p>'.$this->db->last_query()."</p>\r";
 
 		if ($query->num_rows() > 0) {
 			return $query->result_array();
@@ -531,6 +543,8 @@ class Content_model extends MY_Model {
 
 			$cid = $row->content_id;
 			$parent = $row->parent_id;
+			$type_id = $row->type_id;
+			$date_segment = substr($row->date_created, 0, 10);
 		}
 		// get uri title
 		$this->db->where('scope', $this->scope);
@@ -541,8 +555,14 @@ class Content_model extends MY_Model {
 
 		if ($query->num_rows() > 0)
 		{
-			$row = $query->row();
-			$uriArray[] = $row->uri_title;
+			$row = $query->row_array();
+			$uriArray[] = $row['uri_title'];
+			
+			if($type_id == 2)
+			{
+				$uriArray[] = $date_segment;
+			}
+
 		}
 
 		//now loop through to top level		
@@ -555,9 +575,10 @@ class Content_model extends MY_Model {
 			$query = $this->db->get('c_content');
 			if ($query->num_rows() > 0)
 			{
-			   $row = $query->row();
-				$uriArray[] = $row->uri_title;
-				$parent = $row->parent_id;
+				$row = $query->row_array();
+				$uriArray[] = $row['uri_title'];
+
+				$parent = $row['parent_id'];
 			}
 
 		} while ($parent > 0);
@@ -576,29 +597,33 @@ class Content_model extends MY_Model {
     }
 
 	// generate keyword links
-	function keyword_links($str)
+	function keyword_links()
 	{
-		if($this->link_mode == 1)
+		if($this->keywords != '')
 		{
-			$base_url = "cms/search/";
-		}
-		else
-		{
-			$base_url = "search/k/";
-		}
-
-		$kwds = explode(',',$str);
-		$links = array();
-		foreach ($kwds as $tag)
-		{
-			$keyword = trim($tag);
-			$url = $base_url.$keyword;
-			$links[] = anchor($url,$keyword);
+			if($this->link_mode == 1)
+			{
+				$base_url = "cms/search/";
+			}
+			else
+			{
+				$base_url = "search/k/";
+			}
+	
+			$kwds = explode(',',$this->keywords);
+			$links = array();
+			foreach ($kwds as $tag)
+			{
+				$keyword = trim($tag);
+				$url = $base_url.$keyword;
+				$links[] = anchor($url,$keyword);
+				
+			}
+			$keyword_links = implode(', ',$links);
 			
+			return $keyword_links;
 		}
-		$keyword_links = implode(', ',$links);
-		
-		return $keyword_links;
+		return FALSE;
 
 	}
 

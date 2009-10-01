@@ -678,6 +678,8 @@ class MY_Model extends Model {
 			$this->db->where($where);
 		}
 
+		$this->db->join('s_fields', 'c_metadata.field_id = s_fields.field_id', 'left');
+
 		$query = $this->db->get('c_metadata');
 		
 		$meta_all = array();
@@ -697,27 +699,18 @@ class MY_Model extends Model {
 			}
 			else
 			{
-				$temp_meta_1 = array($key => array());
-				
-				$temp_meta['rf_id'] = '';
+
+				$temp_meta = $meta;
+/*				$temp_meta['rf_id'] = '';
 				$temp_meta['scope'] = $this->scope;
 				$temp_meta['rf_rel_id'] = '';
 				$temp_meta['rf_rel_ref_name'] = '';
-				
-				$this->temp_id = $meta['field_id'];
-				$this->load_field();
-				
-				$temp_meta['field_id'] = $this->field_id;
-				$temp_meta['field_ref_name'] = $this->field_ref_name;
-				$temp_meta['field_input_type'] = $this->field_input_type;
-				$temp_meta['field_validation'] = $this->field_validation;
-				$temp_meta['field_needs_lang'] = $this->field_needs_lang;
+*/				
 				$temp_meta['required'] = 0;
-				$temp_meta['order'] = '';
-				
-				$fields[$key] = array_merge($meta,$temp_meta);
+
+				$fields[$key] = $temp_meta;
 				unset($temp_meta);
-				
+
 			}
 			
 		}

@@ -25,9 +25,6 @@ class MY_Controller extends Controller {
 	function MY_Controller()
 	{	
 		parent::Controller();
-		$this->scope = 'site';
-		$this->_load_cms_labels();
-		$this->_load_site_metadata();
 	}
 
 	function _authenticate()
@@ -120,20 +117,23 @@ class MY_Controller extends Controller {
 	}
 
 
-	function _load_cms_labels()
+	function _load_cms_labels($user=FALSE)
 	{	
 		$this->load->library('session');
-		$user_lang = $this->session->userdata('default_lang');
 
-		if($user_lang)
+		if($user)
 		{
-			$this->Site_model->temp_lang = $user_lang;
+			$user_lang = $this->session->userdata('default_lang');
+			if($user_lang)
+			{
+				$this->Site_model->temp_lang = $user_lang;
+			}
 		}
-		else
+		
+		if($this->Site_model->temp_lang == '')
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-
 		$this->Site_model->lang_load();
 		
 		// load validation rules and input types from language files
