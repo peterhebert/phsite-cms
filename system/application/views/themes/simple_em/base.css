@@ -47,10 +47,16 @@ list-style-position:outside;
 font-size:100.00%;
 margin-bottom: .333em;
 }
-ol, ol li {
+ol, ol li, ul ol li {
 list-style-type:decimal;
 }
-ul, ul li {
+ol.alpha li, ul ol.alpha li {
+list-style-type: lower-alpha;
+}
+ol.roman li, ul ol.roman li {
+list-style-type: lower-roman;
+}
+ul, ul li, ol ul li {
 list-style-type: disc;
 }
 ol ol, ol ul, ul ul, ul ol {

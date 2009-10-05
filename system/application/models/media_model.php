@@ -2,8 +2,8 @@
 class Media_model extends MY_Model {
 
 	// media variables
-	var $media_id, $file_uri, $external, $mime_type, $date_created, $creator;
-	var $media_title_id, $title, $uri_title, $subtitle;
+	var $media_id, $file_uri, $external, $mime_type, $date_created, $publish;
+
 	//var $media_meta_id, $field_id, $field_name, $value;
 	var $date_updated, $media_lang;
 
@@ -27,8 +27,8 @@ class Media_model extends MY_Model {
 
 		$this->config->load('phsite_prefs');
 		$this->mime_types = $this->config->item('mime_types');
-
-    }
+		$this->scope = 'media';
+	}
 	
 // directory / file functions
 	
@@ -200,7 +200,7 @@ class Media_model extends MY_Model {
 		return FALSE;
 	}
 
-	function get_file_metadata()
+/*	function get_file_metadata()
 	{
 		$this->read_file_info();
 
@@ -214,28 +214,32 @@ class Media_model extends MY_Model {
 				$this->title = $this->iptc['2#105'][0];
 			}
 			
-			if(array_key_exists('2#080', $this->iptc)) {
-				$this->creator = $this->iptc['2#080'][0];
-			}
-
-			/*if(array_key_exists('2#120', $this->iptc)) {
-				$this->description = $this->iptc['2#120'][0];
-			}
-			if(array_key_exists('2#025', $this->iptc)) {
-				$this->keywords = implode(', ',$this->iptc['2#025']);
-			}
-			if(array_key_exists('2#090', $this->iptc)) {
-				$this->city = $this->iptc['2#090'][0];
-			}
-			if(array_key_exists('2#095', $this->iptc)) {
-				$this->prov_state = $this->iptc['2#095'][0];
-			}
-			if(array_key_exists('2#101', $this->iptc)) {
-				$this->country = $this->iptc['2#101'][0];
-			}
-			if(array_key_exists('2#116', $this->iptc)) {
-				$this->copyright = $this->iptc['2#116'][0];
-			}*/
+//			
+//			
+//			if(array_key_exists('2#080', $this->iptc)) {
+//				$this->creator = $this->iptc['2#080'][0];
+//			}
+//
+//			if(array_key_exists('2#120', $this->iptc)) {
+//				$this->description = $this->iptc['2#120'][0];
+//			}
+//			if(array_key_exists('2#025', $this->iptc)) {
+//				$this->keywords = implode(', ',$this->iptc['2#025']);
+//			}
+//			if(array_key_exists('2#090', $this->iptc)) {
+//				$this->city = $this->iptc['2#090'][0];
+//			}
+//			if(array_key_exists('2#095', $this->iptc)) {
+//				$this->prov_state = $this->iptc['2#095'][0];
+//			}
+//			if(array_key_exists('2#101', $this->iptc)) {
+//				$this->country = $this->iptc['2#101'][0];
+//			}
+//			if(array_key_exists('2#116', $this->iptc)) {
+//				$this->copyright = $this->iptc['2#116'][0];
+//			}
+//			
+//			
 		}
 		
 		if(is_array($this->exif)) {
@@ -257,10 +261,8 @@ class Media_model extends MY_Model {
 
 	}
 
-
-
-// database functions
-	function update_media_db()
+	// database functions
+	function update_media_batch()
 	{
 		foreach($this->file_list as $file)
 		{
@@ -271,10 +273,44 @@ class Media_model extends MY_Model {
 				$this->external = 0;
 				$this->mime_type = $this->get_mime($file);
 				$this->date_created = $row->date_created;
-				$this->creator = $row->creator;
+				$this->publish = $row->publish;
 			}
+			$this->update_media_single();
 
 		}
+	}
+
+	function update_media_single()
+	{
+
+		$data = array(
+		'file_uri' => $this->file_uri,
+		'external' => $this->external,
+		'mime_type' => $this->mime_type,
+		'date_created' => $this->date_created,
+		'publish' => $this->publish,
+		);
+
+		if( $this->media_id != '' )
+		{
+			// update
+			$this->db->where('media_id', $this->media_id);
+			if($this->db->update('c_media', $data))
+			{
+				return TRUE;
+			}
+
+		} else {
+			// insert
+			if($this->db->insert('c_media', $data))
+			{
+				$this->media_id = $this->db->insert_id();
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+
 	}
 
 	function find_media_by_uri()
@@ -292,51 +328,83 @@ class Media_model extends MY_Model {
 			$this->external = $row->external;
 			$this->mime_type = $row->mime_type;
 			$this->date_created = $row->date_created;
-			$this->creator = $row->creator;
+			$this->publish = $row->publish;
 			return TRUE;
 		} 
 
 		return FALSE;
 	}
-	
-    // list all available fields and see if they are assigned as media metadata
-	function list_meta_fields()
-    {
 
-		$list = array();
+	function find_media_by_uri()
+	{
+		$this->db->where('file_uri',$this->file_uri);
+		$this->db->limit(1);
+		$query = $this->db->get('c_media');
 		
-		// get lst of all fields
-		$query = $this->db->get('fields');
-		$field_list = $query->result_array();
-
-
-/*
-CREATE TABLE `fields` (
-  `field_id` mediumint(9) unsigned NOT NULL auto_increment,
-  `field_ref_name` text NOT NULL,
-  `field_input_type` varchar(9) NOT NULL,
-  `field_validation` text,
-  `field_needs_lang` tinyint(1) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`field_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8
-*/
-		foreach($this->mime_categories as $mime_cat)
+		if ($query->num_rows() > 0)
 		{
-			$this->db->where('mime_category',$mime_cat);
-		}
-/*CREATE TABLE `r_mime_fields` (
-  `mime_category` varchar(12) default 'image/jpeg',
-  `field_id` mediumint(8) unsigned NOT NULL,
-  `required` tinyint(1) NOT NULL default '0',
-  `order` smallint(5) default '0',
-  KEY `mime_category` (`mime_category`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='media file info'
-*/
-		$this->media_meta_fields = $list;
+			$row = $query->row();
+			
+			$this->media_id = $row->media_id;
+			$this->file_uri = $row->file_uri;
+			$this->external = $row->external;
+			$this->mime_type = $row->mime_type;
+			$this->date_created = $row->date_created;
+			$this->publish = $row->publish;
+			return TRUE;
+		} 
 
+		return FALSE;
 	}
 
-	
+	function load_media()
+    {
+
+		$this->db->where('media_id', $this->temp_id);
+		$query = $this->db->get('c_media');
+ 
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$this->media_id = $row->media_id;
+			$this->file_uri = $row->file_uri;
+			$this->external = $row->external;
+			$this->mime_type = $row->mime_type;
+			$this->date_created = $row->date_created;
+			$this->publish = $row->publish;
+			return TRUE;
+		} 
+		return FALSE;
+
+    }
+*/	
+/*
+
+
+
+
+    function load_content()
+    {
+		$this->load_content_object();
+		$this->temp_id = $this->content_id;
+		$this->load_title();
+		
+		if($this->temp_value != '')
+		{
+			$this->type_id = $this->temp_value;
+		}
+		
+		$this->temp_id = $this->type_id;
+		$this->scope = 'types';
+		
+		$this->list_fields_related();
+		$this->scope = 'content';
+		$this->temp_id = $this->content_id;
+		$this->load_metadata();
+
+	}
+*/	
 }
 
 ?>

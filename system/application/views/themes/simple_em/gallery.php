@@ -1,22 +1,80 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><?php echo $title; ?></title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo $theme_path; ?>simple_em.css" rel="stylesheet" type="text/css" />
+<?php
+if(isset($html_header))
+{
+echo $html_header;
+}
+
+if(isset($size))
+{
+?>
+<style type="text/css">
+<!--
+ul.thumbnails li {
+min-height: <?php echo round(($size/15)+2.5,3); ?>em;
+}
+ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
+-->
+</style>
+<?php } ?>
 </head>
 <body class="gallery">
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
+	<?php
+if(isset($breadcrumb_links))
+{
+$breadcrumb = implode(' : ', $breadcrumb_links);
+echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
+}
+?>
 	<div class="page-wrap block">
-		<h1><?php echo $title; ?></h1>
-		<p>Posted <?php echo $created ?> by <?php echo $author['name_first'].' '.$author['name_last']; ?></p>
-		<?php echo $content_data['body']; ?>
-		<p>Keywords: <?php echo $content_data['keywords']; ?>
+		<?php
+		if (isset($title)) {
+			echo "<h1 class=\"first\">";
+			echo $title;
+			echo "</h1>\r";
+		}
+		if (isset($content_description)) {
+			echo "<p>";
+			echo $content_description;
+			echo "</p>\r";
+		}
+
+		if(count($subdirs) > 0)
+		{
+			echo "<p>Sub-directories:</p>";
+			echo ul($subdirs);
+		}
+		
+		if(isset($files) && is_array($files))
+		{
+			echo "<ul class=\"thumbnails\">";
+			
+			foreach($files as $file)
+			{
+				$link = str_replace($media_root,'',$file);
+				echo "<li>\r";
+				echo "<div class=\"thumb\">";
+				echo "<a href=\"/gallery/media{$link}\">";
+				echo view_image($file,$this->Site_model->img_size_th,array('title' => 'image title goes here'));
+				echo "</a></div>\r";
+				echo "</li>\r";
+			}
+			echo "</ul>";
+		}
+?>
 	</div>
-	<div class="page-wrap block" id="footer">footer</div>
+	<div class="page-wrap block" id="footer">
+	<?php
+	if (isset($site_meta_copyright) ) {
+		echo "<p>".$site_meta_copyright."</p>\r";
+	}
+	echo POWERED_BY;
+	?>
+	</div>
 </div>
 </body>
 </html>

@@ -258,6 +258,21 @@ class Content_model extends MY_Model {
 		return FALSE;
     }
 
+    function get_other_lang_ids()
+    {
+		
+		$this->db->where('scope', $this->scope);
+		$this->db->where('rel_id', $this->content_id);
+		$this->db->where('lang_ISO_639_3 !=', $this->temp_lang);
+		$query = $this->db->get('c_titles');
+		
+		if ($query->num_rows() > 0)
+		{
+			return $query->result_array();
+		}
+		return FALSE;
+    }
+
     // update main content info
     function update_content()
     {
@@ -471,7 +486,7 @@ class Content_model extends MY_Model {
 			$this->temp_id = 0;
 		}
 
-		$this->db->where('type_id !=', 2);
+		//$this->db->where('type_id !=', 2);
 		$this->db->where('parent_id', $this->temp_id);
 
 		if($this->link_mode == 0)
@@ -534,6 +549,7 @@ class Content_model extends MY_Model {
     {
 		$uriArray = array();
 		// get content info
+		$this->count_lang_versions();
 		$this->db->where('content_id', $this->temp_id);
 		$query = $this->db->get('c_content');
 
@@ -771,46 +787,6 @@ class Content_model extends MY_Model {
 		return $result;		
 	}
 
-    function list_type_meta_fields()
-    {
-		$this->list_fields();
-		$field_list_full = $this->field_list;
-		
-		$this->scope = 'types';
-		$this->temp_id = $this->type_id;
-		$this->list_fields_related();
-		$field_list_related = $this->field_list;
-
-		$field_list_final = array();
-		foreach ($field_list_full as $index => $fd)
-		{
-			
-			$key = $fd['field_id'];
-			$temp_field = array(
-			'field_id' => $fd['field_id'],
-			'field_ref_name' => $fd['field_ref_name'],
-			'field_input_type' => $fd['field_input_type'],
-			'field_validation' => $fd['field_validation'],
-			'field_needs_lang' => $fd['field_needs_lang'],
-			'rf_id' => '',
-			'required' => '',
-			'order' => ''
-			);
-			
-			$field_list_final["$key"] = $temp_field;
-
-		}
-
-		foreach ($field_list_related as $index => $fd)
-		{
-			$field_list_final[$index]['rf_id'] = $fd['rf_id'];
-			$field_list_final[$index]['required'] = $fd['required'];
-			$field_list_final[$index]['order'] = $fd['order'];
-		}
-		$this->field_list = $field_list_final;
-		
-	}
-
 	function new_content_dropdown()
     {
 		$this->scope = 'content';
@@ -828,6 +804,16 @@ class Content_model extends MY_Model {
 		}
 
 		return $list;
+	}
+
+	function count_lang_versions()
+    {
+		$this->db->where('scope', $this->scope);
+		$this->db->where('rel_id', $this->temp_id);
+		$this->db->group_by("lang_ISO_639_3");
+		$query = $this->db->get('c_titles');
+
+		$this->lang_mode = $query->num_rows();
 	}
 
 }

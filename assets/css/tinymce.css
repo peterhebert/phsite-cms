@@ -39,11 +39,14 @@ h2 { font-size:	133.33%; }
 h3 { font-size:120.00%; }
 h4 { font-size: 113.33%;}
 h5 { font-size:106.67%; }
-ol, ul {list-style-position:outside;padding-left:1em;}
-li {list-style-position:outside;margin-bottom:.33em;}
-ol, ol li {list-style-type:decimal;}
-ul, ul li {list-style-type:disc;}
-ol ol, ol ul, ul ul, ul ol {margin-top:.33em;}
+
+ol, ul { list-style-position:outside; padding-left:1.5em; margin-bottom:1em; }
+li { list-style-position:outside; font-size:100.00%; margin-bottom: .333em; }
+ol, ol li, ul ol li { list-style-type:decimal; }
+ol.alpha li, ul ol.alpha li { list-style-type: lower-alpha; }
+ol.roman li, ul ol.roman li { list-style-type: lower-roman; }
+ul, ul li, ol ul li { list-style-type: disc; }
+ol ol, ol ul, ul ul, ul ol { margin-top:.33em; margin-bottom: 0; }
 
 pre,code,kbd,samp,tt{font-family:monospace;*font-size:108%;line-height:100%;}
 
@@ -119,4 +122,32 @@ font-weight: bold;
 .totals td, .totals th {
 border-top: 1px solid;
 font-weight:bold;
+}
+
+/*  SOCIAL MEDIA ICONS */
+ul.social-icons {
+	margin:0 0 .5em 0;
+	padding: 0;
+	clear:both;
+}
+ul.social-icons:after {
+	 visibility: hidden;
+	 display: block;
+	 font-size: 0;
+	 content: " ";
+	 clear: both;
+	 height: 0;
+	 }
+ul.social-icons { display: inline-block; }
+/* start commented backslash hack \*/
+* html ul.social-icons { height: 1%; }
+ul.social-icons { display: block; }
+/* close commented backslash hack */
+
+ul.social-icons li,
+ul.posts ul.social-icons li
+ {
+	list-style-type:none;
+	float: left;
+	margin-right: .5em;
 }

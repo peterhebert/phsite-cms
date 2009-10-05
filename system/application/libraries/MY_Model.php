@@ -254,23 +254,23 @@ class MY_Model extends Model {
 			$temp =  array(
 			'type_id' => $row->type_id,
 			'type_uri_name' => $row->type_uri_name,
-			'label_id' => '',
-			'label' => '',
-			'lang_ISO_639_3' => '',
 			);
 
-			$this->db->where('scope', 'types');
-			$this->db->where('rel_id', $row->type_id);
-			$this->db->where('lang_ISO_639_3', $this->temp_lang);
-			$this->db->limit(1);
-			$query2 = $this->db->get('s_labels');
-
-			if ($query2->num_rows() > 0)
+			if($this->scope != 'media')
 			{
-				$row2 = $query2->row();
-				$temp['label_id'] = $row2->label_id;
-				$temp['label'] = $row2->label;
-				$temp['lang_ISO_639_3'] = $row2->lang_ISO_639_3;
+				$this->db->where('scope', 'types');
+				$this->db->where('rel_id', $row->type_id);
+				$this->db->where('lang_ISO_639_3', $this->temp_lang);
+				$this->db->limit(1);
+				$query2 = $this->db->get('s_labels');
+	
+				if ($query2->num_rows() > 0)
+				{
+					$row2 = $query2->row();
+					$temp['label_id'] = $row2->label_id;
+					$temp['label'] = $row2->label;
+					$temp['lang_ISO_639_3'] = $row2->lang_ISO_639_3;
+				}
 			}
 
 		   $list[] = $temp;
@@ -296,6 +296,46 @@ class MY_Model extends Model {
 		}
 
 		return $list;
+	}
+
+    function list_type_meta_fields()
+    {
+		$this->list_fields();
+		$field_list_full = $this->field_list;
+		
+		$this->scope = 'types';
+		$this->temp_id = $this->type_id;
+		$this->list_fields_related();
+		$field_list_related = $this->field_list;
+
+		$field_list_final = array();
+		foreach ($field_list_full as $index => $fd)
+		{
+			
+			$key = $fd['field_id'];
+			$temp_field = array(
+			'field_id' => $fd['field_id'],
+			'field_ref_name' => $fd['field_ref_name'],
+			'field_input_type' => $fd['field_input_type'],
+			'field_validation' => $fd['field_validation'],
+			'field_needs_lang' => $fd['field_needs_lang'],
+			'rf_id' => '',
+			'required' => '',
+			'order' => ''
+			);
+			
+			$field_list_final["$key"] = $temp_field;
+
+		}
+
+		foreach ($field_list_related as $index => $fd)
+		{
+			$field_list_final[$index]['rf_id'] = $fd['rf_id'];
+			$field_list_final[$index]['required'] = $fd['required'];
+			$field_list_final[$index]['order'] = $fd['order'];
+		}
+		$this->field_list = $field_list_final;
+		
 	}
 
 

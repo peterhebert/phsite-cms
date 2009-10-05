@@ -296,7 +296,22 @@ ul.posts ul li
 ul.social-icons {
 	margin:0 0 .5em 0;
 	padding: 0;
+	clear:both;
 }
+ul.social-icons:after {
+	 visibility: hidden;
+	 display: block;
+	 font-size: 0;
+	 content: " ";
+	 clear: both;
+	 height: 0;
+	 }
+ul.social-icons { display: inline-block; }
+/* start commented backslash hack \*/
+* html ul.social-icons { height: 1%; }
+ul.social-icons { display: block; }
+/* close commented backslash hack */
+
 ul.social-icons li,
 ul.posts ul.social-icons li
  {
@@ -304,6 +319,7 @@ ul.posts ul.social-icons li
 	float: left;
 	margin-right: .5em;
 }
+
 /*  EXIF / IPTC INFO */
 dl.exif-itpc dt
 {

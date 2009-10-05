@@ -8,8 +8,8 @@ $lang['cms_labels']['basic_user'] = "Basic User";
 $lang['cms_labels']['content_external_link'] = "View content in new window";
 $lang['cms_labels']['content_type_edit'] = "Edit '%s' Content Type";
 $lang['cms_labels']['content_type_editor'] = "Content Type Editor";
-$lang['cms_labels']['content_type_label'] = "Content Type label";
-$lang['cms_labels']['content_type_metadata'] = "Content Type Metadata";
+$lang['cms_labels']['type_label'] = "Type label";
+$lang['cms_labels']['type_metadata'] = "Type Metadata";
 $lang['cms_labels']['content_type_new'] = "New Content Type";
 $lang['cms_labels']['content_type_update_failure'] = "The Content Type could not be updated";
 $lang['cms_labels']['content_type_update_success'] = "The Content Type has been successfully updated";
@@ -41,7 +41,7 @@ $lang['cms_labels']['field_label'] = "Field label";
 $lang['cms_labels']['field_metadata'] = "Field metadata";
 $lang['cms_labels']['field_needs_lang'] = "Field value requires Language";
 $lang['cms_labels']['field_use_for_metadata'] = "Use field for metadata?";
-$lang['cms_labels']['field_use_for_type'] = "Use for Content Type?";
+$lang['cms_labels']['field_use_for_type'] = "Use for this Type?";
 $lang['cms_labels']['field'] = "Field";
 $lang['cms_labels']['fields'] = "Fields";
 $lang['cms_labels']['general_info'] = "General information";
@@ -143,7 +143,31 @@ $lang['cms_labels']['read_more'] = "Read More";
 $lang['cms_labels']['permalink_title'] = "Permanent link to full post '%s'";
 $lang['cms_labels']['keywords'] = "Keywords";
 $lang['cms_labels']['recently_posted_to'] = "Recently posted to %s";
-//$lang['cms_labels'][''] = "";
+$lang['cms_labels']['gallery'] = "Gallery";
+
+$lang['cms_labels']['media_type_edit'] = "Edit '%s' Media Type";
+$lang['cms_labels']['media_type_editing'] = "Editing '%s' Media Type";
+$lang['cms_labels']['media_type_editor'] = "Media Type Editor";
+$lang['cms_labels']['media_type_new'] = "New Media Type";
+$lang['cms_labels']['media_type_update_failure'] = "The Media Type could not be updated";
+$lang['cms_labels']['media_type_update_success'] = "The Media Type has been successfully updated";
+$lang['cms_labels']['media_type'] = "Media Type";
+$lang['cms_labels']['media_types'] = "Media Types";
+
+$lang['cms_labels']['media_type_mimes'] = "These media types correspond to the applicable <a rel=\"external\" href=\"http://www.iana.org/assignments/media-types/\">general categories of MIME types</a> as defined by the Internet Assigned Numbers Authority (IANA). The  categories 'example', 'message', 'model' and 'multipart' have been omitted.";
+
+$lang['cms_labels']['blurb_data_structure'] = "You can define what types of content your site has, add custom fields and assign fields to Content or Media Types";
+$lang['cms_labels']['blurb_choose_langs'] = "Choose what languages you want to use on your site";
+$lang['cms_labels']['edit_languages'] = "Edit languages";
+
+
+$lang['cms_labels']['blurb_users'] = "Manage the users of your site";
+$lang['cms_labels']['blurb_site_prefs'] = "This is where you can change site-wide prefrences, such as designating a home page, choosing default languages, designating a Webmaster and Editor users, and selecting a site theme";
+$lang['cms_labels']['blurb_site_metadata'] = "This is where you can change information about your site, such as description, title, footer, etc.";
+$lang['cms_labels']['edit_content_types'] = "Edit Content Types";
+$lang['cms_labels']['edit_media_types'] = "Edit Media Types";
+$lang['cms_labels']['edit_fields'] = "Edit Fields";
+
 //$lang['cms_labels'][''] = "";
 //$lang['cms_labels'][''] = "";
 

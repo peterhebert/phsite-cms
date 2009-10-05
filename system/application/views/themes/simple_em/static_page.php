@@ -7,17 +7,31 @@ if(isset($html_header))
 echo $html_header;
 }
 ?>
+<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
+<?php
+if(isset($breadcrumb_links))
+{
+	$breadcrumb = implode(' : ', $breadcrumb_links);
+	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
+}
+?>
+
+	
 	<div class="page-wrap block five">
-		<div class="column w3">static_page
+		<div class="column w3">
 			<?php
 			if(isset($title))
 			{
 				echo "<h1>{$title}</h1>\r";
+			}
+			if(isset($subtitle))
+			{
+				echo "<h2>{$subtitle}</h2>\r";
 			}
 			if(isset($content_body))
 			{
@@ -31,6 +45,10 @@ echo $html_header;
 		</div>
 		<div class="float w2">
 			<?php
+			if(isset($menu_title))
+			{
+				echo "<h3>{$menu_title}</h3>\r";
+			}
 			if(isset($menu))
 			{
 				echo $menu;

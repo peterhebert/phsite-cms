@@ -7,9 +7,11 @@ class Setup extends MY_Controller
 		parent::MY_Controller();
 		$this->load->helper('form');
 		$this->load->model('Content_model');
+		$this->load->model('Media_model');
 		$this->load->library('form_validation');		
 	
 		//$this->_authenticate();
+		$this->_load_cms_labels();
 	}
 	
 	function index()
@@ -1259,6 +1261,8 @@ class Setup extends MY_Controller
 		}
 	}
 
+// content types
+
 	function content_types()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
@@ -1291,7 +1295,7 @@ class Setup extends MY_Controller
 			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 			$lbl = $this->Content_model->load_label();
 
-			$uri = "cms/setup/type_edit/id/".$type['type_id'];
+			$uri = "cms/setup/content_type_edit/id/".$type['type_id'];
 		
 			if($lbl) {
 				$uri .= "/lang/".$this->Content_model->temp_lang;
@@ -1306,14 +1310,14 @@ class Setup extends MY_Controller
 		}
 
 		$form = "<h3 class=\"first\">".$this->cms_labels['content_types']."</h3>\r";
-		$form .= '<p>'. anchor("cms/setup/type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
+		$form .= '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
 		$form .= ul($types);
 		$this->data['form'] =  $form;
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
 	
-	function type_edit()
+	function content_type_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
@@ -1346,6 +1350,29 @@ class Setup extends MY_Controller
 
 		$this->data['form'] = $this->_form_content_type();
 
+
+		// construct sidebar lang links
+		if($this->Content_model->type_id != '')
+		{
+			$sidebar = "<h2>".$this->cms_labels['edit_by_lang']."</h2>";
+
+			$this->Site_model->list_langs();
+			$enabled = $this->Site_model->lang_list;
+			
+			$lang_links = array();
+			foreach($enabled as $tmp_lang)
+			{
+	
+				$action = "/cms/setup/content_type_edit/id/".$this->Content_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
+	
+				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
+			}
+
+			$sidebar .= ul($lang_links);
+
+			$this->data['sidebar'] = $sidebar;
+		}
+
 		$msg = $this->Content_model->_output_messages();
 		if($msg)
 		{
@@ -1354,7 +1381,7 @@ class Setup extends MY_Controller
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
-	
+
 	function _form_content_type()
 	{
 		if($this->Content_model->type_id != '')
@@ -1374,7 +1401,7 @@ class Setup extends MY_Controller
 		
 		$langs = $this->Content_model->langs_dropdown();
 
-		$action = "/cms/setup/type_edit";
+		$action = "/cms/setup/content_type_edit";
 		if($this->Content_model->type_id != '')
 		{
 			$action .= "/id/".$this->Content_model->type_id;
@@ -1401,7 +1428,7 @@ class Setup extends MY_Controller
 		$form .= "</p>\r";
 
 		// metadata
-		$form .= form_fieldset($this->cms_labels['content_type_metadata']);
+		$form .= form_fieldset($this->cms_labels['type_metadata']);
 		$form .= "\r";
 		$form .= "<p>\r";
 		$form .= form_label($this->cms_labels['language'], 'type_lang');
@@ -1409,7 +1436,7 @@ class Setup extends MY_Controller
 		$form .= "</p>\r";
 		
 		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['content_type_label'], 'label');
+		$form .= form_label($this->cms_labels['type_label'], 'label');
 		$form .= form_input('label',$this->Content_model->label); 
 		$form .= "</p>\r";
 		$form .= form_fieldset_close("\r");
@@ -1517,7 +1544,7 @@ class Setup extends MY_Controller
 			$this->load->library('form_validation');
 
 			$this->form_validation->set_rules('type_uri_name', $this->cms_labels['type_uri_name'], 'required|alpha_num_spaces');
-			$this->form_validation->set_rules('label', $this->cms_labels['content_type_label'], 'required');
+			$this->form_validation->set_rules('label', $this->cms_labels['type_label'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
 			
@@ -1602,7 +1629,374 @@ class Setup extends MY_Controller
 		
 	}
 
+// media types
 
+	function media_types()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['media_types'];
+
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['media_types'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['media_types'];
+
+		$this->Media_model->list_types();
+		$temp_list = $this->Media_model->type_list;
+
+		$types = array();
+		
+		foreach($temp_list as $type)
+		{
+			$this->Media_model->label_id = '';
+			$this->Media_model->label_scope = 'types';
+			$this->Media_model->label_rel_id = '';
+			$this->Media_model->label_rel_name = '';
+			$this->Media_model->label = '';
+
+			$this->Media_model->temp_id = $type['type_id'];
+			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
+			$lbl = $this->Media_model->load_label();
+
+			$uri = "cms/setup/media_type_edit/id/".$type['type_id'];
+		
+			if($lbl) {
+				$uri .= "/lang/".$this->Media_model->temp_lang;
+				$text = $this->Media_model->label;
+			} else {
+				$text = $type['type_uri_name'];
+			}
+			$attr = array('title' => sprintf($this->cms_labels['media_type_edit'],$text));
+			
+			$types[] = anchor($uri,$text,$attr);
+		
+		}
+
+		$form = '<p>'. $this->cms_labels['media_type_mimes']."</p>\r";
+		$form .= ul($types);
+		$this->data['form'] =  $form;
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+
+	function media_type_edit()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = anchor("cms/setup/media_types",$this->cms_labels['media_types']);
+		$breadcrumb[] = $this->cms_labels['media_type_editor'];
+
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['media_type_editor'];
+		$title_tag[] = $this->cms_labels['media_types'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['media_type_editor'];
+
+		$this->_process_media_type();
+
+		$params = $this->uri->uri_to_assoc(4);
+		if(array_key_exists('id',$params)) {
+			$this->Media_model->temp_id = $params['id'];
+		}
+		if(array_key_exists('lang',$params)) {
+			$this->Media_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
+		}
+
+		$this->data['form'] = $this->_form_media_type();
+
+		// construct sidebar lang links
+		if($this->Media_model->type_id != '')
+		{
+			$sidebar = "<h2>".$this->cms_labels['edit_by_lang']."</h2>";
+
+			$this->Site_model->list_langs();
+			$enabled = $this->Site_model->lang_list;
+			
+			$lang_links = array();
+			foreach($enabled as $tmp_lang)
+			{
+	
+				$action = "/cms/setup/media_type_edit/id/".$this->Media_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
+	
+				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
+			}
+
+			$sidebar .= ul($lang_links);
+
+			$this->data['sidebar'] = $sidebar;
+		}
+
+		$msg = $this->Media_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+	
+	function _form_media_type()
+	{
+		if($this->Media_model->type_id != '')
+		{
+			$this->Media_model->temp_id = $this->Media_model->type_id;
+		}
+		$this->Media_model->load_type();
+
+		if($this->Media_model->type_id != '') {
+
+			$this->Media_model->list_type_meta_fields();
+
+			$this->Media_model->reset_label();
+			$this->Media_model->label_scope = "types";
+			$this->Media_model->temp_id = $this->Media_model->type_id;
+			$this->Media_model->load_label();
+		}
+
+		$action = "/cms/setup/media_type_edit";
+		if($this->Media_model->type_id != '')
+		{
+			$action .= "/id/".$this->Media_model->type_id;
+		}
+		if($this->Media_model->temp_lang != '')
+		{
+			$action .= "/lang/".$this->Media_model->temp_lang;
+		}
+
+		$attributes = array('name' => "type_editor", 'id' => "type_editor");
+		$hidden = array(
+		'type_id' => $this->Media_model->type_id,
+		'type_uri_name' => $this->Media_model->type_uri_name,
+		'label_id' => $this->Media_model->label_id,
+		);
+		
+		$form = form_open($action,$attributes,$hidden)."\r";
+
+		// main data
+		$form .= "<h2>\r";
+		$tmp_editing = sprintf($this->cms_labels['media_type_editing'],$this->Media_model->type_uri_name);
+		$form .= $tmp_editing; 
+		$form .= "</h2>\r";
+
+		// metadata
+		$options = $this->Media_model->langs_dropdown();
+		$form .= form_fieldset($this->cms_labels['type_metadata']);
+		$form .= "\r";
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['language'], 'type_lang');
+		$form .= form_dropdown('type_lang', $options, $this->Media_model->temp_lang); 
+		$form .= "</p>\r";
+		
+		$options = array(
+		'name'        => 'label',
+		'id'          => 'label',
+		'value'       => $this->Media_model->label,
+		'class'   => 'text',
+		);
+		
+		$form .= "<p>\r";
+		$form .= form_label($this->cms_labels['type_label'], 'label');
+		$form .= form_input($options); 
+		$form .= "</p>\r";
+		$form .= form_fieldset_close("\r");
+
+		// fields
+		$form .= form_fieldset($this->cms_labels['fields']);
+		$form .= "\r";
+
+
+		$form .= "<table id=\"properties\">\r";
+		$form .= "<thead>\r";
+		$form .= "<tr>\r";
+		$form .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$form .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
+		$form .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
+		$form .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
+		$form .= "</tr>\r";
+		$form .= "</thead>\r";
+
+		$field_list = $this->Media_model->field_list;
+		$fieldCount = count($field_list);
+		$fieldNo = 1;
+
+		$form .= "<tbody>\r";
+
+		$chk_exist = "&nbsp;";
+		$chk_req = "&nbsp;";
+		$input_order = "&nbsp;";
+
+		foreach($this->Media_model->field_list as $field)
+		{
+
+			$row_header = form_hidden('field_id[]', $field['field_id']);
+			$row_header .= form_hidden('rf_id[]', $field['rf_id']);
+
+			$tmp_label = $field['field_ref_name'];
+			
+			// get label for field
+			$this->Media_model->reset_label();
+			$this->Media_model->label_scope = 'field';
+
+			$this->Media_model->temp_id = $field['field_id'];
+			$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->Media_model->load_label();
+
+			if($this->Media_model->label_id != '') {
+				$tmp_label = $this->Media_model->label;
+			}
+			$row_header .= $tmp_label;
+
+
+			if($field['rf_id'] != '') {
+				$exists = true;
+			} else {
+				$exists = false;
+			}
+
+			$params = array(
+			'name'        => 'exists[]',
+			'id'          => 'exists[]',
+			'value'       => $field['field_id'],
+			'checked'     => $exists
+			);
+	
+			$chk_exist = form_checkbox($params);
+
+
+			$params = array(
+			'name'        => 'required[]',
+			'id'          => 'required[]',
+			'value'       => $field['field_id'],
+			'checked'     => $field['required']
+			);
+
+			$chk_req = form_checkbox($params);
+
+			$params = array(
+			'name'        => "order[]",
+			'id'          => "order[]",
+			'value'       => $field['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			$input_order = form_input($params);
+			
+			$form .= "<tr>\r";
+			$form .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$form .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$form .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$form .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$form .= "</tr>\r";
+
+			$fieldNo += 1;
+
+		}
+		$form .= "</tbody>\r";
+		$form .= "</table>\r";
+		$form .= form_fieldset_close("\r");
+
+		$form .= "<p>";
+		$form .= form_submit('submit', $this->cms_labels['save']);
+		$form .= "</p>\n";
+		$form .= form_close();
+
+		return $form;
+	}
+
+	function _process_media_type()
+	{
+
+		if($this->input->post('submit') != '')
+		{
+			// set validation rules
+			$this->load->library('form_validation');
+
+			$this->form_validation->set_rules('type_id', $this->cms_labels['media_type'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('label', $this->cms_labels['type_label'], 'required');
+
+			$form_is_valid = $this->form_validation->run();
+			
+			// get values from form post data
+			$this->Media_model->type_id = $this->input->post('type_id');
+			$this->Media_model->type_uri_name = $this->input->post('type_uri_name');
+
+			if ($form_is_valid)
+			{
+
+				$temp_fields = $this->input->post('field_id');
+				$temp_rels = $this->input->post('rf_id');
+				$temp_exists = $this->input->post('exists');
+				$temp_required = $this->input->post('required');
+				$temp_order = $this->input->post('order');
+	
+				$field_updates = array();
+				foreach($temp_fields as $index => $id)
+				{
+					$temp_field = array(
+					'field_id' => $id,
+					'rf_id' => $temp_rels[$index],
+					'rf_rel_id' => $this->Media_model->type_id,
+					'rf_rel_ref_name' => $this->Media_model->type_uri_name,
+					'exists' => FALSE,
+					'required' => 0,
+					'order' => $temp_order[$index],
+					);
+					
+					if(is_array($temp_exists) && in_array($id,$temp_exists)){
+						$temp_field['exists'] = TRUE;
+					}
+	
+					if(is_array($temp_required) && in_array($id,$temp_required)){
+						$temp_field['required'] = 1;
+					}
+					
+					$field_updates[] = $temp_field;
+				}
+
+				$this->Media_model->field_list = $field_updates;
+				$this->Media_model->scope = 'types';
+				$this->Media_model->update_fields_related();
+				
+				// update type label
+				$this->Media_model->label_scope = 'types';
+				$this->Media_model->label_rel_id = $this->Media_model->type_id;
+				$this->Media_model->label_rel_name = $this->Media_model->type_uri_name;
+				$this->Media_model->label_id = $this->input->post('label_id');
+				$this->Media_model->label = $this->input->post('label');
+				$this->Media_model->temp_lang = $this->input->post('type_lang');
+				
+				if(!$this->Media_model->update_label())
+				{
+					$this->Media_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['type_label']);
+				}
+
+
+			}
+			else
+			{
+				$this->Media_model->messages[] = validation_errors();
+			}
+			
+			if(count($this->Media_model->messages) == 0)
+			{
+				$this->Media_model->messages[] = $this->cms_labels['media_type_update_success'];
+			}
+			
+		}
+		
+	}
 
 }
 ?>

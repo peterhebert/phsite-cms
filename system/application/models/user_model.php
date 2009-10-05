@@ -63,8 +63,6 @@ class User_model extends MY_Model {
     // load user
 	function load_user()
     {
-
-
 		$this->db->where('user_id', $this->temp_id);
 
 		$query = $this->db->get('s_users');
@@ -72,7 +70,7 @@ class User_model extends MY_Model {
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();
-	
+
 			$this->user_id = $row->user_id;
 			$this->name_first = $row->name_first;
 			$this->name_last = $row->name_last;
@@ -84,7 +82,7 @@ class User_model extends MY_Model {
 		
 			$this->db->where('user_id', $this->user_id);
 			$this->db->where('site_id', $this->site_id);
-	
+
 			$q2 = $this->db->get('r_sites_users');
 			if ($q2->num_rows() > 0)
 			{

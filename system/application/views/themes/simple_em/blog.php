@@ -11,13 +11,13 @@ echo $html_header;
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb">
-		<?php
-		if (isset($breadcrumb)){
-			echo $breadcrumb;
-		}
-	 ?>
-	</div>
+<?php
+if(isset($breadcrumb_links))
+{
+	$breadcrumb = implode(' : ', $breadcrumb_links);
+	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
+}
+?>
 	<div class="page-wrap">
 		<div class="block five">
 			<div class="column w3">
@@ -27,10 +27,11 @@ echo $html_header;
 					echo $title;
 					echo "</h1>\r";
 				}
+				if (isset($subtitle) && $subtitle != '') {
+					echo "<h2>".$subtitle."</h2>\r";
+				}
 				if (isset($content_description)) {
-					echo "<p>";
-					echo $content_description;
-					echo "</p>\r";
+					echo "<p>".$content_description."</p>\r";
 				}
 				if (isset($blog)) {
 					echo $blog;
@@ -41,6 +42,10 @@ echo $html_header;
 				<?php
 				if(isset($menu) && $menu != '')
 				{
+					if(isset($menu_title))
+					{
+						echo "<h3>{$menu_title}</h3>\r";
+					}
 					echo $menu;
 				}
 				?>
@@ -48,7 +53,7 @@ echo $html_header;
 		</div>
 	</div>
 	<div class="page-wrap block" id="footer">
-		<?php
+	<?php
 	if (isset($site_meta_copyright) ) {
 		echo "<p>".$site_meta_copyright."</p>\r";
 	}

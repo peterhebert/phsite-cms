@@ -4,7 +4,7 @@
 #
 # Host: localhost (MySQL 5.0.67)
 # Database: phsite_minimal
-# Generation Time: 2009-09-28 12:58:02 -0700
+# Generation Time: 2009-10-02 16:03:33 -0700
 # ************************************************************
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -7943,20 +7943,22 @@ CREATE TABLE `c_content` (
   `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `publish` mediumint(9) unsigned NOT NULL default '1',
   PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_content` WRITE;
 /*!40000 ALTER TABLE `c_content` DISABLE KEYS */;
 INSERT INTO `c_content` (`content_id`,`user_id`,`parent_id`,`type_id`,`type_uri_name`,`date_created`,`date_end_expiry`,`date_updated`,`publish`)
 VALUES
 	(1,1,2,1,'static_page','2009-07-09 13:37:56',NULL,'2009-09-24 12:03:29',1),
-	(2,1,0,1,'static_page','2009-07-09 13:39:52',NULL,'2009-09-24 12:03:29',1),
-	(3,1,0,1,'static_page','2009-07-21 14:18:14',NULL,'2009-09-24 12:03:29',1),
-	(4,1,0,3,'blog','2009-09-18 17:13:30','0000-00-00 00:00:00','2009-09-24 15:48:55',1),
-	(5,1,1,1,'static_page','2009-09-18 17:21:44','0000-00-00 00:00:00','2009-09-25 14:58:46',1),
+	(2,1,0,1,'static_page','2009-07-09 13:39:52','0000-00-00 00:00:00','2009-09-30 08:26:57',1),
+	(3,1,0,1,'static_page','2009-07-21 14:18:14','0000-00-00 00:00:00','2009-09-30 14:53:44',1),
+	(4,1,0,3,'blog','2009-09-18 17:13:30','0000-00-00 00:00:00','2009-09-30 14:15:51',1),
+	(5,1,1,1,'static_page','2009-09-18 17:21:44',NULL,'2009-09-25 14:58:46',1),
 	(6,1,0,1,'static_page','2009-09-23 17:47:50',NULL,'2009-09-24 12:03:29',1),
-	(7,1,0,1,'static_page','2009-09-23 18:10:19',NULL,'2009-09-24 12:03:29',1),
-	(8,1,0,2,'blog_entry','2009-09-25 16:11:24','0000-00-00 00:00:00','2009-09-25 16:15:34',1);
+	(7,1,1,1,'static_page','2009-09-23 18:10:19','0000-00-00 00:00:00','2009-10-01 13:32:32',1),
+	(8,1,4,2,'blog_entry','2009-09-25 16:11:24',NULL,'2009-09-29 12:43:10',1),
+	(9,1,2,1,'static_page','2009-09-29 15:53:08','0000-00-00 00:00:00','2009-10-01 13:38:55',1),
+	(10,1,0,4,'gallery','2009-10-01 14:15:07','0000-00-00 00:00:00','2009-10-01 14:15:07',1);
 
 /*!40000 ALTER TABLE `c_content` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -7968,7 +7970,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `c_media`;
 
 CREATE TABLE `c_media` (
-  `media_id` mediumint(8) unsigned NOT NULL auto_increment,
+  `media_id` mediumint(9) unsigned NOT NULL auto_increment,
   `file_uri` text,
   `external` tinyint(1) NOT NULL default '0',
   `mime_type` varchar(100) default 'image/jpeg',
@@ -7995,7 +7997,7 @@ CREATE TABLE `c_metadata` (
   `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`meta_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_metadata` WRITE;
 /*!40000 ALTER TABLE `c_metadata` DISABLE KEYS */;
@@ -8004,10 +8006,9 @@ VALUES
 	(1,'content',1,2,'body','<p>Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He&rsquo;s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?</p>','eng','2009-09-24 12:03:29'),
 	(2,'content',1,8,'description','Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He’s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?','eng','2009-09-24 12:03:29'),
 	(4,'content',2,8,'description','Information about Peter\'s films.','eng','2009-09-24 12:03:29'),
-	(6,'content',3,2,'body','<p>Here are the various ways you can find me:</p>\n<ul>\n<li><a href=\\mailto:mail@peterhebert.com\">E-mail</a></li>\n<li><a href=\"\"http://www.facebook.com/profile.php?id=527077494\"\">Facebook</a></li>\n<li><a href=\"\"http://www.linkedin.com/in/peterhebert\"\">LinkedIn</a></li>\n<li><a href=\"\"xmpp:mail@peterhebert.com\"\">Jabber</a></li>\n<li><a href=\"\"gtalk:chat?hebert.pj@gmail.com\"\">Google Talk</a></li>\n<li><a href=\"\"callto://peterhebert\"\">Skype</a></li>\n<li><a href=\"\"msnim:add?contact=peterhebert@hotmail.com\"\">MSN</a></li>\n</ul>\n<p>You can add me to your address book by <a href=\"\"/Peter_Hebert.vcf\"\">downloading my vCard</a>.</p>\"\"\"',NULL,'2009-09-24 12:03:29'),
+	(29,'content',7,2,'body','<ul>\n<li>Mark Leahy as Louis Bach</li>\n<li>Jamie Douglas as Frankie</li>\n<li>Derick Fage as Joey</li>\n<li>Heather Earle as Detective O\'Brien</li>\n<li>Mike Caza as Detective Walker</li>\n<li>Franco Mascitto as the Big Boss</li>\n<li>Rod Davison as Lieutenant Monroe</li>\n<li>David Scarcella as the Racetrack Announcer</li>\n<li>Helen Batabyal as the Maid</li>\n<li>Leah Miller as the Good Looking Woman</li>\n<li>Mike Girardin as the Tough Guy</li>\n</ul>\n<h2>Extras</h2>\n<p>Cindy Bertinato<br /> Ray Besharah<br /> Anda Carabineanu<br /> Barry Comer<br /> Bob Ford<br /> Kay Matthews<br /> Kelly McGilvery<br /> Michelle Mulligan<br /> Brenda Scherloski<br /> Cathy Symonds</p>','eng','2009-10-01 13:32:32'),
+	(6,'content',3,2,'body','<p>Here are the various ways you can contact me:</p>\n<ul class=\"social-icons\">\n<li><a href=\"mailto:mail@peterhebert.com\"><img src=\"/assets/icons/fugue/mail.png\" alt=\"e-mail\" /></a></li>\n<li><a href=\"xmpp:mail@peterhebert.com\"><img src=\"/assets/icons/favicons/xmpp-jabber.png\" alt=\"XMPP (Jabber)\" /></a></li>\n<li><a href=\"gtalk:chat?hebert.pj@gmail.com\"><img src=\"/assets/icons/favicons/google.png\" alt=\"XMPP (Google Talk)\" /></a></li>\n<li><a href=\"callto://peterhebert\"><img longdesc=\"http://www.skype.com\" src=\"/assets/icons/favicons/skype.png\" alt=\"Skype\" /></a></li>\n<li><a href=\"msnim:add?contact=peterhebert@hotmail.com\"><img src=\"/assets/icons/favicons/windows.png\" alt=\"MSN / Windows Live Messenger\" /></a></li>\n</ul>\n<p>You can also find me on these social networks:</p>\n<ul class=\"social-icons\">\n<li><a href=\"http://www.facebook.com/peter.j.hebert\"><img longdesc=\"http://www.facebook.com\" src=\"/assets/icons/favicons/facebook.png\" alt=\"Facebook\" /></a></li>\n<li><a href=\"http://www.linkedin.com/in/peterhebert\"><img longdesc=\"http://www.linkedin.com\" src=\"/assets/icons/favicons/linkedin.png\" alt=\"LinkedIn\" /></a></li>\n<li><a href=\"http://www.twitter.com/peter_hebert\"><img longdesc=\"http://www.twitter.com\" src=\"/assets/icons/favicons/twitter.png\" alt=\"Twitter\" /></a></li>\n</ul>','eng','2009-09-30 15:34:24'),
 	(7,'content',3,8,'description','Here are the different ways you can get hold of Peter Hebert.','eng','2009-09-24 12:03:29'),
-	(8,'content',3,11,'excerpt','<p>I am just testing out my new CMS, and would like to use this as my first blog entry.</p>','eng','2009-09-24 12:03:29'),
-	(10,'content',4,2,'body','<p>Here you will find all the updates and news about phSite CMS.</p>','eng','2009-09-24 12:03:29'),
 	(11,'content',4,8,'description','A blog where you will find all the updates and news about phSite CMS.\n','eng','2009-09-24 12:03:29'),
 	(13,'content',5,2,'body','<dl> <dt>Executive Producer</dt> <dd>Peter Hebert</dd> <dt>Associate Producer</dt> <dd>Mark McKay</dd> <dt>Screenwriters</dt> <dd>Stef Faro</dd> <dd>Peter Hebert</dd> <dt>Director</dt> <dd>Peter Hebert</dd> <dt>Director of Photography</dt> <dd>Peter Hebert</dd> <dt>Camera</dt> <dd>Peter Hebert</dd> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dt>Lighting</dt> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dd>Jason Tetro</dd> <dd>Joyce MacPhee</dd> <dd>Jeff Miles</dd> <dt>Sound recording</dt> <dd>Mark McKay</dd> <dd>Bryon Hunter</dd> <dd>Joyce MacPhee</dd> <dt>Properties</dt> <dd>Bryon Hunter</dd> <dd>Peter Hebert</dd> <dt>Set construction</dt> <dd>Steven Giouras</dd> <dt>Catering /craft service</dt> <dd>Peter Hebert</dd> <dt>Video Editing</dt> <dd>Peter Hebert</dd> <dt>Colorist</dt> <dd>Peter Hebert</dd> <dt>Sound Editing</dt> <dd>Peter Hebert</dd> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Music by </dt> <dd>Mark Bolton</dd> <dt>Music Supervisor </dt> <dd>Scott Payne</dd> <dt>Audio mix</dt> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Documentary videographer</dt> <dd>Christophe Forget</dd> <dt>Documentary interviews</dt> <dd>Joyce MacPhee</dd> <dt>Still photography</dt> <dd>Maggie Euteneier</dd> <dd>Peter Hebert</dd> <dd>Jamie Douglas</dd> <dt>Casting</dt> <dd>Peter Hebert</dd> <dd>Guy Marsan</dd> <dt>Production Assistants</dt> <dd>Maggie Euteneier</dd> <dd>Guy Marsan</dd> <dd>Jeff Miles</dd> </dl>','eng','2009-09-25 15:27:00'),
 	(15,'content',6,8,'description','Peter\'s commitment to making his website accessbile to all.','eng','2009-09-24 12:03:29'),
@@ -8018,7 +8019,12 @@ VALUES
 	(23,'users',1,15,'location','Vancouver, British Columbia','eng','2009-09-24 12:03:29'),
 	(24,'users',1,18,'website_url','http://www.peterhebert.com','','2009-09-24 12:03:29'),
 	(25,'content',8,2,'body','<p>In developing this <acronym title=\"Content Management System\">CMS</acronym>, I had quite the dilemma in writing my URI routing scheme. Many questions arose:</p>\n<ul>\n<li>Should I use the built-in Routing class?</li>\n<li>Should I direct all requests to one controller and then roll my own URI segment parser?</li>\n<li>What are all the possible SEO\'d URIs that I might use?</li>\n<li>What are the performace implications of each approach?</li>\n</ul>\n<p>In the end, I made some assumptions, and baked my own parser class as the main controller. It is based upon a hierarchical structure for static pages, and a parameter-based scheme for non-static content.</p>\n<p>What do you think?</p>','eng','2009-09-25 15:54:24'),
-	(26,'content',8,11,'excerpt','<p>In developing this <acronym title=\"Content Management System\">CMS</acronym>, I had quite the dilemma in writing my URI routing scheme. Many questions arose:</p>\n<ul>\n<li>Should I use the built-in Routing class?</li>\n<li>Should I direct all requests to one controller and then roll my own URI segment parser?</li>\n<li>What are all the possible SEO\'d URIs that I might use?</li>\n<li>What are the performace implications of each approach?</li>\n</ul>','eng','2009-09-25 15:54:24');
+	(26,'content',8,11,'excerpt','<p>In developing this <acronym title=\"Content Management System\">CMS</acronym>, I had quite the dilemma in writing my URI routing scheme. Many questions arose:</p>\n<ul>\n<li>Should I use the built-in Routing class?</li>\n<li>Should I direct all requests to one controller and then roll my own URI segment parser?</li>\n<li>What are all the possible SEO\'d URIs that I might use?</li>\n<li>What are the performace implications of each approach?</li>\n</ul>','eng','2009-09-25 15:54:24'),
+	(28,'content',2,2,'body','<p><a href=\"http://www.imdb.com/name/nm2451928/\">My IMDB profile</a></p>\n<p>Here are some of my films, and others that I have worked on.</p>\n<table border=\"0\">\n<tbody>\n<tr>\n<th scope=\"col\">Year</th> <th scope=\"col\">Production title </th> <th scope=\"col\">format</th> <th scope=\"col\">Position(s)</th> <th scope=\"col\">Producer</th>\n</tr>\n<tr>\n<td>2008</td>\n<td><a rel=\"external\" href=\"http://www.thegreenfilm.com/\">The Green Film</a> (Crazy 8s festival intro film)</td>\n<td>4K (RED)</td>\n<td>PA, Grip, Set dressing</td>\n<td>Juggernaut Pictures Inc. / Scott Renyard</td>\n</tr>\n<tr>\n<td>2007</td>\n<td><a rel=\"external\" href=\"http://pastperfectpro.com/roth.html\">Revenge of the Hunted</a></td>\n<td>HD</td>\n<td>Lighting, grip</td>\n<td>Aaron Floresco</td>\n</tr>\n<tr>\n<td>2006</td>\n<td><a href=\"/film/the-leaves\">The Leaves</a></td>\n<td>16mm</td>\n<td>Director, camera</td>\n<td>Peter Hebert</td>\n</tr>\n<tr>\n<td>2005</td>\n<td><a href=\"/film/lucky-or-not\">Lucky - or Not?</a></td>\n<td>DV</td>\n<td>Producer, director, editor, camera</td>\n<td>Peter Hebert (PH new media)</td>\n</tr>\n</tbody>\n</table>','eng','2009-09-30 13:55:03'),
+	(30,'content',9,2,'body','<p>(2006 - B&amp;W - 16mm)</p>\n<p>On November 19, 2006, I shot \"The Leaves\", my entry in IFCO\'s Fall 2006 16mm <a rel=\"external\" href=\"http://www.ifco.ca/events/dogmechallenge.html\">Dogme Challenge</a>. I got one roll of 16mm 7222 black and white negative film, a Bolex camera and had 24 hours to make a film within the following constraints:</p>\n<ul>\n<li>only use available light. </li>\n<li>only in-camera editing.</li>\n<li>no post-production work whatsoever (no editing, no sound, no cuts, no dissolves, etc.)</li>\n<li>include the following credits at some point in your film: <ol class=\"alpha\">\n<li>the words: &ldquo;Fall 2006 IFCO Dogme Challenge &rdquo;;</li>\n<li>your name;</li>\n<li>the film title. </li>\n</ol></li>\n</ul>\n<h3>Cast and Crew</h3>\n<ul>\n<li>Sebastien Fournier: \"The Leaf Guy\"</li>\n<li> Paul Finnegan: \"The Raker\"</li>\n<li>Peter Hebert: Director, camera operator </li>\n<li>Steven Giouras: Camera assistant, still photos </li>\n</ul>\n<p><em>The Leaves</em> had its premiere screening at IFCO\'s Holiday party on December 14, 2006 at the Mercury Lounge.</p>','eng','2009-10-01 14:10:13'),
+	(33,'content',10,8,'description','This is a test of the media gallery function','eng','2009-10-01 14:15:07'),
+	(31,'content',9,8,'description','On November 19, 2006, I shot \"The Leaves\", my entry in IFCO\'s Fall 2006 16mm Dogme Challenge. I got one roll of 16mm 7222 black and white negative film, a Bolex camera and had 24 hours to make a film.','eng','2009-10-01 13:38:55'),
+	(32,'content',10,9,'directory','/test','','2009-10-01 14:15:07');
 
 /*!40000 ALTER TABLE `c_metadata` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8040,8 +8046,9 @@ CREATE TABLE `c_titles` (
   `lang_ISO_639_3` varchar(3) NOT NULL,
   `title_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`title_id`),
-  FULLTEXT KEY `title` (`title`,`subtitle`)
-) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+  FULLTEXT KEY `title` (`title`,`subtitle`),
+  FULLTEXT KEY `keywords` (`keywords`)
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `c_titles` WRITE;
 /*!40000 ALTER TABLE `c_titles` DISABLE KEYS */;
@@ -8052,13 +8059,29 @@ VALUES
 	(3,'content',2,'Film','film','','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-09-28 12:37:07'),
 	(4,'content',3,'Contact','contact','','contact info, email, IM, social media','eng','2009-09-28 12:37:07'),
 	(6,'content',4,'development blog','development-blog','Updates on the development of phSite CMS','development, news, phSite CMS','eng','2009-09-28 12:37:07'),
-	(2,'content',5,'Crew','crew','Production credits for \'Lucky - or Not?\'','credits, crew, film, Lucky - or Not?, production','eng','2009-09-28 12:37:07'),
+	(2,'content',5,'Crew','crew','Production credits for \'Lucky - or Not?\'','credits, crew, film, Lucky - or Not?, production','eng','2009-09-29 12:40:28'),
 	(7,'content',6,'Accessibility','accessibility','','accessibility, disabilities, web standards','eng','2009-09-28 12:37:07'),
 	(8,'content',7,'Cast','cast','','cast, Lucky - or Not?, movie, short','eng','2009-09-28 12:37:07'),
-	(9,'content',8,'Optimum URI routing in CodeIgniter','optimum-uri-routing-in-codeigniter','','CMS, CodeIgniter, parsing, php, routing, URI','eng','2009-09-28 12:37:07');
+	(9,'content',8,'Optimum URI routing in CodeIgniter','optimum-uri-routing-in-codeigniter','','CMS, CodeIgniter, parsing, php, routing, URI, URL','eng','2009-09-28 13:18:08'),
+	(10,'content',9,'The Leaves','the-leaves','','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-09-28 12:37:07'),
+	(11,'content',10,'Test Gallery','test-gallery','checking out the gallery function','movies','eng','2009-10-01 14:15:07');
 
 /*!40000 ALTER TABLE `c_titles` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+# Dump of table r_attachments
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `r_attachments`;
+
+CREATE TABLE `r_attachments` (
+  `a_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `content_id` mediumint(9) unsigned NOT NULL,
+  `media_id` mediumint(9) unsigned NOT NULL,
+  PRIMARY KEY  (`a_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='relate file attachments to content';
+
 
 
 # Dump of table r_fields
@@ -8076,7 +8099,7 @@ CREATE TABLE `r_fields` (
   `required` tinyint(1) NOT NULL default '0',
   `order` smallint(5) NOT NULL default '0',
   PRIMARY KEY  (`rf_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=25 DEFAULT CHARSET=utf8 COMMENT='relate fields to content, user, media, or site for metadata';
+) ENGINE=MyISAM AUTO_INCREMENT=33 DEFAULT CHARSET=utf8 COMMENT='relate fields to content, user, media, or site for metadata';
 
 LOCK TABLES `r_fields` WRITE;
 /*!40000 ALTER TABLE `r_fields` DISABLE KEYS */;
@@ -8084,18 +8107,26 @@ INSERT INTO `r_fields` (`rf_id`,`scope`,`rf_rel_id`,`rf_rel_ref_name`,`field_id`
 VALUES
 	(1,'types',2,'blog_entry',2,'body',1,1),
 	(22,'types',4,'gallery',8,'description',1,2),
+	(27,'types',8,'image',5,'copyright',0,0),
 	(4,'types',2,'blog_entry',2,'body',1,0),
 	(6,'types',2,'blog_entry',11,'excerpt',0,2),
 	(7,'types',3,'blog',8,'description',1,2),
 	(8,'site',1,'',5,'copyright',0,3),
 	(9,'site',1,'',8,'description',1,1),
+	(26,'types',9,'text',8,'description',0,0),
 	(11,'users',1,'',1,'biography',0,1),
 	(12,'users',1,'',15,'location',0,2),
 	(13,'users',1,'',14,'website_url',0,3),
 	(17,'types',1,'static_page',2,'body',1,1),
 	(18,'types',1,'static_page',8,'description',0,2),
+	(25,'types',5,'application',8,'description',0,1),
 	(23,'types',4,'gallery',9,'directory',1,1),
-	(24,'types',4,'gallery',13,'image_poster',0,3);
+	(24,'types',4,'gallery',13,'image_poster',0,3),
+	(28,'types',8,'image',7,'creator',0,0),
+	(29,'types',8,'image',8,'description',1,0),
+	(30,'types',8,'image',15,'location',0,0),
+	(31,'types',8,'image',16,'province_state',0,0),
+	(32,'types',6,'video',8,'description',0,0);
 
 /*!40000 ALTER TABLE `r_fields` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8177,7 +8208,7 @@ CREATE TABLE `s_labels` (
   `label` text NOT NULL,
   `lang_ISO_639_3` char(3) NOT NULL default 'eng',
   PRIMARY KEY  (`label_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
+) ENGINE=MyISAM AUTO_INCREMENT=32 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
 
 LOCK TABLES `s_labels` WRITE;
 /*!40000 ALTER TABLE `s_labels` DISABLE KEYS */;
@@ -8204,13 +8235,15 @@ VALUES
 	(20,'types',2,'blog_entry','Blog Entry','eng'),
 	(21,'types',3,'blog','Blog','eng'),
 	(22,'types',4,'gallery','Gallery','eng'),
-	(23,'types',5,'application','Application','eng'),
-	(24,'types',6,'video','Video','eng'),
-	(25,'types',7,'audio','Audio','eng'),
-	(26,'types',8,'image','Image','eng'),
-	(27,'types',9,'text','Text','eng'),
-	(28,'types',10,'video','Video','eng'),
-	(29,'field',1,'biography','biographie','fra');
+	(23,'field',1,'biography','biographie','fra'),
+	(24,'types',5,'application','application (other file types)','eng'),
+	(25,'types',5,'application','application (autres types de fichiers)','fra'),
+	(26,'types',6,'video','vidéo','fra'),
+	(27,'types',9,'text','texte','fra'),
+	(28,'types',6,'video','video','eng'),
+	(29,'types',9,'text','text','eng'),
+	(30,'types',8,'image','image','eng'),
+	(31,'types',1,'static_page','Contenu statique','fra');
 
 /*!40000 ALTER TABLE `s_labels` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8261,7 +8294,7 @@ CREATE TABLE `s_types` (
   `scope` text NOT NULL,
   `type_uri_name` text NOT NULL,
   PRIMARY KEY  (`type_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `s_types` WRITE;
 /*!40000 ALTER TABLE `s_types` DISABLE KEYS */;
@@ -8275,8 +8308,7 @@ VALUES
 	(6,'media','video'),
 	(7,'media','audio'),
 	(8,'media','image'),
-	(9,'media','text'),
-	(10,'media','video');
+	(9,'media','text');
 
 /*!40000 ALTER TABLE `s_types` ENABLE KEYS */;
 UNLOCK TABLES;
