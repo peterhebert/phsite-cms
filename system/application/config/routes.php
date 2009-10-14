@@ -55,7 +55,7 @@ $route['gallery(.*)'] = "gallery/index$1";
 $route['sitemap'] = "home/sitemap";
 */
 $route['search(.*)'] = "search$1";
-$route['(:any)'] = "parser/index/$1";
+//$route['(:any)'] = "parser/index/$1";
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */

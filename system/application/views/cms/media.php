@@ -1,22 +1,43 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Media | phSite</title>
+<title>Media browser</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/jqueryFileTree/jqueryFileTree.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+
+$(document).ready( function() {
+    $('#file_browser').fileTree({
+      root: '/media/originals',
+      script: 'cms/media/build_filetree',
+    }, function(file) {
+        alert(file);
+    });
+});
+
+// ]]>
+</script>
+<link href="/assets/js/jqueryFileTree/jqueryFileTree.css" rel="stylesheet" type="text/css" />
+<style type="text/css">
+/* <![CDATA[ */
+#file_browser {
+	border: 1px solid #666666;
+	padding: 0.125em;
+	float: left;
+	width: 20em;
+}
+/* ]]> */
+</style>
+
 </head>
 <body>
-<?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Media</div>
 	<div class="page-wrap block">
-		<h1>Media</h1>
-		<p><?php echo anchor("cms/media/upload","upload media"); ?></p>
-		<h2>Manage Media</h2>
-		<?php echo ul($dirs); ?>
+		<h1>Media browser</h1>
+		<div id="file_browser"></div>
 	</div>
-	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
 </body>
 </html>

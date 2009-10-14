@@ -20,9 +20,9 @@ echo "<meta name=\"Description\" content=\"{$content_description}\" />\r";
 echo "<meta name=\"dc.description\" content=\"{$content_description}\" />\r";
 }
 
-if(isset($content_keywords))
+if(isset($keywords))
 {
-echo "<meta name=\"Keywords\" content=\"{$content_keywords}\" />\r";
+echo "<meta name=\"Keywords\" content=\"{$keywords}\" />\r";
 }
 else
 {

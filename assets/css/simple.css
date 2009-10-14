@@ -263,3 +263,99 @@ text-align:left;
 {
 font-size:0.9em;
 }
+
+/* table with borders */
+#page table.borders 
+{
+margin-bottom:1em;
+}
+
+#page table.borders td,
+#page table.borders thead th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+	text-align: center;
+}
+#page table.borders thead th
+{
+	font-weight: bold;
+	vertical-align:bottom;
+}
+#page table.borders tbody tr.last td,
+#page table.borders tbody tr.last th
+{
+	border-bottom:0px none;
+}
+#page table.borders tbody th
+{
+	padding: 1ex;
+	border-bottom:1px dotted #999999;
+	vertical-align: top;
+	text-align: left;
+}
+#page table.borders td input,
+#page table.borders td select
+{
+margin:0;
+padding:0;
+text-align:left;
+}
+
+#page table.borders td select
+{
+font-size:0.9em;
+}
+/* filetree icon lists */
+div.filetree {
+	float:left;
+	margin-left: 10em;
+	border:1px solid #cccccc;
+	padding: 0.125em;
+	width: 22em;
+	margin-top: -1em;
+	display:none;
+}
+
+div.filetree ul {
+	padding: 0px;
+	margin: 0px;
+}
+div.filetree ul li {
+	list-style: none;
+	padding: 0px;
+	padding-left: 1.5em;
+	margin: 0px;
+	background: url(/assets/js/jqueryFileTree/images/file.png) left top no-repeat;
+}
+div.filetree li.directory,
+div.filetree li.collapsed
+{
+	background: url(/assets/js/jqueryFileTree/images/directory.png) left top no-repeat;
+}
+div.filetree li.expanded
+{
+	background: url(/assets/js/jqueryFileTree/images/folder_open.png) left top no-repeat;
+}
+div.filetree li.collapsed ul {
+	display: none;
+}
+div.filetree li.expanded ul {
+	display: block;
+}
+
+/* File Extensions */
+div.filetree ul li.icon_image { background: url(/assets/icons/fugue/image.png) left top no-repeat; }
+div.filetree ul li.icon_audio { background: url(/assets/icons/fugue/music.png) left top no-repeat; }
+div.filetree ul li.icon_video { background: url(/assets/icons/fugue/film.png) left top no-repeat; }
+div.filetree ul li.icon_text { background: url(/assets/icons/fugue/document-text.png) left top no-repeat; }
+
+div.filetree ul li.ext_xls,
+div.filetree ul li.ext_ods { background: url(/assets/icons/tango/mimetypes/x-office-spreadsheet.png) left top no-repeat; }
+
+div.filetree ul li.ext_odt { background: url(/assets/icons/tango/mimetypes/x-office-document.png) left top no-repeat; }
+div.filetree ul li.ext_doc { background: url(images/doc.png) left top no-repeat; }
+
+div.filetree ul li.ext_odp,
+div.filetree ul li.ext_ppt { background: url(/assets/icons/tango/mimetypes/x-office-presentation.png) left top no-repeat; }

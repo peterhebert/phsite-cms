@@ -168,8 +168,15 @@ $lang['cms_labels']['edit_content_types'] = "Edit Content Types";
 $lang['cms_labels']['edit_media_types'] = "Edit Media Types";
 $lang['cms_labels']['edit_fields'] = "Edit Fields";
 
-//$lang['cms_labels'][''] = "";
-//$lang['cms_labels'][''] = "";
+$lang['cms_labels']['file_open_failure'] = "Unable to open '%s'";
+$lang['cms_labels']['media_subdirs'] = "Sub-directories";
+
+$lang['cms_labels']['media_edit'] = "Edit Media";
+$lang['cms_labels']['mime'] = "MIME type";
+$lang['cms_labels']['file'] = "File";
+$lang['cms_labels']['file_external'] = "External link?";
+$lang['cms_labels']['metadata'] = "metadata";
+
 
 /* End of file phsite_lang.php */
 /* Location: ./system/application/language/english/phsite_lang.php */

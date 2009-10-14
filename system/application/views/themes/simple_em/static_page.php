@@ -37,10 +37,10 @@ if(isset($breadcrumb_links))
 			{
 				echo $content_body;
 			}
-			if(isset($content_keyword_links))
+			/*if(isset($content_keyword_links))
 			{
 				echo "<p>Keywords: {$content_keyword_links}</p>\r";
-			}
+			}*/
 			?>
 		</div>
 		<div class="float w2">

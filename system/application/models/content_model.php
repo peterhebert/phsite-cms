@@ -4,9 +4,10 @@ class Content_model extends MY_Model {
 	// 'c_content' variables
 	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish;
 
-	// misc utility variables
-	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array();
+	// list variables
+	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array(), $attachments = array();
 
+	// misc utility variables
 	var $link_mode; // display links for site (0) or cms (1)
 	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
 	var $limit; // limit number for query
@@ -433,17 +434,10 @@ class Content_model extends MY_Model {
 			$this->db->where('lang_ISO_639_3',$this->temp_lang);
 		}		
 
-		if($this->date_filter != '')
-		{
-			$this->db->like('date_created',$this->date_filter, 'after'); 
-		}		
-/*		$this->db->order_by("date_created", "desc");
-*/
 		$this->db->where('scope','content');
 		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
 
 		$query = $this->db->get('c_content');
-//echo '<p>'.$this->db->last_query()."</p>\r";
 
 		if ($query->num_rows() > 0) {
 			return $query->result_array();
@@ -816,6 +810,21 @@ class Content_model extends MY_Model {
 		$this->lang_mode = $query->num_rows();
 	}
 
+	// attachments
+	function list_attachments()
+    {
+		$this->db->where('scope', $this->scope);
+		$this->db->where('content_id', $this->content_id);
+		$query = $this->db->get('r_attachments');
+
+		if ($query->num_rows() > 0)
+		{
+			$this->attachments = $query->result_array();
+			return TRUE;
+		}
+		return FALSE;
+	}
+	
 }
 
 ?>

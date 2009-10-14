@@ -272,15 +272,28 @@ if ( ! function_exists('media_player'))
 		$params_outer = array();
 		$other_outer = '';
 		$fallback_text = '';
-		$tag_outer = 'object';
+		$external_controller = '';
 
 		$inner = true;
-		$tag_inner = 'object';
 		$params_inner = array();
 		$other_inner = '';
 		
 		$pinfo = pathinfo($src);
 		$ext = $pinfo['extension'];
+		$is_IE = false;
+
+		$agent = $_SERVER['HTTP_USER_AGENT'];
+		// Platforms and browsers
+		if (strpos($agent, 'Macintosh')) {
+			$platform = 'Macintosh';
+		} elseif (strpos($agent, 'Windows')) {
+			$platform = 'Windows';
+		} elseif (strpos($agent, 'Linux')) {
+			$platform = 'Linux';
+		}
+		if (strpos($agent, 'MSIE')) {
+			$is_IE = true;
+		}
 
 		switch ($ext)
 		{
@@ -291,11 +304,15 @@ if ( ! function_exists('media_player'))
 			$type = 'application/x-shockwave-flash';
 			$player = '/assets/osflv_player_v3.swf';
 			$other_outer = " type=\"{$type}\" data=\"{$player}\"";
-			$params_outer[] = array('name' => 'movie', 'value' => $player);
-			
+
+			$params_outer = array(
+			'movie' => $player,
+			'allowFullScreen' => 'true',
+			);
+
 			if(array_key_exists('allowFullScreen',$misc_vars))
 			{
-				$params_outer[] = array('name' => 'allowFullScreen', 'value' => $misc_vars['allowFullScreen']);
+				$params_outer['allowFullScreen'] = $misc_vars['allowFullScreen'];
 			}
 
 			$flash_vars[] = 'movie='.$src;
@@ -305,10 +322,8 @@ if ( ! function_exists('media_player'))
 					$flash_vars[] = $param.'='.$value;
 				}
 			}
-			$FlashVars = implode('&',$flash_vars);
-			$params_outer[] = array('name' => 'FlashVars', 'value' => $FlashVars);
+			$params_outer['FlashVars'] = implode('&',$flash_vars);
 
-			$params_outer[] = array('name' => '', 'value' => '');
 
 			$inner = false;
 			break;
@@ -316,14 +331,20 @@ if ( ! function_exists('media_player'))
 		// Ogg video
 		case 'ogv':
 		case 'ogm':
-			$tag_outer = 'video';
-			$tag_inner = 'applet';
 			$type = 'video/ogg';
+			$inner = false;
 
 			$fallback_text = "\t<p>You need a browser that supports <a href=\"http://en.wikipedia.org/wiki/Theora#Browser_plugins\">Ogg Theora video</a> or a valid <a href=\"http://java.com/en/download/manual.jsp\">Java runtime</a> in order to play this content.</p>\r";
 			
 			$other_outer .= " src=\"{$src}\"";
-			$other_inner .= " code=\"com.fluendo.player.Cortado.class\" archive=\"http://theora.org/cortado.jar\"";
+			$other_inner .= " type=\"application/x-java-applet\"";
+
+			$params_inner = array(
+			'archive' => '/assets/cortado-ovt-stripped-0.2.2.jar',
+			'code' => 'com.fluendo.player.Cortado.class',
+			'url' => $src,
+			'keepAspect' => 'true'
+			);
 
 			if($controls)
 			{
@@ -342,386 +363,273 @@ if ( ! function_exists('media_player'))
 				$other_outer .= " poster=\"{$misc_vars['poster']}\"";
 			}
 
-			$params_inner[] = array('name' => 'url', 'value' => $src);
+			break;
+		// QuickTime / MP4
+		case 'mov':
+		case 'qt':
+		case 'm4u':
+		case 'm4v':
+		case 'mp4':
+		case 'mpeg4':
+
+			switch ($ext)
+			{
+			case 'm4u':
+				$type = 'video/x-mpegurl';
+				break;
+			case 'm4v':
+				$type = 'video/mp4';
+				break;
+			case 'mp4':
+			case 'mpeg4':
+				$type = 'video/mpeg';
+				break;
+			default:
+				$type = 'video/quicktime';
+			}
+
+			$other_outer = " classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" codebase=\"http://www.apple.com/qtactivex/qtplugin.cab\"";
+			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
+
+			$params_outer = array(
+			'src' => $src,
+			'type' => $type,
+			'controller' => 'false',
+			'autoplay' => 'false',
+			'loop' => 'false',
+			);
+			$params_inner = array(
+			'controller' => 'false',
+			'autoplay' => 'false',
+			'loop' => 'false',
+			);
+
+			if($controls)
+			{
+				$params_outer['controller'] = 'true';
+				$params_inner['controller'] = 'true';
+			}
+			if($autoplay)
+			{
+				$params_outer['autoplay'] = 'true';
+				$params_inner['autoplay'] = 'true';
+			}
+			if($loop)
+			{
+				$params_outer['loop'] = 'true';
+				$params_inner['loop'] = 'true';
+			}
+			$height = $height + 16;
+
+			break;
+		// Windows Media Player
+		case 'asf':
+		case 'asx':
+		case 'wmv':
+		case 'wmx':
+		case 'wvx':
+			if($ext == 'wmv')
+			{
+				$type = 'video/x-ms-wmv';
+			}
+			else
+			{
+				$type = 'video/x-ms-asf';
+			}
+			$other_outer = " classid=\"CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6\"";
+			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
+			//$height = $height + 64;
+			switch ($platform)
+			{
+			case 'Windows':
+				$fallback_text = "\t\t<p>You need <a href=\"http://www.microsoft.com/windows/windowsmedia/player/download/download.aspx\" rel=\"external\">Windows Media Player</a> in order to play this content.</p>\n";
+				break;
+			case 'Macintosh':
+				$fallback_text = "\t\t<p>You need the <a href=\"http://www.telestream.net/flip4mac-wmv/overview.htm\" rel=\"external\">Flip4Mac WMV QuickTime component</a> in order to play this content.</p>\n";
+				break;
+			case 'Linux':
+				$fallback_text = "\t\t<p>You need <a href=\"http://ffmpeg.org\" rel=\"external\">FFmpeg</a> or <a href=\"http://www.mplayerhq.hu/design7/dload.html\" rel=\"external\">Mplayer + Mencoder</a> in order to play this content.</p>\n";
+				break;
+			}
+
+			$params_outer = array(
+			'url' => $src,
+			'src' => $src,
+			'showcontrols' => 'false',
+			'autostart' => 'false',
+			);
+			$params_inner = array(
+			'src' => $src,
+			'controller' => 'false',
+			'autoplay' => 'false',
+			'loop' => 'false',
+			);
+
+			if($controls)
+			{
+				$params_outer['showcontrols'] = 'true';
+				$params_inner['controller'] = 'true';
+			}
+			if($autoplay)
+			{
+				$params_outer['autostart'] = 'true';
+				$params_inner['autostart'] = 'true';
+			}
+			if($loop)
+			{
+				$params_outer['loop'] = 'true';
+				$params_inner['loop'] = 'true';
+			}
+
+			break;
+		// Real Player
+		case 'rv':
+		case 'ra':
+		case 'rm':
+		case 'ram':
+			$type = 'application/vnd.rn-realmedia';
+			$other_outer = " classid=\"clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA\"";
+			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
+
+			$params_outer = array(
+			'src' => $src,
+			'type' => $type,
+			'controls' => 'All',
+			'autostart' => 'false',
+			'loop' => 'false',
+			'console' => 'video',
+			);
+			$params_inner = array(
+			'src' => $src,
+			'controls' => 'All',
+			'autostart' => 'false',
+			'loop' => 'false',
+			'console' => 'video',
+			);
+			if($loop)
+			{
+				$params_outer['loop'] = 'true';
+				$params_inner['loop'] = 'true';
+			}
+
+			if($controls)
+			{
+				$external_controller .= "<object classid=\"clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA\" width=\"{$width}\" height=\"30\">\r";
+				$external_controller .= "\t<param name=\"src\" value=\"{$src}\" />\r";
+				$external_controller .= "\t<param name=\"controls\" value=\"ControlPanel\" />\r";
+				$external_controller .= "\t<param name=\"console\" value=\"video\" />\r";
+				if($autoplay)
+				{
+					$external_controller .= "\t<param name=\"autostart\" value=\"true\" />\r";
+				}
+				else
+				{
+					$external_controller .= "\t<param name=\"autostart\" value=\"false\" />\r";
+				}
+				$external_controller .= "</object>\r";
+			}
+
+			$fallback_text = "\t\t<p>You need <a href=\"http://www.real.com\" rel=\"external\">RealPlayer</a> in order to play this content.</p>\n";
 
 			break;
 		}
 
 		// now begin generating player code
-		$code = "<!-- begin media player embed -->\n";
-		$code .= "<{$tag_outer} width=\"{$width}\" height=\"{$height}\"{$other_outer}>\r";
 
-		foreach($params_outer as $param)
+		$code = "<!-- begin media player embed -->\n";
+		$code .= "<object width=\"{$width}\" height=\"{$height}\"{$other_outer}>\r";
+
+		foreach($params_outer as $name => $value)
 		{
-			$code .= "\t<param name=\"".$param['name']."\" value=\"".$param['value']."\" />\r";
+			$code .= "\t<param name=\"{$name}\" value=\"{$value}\" />\r";
 		}
 
 		if($inner)
 		{
-			$code .= "\t<!--[if !IE]>-->\r";
-			$code .= "\t<{$tag_inner} width=\"{$width}\" height=\"{$height}\"{$other_inner}>\r";
+			$code .= "\t<!--[if gte IE 7]>-->\r";
+			$code .= "\t<object width=\"{$width}\" height=\"{$height}\"{$other_inner}>\r";
 
-			foreach($params_inner as $param)
+			foreach($params_inner as $name => $value)
 			{
-				$code .= "\t\t<param name=\"{$param['name']}\" value=\"{$param['value']}\" />\r";
+				$code .= "\t\t<param name=\"{$name}\" value=\"{$value}\" />\r";
 			}
 
 			$code .= "\t".$fallback_text;
-			$code .= "\t</{$tag_inner}>\r";
+			$code .= "\t</object>\r";
 			$code .= "\t<!--<![endif]-->\r";
 		}
 		else
 		{
 			$code .= $fallback_text;
 		}
-
-		$code .= "</{$tag_outer}>\r";
-		$code .= "<!-- end media player embed -->\n";
-		
-
-		return $code;
-	}
-}
-
-/*if ( ! function_exists('media_player'))
-{
-		
-			// Real video
-			case 'rv':
-			case 'rm':
-			case 'ram':
-				$fallback_text = "\t<p>You need <a href=\"http://www.real.com/\" rel=\"external\">RealPlayer</a> in order to play this content</p>\r";
-				if($ext == 'rv')
-				{
-					$type = 'video/vnd.rn-realvideo';
-				}
-				else
-				{
-					$type = 'audio/vnd.rn-realaudio';
-				}
-				$other_outer = "classid=\"clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA\"";
-
-				$params_inner[] = array('name' => 'src', 'value' => $src);
-				$params_inner[] = array('name' => 'controls', 'value' => 'imagewindow');
-				$params_inner[] = array('name' => 'console', 'value' => 'video');
-				if($autoplay)
-				{
-					$params_inner[] = array('name' => 'autostart', 'value' => 'true');
-				}
-				else
-				{
-					$params_inner[] = array('name' => 'autostart', 'value' => 'false');
-				}
-				if($loop)
-				{
-					$params_inner[] = array('name' => 'loop', 'value' => 'true');
-				}
-				else
-				{
-					$params_inner[] = array('name' => 'loop', 'value' => 'false');
-				}
-				break;
-			// QuickTime / MP4
-			case 'mov':
-			case 'qt':
-			case 'm4u':
-			case 'm4v':
-			case 'mp4':
-			case 'mpeg4':
-				$other_outer = "classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" codebase=\"http://www.apple.com/qtactivex/qtplugin.cab\"";
-				break;
-			// Windows Media Player
-			case 'asf':
-			case 'asx':
-			case 'wmv':
-			case 'wmx':
-			case 'wvx':
-				if($ext == 'wmv')
-				{
-					$type = 'video/x-ms-wmv';
-				}
-				else
-				{
-					$type = 'video/x-ms-asf';
-				}
-				$other_outer = "classid=\"CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6\"";
-
-				break;
-		}
-
-		$code = "<!-- begin media player embed -->\n";
-		$code .= "<{$tag_outer} width=\"{$width}\" height=\"{$height}\" {$other_outer}>\r";
-
-		if(count($params_outer) > 0)
-		{
-			$foreach($params_outer as $param)
-			{
-				$code .= "\t<param name=\"".$param['name']."\" value=\"".$param['value']."\" />\r";
-			}
-		}
-
-		if($inner)
-		{
-			$code .= "\t<!--[if !IE]>-->\r";
-			$code .= "\t<{$tag_inner} type=\"{$type}\" width=\"{$width}\" height=\"{$height}\" {$other_inner}>\r";
-			if(count($params_inner) > 0)
-			{
-				$foreach($params_inner as $param)
-				{
-					$code .= "\t<param name=\"{$param['name']}\" value=\"{$param['value']}\" />\r";
-				}
-			}
-			$code .= $fallback_text;
-			$code .= "\t</{$tag_inner}>\r";
-			$code .= "\t<!--<![endif]-->\r";
-		}
-		else
-		{
-			$code .= $fallback_text;
-		}
-
-		$code .= "</{$tag_outer}>\r";
-		$code .= "<!-- end media player embed -->\n";
-
-
-		return $code;
-	}
-
-}
-
-*/
-
-if ( ! function_exists('flv_player'))
-{
-
-	function flv_player($file, $width = 640, $height = 360, $fullscreen = true, $flvars=array()) {
-
-		$player = '/assets/osflv_player_v225/player.swf';
-		$flash_vars[] = 'movie='.$file;
-		
-		foreach ($flvars as $param => $value) {
-			$flash_vars[] = $param.'='.$value;
-		}
-		$FlashVars = implode('&',$flash_vars);
-		
-		$code = "<!-- begin OS FLV player -->\n";
-		$code .= "<object type=\"application/x-shockwave-flash\" data=\"{$player}\" width=\"{$width}\" height=\"{$height}\">\n";
-		$code .= "<param name=\"movie\" value=\"{$player}\" />\n";
-		$code .= "<param name=\"allowFullScreen\" value=\"{$fullscreen}\">\n";
-		$code .= "<param name=\"FlashVars\" value=\"{$FlashVars}\" />\n";
-		$code .= "</object>\n";
-		$code .= "<!-- end OS FLV player -->\n";
-
-		return $code;
-	}
-
-}
-
-if ( ! function_exists('embed_ogg_video'))
-{
-	function embed_ogg_video($src,$width,$height,$boolVars=array('controls'),$poster='')
-	{
-		$code = "<!-- begin HTML5 ogg video tag with Cortado fallback -->\n";
-		$code .= "<video src=\"{$src}\" width=\"{$width}\" height=\"{$height}\"";
-
-		if(count($boolVars)>0)
-		{
-			foreach ($boolVars as $val) {
-				$code .= " {$val}";
-			}
-		}
-		if($poster != '')
-		{
-			$code .= " poster=\"{$poster}\"";
-		}
-
-		$code .= ">\n";
-		$code .= "<applet code=\"com.fluendo.player.Cortado.class\" archive=\"http://theora.org/cortado.jar\" width=\"{$width}\" height=\"{$height}\">\n";
-		$code .= "<param name=\"url\" value=\"{$src}\"/>\n";
-		$code .= "</applet>\n";
-		$code .= "</video>\n";
-		$code .= "<!-- end Ogg video player -->\n";
-
-		return $code;
-	}
-}
-
-if ( ! function_exists('embed_quicktime'))
-{
-	function embed_quicktime($src,$width,$height,$controller=true,$autoplay=false,$loop=false)
-	{
-		if($controller)
-		{
-			$height = $height + 16;
-		}
-
-		$code = "<!-- begin QuickTime video embed -->\n";
-		$code .= "<object classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" width=\"{$width}\" height=\"{$height}\" codebase=\"http://www.apple.com/qtactivex/qtplugin.cab\">\r";
-		$code .= "\t<param name=\"src\" value=\"{$src}\" />\r";
-		$code .= "\t<param name=\"type\" value=\"video/quicktime\" />\r";
-		if($autoplay)
-		{
-			$code .= "\t<param name=\"autoplay\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"autoplay\" value=\"false\" />\r";
-		}
-		if($controller)
-		{
-			$code .= "\t<param name=\"controller\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"controller\" value=\"false\" />\r";
-		}
-		if($loop)
-		{
-			$code .= "\t<param name=\"loop\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"loop\" value=\"false\" />\r";
-		}
-
-		$code .= "\t<!--[if !IE]>-->\r";
-
-		$code .= "\t<object data=\"{$src}\" type=\"video/quicktime\" width=\"{$width}\" height=\"{$height}\">\r";
-		if($autoplay)
-		{
-			$code .= "\t\t<param name=\"autoplay\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t\t<param name=\"autoplay\" value=\"false\" />\r";
-		}
-		if($controller)
-		{
-			$code .= "\t\t<param name=\"controller\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t\t<param name=\"controller\" value=\"false\" />\r";
-		}
-		$code .= "\t</object>\r";
-		$code .= "\t<!--<![endif]-->\r";
 
 		$code .= "</object>\r";
-		$code .= "<!-- end QuickTime video embed -->\n";
+		$code .= $external_controller;
+		$code .= "<!-- end media player embed -->\n";
+		
+
 		return $code;
 	}
-
 }
 
-if ( ! function_exists('embed_wmv'))
+if ( ! function_exists('video_for_everybody'))
 {
-	function embed_wmv($src,$width,$height,$controller=true,$autoplay=false)
-	{
-		if($controller)
-		{
-			$height = $height + 64;
-		}
-
-		$code = "<!-- begin Windows Media video embed -->\n";
-		$code .= "<object classid=\"CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6\" id=\"player\" width=\"{$width}\" height=\"{$height}\">\n";
-		$code .= "\t<param name=\"url\" value=\"{$src}\" />\n";
-		$code .= "\t<param name=\"src\" value=\"{$src}\" />\n";
-
-		if($autoplay)
-		{
-			$code .= "\t<param name=\"autostart\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"autostart\" value=\"false\" />\r";
-		}
-		if($controller)
-		{
-			$code .= "\t<param name=\"controller\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"controller\" value=\"false\" />\r";
-		}
-
-
-		$code .= "\t<!--[if !IE]>-->\n";
-		$code .= "\t<object type=\"video/x-ms-wmv\" data=\"{$src}\" width=\"{$width}\" height=\"{$height}\">\n";
-		$code .= "\t\t<param name=\"src\" value=\"{$src}\" />\n";
-
-		if($autoplay)
-		{
-			$code .= "\t<param name=\"autostart\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"autostart\" value=\"false\" />\r";
-		}
-		if($controller)
-		{
-			$code .= "\t<param name=\"controller\" value=\"true\" />\r";
-		}
-		else
-		{
-			$code .= "\t<param name=\"controller\" value=\"false\" />\r";
-		}
-
-		$agent = $_SERVER['HTTP_USER_AGENT'];
-		// Platforms and browsers
-		if (strpos($agent, 'Macintosh')) {
-			$platform = 'Macintosh';
-			$code .= "\t\t<p>You need the <a href=\"http://www.telestream.net/flip4mac-wmv/overview.htm\" rel=\"external\">Flip4Mac WMV QuickTime component</a> in order to play this content.</p>\n";
-		} elseif (strpos($agent, 'Windows')) {
-			$platform = 'Windows';
-			$code .= "\t\t<p>You need <a href=\"http://www.microsoft.com/windows/windowsmedia/player/download/download.aspx\" rel=\"external\">Windows Media Player</a> in order to play this content.</p>\n";
-		} elseif (strpos($agent, 'Linux')) {
-			$platform = 'Linux';
-			$code .= "\t\t<p>You need <a href=\"http://ffmpeg.org\" rel=\"external\">FFmpeg</a> or <a href=\"http://www.mplayerhq.hu/design7/dload.html\" rel=\"external\">Mplayer + Mencoder</a> in order to play this content.</p>\n";
-		}
-
-		$code .= "\t</object>\n";
-		$code .= "\t<!--<![endif]-->\n";
-		$code .= "</object>\n";
-		$code .= "<!-- end Windows Media video embed -->\n";
-		return $code;
-	}
-
-}
-
 /*
+based upon : http://camendesign.com/code/video_for_everybody
+note: $src parameter is without a file extension, and would require 
+all versions of the video to have the same basename.
+I have modified the poster so it does not need to be a JPEG but any image type (provide full url with extension)
+*/
+	function video_for_everybody($src,$width,$height,$flv_player='/assets/osflv_player_v3.swf',$poster=false) {
+		$ht_qt = $height + 15;
+		$ht_fl = $height + 20;
+		$code = "<!-- 'Video for Everybody' v0.2 by Kroc Camen <camendesign.com> cc-by -->\r";
+		if($poster)
+		{
+			$code .= "<video width=\"{$width}\" height=\"{$height}\" poster=\"{$poster}\" controls=\"controls\">\r";
+		}
+		else
+		{
+			$code .= "<video width=\"{$width}\" height=\"{$height}\" controls=\"controls\">\r";
+		}
+		$code .= "<source src=\"{$src}.ogv\" type=\"video/ogg\" />\r";
+		$code .= "<source src=\"{$src}.mp4\" type=\"video/mp4\" />\r";
+		$code .= "<!--[if gt IE 6]>\r";
+		$code .= "<object width=\"{$width}\" height=\"{$ht_qt}\" classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\"><!\r";
+		$code .= "[endif]-->\r";
+		$code .= "<!--[if !IE]><!-->\r";
+		$code .= "<object width=\"{$width}\" height=\"{$ht_qt}\" type=\"video/quicktime\" data=\"{$src}.mp4\">\r";
+		$code .= "<!--<![endif]-->\r";
+		$code .= "<param name=\"src\" value=\"{$src}.mp4\" />\r";
+		$code .= "<param name=\"autoplay\" value=\"false\" />\r";
+		$code .= "<param name=\"showlogo\" value=\"false\" />\r";
+		$code .= "<object width=\"{$width}\" height=\"{$ht_fl}\" type=\"application/x-shockwave-flash\" data=\"{$flv_player}.swf?image={$poster}&amp;file={$src}.mp4\">\r";
+		if($poster)
+		{
+			$code .= "<param name=\"movie\" value=\"{$flv_player}.swf?image={$poster}&amp;file={$src}.mp4\" />\r";
+			$code .= "<img src=\"{$poster}\" width=\"{$width}\" height=\"{$height}\" />\r";
+		}
+		else
+		{
+			$code .= "<param name=\"movie\" value=\"{$flv_player}.swf?file={$src}.mp4\" />\r";
+		}
+		$code .= "<p><strong>No video playback capabilities detected.</strong> Why not try to download the file instead?<br />\r";
+		$code .= "<a href=\"{$src}.mp4\">MPEG4 / H.264 &quot;.mp4&quot; (Windows / Mac)</a> | <a href=\"{$src}.ogv\">Ogg Theora &amp; Vorbis &quot;.ogv&quot; (Linux)</a></p>\r";
+		$code .= "<p>To play the video here in the webpage, please install one of the following:</p>\r";
+		$code .= "<ul>\r";
+		$code .= "<li>the latest  <a href=\"http://getfirefox.com\">Firefox</a> or <a href=\"http://apple.com/safari\">Safari</a> web browser</li>\r";
+		$code .= "<li><a href=\"http://get.adobe.com/flashplayer/\">Adobe Flash Player</a></li>\r";
+		$code .= "<li><a href=\"http://apple.com/quicktime/download/\">Apple QuickTime</a></li>\r";
+		$code .= "</ul>\r";
+		$code .= "</object><!--[if gt IE 6]><!-->\r";
+		$code .= "</object><!--<![endif]-->\r";
+		$code .= "</video>\r";
+		$code .= "<!-- end 'Video for Everybody' code -->\r";
 
+		return $code;
 
-
-
-if($_SERVER['HTTP_USER_AGENT'])
-{
+	}
 }
-
-  ereg(,$reg);
-
-
-// Simple browser detection
-$is_lynx = $is_gecko = $is_winIE = $is_macIE = $is_opera = $is_NS4 = $is_safari = $is_chrome = false;
-
-if (strpos($_SERVER['HTTP_USER_AGENT'], 'Lynx') !== false) {
-	$is_lynx = true;
-} elseif ( strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'chrome') !== false ) {
-	$is_chrome = true;
-} elseif ( strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'webkit') !== false ) {
-	$is_safari = true;
-} elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Gecko') !== false) {
-	$is_gecko = true;
-} elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false && strpos($_SERVER['HTTP_USER_AGENT'], 'Win') !== false) {
-	$is_winIE = true;
-} elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false && strpos($_SERVER['HTTP_USER_AGENT'], 'Mac') !== false) {
-	$is_macIE = true;
-} elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Opera') !== false) {
-	$is_opera = true;
-} elseif (strpos($_SERVER['HTTP_USER_AGENT'], 'Nav') !== false && strpos($_SERVER['HTTP_USER_AGENT'], 'Mozilla/4.') !== false) {
-	$is_NS4 = true;
-}
-
-$is_IE = ( $is_macIE || $is_winIE );*/
 
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

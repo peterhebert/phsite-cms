@@ -11,13 +11,13 @@ echo $html_header;
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb">
-		<?php
-		if (isset($breadcrumb)){
-			echo $breadcrumb;
-		}
-	 ?>
-	</div>
+<?php
+if(isset($breadcrumb_links))
+{
+	$breadcrumb = implode(' : ', $breadcrumb_links);
+	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
+}
+?>
 	<div class="page-wrap">
 		<div class="block five">
 			<div class="column w3">
@@ -54,12 +54,12 @@ if(isset($content_keyword_links))
 			</div>
 			<div class="float w2">
 				<?php
+				if(isset($menu_title))
+				{
+					echo "<h3>{$menu_title}</h3>\r";
+				}
 				if(isset($menu) && $menu != '')
 				{
-					if(isset($menu_title))
-					{
-						echo "<h3>{$menu_title}</h3>\r";
-					}
 					echo $menu;
 				}
 				?>

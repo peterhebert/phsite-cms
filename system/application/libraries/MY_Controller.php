@@ -76,6 +76,7 @@ class MY_Controller extends Controller {
 
 		$this->data['site_meta_title'] = $this->Site_model->title;
 		$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
+		$this->data['site_meta_keywords'] = $this->Site_model->keywords;
 
 		// format the date according to site timezone
 

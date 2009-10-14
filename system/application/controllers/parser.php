@@ -154,14 +154,11 @@ class Parser extends MY_Controller {
 
 				$this->Content_model->temp_value = $uri_segment;
 				$info = $this->Content_model->find_by_uri();
+				
 				if($info)
 				{
 					$this->Content_model->temp_id = $info[0]['content_id'];
 					$tree[$index] = $info[0];
-				}
-				else
-				{
-					$tree[$index] = NULL;
 				}
 
 			}
@@ -248,6 +245,7 @@ class Parser extends MY_Controller {
 		}
 
 		if($this->Content_model->keywords != '') {
+			$this->data['keywords'] = $this->Content_model->keywords;
 			$this->data['content_keyword_links'] = $this->Content_model->keyword_links();
 		}
 
@@ -286,38 +284,48 @@ class Parser extends MY_Controller {
 
 		// menu options by content type
 		$menu = '';
+		$menu_title = 'menu';
 		switch ($this->Content_model->type_uri_name)
 		{
 
 			case 'blog_entry':
 				$entries = $this->_blog_menu($this->Content_model->parent_id);
+
 				if(count($entries) > 0)
 				{
-					if($this->Content_model->parent_id > 0)
+					if($this->Content_model->parent_id > 0 && $this->parent_title != '')
 					{
-						$this->data['menu_title'] = sprintf($this->cms_labels['recently_posted_to'],$this->Content_model->parent_title);
+						$menu_title = sprintf($this->cms_labels['recently_posted_to'],$this->parent_title);
 					}
 					else
 					{
-						$this->data['menu_title'] = $this->cms_labels['recent_content'];
+						$menu_title = $this->cms_labels['recent_content'];
 					}
 
-					$menu = ul($entries);
+					$tmp_view = 'themes/'.$this->Site_model->theme.'/embed_menu';
+					$tmp_blog = array('entries' => $entries,'cms_labels' => $this->cms_labels);
+					
+					$menu = $this->load->view($tmp_view,$tmp_blog,true);
 				}
 				else
 				{
+					$menu_title = $this->Site_model->title;
+	
+					$this->Content_model->temp_id = 0;
+					$this->Content_model->current_level = 1;
+					$this->Content_model->levels = 1;
 					$menu = $this->Content_model->site_map();
 				}
-				print_r( $menu);
+
 				break;
 			default:
 				if($this->Content_model->parent_id == 0)
 				{
-					$this->data['menu_title'] = $this->Site_model->title;
+					$menu_title = $this->Site_model->title;
 				}
 				else
 				{
-					$this->data['menu_title'] = $this->parent_title;
+					$menu_title = $this->parent_title;
 				}
 
 				$this->Content_model->temp_id = $this->Content_model->parent_id;
@@ -325,6 +333,7 @@ class Parser extends MY_Controller {
 				$this->Content_model->levels = 2;
 				$menu = $this->Content_model->site_map();
 		}
+		$this->data['menu_title'] = $menu_title;
 		$this->data['menu'] = $menu;
 
 		
@@ -451,6 +460,7 @@ class Parser extends MY_Controller {
 	
 	function _blog_menu($parent=NULL)
 	{
+		$my_id = $this->Content_model->content_id;		
 		$this->Content_model->type_id = 2;
 		if(isset($parent))
 		{
@@ -462,33 +472,29 @@ class Parser extends MY_Controller {
 		}
 		
 		$recent = $this->Content_model->content_list;
+
 		$blog_menu = array();
-		
+
 		if(count($recent) > 0)
 		{
 			foreach($recent as $index => $post)
 			{
-				if($post['content_id'] != $this->Content_model->content_id)
+
+				if($post['content_id'] != $my_id)
 				{
-					$blog_data = array();
-					$blog_data['title'] = $post['title'];
+					$tmp_entry = $post;
 	
 					// get uri to full post
 					$this->Content_model->scope = 'content';
 					$this->Content_model->temp_id = $post['content_id'];
 					$this->Content_model->temp_lang = $post['lang_ISO_639_3'];
-					$permalink = $this->Content_model->generate_uri();
-					$pl_title = sprintf($this->cms_labels['permalink_title'],$post['title']);
+					$tmp_entry['permalink'] = $this->Content_model->generate_uri();
 					
-					$blog_menu[] = anchor($permalink, $post['title'], array('title' => $pl_title));
+					$blog_menu[] = $tmp_entry;
 				}
-				
-			
 			}
 		}
-
 		return $blog_menu;
-
 	}
 
 
