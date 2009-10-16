@@ -164,11 +164,11 @@ class Media_model extends MY_Model {
 		}
 		if(file_exists($this->file_current) && !is_dir($this->file_current)) {
 
-			$size = getimagesize($this->file_current, $info);
+			$size = @getimagesize($this->file_current, $info);
 
 			if(isset($info['APP13']))
 			{
-				$this->iptc = iptcparse($info['APP13']);
+				$this->iptc = @iptcparse($info['APP13']);
 			} else {
 				$this->iptc = FALSE;
 			}
@@ -185,7 +185,7 @@ class Media_model extends MY_Model {
 	function get_mime($filename) {
 		if(file_exists($filename) && !is_dir($filename))
 		{
-			$imagetype = exif_imagetype($filename);
+			$imagetype = @exif_imagetype($filename);
 
 			if ($imagetype)
 			{
@@ -257,6 +257,9 @@ class Media_model extends MY_Model {
 		{
 			$this->media_id = '';
 			$this->date_created = '';
+			$this->title_id = '';
+			$this->title = '';
+			$this->title_rel_id = '';
 
 			$this->file_uri = str_replace($this->dir_base,'',$file);
 			$file_type = $this->get_mime($file);
@@ -277,9 +280,43 @@ class Media_model extends MY_Model {
 				$this->external = 0;
 				$this->mime_type = $file_type;
 				$this->publish = 1;
+				
+			}
+
+			$this->get_file_metadata();
+
+			if($this->title == '') {
+				$this->title = basename($this->file_uri);
 			}
 
 			$this->update_media_single();
+
+			// find title if it exists, then update
+			$this->scope = 'media';
+			$this->temp_id = $this->media_id;
+			if(!$this->title_exists())
+			{
+				$this->title_rel_id = $this->media_id;
+				$this->update_title();
+			}
+
+			$this->scope = 'media';
+			$this->temp_id = $this->media_id;
+			if(is_array($this->metadata) && count($this->metadata) > 0)
+			{
+
+		
+				foreach($this->metadata as $index => $info)
+				{
+					$this->metadata[$index]['meta_rel_id'] = $this->media_id;
+				}
+
+//				echo "<pre>";
+//				print_r($this->metadata);
+//				echo "</pre>\r";
+
+				$this->update_metadata();
+			}
 
 		}
 	}
@@ -408,6 +445,27 @@ class Media_model extends MY_Model {
 		$this->file_count = $this->db->count_all('c_media');
 	}
 
+	function load_type_by_mime()
+	{
+		$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->mime_type);
+
+		$this->db->where('scope','media');
+		$this->db->where('type_uri_name',$mime_cat);
+		$query = $this->db->get('s_types');
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$this->type_id = $row->type_id;
+			$this->scope = $row->scope;
+			$this->type_uri_name = $row->type_uri_name;
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
 	function load_media()
 	{
 		$this->db->where('media_id',$this->temp_id);
@@ -428,119 +486,6 @@ class Media_model extends MY_Model {
 
 		return FALSE;
 	}
-
-/*
-
-	function get_file_metadata()
-	{
-		$this->read_file_info();
-
-		if(is_array($this->iptc)) {
-
-			if(array_key_exists('2#005', $this->iptc)) {
-				$this->title = $this->iptc['2#005'][0];
-			}
-			else if(array_key_exists('2#105', $this->iptc))
-			{
-				$this->title = $this->iptc['2#105'][0];
-			}
-			
-//			
-//			
-//			if(array_key_exists('2#080', $this->iptc)) {
-//				$this->creator = $this->iptc['2#080'][0];
-//			}
-//
-//			if(array_key_exists('2#120', $this->iptc)) {
-//				$this->description = $this->iptc['2#120'][0];
-//			}
-//			if(array_key_exists('2#025', $this->iptc)) {
-//				$this->keywords = implode(', ',$this->iptc['2#025']);
-//			}
-//			if(array_key_exists('2#090', $this->iptc)) {
-//				$this->city = $this->iptc['2#090'][0];
-//			}
-//			if(array_key_exists('2#095', $this->iptc)) {
-//				$this->prov_state = $this->iptc['2#095'][0];
-//			}
-//			if(array_key_exists('2#101', $this->iptc)) {
-//				$this->country = $this->iptc['2#101'][0];
-//			}
-//			if(array_key_exists('2#116', $this->iptc)) {
-//				$this->copyright = $this->iptc['2#116'][0];
-//			}
-//			
-//			
-		}
-		
-		if(is_array($this->exif)) {
-			if(array_key_exists('MimeType', $this->exif)) {
-				$this->mime_type = $this->exif['MimeType'];
-			}
-			if(array_key_exists('DateTimeOriginal', $this->exif)) {
-				$this->created = $this->exif['DateTimeOriginal'];
-			}
-		}
-
-		if($this->title == '') {
-			$this->title = basename($this->file_uri);
-		}
-		
-		if($this->date_created == '') {
-			$this->date_created = date('Y-m-d H:i:s');
-		}
-
-	}
-
-
-	function load_media()
-    {
-
-		$this->db->where('media_id', $this->temp_id);
-		$query = $this->db->get('c_media');
- 
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row();
-			
-			$this->media_id = $row->media_id;
-			$this->file_uri = $row->file_uri;
-			$this->external = $row->external;
-			$this->mime_type = $row->mime_type;
-			$this->date_created = $row->date_created;
-			$this->publish = $row->publish;
-			return TRUE;
-		} 
-		return FALSE;
-
-    }
-*/	
-/*
-
-
-
-
-    function load_content()
-    {
-		$this->load_content_object();
-		$this->temp_id = $this->content_id;
-		$this->load_title();
-		
-		if($this->temp_value != '')
-		{
-			$this->type_id = $this->temp_value;
-		}
-		
-		$this->temp_id = $this->type_id;
-		$this->scope = 'types';
-		
-		$this->list_fields_related();
-		$this->scope = 'content';
-		$this->temp_id = $this->content_id;
-		$this->load_metadata();
-
-	}
-*/	
 
 	// list files in directory
 	function list_recursive() {
@@ -593,6 +538,75 @@ class Media_model extends MY_Model {
 
 	}
 
+	function get_file_metadata()
+	{
+		// first load metadata fields by mime type
+		$this->load_type_by_mime();
+
+		$field_name_to_iptc = array(
+		'copyright' => '2#116',
+		'creator' => '2#080',
+		'description' => '2#120',
+		'location' => '2#092',
+		'city' => '2#090',
+		'province_state' => '2#095',
+		'country' => '2#101',
+		);
+
+		$this->scope = 'types';
+		$this->temp_id = $this->type_id;
+		$this->list_fields_related();
+		
+		$meta = array();
+		if($this->media_id != '')
+		{
+			$this->scope = 'media';
+			$this->temp_id = $this->media_id;
+			$this->load_metadata();
+			$meta = $this->metadata;
+		}
+		else
+		{
+			$meta = $this->file_list;
+		}
+		
+
+		foreach($meta as $index => $info)
+		{
+			
+			if(array_key_exists($info['field_ref_name'],$field_name_to_iptc))
+			{
+				$iptc_key = $field_name_to_iptc[$info['field_ref_name']];
+				if(array_key_exists($iptc_key, $this->iptc)) {
+					$meta[$index]['value'] = $this->iptc[$iptc_key][0];
+					if($this->media_id != '')
+					{
+						$meta[$index]['meta_rel_id'] = $this->media_id;
+					}
+				}
+			}
+
+		}
+
+		$this->metadata = $meta;
+		
+		// now get title and keywords
+		if(array_key_exists('2#005', $this->iptc)) {
+			$this->title = $this->iptc['2#005'][0];
+		}
+		else if(array_key_exists('2#105', $this->iptc))
+		{
+			$this->title = $this->iptc['2#105'][0];
+		}
+		
+		if(array_key_exists('2#025', $this->iptc)) {
+			$kw = $this->iptc['2#025'];
+			natcasesort($kw);
+			$kw_unique = array_unique($kw);
+			$this->keywords = implode(', ',$kw_unique);
+		}
+				
+	}
 
 }
 
