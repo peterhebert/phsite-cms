@@ -338,7 +338,7 @@ class Content extends MY_Controller
 		'value' => $this->Content_model->date_created,
 		);
 		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['date_created'], 'date_created');
+		$form .=  form_label($this->cms_labels['date_created_start'], 'date_created');
 		$form .=  form_input($form_options);
 		$form .= "</p>\n";
 

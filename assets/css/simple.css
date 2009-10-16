@@ -176,6 +176,14 @@ display: inline;
 margin: 0 1ex; width: auto;
 white-space:nowrap;
 }
+#page form fieldset div.row div.filename {
+float: left;
+width: 22em;
+font-weight: normal;
+margin-left:3em;
+white-space: normal;
+word-spacing:-.375em;
+}
 
 /*
 form input types 
@@ -311,13 +319,17 @@ font-size:0.9em;
 div.filetree {
 	float:left;
 	margin-left: 10em;
-	border:1px solid #cccccc;
-	padding: 0.125em;
-	width: 22em;
 	margin-top: -1em;
 	display:none;
+	position:relative;
 }
-
+div.filetree div {
+	position: absolute;
+	width: 22em;
+	border:1px solid #cccccc;
+	padding: 0.125em;
+	background-color:#FFFFFF;
+}
 div.filetree ul {
 	padding: 0px;
 	margin: 0px;

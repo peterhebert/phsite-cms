@@ -13,23 +13,15 @@ class Media extends MY_Controller {
 	
 	function index()
 	{	
-
-
 		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
 
 		$this->data['sidebar'] = ul($links);
 
-		$config['base_url'] = 'http://example.com/index.php/test/page/';
-		$config['per_page'] = $this->Site_model->limit_thumbs;
-		$this->Media_model->count_media();
-		$config['total_rows'] = $this->Media_model->file_count;
-
 		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
 		$this->Media_model->list_media();
 
-
-		$html .= "<table class=\"borders\">\r";
+		$html = "<table class=\"borders\">\r";
 		$html .= "\t<thead>\r";
 		$html .= "\t\t<tr>\r";
 		$html .= "\t\t<th scope=\"col\" id=\"m_file\">File</th>\r";
@@ -109,27 +101,6 @@ class Media extends MY_Controller {
 		
 		$html .= "\t</tbody>\r";
 		$html .= "</table>\r";
-
-/*
-
-[media_id] => 1
-[file_uri] => /peterhebert.com-redirects.ods
-[external] => 0
-[mime_type] => application/vnd.oasis.opendocument.spreadsheet
-[date_created] => 2009-10-07 11:05:09
-[publish] => 1
-[title_id] => 
-[title] => 
-[uri_title] => 
-[subtitle] => 
-[keywords] => 
-[attached_to] => Array
-(
-)
-
-
-*/
-
 
 		$this->data['form'] = $html;
 
@@ -298,17 +269,14 @@ class Media extends MY_Controller {
 		$title_tag[] = $this->cms_labels['media'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
-		$this->data['title_h1'] = $this->cms_labels['media'];
+		$this->data['title_h1'] = $this->cms_labels['media_edit'];
 
 		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"/assets/js/jquery_media_filetree.js\"></script>\r";
 
+		$this->data['sidebar'] = $this->_media_meta_menu();
+
 		$this->load->view('cms/cms_form', $this->data);
 	}
-	function popup_media()
-	{
-		$this->load->view('cms/media');
-	}
-
 
 	function _form_edit()
 	{
@@ -324,58 +292,87 @@ class Media extends MY_Controller {
 		{
 			$this->Media_model->temp_id = $this->Media_model->media_id;
 			$this->Media_model->load_media();
+			$this->Media_model->load_type_by_mime();
+			$this->Media_model->load_media();
+
+			$this->Media_model->load_title();
+			$this->Media_model->scope = 'types';
+			$this->Media_model->temp_id = $this->Media_model->type_id;
+			$this->Media_model->list_fields_related();
+
+			$this->Media_model->scope = 'media';
+			$this->Media_model->temp_id = $this->Media_model->media_id;
+			$this->Media_model->load_metadata();
+
 		}
 
 		$form = form_open($action, $attributes);
 		$form .= form_hidden('media_id',$this->Media_model->media_id);
 		$form .= form_hidden('title_id',$this->Media_model->title_id);
 		
-
 		$form .= form_fieldset($this->cms_labels['general_info']);
 
-		$form_options = array(
-		'id' => 'file_uri',
-		'name' => 'file_uri',
-		'class' => 'text',
-		'value' => $this->Media_model->file_uri
-		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['file'],'file_uri');
-		$form .= form_input($form_options);
-		$form .= "</p>";
+		if($this->Media_model->type_uri_name == 'image')
+		{
+			if($this->Media_model->external == 0)
+			{
+				$file_path_full = $this->Media_model->dir_base.$this->Media_model->file_uri;
+				$form .= "<p>";
+				$form .= view_image($file_path_full,$this->Site_model->img_size_md,$this->Media_model->title);
+				$form .= "</p>";
+			}
+			else
+			{
+				$em_size = $this->Site_model->img_size_md / 15;
+				$form_options = array(
+				'src' => $this->Media_model->file_uri,
+				'alt' => $this->Media_model->title,
+				'style' => "width: {$em_size}em",
+				'title' => $this->Media_model->title,
+				);
 
-		$files = $this->Media_model->list_recursive();
-		$form .= "<div class=\"filetree block\">";
-		$form .= $this->build_filetree($files);
+				$form .= "<p>";
+				$form .= img($form_options);
+				$form .= "</p>";
+			}
+		}
+
+		$form .= "<div class=\"row\">";
+		$form .= form_label($this->cms_labels['file']);
+		$form .= "<div class=\"filename\">";
+		$filename = str_replace('/','/ ',$this->Media_model->file_uri);
+		$filename = str_replace('/ / ','//',$filename);
+		$form .= $filename;
+		$form .= "</div>";
 		$form .= "</div>";
 
+		$pinfo = pathinfo($this->Media_model->file_uri);
+		$ext = $pinfo['extension'];
+		
+		$this->Media_model->lang_load();
+		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$mime_names = $this->lang->line('mime');
 
-//		$form .= "<p>";
-//		$form .=  form_label($this->cms_labels['mime']);
-//		$form .=  $this->Media_model->mime_type;
-//		$form .= "</p>\n";
+		$form .= "<p>";
+		$form .= form_label($this->cms_labels['mime']);
+		if(array_key_exists($ext,$mime_names))
+		{
+			$form .= $mime_names[$ext];
+		}
+		else
+		{
+			$form .= $this->Media_model->mime_type;
+		}
+		$form .= "</p>";
 
 		$form_options = array(1 => $this->cms_labels['yes'], 0 => $this->cms_labels['no']);
-/*
-			$this->media_id = $row->media_id;
-			$this->file_uri = $row->file_uri;
-			$this->external = $row->external;
-			$this->mime_type = $row->mime_type;
-			$this->date_created = $row->date_created;
-			$this->publish = $row->publish;
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['file_external'], 'external');
-		$form .=  form_dropdown('external', $form_options, $this->Media_model->external);
-		$form .= "</p>\n";
-
-*/
 
 		$form .= "<p>";
 		$form .=  form_label($this->cms_labels['publish'], 'publish');
 		$form .=  form_dropdown('publish', $form_options, $this->Media_model->publish);
 		$form .= "</p>\n";
 
-/*		// convert dates to user timezone
+		// convert dates to user timezone
 		$sys_zone = date_default_timezone_get();
 		$usr_zone = $this->session->userdata('timezone');
 		
@@ -404,7 +401,7 @@ class Media extends MY_Controller {
 		$form .=  form_input($form_options);
 		$form .= "</p>\n";
 
-*/		$form .= form_fieldset_close();
+		$form .= form_fieldset_close();
 		
 		$form .= form_fieldset($this->cms_labels['metadata']);
 
@@ -436,6 +433,86 @@ class Media extends MY_Controller {
 		$form .= form_input($form_options);
 		$form .= "</p>";
 
+/*$form .= "<pre>";
+$form .= print_r($this->Media_model->metadata,true);
+$form .= "</pre>\r";
+*/
+		// start meta fields
+		foreach($this->Media_model->metadata as $index => $fd)
+		{
+			// get field data if it does not exist
+			if(array_key_exists('field_id',$fd))
+			{
+				$tmp_ref_name = $fd['field_ref_name'];
+				$tmp_label = $fd['field_ref_name'];
+				$tmp_needs_lang = $fd['field_needs_lang'];
+				$tmp_meta_id = $fd['meta_id'];
+				$tmp_required = $fd['required'];
+				$tmp_input_type = $fd['field_input_type'];
+				$tmp_validation = $fd['field_validation'];
+			}
+			else
+			{
+				$this->Media_model->temp_id = $index;
+				$this->Media_model->load_field();
+
+				$tmp_ref_name = $this->Media_model->field_ref_name;
+				$tmp_needs_lang = $this->Media_model->field_needs_lang;
+				$tmp_input_type = $this->Media_model->field_input_type;
+				$tmp_validation = $this->Media_model->field_validation;
+				$tmp_label = $tmp_ref_name;
+				$tmp_meta_id = '';
+				$tmp_required = '';
+			}
+
+			// hidden fields
+			$form_options = array(
+			'field_id[]' =>  $index,
+			'field_ref_name[]' =>  $tmp_ref_name,
+			'meta_id[]' => $tmp_meta_id,
+			'required[]' =>  $tmp_required,
+			'field_validation[]' =>  $tmp_validation,
+			'field_needs_lang[]' => $tmp_needs_lang
+			);
+			$form .= form_hidden($form_options);
+
+			$this->Media_model->label_scope = 'field';
+			$this->Media_model->temp_id = $index;
+			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
+
+			if($this->Media_model->load_label())
+			{
+				$tmp_label = $this->Media_model->label;
+			}
+
+			$form .= "<p>\r";
+			$form .= form_label($tmp_label, $tmp_ref_name);
+
+			$form_options = array(
+			'id' => $tmp_ref_name,
+			'name' => 'value_'.$index,
+			'value' => $fd['value'],
+			'class' => $tmp_input_type
+			);
+
+			switch($tmp_input_type) {
+			case 'textarea':
+				$form_options['cols'] = 38;
+				$form .=  form_textarea($form_options);
+				break;
+			case 'richtext':
+				$form_options['cols'] = 38;
+				$form .=  form_textarea($form_options);
+				break;
+			default:
+				$form .=  form_input($form_options);
+			}
+
+
+			$form .= "</p>\r";
+		}
+		// end meta fields
+
 		$form_options = array(
 		'id' => 'keywords',
 		'name' => 'keywords',
@@ -458,8 +535,7 @@ class Media extends MY_Controller {
 
 	}
 
-
-	function build_filetree($files=array())
+/*	function build_filetree($files=array())
 	{
 		
 		$filetree = "<ul>\r";
@@ -500,6 +576,42 @@ class Media extends MY_Controller {
 		$filetree .= "</ul>\r";	
 		return $filetree;
 
+	}
+*/
+	function _media_meta_menu()
+    {
+		$menu = '';
+		
+		if($this->Media_model->media_id != '')
+		{
+		
+			// list active languages
+			$lang_links = array();
+			$this->Media_model->list_langs();
+			foreach($this->Media_model->lang_list as $llang)
+			{
+				$temp_link = 'cms/media/edit/id/'.$this->Media_model->media_id.'/lang/'.$llang['ISO_639_3'];
+				if($llang['Native_Name'] != '')
+				{
+					$temp_txt = $llang['Native_Name'];
+				}
+				else
+				{
+					$temp_txt = $llang['Ref_Name'];
+				}
+				$lang_links[] = anchor($temp_link,$temp_txt);
+			}
+			
+			$menu .=  "<ul>\r";
+			$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
+			$menu .= ul($lang_links);
+			$menu .=  "</li>\r";
+	
+			$menu .=  "</ul>\r";
+
+		}
+
+		return $menu;
 	}
 
 }

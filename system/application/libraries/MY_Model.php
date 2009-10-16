@@ -866,6 +866,23 @@ class MY_Model extends Model {
 
     }
 
+	function title_exists()
+    {
+
+		$this->db->where('scope', $this->scope);
+		$this->db->where('rel_id', $this->temp_id);
+		$this->db->where('lang_ISO_639_3', $this->temp_lang);
+		$query = $this->db->get('c_titles');
+
+		if ($query->num_rows() > 0)
+		{
+		   $row = $query->row();
+		   $this->title_id = $row->title_id;
+		   return true;
+		}
+	   return false;
+    }
+
     // update title
     function update_title()
     {
