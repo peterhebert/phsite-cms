@@ -15,7 +15,6 @@ class Site_model extends MY_Model {
         // Call the Model constructor
         parent::MY_Model();
 
-		//$this->config->load('phsite_prefs');
 		$this->site_id = $this->config->item('site_id');
 		$this->load_site();
     }
