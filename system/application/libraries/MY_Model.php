@@ -12,6 +12,14 @@ class MY_Model extends Model {
 	var $messages = array();
 	var $scope_list = array('content','media','types','users','site');
 	var $label_scope_list = array('field','types');
+	var $limit; // limit number for query
+	var $page; // page number number for query limit
+	
+	var $date_filter;
+	// add < or > for before or after at beginning of string
+	// date range YYYY, YYYY-MM or YYYY-MM-DD format
+	// one value means on that date, month or year
+	// two values means range
 
 	// field variables
 	var $field_list = array();
@@ -52,6 +60,7 @@ class MY_Model extends Model {
 		$basedir = preg_replace('/(.*)index\.php(.*)/','\1',$script);
 
 		$this->install_path = $docroot.$basedir;
+
 	}
 
 	function _output_messages()
@@ -841,9 +850,12 @@ class MY_Model extends Model {
 
 		$this->db->where('scope', $this->scope);
 		$this->db->where('rel_id', $this->temp_id);
-		$this->db->where('lang_ISO_639_3', $this->temp_lang);
+
 		if($this->title_id != '') {
 			$this->db->where('title_id', $this->title_id);
+		}
+		if($this->temp_lang != '' && preg_match('#^([a-z]{3})$#',$this->temp_lang)) {
+			$this->db->where('lang_ISO_639_3', $this->temp_lang);
 		}
 
 		$this->db->limit(1);
@@ -916,6 +928,95 @@ class MY_Model extends Model {
 		return FALSE;
 
     }
+	
+    // search for content/media matching a string
+	function search()
+    {
+		$match = $this->input->xss_clean($this->temp_value);
+		$scores = array();
+
+		$lang_sql = "";
+
+		if($this->temp_lang != '' && preg_match('#^([a-z]{3})$#',$this->temp_lang))
+		{
+			$lang_sql = " AND lang_ISO_639_3 = '{$this->temp_lang}'";
+		}
+
+		// first match values
+		$sql = "SELECT meta_rel_id AS rel_id, AVG(MATCH(`value`) AGAINST ('{$match}')) * 4 AS score
+		FROM c_metadata
+		WHERE MATCH(`value`) AGAINST('{$match}'){$lang_sql} 
+		AND scope = '{$this->scope}'
+		GROUP BY meta_rel_id";
+
+		$query = $this->db->query($sql);
+		
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$key = strval($row->rel_id);
+				$scores[$key] = array(
+				'rel_id' => $row->rel_id,
+				'score' => $row->score,
+				);
+				
+			}
+		}	
+
+		$sql = "SELECT *, COUNT(rel_id) AS score FROM c_titles WHERE 
+		(title LIKE '%{$match}%' OR subtitle LIKE '%{$match}%' OR keywords LIKE '%{$match}%'{$lang_sql}) 
+		AND scope = '{$this->scope}'
+		GROUP BY rel_id";
+		
+		$query = $this->db->query($sql);
+
+		if ($query->num_rows() > 0)
+		{
+			foreach ($query->result() as $row)
+			{
+				$key = strval($row->rel_id);
+				$tmp_score = $row->score;
+				
+				if(array_key_exists($key,$scores))
+				{
+					$tmp_score += $scores[$key]['score'];
+				}
+
+				$scores[$key] = array(
+				'rel_id' => $row->rel_id,
+				'score' => $tmp_score,
+				'title_id' => $row->title_id,
+				'title' => $row->title,
+				'lang' => $row->lang_ISO_639_3,
+				);
+
+
+			}
+		}
+
+		uasort($scores, 'sort_scores');
+		
+		return $scores;		
+	}
+
+    // search using a keyword
+	function keyword_search()
+    {
+		$match = $this->input->xss_clean($this->temp_value);
+		$results = array();
+
+		$sql = "SELECT * FROM c_titles WHERE keywords REGEXP '[[:<:]]{$match}[[:>:]]' AND scope = '{$this->scope}'";
+
+		$query = $this->db->query($sql);
+		
+		if ($query->num_rows() > 0)
+		{
+			$results = $query->result_array();
+		} 		
+
+		return $results;		
+	}
 
 }
 // END MY_Model class

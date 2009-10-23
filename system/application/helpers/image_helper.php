@@ -58,10 +58,27 @@ if ( ! function_exists('file_is_image'))
 	}
 }
 
+if ( ! function_exists('url_exists'))
+{
+	// does remote file exist?
+	function url_exists($url) {
+		if(@file_get_contents($url,0,NULL,0,1))
+		{
+			return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
+	}
+}
+
+
+
 if ( ! function_exists('view_image'))
 {
 
-	function view_image($path,$size,$img_tag_attr = '',$square=FALSE ) {
+	function view_image($path,$size,$img_tag_attr = array(),$square=FALSE ) {
 
 		/* 
 		parameters for function
@@ -73,10 +90,6 @@ if ( ! function_exists('view_image'))
 		
 		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
 		*/
-
-		if($img_tag_attr == '') {
-			$img_tag_attr = array();
-		}
 
 		// Path to original image and to resized version
 		$orig_image_path = $path;

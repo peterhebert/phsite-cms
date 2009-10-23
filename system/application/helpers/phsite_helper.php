@@ -64,6 +64,17 @@ if ( ! function_exists('sort_compare'))
 	}
 }
 
+if ( ! function_exists('sort_scores'))
+{	
+	function sort_scores($a, $b) {
+		if ($a['score'] == $b['score'])
+		{
+			return 0;
+		}
+		return ($a['score'] < $b['score']) ? 1 : -1;
+	}
+}
+
 if ( ! function_exists('checkPassword'))
 {
 	function checkPassword($plainText,$pwd)
@@ -287,6 +298,56 @@ if ( ! function_exists('resize_bytes'))
 	   }
 	   $formatted = number_format($size,0,'','.')." ".$format[$count];
 	   return $formatted;
+	}
+}
+
+if ( ! function_exists('parse_date_filter'))
+{
+	// parse string date filter
+	/* example formats:
+	date range	'2008-10-17 2009-02-12'
+	exact date	'2009-10-17'
+	after date	'> 2009-10-17',
+	before date	'< 2009-10-17',
+	in month	'2009-10',
+	in year		'2009'
+	*/
+	function parse_date_filter($str,$field_name='date_created')
+	{
+		
+		if(preg_match('#^([0-9]{4})$#',$str,$matches))
+		{
+			return "YEAR({$field_name}) = '".$matches[0]."'";
+		}
+
+		if(preg_match('#^([0-9]{4})-([0-9]{2})$#',$str,$matches))
+		{
+			return $field_name." LIKE '".$matches[0]."%'";
+		}
+
+		if(preg_match('#^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{4})-([0-9]{2})-([0-9]{2})$#',$str,$matches))
+		{
+			$date_start = $matches[1]."-".$matches[2]."-".$matches[3];
+			$date_end = $matches[4]."-".$matches[5]."-".$matches[6];
+			
+			return $field_name." BETWEEN STR_TO_DATE('{$date_start}','%Y-%m-%d') AND STR_TO_DATE('{$date_end}','%Y-%m-%d')";
+		}
+
+		if(preg_match('#^([\<\>]?)(\s?)([0-9]{4})-([0-9]{2})-([0-9]{2})$#',$str,$matches))
+		{
+			if($matches[1] == '>' || $matches[1] == '<')
+			{
+				$date = $matches[2]."-".$matches[3]."-".$matches[4];
+				return $field_name." ".$matches[1]." STR_TO_DATE('{$date}','%Y-%m-%d')";
+			}
+			else
+			{
+				return $field_name." LIKE '".$matches[0]."%'";
+			}
+			
+		}
+		return false;
+
 	}
 }
 

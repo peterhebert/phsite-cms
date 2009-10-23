@@ -10,17 +10,6 @@ echo $title_tag.' | ';
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
-<script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
-<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_required_fields.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_new_content.js"></script>
-<?php
-if (isset($custom_js)){
-	echo $custom_js;
-}
-?>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
@@ -55,5 +44,16 @@ if (isset($custom_js)){
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
+<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
+<script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
+<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_required_fields.js"></script>
+<script type="text/javascript" src="/assets/js/jquery_new_content.js"></script>
+<?php
+if (isset($custom_js)){
+	echo $custom_js;
+}
+?>
 </body>
 </html>

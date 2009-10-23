@@ -46,13 +46,12 @@ echo "<meta http-equiv=\"expires\" content=\"{$content_date_expiry_RFC850}\">\r"
 }
 
 /*
-
 <meta name=\"review_date\" content=\"2010-07-16\" />
-
 
 <meta name=\"dc.creator\" content=\"\" />
 <meta name=\"dc.contributor\" content=\"\" />
 */
 
 ?>
+<meta name="generator" content="phSite CMS" />
 

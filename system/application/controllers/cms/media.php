@@ -13,97 +13,179 @@ class Media extends MY_Controller {
 	
 	function index()
 	{	
+
+		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
+		$this->Media_model->lang_load();
+
+		//$files = $this->Media_model->list_media_recursive();
+		$this->Media_model->list_media();
+		$action = 'cms/media';
+		$attributes = array(
+		'id' => 'filter_media'
+		);
+		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$mime_labels = $this->lang->line('mime_cat');
+		$form = form_open($action, $attributes);
+		
+		$form_options[''] = 'any';
+		foreach($this->Media_model->mime_categories as $cat)
+		{
+			$form_options[$cat] = $mime_labels[$cat];
+		}	
+
+		$form .= "<p>";
+		$form .=  form_label($this->cms_labels['media_type'], 'media_type');
+		$form .=  form_dropdown('media_type', $form_options, '');
+		$form .= "</p>\n";
+
+		$form_options = array(10,20,30,40,50);
+		$form .= "<p>";
+		$form .=  form_label($this->cms_labels['results_per_page'], 'limit');
+		$form .=  form_dropdown('limit', $form_options, 10);
+		$form .= "</p>\n";
+
+		$form .= "<p>";
+		$form .= form_submit('submit', $this->cms_labels['results_filter']);
+		$form .= "</p>\n";
+		$form .= form_close();
+
+/*
+<form id="filter_media" method="post" action="">
+	<p>
+		<label for="date_modifier">date</label>
+		<select name="date_modifier" id="date_modifier">
+			<option value="" selected="selected">on / between</option>
+			<option value="<">before</option>
+			<option value=">">after</option>
+		</select>
+		<input name="date_1" id="date_1" type="text" />
+		<label for="date_2">and</label>
+		<input name="date_2" id="date_2" type="text" />
+		<input type="submit" name="submit" id="submit" value="Filter Results" />
+	</p>
+</form>
+*/
+
+
 		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
 
-		$this->data['sidebar'] = ul($links);
+		$form .= ul($links);
+		$this->data['sidebar'] = $form;
 
-		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
-		$this->Media_model->list_media();
 
-		$html = "<table class=\"borders\">\r";
-		$html .= "\t<thead>\r";
-		$html .= "\t\t<tr>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_file\">File</th>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_mime\">MIME type</th>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_publish\">publish</th>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_title\">title</th>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_attach\">attached to</th>\r";
-		$html .= "\t\t<th scope=\"col\" id=\"m_action\">action</th>\r";
-		$html .= "\t\t</tr>\r";
-		$html .= "\t</thead>\r";
-		
-		$html .= "\t<tbody>\r";
-		
-		foreach($this->Media_model->media_list as $md)
+
+/*
+$media_html = "<pre>";
+$media_html .= print_r($this->Media_model->media_list,true);
+$media_html .= "</pre>\r";
+
+thumbnail / icon
+[file_uri] => /peterhebert.com-redirects.ods
+[mime_type] => application/vnd.oasis.opendocument.spreadsheet
+[date_created] => 2009-10-16 14:05:27
+[publish] => 1
+[title] => title
+[attached_to] => Array
+*/
+	$media_html = '';
+
+		foreach($this->Media_model->media_list as $media)
 		{
-			$html .= "\t\t<tr>\r";
-			$html .= "\t\t<td headers=\"m_file\">";
-			
-			$path = $this->Media_model->dir_base.$md['file_uri'];
-			if(preg_match('#^image/(.*)$#',$md['mime_type']))
+			$media_html .= '<p>';
+			// determine edit uri
+			$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
+			if($this->Media_model->temp_lang != '')
 			{
-				$thumb = view_image($path,$this->Site_model->img_size_th);
-				$file = $thumb;
+				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+			}
+			// get mime category
+			// get filename and extension
+			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+			
+			if($mime_cat == 'image' && $media['external'] == 0)
+			{
+				// get thumbnail
+				$img_path = $this->Media_model->dir_base.$media['file_uri'];
+				$media_html .= view_image($img_path,$this->Site_model->img_size_th,array('alt' => $media['title']));
+			}
+			
+			$filename = basename($media['file_uri']);
+			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
+
+			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+			if(in_array($ext,$mime_icon_exts))
+			{
+				$media_html .= "<span class=\"icon ext_{$ext}\">";
 			}
 			else
 			{
-				$path_parts = pathinfo($path);
-				$thumb_path = $path_parts['dirname'].'/'.$path_parts['filename'].'.jpg';
-				if(file_exists($thumb_path))
+				$media_html .= "<span class=\"icon icon_{$mime_cat}\">";
+			}
+
+			$media_html .= anchor($edit_uri, $filename);
+			$media_html .= "</span>";
+			$media_html .= "</p>\r";
+
+
+
+/*
+			
+		
+		
+			$thumb = '';
+				if()
 				{
-					$thumb = view_image($path,$this->Site_model->img_size_th);
-					$file = $thumb;
 				}
 				else
 				{
-					$file = $path_parts['filename'];
+					if(url_exists($media['file_uri']))
+					{
+						$image_properties = array(
+						'src' => $media['file_uri'],
+						'alt' => $media['title'],
+						'style' => 'width: '.$this->Media_model->img_size_th.'px',
+						);
+						$thumb = img($image_properties);
+					}
 				}
 			}
-			$uri_edit = 'cms/media/edit/id/'.$md['media_id'];
-			if($md['lang_ISO_639_3'] != '')
-			{
-				$uri_edit .= '/lang/'.$md['lang_ISO_639_3'];
-			}
-			
-			$html .= anchor($uri_edit,$file)."</td>\r";
-			
-
-			$mime_array = explode('/',$md['mime_type']);
-			$type = $mime_array[0];
-
-			if($type == 'application')
-			{
-				$this->Media_model->lang_load(); 
-				$this->lang->load('mime', $this->Media_model->lang_CI_Name);
-				$mime_names = $this->lang->line('mime');
-				$type = $mime_names[$path_parts['extension']];
-			}
 		
-			$html .= "\t\t<td headers=\"m_mime\">{$type}</td>\r";
-			$html .= "\t\t<td headers=\"m_publish\">{$md['publish']}</td>\r";
-			$html .= "\t\t<td headers=\"m_title\">{$md['title']}</td>\r";
-			
-			$html .= "\t\t<td headers=\"m_attach\">";
-			if(count($md['attached_to']) <= 0)
+			if($thumb === false || $thumb == '')
 			{
-				$html .= "none";
 			}
 			else
 			{
-				$html .= "<pre>".$md['attached_to']."</pre>\r";
+				$media_html .= anchor($edit_uri, $thumb);
 			}
-			$html .= "</td>\r";
-			$html .= "\t\t<td headers=\"m_action\">action</td>\r";
-			$html .= "\t\t</tr>\r";
-		} 
 		
+			$media_html .= anchor($edit_uri, $fname);
 		
-		$html .= "\t</tbody>\r";
-		$html .= "</table>\r";
+			if($thumb === false || $thumb == '')
+			{
+				$media_html .= "</span>";
+			}
+*/		}
+/*
+[media_id] => 10
+[file_uri] => /peterhebert.com-redirects.ods
+[external] => 0
+[mime_type] => application/vnd.oasis.opendocument.spreadsheet
+[date_created] => 2009-10-16 14:05:27
+[publish] => 1
+[title_id] => 48
+[title] => title
+[uri_title] => title
+[subtitle] => 
+[keywords] => baseball, Canada Day, holiday, Ottawa, sports
+[lang_ISO_639_3] => eng
+[attached_to] => Array
+(
+)
 
-		$this->data['form'] = $html;
 
+*/
+		$this->data['form'] = $media_html;
 		
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = $this->cms_labels['media'];
@@ -115,7 +197,36 @@ class Media extends MY_Controller {
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media'];
 
+		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"/assets/js/jquery_media_filetree.js\"></script>\r";
+
 		$this->load->view('cms/cms_form', $this->data);
+	}
+
+	function info()
+	{	
+
+		$this->Media_model->temp_id = $this->uri->segment(4);
+		$this->Media_model->load_media();
+		$this->data['file_uri'] = $this->Media_model->file_uri;
+/*		)
+		{
+			//$this->Media_model->load_type_by_mime();
+			$this->Media_model->scope = 'media';
+			$this->Media_model->temp_id = $this->Media_model->media_id;
+			$this->Media_model->temp_lang = $this->Site_model->site_default_lang);
+			
+			//$this->Media_model->load_title();
+		}
+		
+		if($this->Media_model->title != '')
+		{
+			$this->data['title'] = $this->Media_model->title;
+		}
+		
+*/
+
+		$this->load->view('cms/media_info', $this->data);
+		
 	}
 
 	function manage()
@@ -271,7 +382,6 @@ class Media extends MY_Controller {
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media_edit'];
 
-		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"/assets/js/jquery_media_filetree.js\"></script>\r";
 
 		$this->data['sidebar'] = $this->_media_meta_menu();
 
@@ -535,49 +645,74 @@ $form .= "</pre>\r";
 
 	}
 
-/*	function build_filetree($files=array())
+	function build_filetree($files=array())
 	{
-		
 		$filetree = "<ul>\r";
-		foreach($files as $path => $file)
+		$base_uri = 'cms/media/edit/id/';
+		foreach($files as $path_rel => $file)
 		{
-			$path_rel = str_replace($this->Media_model->dir_base,'',$path);
-			if(is_array($file))
+
+			$paths = explode('/',$path_rel);
+			$filename = array_pop($paths); 
+
+			if($file['type'] == 'file')
 			{
-				$paths = explode('/',$path);
-				$filename = array_pop($paths); 
-				$filetree .= "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . $path_rel . "/\">" . htmlentities($filename) . "</a>";
-				$filetree .= $this->build_filetree($file);
-				$filetree .= "</li>";
-			}
-			else
-			{
-				$ext = strtolower(preg_replace('/^.*\./', '', $file));
-				$class = '';
+
+				$ext = strtolower(preg_replace('/^.*\./', '', $filename));
+				$classes = array();
 				
 				if(array_key_exists($ext,$this->Media_model->mime_types))
 				{
 					$type = explode('/',$this->Media_model->mime_types[$ext]);
 					if($type[0] != 'application')
 					{
-						$class = 'icon_'.$type[0];
+						$classes[] = 'icon_'.$type[0];
 					}
 				}
-				if($class == '')
+				if(count($classes) <= 0)
 				{
-					$class = 'ext_'.$ext;
+					$classes[] = 'file ext_'.$ext;
 				}
+/*
+				$uri = $base_uri.$file['media_id'];
+				if($this->Media_model->temp_lang != '')
+				{
+					$uri .= '/lang/'.$this->Media_model->temp_lang;
+				}
+*/
+
+
+				$info_uri = 'cms/media/info/'.$file['media_id'];
+
+				$class = implode(' ',$classes);			
 				
-				$filetree .= "<li class=\"file {$class}\"><a href=\"#\" rel=\"" . $path_rel . "\">" . htmlentities($file) . "</a></li>";
+/*				if($file['title'] != '')
+				{
+					//$li = anchor($uri, $file['title'], array('rel' => $path_rel));
+					$li = "<a href=\"#\" rel=\"" . $info_uri . "/\">" . htmlentities($file['title']) . "</a>";
+				}
+				else
+				{
+*/					//$li = anchor($uri, $filename, array('rel' => $path_rel));
+					$li = "<a href=\"#\" rel=\"" . $info_uri . "/\">" . htmlentities($filename) . "</a>";
+				//}
 
 			}
-			
-		}
-		$filetree .= "</ul>\r";	
-		return $filetree;
+			else
+			{
+				$class = 'directory collapsed';			
+				$li = "<a href=\"#\">" . htmlentities($filename) . "</a>";
+				$li .= $this->build_filetree($file['files']);
+			}
 
+				$filetree .= "<li class=\"{$class}\">{$li}</li>\r";
+
+		}
+		$filetree .= "</ul>\r";
+
+		return $filetree;
 	}
-*/
+
 	function _media_meta_menu()
     {
 		$menu = '';

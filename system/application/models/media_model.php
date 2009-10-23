@@ -4,12 +4,11 @@ class Media_model extends MY_Model {
 	// media variables
 	var $media_id, $file_uri, $external, $mime_type, $date_created, $publish;
 
-	//var $media_meta_id, $field_id, $field_name, $value;
-	var $date_updated, $media_lang;
+	var $date_updated;
 
 	// misc utility variables
 	var $media_list = array(), $media_metadata = array(), $media_meta_fields = array();
-	var $mime_categories = array('application','audio','image','text','video');
+	var $mime_categories = array('image','audio','video','text','application');
 	var $cms_labels;
 
 	// iptc / exif metadata
@@ -86,7 +85,7 @@ class Media_model extends MY_Model {
 	}
 
 	// list files in directory
-	function list_files() {
+	function list_files($include_dirs=FALSE) {
 
 		$filepath = $this->dir_current;
 
@@ -98,10 +97,20 @@ class Media_model extends MY_Model {
 		while ($file = readdir($dir_handle)) {
 			$newpath = $filepath.'/'.$file;
 			$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
-
-			if(!in_array($file,$ignore) && !is_dir($newpath)) {
-				$files[] = $newpath;
+			
+			if(!in_array($file,$ignore)) {
+				if($include_dirs)
+				{
+					$files[] = $newpath;
+				}
+				else
+				{
+					if(!is_dir($newpath)) {
+						$files[] = $newpath;
+					}
+				}
 			}
+
 		}
 		//closing the directory
 		closedir($dir_handle);
@@ -111,9 +120,16 @@ class Media_model extends MY_Model {
 
 	}
 
-	function list_files_unique() {
+	function list_files_unique($include_dirs=FALSE) {
 		
-		$this->list_files();
+		if($include_dirs)
+		{
+			$this->list_files(TRUE);
+		}
+		else
+		{
+			$this->list_files();
+		}
 
 		$files = $this->file_list;
 		$new_list = array();
@@ -124,28 +140,35 @@ class Media_model extends MY_Model {
 
 		//running the while loop
 		foreach ($files as $file) {
-			$pi = pathinfo($file);
-			$fnames[] = $pi['filename'];
-			$exts[] = strtolower($pi['extension']);
+			if(is_dir($file))
+			{
+				$new_list[] = $file;
+			}
+			else
+			{
+				$pi = pathinfo($file);
+				$only_files[] = $file;
+				$fnames[] = $pi['filename'];
+				$exts[] = strtolower($pi['extension']);
+			}
 		}
-		
+
 		$unique_names = array_count_values($fnames);
 		
 		foreach($unique_names as $uname => $times) {
 			$matching_keys = array_keys( $fnames, $uname);
 			if($times > 1) {
 				foreach($matching_keys as $key) {
-					
 					if(!in_array($exts[$key],$imageTypes)) {
-						$newfile = $files[$key];
+						$newfile = $only_files[$key];
 					}
 				}
 				if(!isset($newfile)) {
-					$newfile = $files[$matching_keys[0]];
+					$newfile = $only_files[$matching_keys[0]];
 				}
 
 			} else {
-				$newfile = $files[$matching_keys[0]];
+				$newfile = $only_files[$matching_keys[0]];
 			}
 			$new_list[] = $newfile;
 			unset($newfile);
@@ -182,7 +205,8 @@ class Media_model extends MY_Model {
 		
 	}
 
-	function get_mime($filename) {
+	function get_mime() {
+		$filename = $this->file_current;
 		if(file_exists($filename) && !is_dir($filename))
 		{
 			$imagetype = @exif_imagetype($filename);
@@ -230,11 +254,10 @@ class Media_model extends MY_Model {
 						break;
 					default:
 						$imagetype = FALSE;
-						break;
 				}
 			}
 
-			if (!$imagetype)
+			if ($imagetype == FALSE)
 			{
 				$fileinfo = pathinfo($filename);
 				if($fileinfo)
@@ -265,59 +288,7 @@ class Media_model extends MY_Model {
 			$file_type = $this->get_mime($file);
 
 			$this->file_current = $file;
-			$this->read_file_info();
-			if(is_array($this->exif) && array_key_exists('DateTimeOriginal', $this->exif)) {
-				$this->date_created = $this->exif['DateTimeOriginal'];
-			}
-			else
-			{
-				$this->date_created = date('Y-m-d H:i:s');
-			}
-
-			// if file not in database, add to database
-			if(!$this->find_media_by_uri())
-			{
-				$this->external = 0;
-				$this->mime_type = $file_type;
-				$this->publish = 1;
-				
-			}
-
-			$this->get_file_metadata();
-
-			if($this->title == '') {
-				$this->title = basename($this->file_uri);
-			}
-
-			$this->update_media_single();
-
-			// find title if it exists, then update
-			$this->scope = 'media';
-			$this->temp_id = $this->media_id;
-			if(!$this->title_exists())
-			{
-				$this->title_rel_id = $this->media_id;
-				$this->update_title();
-			}
-
-			$this->scope = 'media';
-			$this->temp_id = $this->media_id;
-			if(is_array($this->metadata) && count($this->metadata) > 0)
-			{
-
-		
-				foreach($this->metadata as $index => $info)
-				{
-					$this->metadata[$index]['meta_rel_id'] = $this->media_id;
-				}
-
-//				echo "<pre>";
-//				print_r($this->metadata);
-//				echo "</pre>\r";
-
-				$this->update_metadata();
-			}
-
+			$this->update_media_from_file();
 		}
 	}
 
@@ -377,14 +348,32 @@ class Media_model extends MY_Model {
 		return FALSE;
 	}
 
-	function list_media($limit=FALSE)
+	function list_media()
 	{
 		$list = array();
 		
-		if ($limit)
+		if ($this->limit > 0)
 		{
-			$this->db->limit('c_media');
+			if($this->page > 1)
+			{
+				$start = ($this->page * $this->limit) - 1;
+				$this->db->limit($this->limit,$start);
+			}
+			else
+			{
+				$this->db->limit($this->limit);
+			}
 		}
+
+		if ($this->date_filter != '')
+		{
+			$filter = parse_date_filter($this->date_filter);
+			if($filter)
+			{
+				$this->db->where($filter);
+			}
+		}
+
 		$query = $this->db->get('c_media');
 		
 		if ($query->num_rows() > 0)
@@ -487,57 +476,6 @@ class Media_model extends MY_Model {
 		return FALSE;
 	}
 
-	// list files in directory
-	function list_recursive() {
-
-		$filepath = $this->dir_current;
-		$dirs = array();
-		$dirs_rel = array();
-		
-		$dir_handle = @opendir($filepath) or die('cannot open '.$filepath);
-		if($dir_handle)
-		{
-
-			while ($file = readdir($dir_handle)) {
-
-				$newpath = $filepath.'/'.$file;
-
-				$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
-				if(!in_array($file,$ignore) ) {
-
-					if(is_dir($newpath))
-					{
-
-						$this->dir_current = $newpath;
-						$newdirs = $this->list_recursive();
-						$dirs[$newpath] = $newdirs;
-						unset($newdirs);
-					}
-					else
-					{
-						$dirs[$newpath] = $file;
-					}
-
-
-				}
-			}
-			// closing the directory
-			closedir($dir_handle);
-
-		
-			// get relative paths for each directory
-	
-			foreach($dirs as $dir) {
-				$dest_dir = str_replace($_SERVER["DOCUMENT_ROOT"],'',$dir);
-				//$dirs_rel[$dir] = $dest_dir;
-			}
-	
-		}
-
-		return $dirs;
-
-	}
-
 	function get_file_metadata()
 	{
 		// first load metadata fields by mime type
@@ -577,7 +515,7 @@ class Media_model extends MY_Model {
 			if(array_key_exists($info['field_ref_name'],$field_name_to_iptc))
 			{
 				$iptc_key = $field_name_to_iptc[$info['field_ref_name']];
-				if(array_key_exists($iptc_key, $this->iptc)) {
+				if(is_array($this->iptc) && array_key_exists($iptc_key, $this->iptc)) {
 					$meta[$index]['value'] = $this->iptc[$iptc_key][0];
 					if($this->media_id != '')
 					{
@@ -591,15 +529,15 @@ class Media_model extends MY_Model {
 		$this->metadata = $meta;
 		
 		// now get title and keywords
-		if(array_key_exists('2#005', $this->iptc)) {
+		if(is_array($this->iptc) && array_key_exists('2#005', $this->iptc)) {
 			$this->title = $this->iptc['2#005'][0];
 		}
-		else if(array_key_exists('2#105', $this->iptc))
+		else if(is_array($this->iptc) && array_key_exists('2#105', $this->iptc))
 		{
 			$this->title = $this->iptc['2#105'][0];
 		}
 		
-		if(array_key_exists('2#025', $this->iptc)) {
+		if(is_array($this->iptc) && array_key_exists('2#025', $this->iptc)) {
 			$kw = $this->iptc['2#025'];
 			natcasesort($kw);
 			$kw_unique = array_unique($kw);
@@ -607,6 +545,122 @@ class Media_model extends MY_Model {
 		}
 				
 	}
+
+	// list all files, and add to db if not present
+	function list_media_recursive($dir=NULL) {
+		if(isset($dir))
+		{
+			$this->dir_current = $dir;
+		}
+
+		$list = array();
+
+		// get files in this directory (unique)
+		$this->list_files_unique(TRUE);
+		$files = $this->file_list;
+		foreach($files as $file)
+		{
+			$this->reset_media_vars();
+
+			$tmp_file_info = array('type' => 'file');
+			$path_rel = str_replace($this->dir_base,'',$file);
+			
+			if(is_dir($file))
+			{
+				$tmp_file_info['type'] = 'dir';
+				$tmp_file_info['files'] = $this->list_media_recursive($file);
+			}
+			else
+			{
+				$tmp_file_info['type'] = 'file';
+				$this->file_current = $file;
+				$this->file_uri = $path_rel;
+				$this->update_media_from_file();
+				$tmp_file_info['media_id'] = $this->media_id;
+				$tmp_file_info['title'] = $this->title;
+			}
+			
+			$list[$path_rel] = $tmp_file_info;
+			unset($tmp_file_info);
+		}
+
+		return $list;
+	}
+
+	function reset_media_vars()
+	{
+		$this->media_id = '';
+		$this->file_uri = '';
+		$this->external = 0;
+		$this->mime_type = '';
+		$this->date_created = '';
+		$this->date_updated = '';
+		$this->publish = 1;
+		$this->iptc = FALSE;
+		$this->exif = FALSE;
+		$this->metadata = array();
+		$this->title_id = '';
+		$this->title_rel_id = '';
+		$this->title = '';
+		$this->uri_title = '';
+		$this->subtitle = '';
+		$this->keywords = '';
+		$this->title_updated = '';
+	}
+
+	function update_media_from_file()
+	{
+		$this->read_file_info();
+		if(is_array($this->exif) && array_key_exists('DateTimeOriginal', $this->exif)) {
+			$this->date_created = $this->exif['DateTimeOriginal'];
+		}
+		else
+		{
+			$this->date_created = date('Y-m-d H:i:s');
+		}
+
+		// if file not in database, add to database
+		if(!$this->find_media_by_uri())
+		{
+			$this->external = 0;
+			$this->publish = 1;
+			
+		}
+		$this->mime_type = $this->get_mime($this->file_current);
+
+		$this->get_file_metadata();
+
+		if($this->title == '') {
+			$this->title = basename($this->file_uri);
+		}
+
+		$this->update_media_single();
+
+		// find title if it exists, then update
+		$this->scope = 'media';
+		$this->temp_id = $this->media_id;
+		if(!$this->title_exists())
+		{
+			$this->title_rel_id = $this->media_id;
+			$this->update_title();
+		}
+
+		$this->scope = 'media';
+		$this->temp_id = $this->media_id;
+		if(is_array($this->metadata) && count($this->metadata) > 0)
+		{
+
+	
+			foreach($this->metadata as $index => $info)
+			{
+				$this->metadata[$index]['meta_rel_id'] = $this->media_id;
+			}
+
+			$this->update_metadata();
+		}
+
+	}
+
 
 }
 

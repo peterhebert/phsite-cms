@@ -580,10 +580,24 @@ class Content extends MY_Controller
 
 	function search()
 	{
-		$this->Content_model->link_mode = 1;
-		$this->data['term'] = $this->input->post('search-text');
-		$this->data['matches'] = $this->Content_model->search($this->input->post('search-text'));
-		$this->data['query'] = $this->db->last_query();
+
+		if($this->input->post('search-text') != '')
+		{
+			$search_string = $this->input->post('search-text');
+			$this->data['term'] = sprintf($this->cms_labels['search_term'],$search_string);
+			$this->Content_model->temp_value = $search_string;
+			$this->Content_model->link_mode = 1;
+
+			$matches = $this->Content_model->search_content();
+
+			// content matches
+			if(count($matches) > 0)
+			{
+				$this->data['content_results'] = $matches;
+			}
+
+			// media matches
+		}
 
 		$view = 'cms/search_results';
 

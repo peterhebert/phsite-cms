@@ -27,12 +27,12 @@ class Parser extends MY_Controller {
 		$this->Content_model->link_mode = 0;
 		$this->Content_model->lang_mode = $this->Content_model->lang_count;
 
-
 		// get all parameters from uri
 		$this->_parse_uri();
 		
-		if($this->Content_model->content_id != '')
+		if(count($this->segments) > 0)
 		{
+			$this->_find_content();
 			$this->_prepare_view();
 		}
 		else
@@ -54,114 +54,106 @@ class Parser extends MY_Controller {
 	function _parse_uri()
 	{
 
-		$this->segments = $this->uri->segment_array();
-		$seg_count = count($this->segments);
-		
-		$params = array();
-		$uri_patterns = array(
-		'date' => "/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/",
-		'month' => "/^([0-9]{4})-([0-9]{2})$/",
-		'year' => "/^([0-9]{4})$/",
-		'page' => "/^([0-9]+)$/",
+		$uri_segments = array();
+		$uri_array = $this->uri->segment_array();
+
+		$params = array('page' => '','lang' => '','date' => '');
+		$patterns = array(
+		'lang' => '#^([a-z]{3})$#',
+		'date' => '#^([0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{4}-[0-9]{2}|[0-9]{4})$#',
+		'page' => '#^p([0-9]+)$#',
 		);
+
+		$segment_count = count($uri_array);
+		$segment_current = 1;
 		
-		if($seg_count > 0)
+		foreach($uri_array as $segment)
 		{
-			$current_path = 1;
-			
-			foreach($this->segments as $segment)
+			$match = FALSE;
+			foreach($patterns as $key => $pattern)
 			{
-				$match = FALSE;
-
-				foreach($uri_patterns as $key => $pattern)
+				if(preg_match($pattern,$segment))
 				{
-					// test for lang match
-					if($current_path == 1 && preg_match("/^([a-z]{3})$/", $segment) )
-					{
-						$params['lang'] = $segment;
-						$match = TRUE;
-					}
 					
-					// test for pattern match
-					if (preg_match($pattern, $segment) && $match === FALSE && !array_key_exists($key,$params))
+					if($params[$key] == '')
 					{
-						$params[$key] = $segment;
-						$match = TRUE;
+						if($key == 'page')
+						{
+							if($segment_current == $segment_count)
+							{
+								$params[$key] = str_replace('p','',$segment);
+								$match = TRUE;
+								break;
+							
+							}
+						}
+						else
+						{
+							$params[$key] = $segment;
+							$match = TRUE;
+							break;
+						}
+						
 					}
-					
-				}
 
-				if ($match === FALSE)
-				{
-					$params['titles'][] = $segment;
 				}
-				
-				$current_path = $current_path + 1;
+	
 			}
-			
-		}
-		$this->data['params'] = $params;
 
-		$this->segments = array();
+			if(!$match)
+			{
+				$uri_segments[] = $segment;
+			}
+			$segment_current += 1;
 
-		if(array_key_exists('lang',$params))
-		{
-			$this->Content_model->temp_lang = $params['lang'];
-			$this->Site_model->temp_lang = $params['lang'];
-		} else {
-			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
-			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
+		
+		$this->segments = $uri_segments;
 
-		$this->_load_cms_labels();
-		$this->_load_site_metadata();
-
-		if(array_key_exists('year',$params))
-		{
-			$this->Content_model->date_filter = $params['year'];
-		}
-		if(array_key_exists('month',$params))
-		{
-			$this->Content_model->date_filter = $params['month'];
-		}
-		if(array_key_exists('date',$params))
+		if($params['date'] != '')
 		{
 			$this->Content_model->date_filter = $params['date'];
 		}
-		if( array_key_exists('page',$params))
+		if(preg_match('|^([a-z]{3})$|',$params['lang']))
 		{
-			$this->Content_model->page = $params['page'];
+			$this->Site_model->temp_lang = $params['lang'];
+			$this->Content_model->temp_lang = $params['lang'];
 		}
 		else
 		{
-			$this->Content_model->page = 1;
+			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		
-		if( array_key_exists('titles',$params))
+		$this->Site_model->lang_load();
+		$this->_load_site_metadata();
+		$this->_load_cms_labels();
+
+		if($params['page'] != '')
 		{
-			$this->segments = $params['titles'];
+			$this->page = $params['page'];
+			$this->Content_model->page = $params['page'];
 		}
-		$seg_count = count($this->segments);
+	}
+	
+	function _find_content()
+	{
+
 		$msg = '';
 		
 		$tree = array();
 
-		if($seg_count > 0)
+		foreach($this->segments as $index => $uri_segment)
 		{
-		
-			foreach($this->segments as $index => $uri_segment)
+
+			$this->Content_model->temp_value = $uri_segment;
+			$info = $this->Content_model->find_by_uri();
+			
+			if($info)
 			{
-
-				$this->Content_model->temp_value = $uri_segment;
-				$info = $this->Content_model->find_by_uri();
-				
-				if($info)
-				{
-					$this->Content_model->temp_id = $info[0]['content_id'];
-					$tree[$index] = $info[0];
-				}
-
+				$this->Content_model->temp_id = $info[0]['content_id'];
+				$tree[$index] = $info[0];
 			}
+
 		}
 
 		$result_count = count($tree);

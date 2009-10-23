@@ -1,4 +1,12 @@
 <?php
+$lang['mime_cat'] = array(
+'audio' => 'audio',
+'image' => 'image',
+'application' => 'other',
+'text' => 'text',
+'video' => 'video',
+'any' => 'any'
+);
 
 $lang['mime'] = array(
 'flac' => '<acronym title="Free Lossless Audio Codec">FLAC</acronym> audio',

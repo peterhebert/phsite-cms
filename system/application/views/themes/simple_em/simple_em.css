@@ -129,8 +129,8 @@ body.gallery h1,body.gallery h2,body.gallery h3,body.gallery h4,body.gallery h5,
 /* image containers */
 .placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }
 .image { margin-bottom: 1em;}
-.image .image-left { float: left; margin-right: 1em; }
-.image .image-right { float: right; margin-left: 1em; }
+.image-left { float: left; margin-right: 1em; }
+.image-right { float: right; margin-left: 1em; }
 .image img { border: 1px solid #000000; }
 
 /* masthead styles */

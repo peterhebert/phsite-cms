@@ -30,17 +30,36 @@ echo "<meta name=\"dc.creator\" content=\"{$site_meta_creator}\" />\n";
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("","Home"); ?> : Search Results</div>
+<?php if (isset($breadcrumb) && is_array($breadcrumb) && count($breadcrumb) > 0) {
+	$bc = implode(' : ',$breadcrumb);
+?>
+<div class="page-wrap block" id="breadcrumb"><?php echo $bc; ?></div>
+<?php } ?>
+
 	
 	<div class="page-wrap block">
-		<h1>Search Results</h1>
-		<?php
+		<h1><?php echo $cms_labels['search_results']; ?></h1>
+		<?php 
+		if (isset($keyword_search)) {
+			echo "<p>".$cms_labels['search_matching_keywords'].' : '.$keyword_search."</p>\r";
+		} 
+
 		if(isset($term)) {
 			echo "<p>{$term}</p>\r";
+			if(!isset($content_results) && !isset($media_results))
+			{
+				echo "<p>".$cms_labels['search_no_results']."</p>\r";
+			}
+		}
+		else
+		{
+			echo "<p>".$cms_labels['search_null']."</p>\r";
 		}
 
-		if(isset($matches)) {
-			echo $matches;
+		if(isset($content_results))
+		{
+			echo "<h2>".$cms_labels['content_results']."</h2>\r"; 
+			echo ul($content_results);
 		}
 		?>
 	</div>
