@@ -46,7 +46,11 @@ $route['scaffolding_trigger'] = "";
 $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
+$route['cms/media'] = "cms/media/manage";
 $route['cms/(.*)'] = "cms/$1";
+
+$route['test(.*)'] = "test/index$1";
+
 $route['search(/?)(.*)'] = "search$1$2";
 
 // now route anything else to main uri parser

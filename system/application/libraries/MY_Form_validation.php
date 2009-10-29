@@ -74,6 +74,32 @@ class MY_Form_validation extends CI_Form_validation {
 		return $valid;
 	}
 
+	/**
+	 * external URL exists
+	 *
+	 * @access	public
+	 * @param	string
+	 * @return	bool
+	 */	
+	function uri_exists($uri)
+	{
+		$valid = FALSE;
+		if(preg_match('#^(http|https){1}://(www\.)?(.*)\.([a-z0-9]{2,6})$#',$uri))
+		{
+			$uri_clean = str_replace(' ','%20',$uri);
+			$headers = get_headers($uri_clean);
+			if (is_array($headers) && preg_match("|200|", $headers[0])) {
+				$valid = TRUE;
+			}
+			else
+			{
+				$valid = FALSE;
+			}
+		}
+		
+		return $valid;
+	}
+
 	// --------------------------------------------------------------------
 	
 	/**
@@ -81,7 +107,7 @@ class MY_Form_validation extends CI_Form_validation {
 	 *
 	 * @access	public
 	 * @param	string
-	 * @return	string
+	 * @return	bool
 	 */	
 	function is_date($str)
 	{

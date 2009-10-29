@@ -351,5 +351,14 @@ if ( ! function_exists('parse_date_filter'))
 	}
 }
 
+if ( ! function_exists('uri_exists'))
+{	
+	function uri_exists($uri)
+	{
+		$headers = get_headers($uri);
+		return $headers;
+	}
+}
+
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

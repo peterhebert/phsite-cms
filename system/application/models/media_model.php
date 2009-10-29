@@ -356,7 +356,7 @@ class Media_model extends MY_Model {
 		{
 			if($this->page > 1)
 			{
-				$start = ($this->page * $this->limit) - 1;
+				$start = ($this->page * $this->limit) - $this->limit;
 				$this->db->limit($this->limit,$start);
 			}
 			else
@@ -374,6 +374,11 @@ class Media_model extends MY_Model {
 			}
 		}
 
+		if ($this->temp_value != '')
+		{
+			$this->db->like('mime_type', $this->temp_value, 'after');
+		}
+
 		$query = $this->db->get('c_media');
 		
 		if ($query->num_rows() > 0)
@@ -382,6 +387,7 @@ class Media_model extends MY_Model {
 			foreach ($query->result_array() as $row)
 			{
 				$tmp_media = array();
+				$this->title_id = '';
 
 				$tmp_media['media_id'] = $row['media_id'];
 				$tmp_media['file_uri'] = $row['file_uri'];
@@ -391,8 +397,9 @@ class Media_model extends MY_Model {
 				$tmp_media['publish'] = $row['publish'];
 
 				$this->scope = 'media';
-				$this->rel_id = $row['media_id'];
+				$this->temp_id = $row['media_id'];
 				$this->load_title();
+
 				
 				$tmp_media['title_id'] = $this->title_id;
 				$tmp_media['title'] = $this->title;
@@ -412,6 +419,31 @@ class Media_model extends MY_Model {
 
 		$this->media_list = $list;
 		$this->file_count = $query->num_rows();
+		
+
+	}
+
+	function count_media_all()
+	{
+		
+		if ($this->date_filter != '')
+		{
+			$filter = parse_date_filter($this->date_filter);
+			if($filter)
+			{
+				$this->db->where($filter);
+			}
+		}
+
+		if ($this->temp_value != '')
+		{
+			$this->db->like('mime_type', $this->temp_value, 'after');
+		}
+
+		$query = $this->db->get('c_media');
+		
+		return $query->num_rows();
+		
 	}
 
 	function media_attached_to()
@@ -552,6 +584,10 @@ class Media_model extends MY_Model {
 		{
 			$this->dir_current = $dir;
 		}
+		else
+		{
+			$this->dir_current = $this->dir_base;
+		}
 
 		$list = array();
 
@@ -577,12 +613,61 @@ class Media_model extends MY_Model {
 				$this->file_uri = $path_rel;
 				$this->update_media_from_file();
 				$tmp_file_info['media_id'] = $this->media_id;
+				$tmp_file_info['mime_type'] = $this->mime_type;
 				$tmp_file_info['title'] = $this->title;
 			}
 			
 			$list[$path_rel] = $tmp_file_info;
 			unset($tmp_file_info);
 		}
+
+		return $list;
+	}
+
+	// list all files, and add to db if not present
+	// flat list of files only
+	function list_flat($dir=NULL) {
+		if(isset($dir))
+		{
+			$this->dir_current = $dir;
+		}
+		else
+		{
+			$this->dir_current = $this->dir_base;
+		}
+
+		$list = array();
+
+		// get files in this directory (unique)
+		$this->list_files_unique(TRUE);
+		$files = $this->file_list;
+		foreach($files as $file)
+		{
+			$this->reset_media_vars();
+
+			$tmp_file_info = array();
+			$path_rel = str_replace($this->dir_base,'',$file);
+			
+			if(is_dir($file))
+			{
+				$subdir = $this->list_flat($file);
+				$list = array_merge($list,$subdir);
+			}
+			else
+			{
+				$this->file_current = $file;
+				$this->file_uri = $path_rel;
+				$this->update_media_from_file();
+				$tmp_file_info['media_id'] = $this->media_id;
+				$tmp_file_info['mime_type'] = $this->mime_type;
+				$tmp_file_info['title'] = $this->title;
+
+				$list[$path_rel] = $tmp_file_info;
+				unset($tmp_file_info);
+			}
+			
+		}
+		ksort($list);
 
 		return $list;
 	}
@@ -661,6 +746,45 @@ class Media_model extends MY_Model {
 
 	}
 
+	function remove_media_cache($dir=NULL) {
+
+		if(isset($dir))
+		{
+			$this->dir_current = $dir;
+		}
+		else
+		{
+			$this->dir_current = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_CACHE;
+		}
+		$list = array();
+
+		// get files in this directory (unique)
+		$this->list_files(TRUE);
+		$files = $this->file_list;
+		foreach($files as $file)
+		{
+			
+			$path_rel = str_replace($this->dir_base,'',$file);
+
+			if(is_dir($file))
+			{
+				$this->remove_media_cache($file);
+				if(!rmdir($file))
+				{
+					$this->messages[] = "could not remove path '{$path_rel}'";
+				}
+			}
+			else
+			{
+				if(!unlink($file))
+				{
+					$this->messages[] = "could not delete file '{$path_rel}'";
+				}
+			}
+			
+		}
+		
+	}
 
 }
 

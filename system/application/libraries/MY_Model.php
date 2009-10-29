@@ -640,14 +640,14 @@ class MY_Model extends Model {
 		{
 			$this->db->where('lang_ISO_639_3',$this->session->userdata('default_lang'));
 		}
-		else
+		else if ($this->temp_lang != '')
 		{
 			$this->db->where('lang_ISO_639_3',$this->temp_lang);
 		}
 		
 		$this->db->limit(1);
 		$query = $this->db->get('s_labels');
-				
+			
 		if ($query->num_rows() > 0)
 		{
 			$row = $query->row();

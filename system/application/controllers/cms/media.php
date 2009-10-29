@@ -7,185 +7,240 @@ class Media extends MY_Controller {
 		parent::MY_Controller();
 		$this->load->helper(array('form','url','file','image'));
 		$this->load->model('Media_model');
+		$this->load->model('Content_model');
 		$this->_load_cms_labels();
 		$this->_load_site_metadata();
-	}
-	
-	function index()
-	{	
 
 		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
+	}
+	
+	function manage()
+	{	
 		$this->Media_model->lang_load();
 
-		//$files = $this->Media_model->list_media_recursive();
-		$this->Media_model->list_media();
-		$action = 'cms/media';
-		$attributes = array(
-		'id' => 'filter_media'
-		);
-		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
-		$mime_labels = $this->lang->line('mime_cat');
-		$form = form_open($action, $attributes);
-		
-		$form_options[''] = 'any';
-		foreach($this->Media_model->mime_categories as $cat)
+		// get filter for list
+		$params = $this->uri->uri_to_assoc(3);
+
+		$limit = $this->input->post('limit');
+		if(array_key_exists('limit',$params))
 		{
-			$form_options[$cat] = $mime_labels[$cat];
-		}	
+			$limit = $params['limit'];
+		}
+		if(!$limit || $limit == '')
+		{
+			$limit = 10;
+		}
 
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['media_type'], 'media_type');
-		$form .=  form_dropdown('media_type', $form_options, '');
-		$form .= "</p>\n";
+		$this->Media_model->limit = $limit;
 
-		$form_options = array(10,20,30,40,50);
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['results_per_page'], 'limit');
-		$form .=  form_dropdown('limit', $form_options, 10);
-		$form .= "</p>\n";
+		$media_type = $this->input->post('media_type');
+		if(array_key_exists('type',$params))
+		{
+			$media_type = $params['type'];
+		}
+		if ($media_type !== FALSE && $media_type != '')
+		{
+			$this->Media_model->temp_value = $media_type;
+		}
 
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['results_filter']);
-		$form .= "</p>\n";
-		$form .= form_close();
-
-/*
-<form id="filter_media" method="post" action="">
-	<p>
-		<label for="date_modifier">date</label>
-		<select name="date_modifier" id="date_modifier">
-			<option value="" selected="selected">on / between</option>
-			<option value="<">before</option>
-			<option value=">">after</option>
-		</select>
-		<input name="date_1" id="date_1" type="text" />
-		<label for="date_2">and</label>
-		<input name="date_2" id="date_2" type="text" />
-		<input type="submit" name="submit" id="submit" value="Filter Results" />
-	</p>
-</form>
-*/
-
+		$this->Media_model->page = 1;
+		if(array_key_exists('page',$params))
+		{
+			$this->Media_model->page = $params['page'];
+		}
+		
+		$total = $this->Media_model->count_media_all();
+		
+		$this->Media_model->list_media();
+		
+		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$mime_cat_labels = $this->lang->line('mime_cat');
+		$mime_labels = $this->lang->line('mime');
 
 		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
 
-		$form .= ul($links);
-		$this->data['sidebar'] = $form;
+		$html = ul($links);
+
+		$this->data['sidebar'] = $html;
+
+		$end = $this->Media_model->page * $limit;
+		$start = $end - $limit + 1;
+		
+		if($end > $total || $end == 0)
+		{
+			$end = $total;
+		}
+		if($total > 0)
+		{
+			$results = sprintf($this->cms_labels['showing_results'],$start,$end,$total);
+		}
+		else
+		{
+			$results = $this->cms_labels['no_results'];
+		}
+
+		$action = 'cms/media/manage';
+		$attributes = array(
+		'id' => 'process'
+		);
+		$html = form_open($action, $attributes);
+		
+		$form_options[''] = 'any';
+		foreach($this->Media_model->mime_categories as $cat)
+		{
+			$form_options[$cat] = $mime_cat_labels[$cat];
+		}	
+
+		$html .= "<div class=\"form-filter\">\r";
+		$html .=  form_label($this->cms_labels['media_type'], 'media_type');
+		$html .=  form_dropdown('media_type', $form_options, $media_type);
+
+		$form_options = array(10 => 10,20 => 20,30=>30,40=>40,50=>50);
+		$html .=  form_label($this->cms_labels['results_per_page'], 'limit');
+		$html .=  form_dropdown('limit', $form_options, $limit);
+		$html .= form_submit('filter', $this->cms_labels['results_filter']);
+		$html .= "</div>\r";
 
 
+		$html .= "<p class=\"align-center\">\r";
+		$html .= "{$results}<br />\r";
+		$this->load->library('pagination');
+		$base_url = '/cms/media';
+		$base_url .= '/limit/'.$limit;
+		if ($media_type !== FALSE && $media_type != '')
+		{
+			$base_url .= '/type/'.$media_type;
+		}
+		$base_url .= '/page/';
 
-/*
-$media_html = "<pre>";
-$media_html .= print_r($this->Media_model->media_list,true);
-$media_html .= "</pre>\r";
+		$pconfig['base_url'] = $base_url;
+		$pconfig['total_rows'] = $total;
+		$pconfig['per_page'] = $limit;
+		$pconfig['cur_page'] = $this->Media_model->page;
+		$this->pagination->initialize($pconfig);
 
-thumbnail / icon
-[file_uri] => /peterhebert.com-redirects.ods
-[mime_type] => application/vnd.oasis.opendocument.spreadsheet
-[date_created] => 2009-10-16 14:05:27
-[publish] => 1
-[title] => title
-[attached_to] => Array
-*/
-	$media_html = '';
+		$html .= $this->pagination->create_links_proper();
+		$html .= "</p>\r";
+
+		$html .= "<table class=\"borders full\">\r";
+		$html .= "\t<thead>\r";
+		$html .= "\t\t<tr>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"files\">{$this->cms_labels['file']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"attached\">{$this->cms_labels['media_attached_to']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
+		$html .= "<ul class=\"option-list\">\r";
+		//$html .= "<li><a href=\"#\" id=\"select-toggle\">{$this->cms_labels['toggle']}</a></li>\r";
+		$html .= "<li><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
+		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-none\">{$this->cms_labels['none']}</a></li>\r";
+		$html .= "</ul>\r";
+		$html .= "</th>\r";
+		$html .= "\t\t</tr>\r";
+		$html .= "\t</thead>\r";
+		$html .= "\t<tbody>\r";
 
 		foreach($this->Media_model->media_list as $media)
 		{
-			$media_html .= '<p>';
+
+			// get mime category
+			// get filename and extension
+			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+			$filename = basename($media['file_uri']);
+			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
+			$mid = $media['media_id'];
+
 			// determine edit uri
 			$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
 			if($this->Media_model->temp_lang != '')
 			{
 				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
 			}
-			// get mime category
-			// get filename and extension
-			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
-			
+
+			$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\">";
 			if($mime_cat == 'image' && $media['external'] == 0)
 			{
+				$html .= "<div class=\"image-left\">";
 				// get thumbnail
 				$img_path = $this->Media_model->dir_base.$media['file_uri'];
-				$media_html .= view_image($img_path,$this->Site_model->img_size_th,array('alt' => $media['title']));
+				$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+				$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+				$html .= "</div>";
 			}
-			
-			$filename = basename($media['file_uri']);
-			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
 
-			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
 			if(in_array($ext,$mime_icon_exts))
 			{
-				$media_html .= "<span class=\"icon ext_{$ext}\">";
+				$html .= "<span class=\"icon ext_{$ext}\">";
 			}
 			else
 			{
-				$media_html .= "<span class=\"icon icon_{$mime_cat}\">";
+				$html .= "<span class=\"icon icon_{$mime_cat}\">";
+			}
+			if($media['title'] != '' && $media['title'] != $filename)
+			{
+				$html .= $media['title']."<br />\r";
+			}
+			$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+			$html .= "</span>";
+			$html .= "<br />\r".$mime_labels[$ext];
+
+			$html .= "</th>\r";
+
+			$html .= "\t\t\t<td headers=\"file-{$mid} attached\">";
+
+			if(count($media['attached_to']) > 0)
+			{
+				$this->Content_model->temp_lang = $this->Media_model->temp_lang;
+				$this->Content_model->link_mode = 1;
+				$attachment_links = array();
+				foreach($media['attached_to'] as $page)
+				{
+					$this->Content_model->temp_id = $page['content_id'];
+					$this->Content_model->load_title();
+					$uri = $this->Content_model->generate_uri();
+					$attachment_links[] = anchor($uri,$this->Content_model->title, array('title' => sprintf($this->cms_labels['edit_this'],$this->Content_model->title)));
+				}
+				$html .= ul($attachment_links);
+			}
+			else
+			{
+				$html .= $this->cms_labels['none'];
 			}
 
-			$media_html .= anchor($edit_uri, $filename);
-			$media_html .= "</span>";
-			$media_html .= "</p>\r";
+			$html .= "</td>\r";
 
+			$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
+			$html .= "\t\t\t<td headers=\"file-{$mid} published\">";
+			$html .= $options[$media['publish']];
+			$html .= "</td>\r";
 
+			$html .= "\t\t\t<td headers=\"file-{$mid} actions\">";
 
-/*
+			$options = array(
+			'name'        => "select[]",
+			'id'          => "select[]",
+			'value'       => $media['media_id'],
+			);
 			
-		
-		
-			$thumb = '';
-				if()
-				{
-				}
-				else
-				{
-					if(url_exists($media['file_uri']))
-					{
-						$image_properties = array(
-						'src' => $media['file_uri'],
-						'alt' => $media['title'],
-						'style' => 'width: '.$this->Media_model->img_size_th.'px',
-						);
-						$thumb = img($image_properties);
-					}
-				}
-			}
-		
-			if($thumb === false || $thumb == '')
-			{
-			}
-			else
-			{
-				$media_html .= anchor($edit_uri, $thumb);
-			}
-		
-			$media_html .= anchor($edit_uri, $fname);
-		
-			if($thumb === false || $thumb == '')
-			{
-				$media_html .= "</span>";
-			}
-*/		}
-/*
-[media_id] => 10
-[file_uri] => /peterhebert.com-redirects.ods
-[external] => 0
-[mime_type] => application/vnd.oasis.opendocument.spreadsheet
-[date_created] => 2009-10-16 14:05:27
-[publish] => 1
-[title_id] => 48
-[title] => title
-[uri_title] => title
-[subtitle] => 
-[keywords] => baseball, Canada Day, holiday, Ottawa, sports
-[lang_ISO_639_3] => eng
-[attached_to] => Array
-(
-)
+			$html .= form_checkbox($options);
+			$html .= "</td>\r";
+			$html .= "\t\t</tr>\r";
+		}
+		$html .= "\t</tbody>\r";
+		$html .= "</table>\r";
 
+		$form_options = array(''=>'','delete' => 'delete','publish'=>'publish','unpublish'=>'unpublish');
+		$html .= "<p class=\"align-right\">";
+		$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
+		$html .=  form_dropdown('acion', $form_options);
+		$html .= "&nbsp; ";
 
-*/
-		$this->data['form'] = $media_html;
+		$html .= form_submit('submit', $this->cms_labels['submit']);
+		$html .= "</p>\n";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
 		
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = $this->cms_labels['media'];
@@ -199,161 +254,66 @@ thumbnail / icon
 
 		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"/assets/js/jquery_media_filetree.js\"></script>\r";
 
-		$this->load->view('cms/cms_form', $this->data);
+		$this->load->view('cms/media', $this->data);
 	}
 
-	function info()
+	function reset_cache()
 	{	
 
-		$this->Media_model->temp_id = $this->uri->segment(4);
-		$this->Media_model->load_media();
-		$this->data['file_uri'] = $this->Media_model->file_uri;
-/*		)
+		$this->Media_model->remove_media_cache();
+		
+		$thumbs = array();
+		
+		$files = $this->Media_model->list_flat();
+		foreach($files as $uri => $media)
 		{
-			//$this->Media_model->load_type_by_mime();
-			$this->Media_model->scope = 'media';
-			$this->Media_model->temp_id = $this->Media_model->media_id;
-			$this->Media_model->temp_lang = $this->Site_model->site_default_lang);
+			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+			$path_full = $this->Media_model->dir_base.$uri;
+			if($mime_cat == 'image')
+			{
+				$thumbs[] = view_image($path_full,$this->Site_model->img_size_th,array('alt' => $media['title']));
+			}
+			else
+			{
+				$poster_image = preg_replace('#^(.*)\.([a-zA-Z0-9]{2,6})$#','$1.jpg',$path_full);
+				if(file_exists($poster_image))
+				{
+					$thumbs[] = view_image($poster_image,$this->Site_model->img_size_th,array('alt' => $media['title']));
+				}
 			
-			//$this->Media_model->load_title();
+			}
 		}
+
+		$html = "<h2>Thumbnails</h2>\r";
+		$html .= "<div class=\"block\">\r";
+		foreach($thumbs as $img)
+		{
+			$html .= "<div class=\"image-left\">{$img}</div>\r";
+		}
+		$html .= "</div>\r";
+		$this->data['form'] = $html;
+
 		
-		if($this->Media_model->title != '')
-		{
-			$this->data['title'] = $this->Media_model->title;
-		}
-		
-*/
-
-		$this->load->view('cms/media_info', $this->data);
-		
-	}
-
-	function manage()
-	{	
-		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
-
-		// get media path from uri
-		$media_root = $this->Media_model->dir_base;
-
-		$raw_segs = $this->uri->segment_array();
-		if(count($raw_segs) > 3)
-		{
-			$uri_array = array_slice($raw_segs, 3);
-			$dir_uri = implode('/',$uri_array);
-			$dir_display = $dir_uri;
-			$my_uri = $this->Media_model->dir_base.'/'.$dir_uri;
-			
-		}
-		else
-		{
-			$my_uri = $this->Media_model->dir_base;
-			$dir_uri = '';
-			$dir_display = 'media root';
-		}
-
-		$media_root = $this->Media_model->dir_base;
-
-		//get list of directories in media folder
-		$this->Media_model->dir_current = $my_uri;
-		$this->Media_model->list_dirs();
-		$subdirs = array();
-		foreach($this->Media_model->dir_list_rel as $full_dir => $dir)
-		{
-			$dir_rel = trim(str_replace(MEDIA_PATH_ORIG,'',$dir),'/');
-			$link = 'cms/media/manage/'.$dir_rel;
-			$title = trim($dir_rel,'/');
-			
-			$subdirs[] = anchor($link,$title);
-		}
-
-
-		$form = "<p>Current directory: ".$dir_display."</p>";
-		if(count($subdirs) > 0)
-		{
-			$form .= "<h2>".$this->cms_labels['media_subdirs']."</h2>";
-			$form .= ul($subdirs);
-		}
-		
-		// scan files in current directory
-
-		$this->Media_model->dir_current = $my_uri;
-		$this->Media_model->list_files_unique();
-
-		$this->Media_model->update_media_batch();
-
-		if(count($this->Media_model->file_list) > 0)
-		{
-			$form .= "<h2>Files</h2>";
-			$form .= "<pre>";
-			$form .= print_r($this->Media_model->file_list,true);
-			$form .= "</pre>\r";
-
-		}
-		else
-		{
-			$form .= "<p>no files in this directory</p>";
-		}
-
-
-
-		$this->data['form'] = $form;
-
 		$msg = $this->Media_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
 		}
 
-
-
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/media",$this->cms_labels['media']);
-		$dirz = trim($dir_uri,'/');
-		if($dirz != '')
-		{
-			$breadcrumb[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
-			// build breadcrumb from dir path
-			$dir_array = explode('/',$dirz);
-
-			$dir_count = count($dir_array);
-			$cur = 1;
-			$base_dir = 'cms/media/manage';
-
-			$mydir = '';
-			
-			foreach ($dir_array as $tmp_dir)
-			{
-				$mydir .= '/'.$tmp_dir;
-				$link = $base_dir.$mydir;
-				if($cur < $dir_count)
-				{
-					$breadcrumb[] = anchor($link,$tmp_dir);
-				}
-				else
-				{
-					$breadcrumb[] = $tmp_dir;
-				}
-				$cur = $cur + 1;
-			}
-			
-			$title_tag[] = str_replace('/',' | ',$dirz);
-		}
-		else
-		{
-			$breadcrumb[] = $this->cms_labels['media_manage'];
-		}
-
+		$breadcrumb[] = $this->cms_labels['reset_media_cache'];
+		
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
-		$title_tag[] = $this->cms_labels['media_manage'];
+		$title_tag[] = $this->cms_labels['reset_media_cache'];
 		$title_tag[] = $this->cms_labels['media'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
-		$this->data['title_h1'] = $this->cms_labels['media_manage'];
+		$this->data['title_h1'] = $this->cms_labels['reset_media_cache'];
 
-		$this->load->view('cms/cms_form', $this->data);
-
+		$this->load->view('cms/media', $this->data);
+		
 	}
 
 	function edit()
@@ -368,7 +328,14 @@ thumbnail / icon
 			$this->Media_model->temp_lang = $params['lang'];
 		}
 		
+		$this->_process_edit();
 		$this->_form_edit();
+
+		$msg = $this->Media_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/media",$this->cms_labels['media']);
@@ -382,7 +349,6 @@ thumbnail / icon
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media_edit'];
 
-
 		$this->data['sidebar'] = $this->_media_meta_menu();
 
 		$this->load->view('cms/cms_form', $this->data);
@@ -392,7 +358,7 @@ thumbnail / icon
 	{
 		$this->load->helper('form');
 
-		$action = 'cms/media/edit';
+		$action = 'cms/media/edit/id/'.$this->Media_model->media_id;
 		$attributes = array(
 		'name' => 'media_editor',
 		'id' => 'media_editor'
@@ -416,20 +382,20 @@ thumbnail / icon
 
 		}
 
-		$form = form_open($action, $attributes);
-		$form .= form_hidden('media_id',$this->Media_model->media_id);
-		$form .= form_hidden('title_id',$this->Media_model->title_id);
+		$html = form_open($action, $attributes);
+		$html .= form_hidden('media_id',$this->Media_model->media_id);
+		$html .= form_hidden('title_id',$this->Media_model->title_id);
 		
-		$form .= form_fieldset($this->cms_labels['general_info']);
-
+		$html .= form_fieldset($this->cms_labels['general_info']);
+		
 		if($this->Media_model->type_uri_name == 'image')
 		{
 			if($this->Media_model->external == 0)
 			{
 				$file_path_full = $this->Media_model->dir_base.$this->Media_model->file_uri;
-				$form .= "<p>";
-				$form .= view_image($file_path_full,$this->Site_model->img_size_md,$this->Media_model->title);
-				$form .= "</p>";
+				$html .= "<p>";
+				$html .= view_image($file_path_full,$this->Site_model->img_size_md,array('alt' => $this->Media_model->title));
+				$html .= "</p>";
 			}
 			else
 			{
@@ -441,46 +407,68 @@ thumbnail / icon
 				'title' => $this->Media_model->title,
 				);
 
-				$form .= "<p>";
-				$form .= img($form_options);
-				$form .= "</p>";
+				$html .= "<p>";
+				$html .= img($form_options);
+				$html .= "</p>";
 			}
 		}
 
-		$form .= "<div class=\"row\">";
-		$form .= form_label($this->cms_labels['file']);
-		$form .= "<div class=\"filename\">";
-		$filename = str_replace('/','/ ',$this->Media_model->file_uri);
-		$filename = str_replace('/ / ','//',$filename);
-		$form .= $filename;
-		$form .= "</div>";
-		$form .= "</div>";
 
-		$pinfo = pathinfo($this->Media_model->file_uri);
-		$ext = $pinfo['extension'];
-		
-		$this->Media_model->lang_load();
-		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
-		$mime_names = $this->lang->line('mime');
-
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['mime']);
-		if(array_key_exists($ext,$mime_names))
+		$html .= form_hidden('external',$this->Media_model->external);
+		if($this->Media_model->external == 1)
 		{
-			$form .= $mime_names[$ext];
+
+			$form_options = array(
+			'name'        => 'file_uri',
+			'id'          => 'file_uri',
+			'class'	=> 'input',
+			'value' => $this->Media_model->file_uri,
+			);
+			$html .= "<p>";
+			$html .=  form_label($this->cms_labels['file_external_uri'], 'file_uri');
+			$html .=  form_input($form_options);
+			$html .= "</p>\n";
+
 		}
 		else
 		{
-			$form .= $this->Media_model->mime_type;
+			$html .= form_hidden('file_uri',$this->Media_model->file_uri);
+			$html .= form_hidden('mime_type',$this->Media_model->mime_type);
+		
+			$html .= "<div class=\"row\">";
+			$html .= form_label($this->cms_labels['file']);
+			$html .= "<div class=\"filename\">";
+			$filename = str_replace('/','/ ',$this->Media_model->file_uri);
+			$filename = str_replace('/ / ','//',$filename);
+			$html .= $filename;
+			$html .= "</div>";
+			$html .= "</div>";
+
+			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+			
+			$this->Media_model->lang_load();
+			$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+			$mime_names = $this->lang->line('mime');
+	
+			$html .= "<p>";
+			$html .= form_label($this->cms_labels['mime']);
+			if(array_key_exists($ext,$mime_names))
+			{
+				$html .= $mime_names[$ext];
+			}
+			else
+			{
+				$html .= $this->Media_model->mime_type;
+			}
+			$html .= "</p>";
 		}
-		$form .= "</p>";
 
 		$form_options = array(1 => $this->cms_labels['yes'], 0 => $this->cms_labels['no']);
 
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['publish'], 'publish');
-		$form .=  form_dropdown('publish', $form_options, $this->Media_model->publish);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['publish'], 'publish');
+		$html .=  form_dropdown('publish', $form_options, $this->Media_model->publish);
+		$html .= "</p>\n";
 
 		// convert dates to user timezone
 		$sys_zone = date_default_timezone_get();
@@ -506,20 +494,20 @@ thumbnail / icon
 		'class'	=> 'small_input',
 		'value' => $this->Media_model->date_created,
 		);
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['date_created'], 'date_created');
-		$form .=  form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['date_created'], 'date_created');
+		$html .=  form_input($form_options);
+		$html .= "</p>\n";
 
-		$form .= form_fieldset_close();
+		$html .= form_fieldset_close();
 		
-		$form .= form_fieldset($this->cms_labels['metadata']);
+		$html .= form_fieldset($this->cms_labels['metadata']);
 
 		$form_options = $this->Media_model->langs_dropdown();
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['language'], 'media_lang');
-		$form .=  form_dropdown('media_lang', $form_options, $this->Media_model->temp_lang);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['language'], 'media_lang');
+		$html .=  form_dropdown('media_lang', $form_options, $this->Media_model->temp_lang);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'id' => 'title',
@@ -527,10 +515,10 @@ thumbnail / icon
 		'class' => 'text',
 		'value' => $this->Media_model->title
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['title'],'title');
-		$form .= form_input($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['title'],'title');
+		$html .= form_input($form_options);
+		$html .= "</p>";
 
 		$form_options = array(
 		'id' => 'subtitle',
@@ -538,20 +526,16 @@ thumbnail / icon
 		'class' => 'text',
 		'value' => $this->Media_model->subtitle
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['subtitle'],'subtitle');
-		$form .= form_input($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
+		$html .= form_input($form_options);
+		$html .= "</p>";
 
-/*$form .= "<pre>";
-$form .= print_r($this->Media_model->metadata,true);
-$form .= "</pre>\r";
-*/
 		// start meta fields
 		foreach($this->Media_model->metadata as $index => $fd)
 		{
 			// get field data if it does not exist
-			if(array_key_exists('field_id',$fd))
+			if(array_key_exists('field_id',$fd) && $fd['field_id'] != '')
 			{
 				$tmp_ref_name = $fd['field_ref_name'];
 				$tmp_label = $fd['field_ref_name'];
@@ -564,16 +548,19 @@ $form .= "</pre>\r";
 			else
 			{
 				$this->Media_model->temp_id = $index;
-				$this->Media_model->load_field();
-
-				$tmp_ref_name = $this->Media_model->field_ref_name;
-				$tmp_needs_lang = $this->Media_model->field_needs_lang;
-				$tmp_input_type = $this->Media_model->field_input_type;
-				$tmp_validation = $this->Media_model->field_validation;
-				$tmp_label = $tmp_ref_name;
-				$tmp_meta_id = '';
-				$tmp_required = '';
+				if($this->Media_model->load_field())
+				{
+	
+					$tmp_ref_name = $this->Media_model->field_ref_name;
+					$tmp_needs_lang = $this->Media_model->field_needs_lang;
+					$tmp_input_type = $this->Media_model->field_input_type;
+					$tmp_validation = $this->Media_model->field_validation;
+					$tmp_label = $tmp_ref_name;
+					$tmp_meta_id = '';
+					$tmp_required = '';
+				}
 			}
+
 
 			// hidden fields
 			$form_options = array(
@@ -584,10 +571,11 @@ $form .= "</pre>\r";
 			'field_validation[]' =>  $tmp_validation,
 			'field_needs_lang[]' => $tmp_needs_lang
 			);
-			$form .= form_hidden($form_options);
+			$html .= form_hidden($form_options);
 
-			$this->Media_model->label_scope = 'field';
+			$this->Media_model->reset_label();
 			$this->Media_model->temp_id = $index;
+			$this->Media_model->label_scope = 'field';
 			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
 
 			if($this->Media_model->load_label())
@@ -595,8 +583,8 @@ $form .= "</pre>\r";
 				$tmp_label = $this->Media_model->label;
 			}
 
-			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $tmp_ref_name);
+			$html .= "<p>\r";
+			$html .= form_label($tmp_label, $tmp_ref_name);
 
 			$form_options = array(
 			'id' => $tmp_ref_name,
@@ -608,18 +596,18 @@ $form .= "</pre>\r";
 			switch($tmp_input_type) {
 			case 'textarea':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			case 'richtext':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			default:
-				$form .=  form_input($form_options);
+				$html .=  form_input($form_options);
 			}
 
 
-			$form .= "</p>\r";
+			$html .= "</p>\r";
 		}
 		// end meta fields
 
@@ -629,20 +617,122 @@ $form .= "</pre>\r";
 		'class' => 'textarea',
 		'value' => $this->Media_model->keywords
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['keywords'],'keywords');
-		$form .=  form_textarea($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
+		$html .= "</p>";
 
-		$form .= form_fieldset_close();
+		$html .= form_fieldset_close();
 
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
-		$form .= form_close();
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
 
-		$this->data['form'] = $form;
+		$this->data['form'] = $html;
 
+	}
+
+	function _process_edit()
+	{
+		// if form submitted, process data
+		if($this->input->post('submit') != '')
+		{
+			$this->load->library('form_validation');
+
+			// set validation rules
+			$this->form_validation->set_rules('media_id', $this->cms_labels['id'], 'required|is_natural_no_zero');
+			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
+			
+			if($this->input->post('external') == 1)
+			{
+				$this->form_validation->set_rules('file_uri', $this->cms_labels['file'], 'required|uri_exists');
+			}
+			else
+			{
+				$this->form_validation->set_rules('file_uri', $this->cms_labels['file'], 'required|path_file');
+			}
+			
+
+			$tmp_field_id = $this->input->post('field_id');
+			$tmp_field_ref_name = $this->input->post('field_ref_name');
+			$tmp_meta_id = $this->input->post('meta_id');
+			$tmp_required = $this->input->post('required');
+			$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+			$tmp_validation = $this->input->post('field_validation');
+
+			// set validation of field data
+			foreach($tmp_field_id as $index => $fd_id)
+			{
+				$tmp_valid = array();
+
+				//is the field required?
+				if($tmp_required[$index] == 1)
+				{
+					$tmp_valid[] = 'required';
+				}
+
+				// get field validation
+				if($tmp_validation[$index] != '')
+				{
+					$tmp_valid[] = $tmp_validation[$index];
+				}
+				
+				$lbl_name = $tmp_field_ref_name[$index];
+				
+				// load label
+	
+				$this->Media_model->label_scope = 'field';
+				$this->Media_model->temp_id = $fd_id;
+	
+				if($this->Media_model->load_label())
+				{
+					$lbl_name = $this->Media_model->label;
+				}
+
+				$concat_valid = implode('|', $tmp_valid);
+
+				if($concat_valid != '')
+				{
+					$this->form_validation->set_rules('value_'.$fd_id, $lbl_name, $concat_valid);
+				}
+
+			}
+
+			// validate and process if all valid
+			$form_is_valid = $this->form_validation->run();
+			if ($form_is_valid)
+			{
+				$this->Media_model->media_id = $this->input->post('media_id');
+				$this->Media_model->file_uri = $this->input->post('file_uri');
+				$this->Media_model->external = $this->input->post('external');
+				$this->Media_model->mime_type = $this->input->post('mime_type');
+				$this->Media_model->date_created = $this->input->post('date_created');
+				$this->Media_model->publish = $this->input->post('publish');
+
+				$this->Media_model->title_id = $this->input->post('title_id');
+				$this->Media_model->temp_lang = $this->input->post('media_lang');
+				$this->Media_model->title = $this->input->post('title');
+				$this->Media_model->subtitle = $this->input->post('subtitle');
+				$this->Media_model->keywords = $this->input->post('keywords');
+
+/*				$this->Media_model->temp_id = $this->input->post('type_id');
+				$this->Media_model->scope = 'media';
+				$this->Media_model->load_type();
+*/	
+				$tmp_field_id = $this->input->post('field_id');
+				$tmp_field_name = $this->input->post('field_name');
+				$tmp_meta_id = $this->input->post('meta_id');
+				$tmp_required = $this->input->post('required');
+				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+
+				$this->Media_model->messages[] = 'form is valid';
+			}
+			else
+			{
+				$this->Media_model->messages[] = validation_errors();
+			}
+		}		
 	}
 
 	function build_filetree($files=array())

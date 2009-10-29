@@ -47,9 +47,26 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 /* image containers */
 .placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }
 .image { margin-bottom: 1em;}
-.image .image-left { float: left; margin-right: 1em; }
-.image .image-right { float: right; margin-left: 1em; }
+.image-left { float: left; margin-right: 1em; }
+.image-right { float: right; margin-left: 1em; }
 .image img { border: 1px solid #000000; }
+
+.hide {
+	visibility: hidden;
+	display: none;
+}
+
+/* option lists */
+ul.option-list {
+	list-style:none inside;
+	margin:0;
+	padding:0;
+}
+ul.option-list li { 
+	list-style-type: none;
+	text-align: center;
+}
+
 
 /* thumbnail lists */
 	ul.thumbnails {
@@ -170,12 +187,27 @@ width:9.5em;
 	display:inline-block;
 }
 #page form .radiogroup label,
-#page form label.inline {
+#page form label.inline,
+#page form .form-filter label
+{
 float: none;
 display: inline;
-margin: 0 1ex; width: auto;
+margin: 0 .5em 0 0;
+width: auto;
 white-space:nowrap;
 }
+#page form .form-filter
+{
+margin-bottom: 1em;
+}
+#page form .form-filter input,
+#page form .form-filter select
+{
+margin-right: 1em;
+}
+
+
+
 #page form fieldset div.row div.filename {
 float: left;
 width: 22em;
@@ -276,6 +308,10 @@ font-size:0.9em;
 #page table.borders 
 {
 margin-bottom:1em;
+}
+#page .full 
+{
+width: 100%;
 }
 
 #page table.borders td,

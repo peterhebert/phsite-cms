@@ -22,7 +22,7 @@ echo $title_tag.' | ';
 	 ?>
 	</div>
 	<div class="page-wrap block">
-		<div class="column w3">
+		<div class="column w5">
 			<h1><?php echo $title_h1; ?></h1>
 			<?php 
 			if (isset($msg)){
@@ -33,7 +33,7 @@ echo $title_tag.' | ';
 			}
 			?>
 		</div>
-		<div class="float w3">
+		<div class="float w1">
 			<?php 
 			if (isset($sidebar)) {
 				echo $sidebar;

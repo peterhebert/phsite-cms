@@ -153,6 +153,7 @@ class Content extends MY_Controller
 		// fields
 		foreach($this->Content_model->metadata as $index => $fd)
 		{
+			$this->Content_model->reset_label();
 			// get field data if it does not exist
 			if(array_key_exists('field_id',$fd))
 			{
@@ -189,6 +190,7 @@ class Content extends MY_Controller
 			);
 			$form .= form_hidden($form_options);
 
+			$this->Content_model->reset_label();
 			$this->Content_model->label_scope = 'field';
 			$this->Content_model->temp_id = $index;
 			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
