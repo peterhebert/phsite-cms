@@ -21,9 +21,14 @@ $lang['is_natural_no_zero']	= "'%s' must contain a number greater than zero.";
 
 /* custom values */
 $lang['is_date']	= "'%s' doit contenir une date.";
+$lang['is_phone']	= "'%s' doit contenir un num&eacute;ro de t&eacute;l&eacute;phone.";
 $lang['alpha_num_spaces']	= "'%s' ne peut contenir que des caract&egrave;res alphanum&eacute;riques, des espsaces, des tirets bas, et des traits d'union.";
 $lang['path_file'] = "'%s' doit &ecirc;tre un fichier.";
-$lang['path_dir'] = "'%s' doit &ecirc;tre un répertoire.";
+$lang['path_dir'] = "'%s' doit &ecirc;tre un r&eacute;pertoire.";
+$lang['any_value'] = "n'importe quel valeur";
+$lang['uri_exists'] = "'%s' doit &ecirc;tre un adresse URL valide d'un fichier qui existe";
+
+
 
 /* End of file form_validation_lang.php */
 /* Location: ./system/application/language/francais/form_validation_lang.php */
