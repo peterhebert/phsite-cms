@@ -44,13 +44,8 @@ echo $title_tag.' | ';
 	</div>
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
-<script type="text/javascript" src="/assets/js/tiny_mce/tiny_mce_gzip.js"></script>
-<script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
-<script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_required_fields.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_new_content.js"></script>
 <?php
+require_once('js_includes.html');
 if (isset($custom_js)){
 	echo $custom_js;
 }

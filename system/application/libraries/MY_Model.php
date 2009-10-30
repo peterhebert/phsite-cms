@@ -45,7 +45,7 @@ class MY_Model extends Model {
 
 	// metadata variables
 	var $metadata = array();
-	var $meta_id, $meta_rel_id, $value;
+	var $meta_id, $rel_id, $value;
 
 	// titles & keywords
 	var $title_id, $title_rel_id, $title, $uri_title, $subtitle, $keywords, $title_updated;
@@ -410,7 +410,7 @@ class MY_Model extends Model {
 				'required' => $row->required,
 				'order' => $row->order,
 				'meta_id' => '',
-				'meta_rel_id' => '',
+				'rel_id' => '',
 				'value' => '',
 				'lang_ISO_639_3' => '',
 				'date_updated' => '',
@@ -719,7 +719,7 @@ class MY_Model extends Model {
 		$fields = $this->field_list;
 
 		$this->db->where('scope',$this->scope);
-		$this->db->where('meta_rel_id',$this->temp_id);
+		$this->db->where('rel_id',$this->temp_id);
 
 		if ($this->temp_lang != '')
 		{
@@ -789,7 +789,7 @@ class MY_Model extends Model {
 			
 			$db_fields = array(
 			'scope' => $this->scope,
-			'meta_rel_id' => $meta['meta_rel_id'],
+			'rel_id' => $meta['rel_id'],
 			'field_id' => $meta['field_id'],
 			'field_ref_name' => $meta['field_ref_name'],
 			'value' => $meta['value'],
@@ -943,11 +943,11 @@ class MY_Model extends Model {
 		}
 
 		// first match values
-		$sql = "SELECT meta_rel_id AS rel_id, AVG(MATCH(`value`) AGAINST ('{$match}')) * 4 AS score
+		$sql = "SELECT rel_id AS rel_id, AVG(MATCH(`value`) AGAINST ('{$match}')) * 4 AS score
 		FROM c_metadata
 		WHERE MATCH(`value`) AGAINST('{$match}'){$lang_sql} 
 		AND scope = '{$this->scope}'
-		GROUP BY meta_rel_id";
+		GROUP BY rel_id";
 
 		$query = $this->db->query($sql);
 		

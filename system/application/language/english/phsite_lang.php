@@ -101,6 +101,17 @@ $lang['cms_labels'] = array(
 'media_results' => 'Media Results',
 'media_upload' => "upload media",
 'media' => "Media",
+
+'delete_failure' => "Could not delete '%s'",
+'insert_failure' => "Could not insert '%s'",
+'update_failure' => "Could not update '%s'",
+'update_success' => "'%s' updated successfully",
+'insert_success' => "'%s' inserted successfully",
+'delete_success' => "'%s' deleted successfully",
+'delete_confirm_multiple' => 'Are you sure you want to delete the selected items',
+
+
+
 'menu' => "Menu",
 'metadata_delete_failure' => "Could not delete metadata '%s'",
 'metadata_insert_failure' => "Could not insert metadata '%s'",
@@ -133,6 +144,8 @@ $lang['cms_labels'] = array(
 'powered_by' => "Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\" title=\"Visit the phsite website in a new window\">phSite CMS</a>",
 'publish' => "Publish",
 'published' => "Published",
+'publish_update_failure' => "Publish status could not be updated",
+'publish_update_success' => "Publish status successfully updated",
 'read_more' => "Read More",
 'recent_content' => "Recently Added",
 'recently_posted_to' => "Recently posted to %s",

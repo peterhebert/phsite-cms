@@ -551,7 +551,7 @@ class Media_model extends MY_Model {
 					$meta[$index]['value'] = $this->iptc[$iptc_key][0];
 					if($this->media_id != '')
 					{
-						$meta[$index]['meta_rel_id'] = $this->media_id;
+						$meta[$index]['rel_id'] = $this->media_id;
 					}
 				}
 			}
@@ -738,7 +738,7 @@ class Media_model extends MY_Model {
 	
 			foreach($this->metadata as $index => $info)
 			{
-				$this->metadata[$index]['meta_rel_id'] = $this->media_id;
+				$this->metadata[$index]['rel_id'] = $this->media_id;
 			}
 
 			$this->update_metadata();
@@ -786,6 +786,97 @@ class Media_model extends MY_Model {
 		
 	}
 
+	function update_publish()
+	{
+
+		$data = array(
+		'publish' => $this->publish,
+		);
+
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $mid)
+			{
+				$this->db->or_where('media_id', $mid);
+			}
+			// update
+			if($this->db->update('c_media', $data))
+			{
+				echo "<p>".$this->db->last_query()."</p>\r";
+				return TRUE;
+			}
+
+		}
+
+		return FALSE;
+
+	}
+
+/*	function delete_media()
+	{
+
+		// first load to get file URI
+		$this->load_media();
+		$this->load_title();
+
+		$name = $this->file_uri;
+		if($this->title != '')
+		{
+			$name = $this->title;
+		}
+		
+		// if local then delete
+		if($this->external == 0)
+		{
+			$full_path = $this->dir_base.$this->file_uri;
+			if(file_exists($full_path))
+			{
+				if(!unlink($full_path))
+				{
+					$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+					return FALSE;
+				}
+			}
+		}
+		
+		// delete all titles, metadata
+		$tables = array('c_titles', 'c_metadata');
+		$this->db->where('scope', 'media');
+		$this->db->where('rel_id', $this->media_id);
+		if(!$this->db->delete($tables))
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		// delete all attached instances of media and media entry
+		$tables = array('c_media', 'r_attachments');
+		$this->db->where('media_id', $this->media_id);
+		if(!$this->db->delete($tables))
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		$this->messages[] = sprintf($this->cms_labels['delete_success'],$name);
+		return TRUE;
+
+	}
+*/
+	function delete_batch()
+	{
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $mid)
+			{
+				$this->temp_id = $mid;
+				$this->delete_media();
+			}
+
+		}
+	}
 }
+
 
 ?>

@@ -582,7 +582,7 @@ class Setup extends MY_Controller
 					$tmp_meta = array(
 					'meta_id' => $tmp_meta_id[$index],
 					'scope' => $this->Site_model->scope,
-					'meta_rel_id' => $this->Site_model->site_id,
+					'rel_id' => $this->Site_model->site_id,
 					'field_id' => $this->Site_model->field_id,
 					'field_ref_name' => $this->Site_model->field_ref_name,
 					'value' => $value,

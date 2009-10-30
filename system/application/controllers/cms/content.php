@@ -481,7 +481,7 @@ class Content extends MY_Controller
 						$tmp_meta = array(
 						'meta_id' => $tmp_meta_id[$index],
 						'scope' => $this->Content_model->scope,
-						'meta_rel_id' => $this->Content_model->content_id,
+						'rel_id' => $this->Content_model->content_id,
 						'field_id' => $this->Content_model->field_id,
 						'field_ref_name' => $this->Content_model->field_ref_name,
 						'value' => $value,

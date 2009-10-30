@@ -17,7 +17,53 @@ class Media extends MY_Controller {
 	function manage()
 	{	
 		$this->Media_model->lang_load();
+		
+		$this->_process_manage();
+		$this->_form_manage();
 
+		$msg = $this->Media_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+		
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['media'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['media'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['media'];
+		
+		$this->custom_js[] = "<script type=\"text/javascript\" src=\"/assets/js/admin_ui/select_checkboxes.js\"></script>";
+		
+		$confirm_delete = "<script type=\"text/javascript\">\r";
+		$confirm_delete .= "/* <![CDATA[ */\r";
+		$confirm_delete .= "$().ready(function(){\r";
+		$confirm_delete .= "\tvar deleteText = '".$this->cms_labels['delete_confirm_multiple']."';\r";
+		
+		$confirm_delete .= "\t$(\"input[name='submit']\").click(function(){\r";
+		$confirm_delete .= "\t\tvar action = $(\"select[name='action']\").val();\r";
+		$confirm_delete .= "\t\tif(action == 'delete') {\r";
+		$confirm_delete .= "\t\t\tvar answer = confirm(action + ' ' + deleteText);\r";
+		$confirm_delete .= "\t\t\treturn answer // answer is a boolean\r";
+		$confirm_delete .= "\t\t}\r";
+		$confirm_delete .= "\t});\r";
+
+		$confirm_delete .= "});\r";
+		$confirm_delete .= "/* ]]> */\r";
+		$confirm_delete .= "</script>";
+		
+		$this->custom_js[] = $confirm_delete;
+		
+		$this->data['custom_js'] = implode("\r",$this->custom_js);
+
+		$this->load->view('cms/media', $this->data);
+	}
+
+	function _form_manage()
+	{
 		// get filter for list
 		$params = $this->uri->uri_to_assoc(3);
 
@@ -131,8 +177,7 @@ class Media extends MY_Controller {
 		$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
 		$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
 		$html .= "<ul class=\"option-list\">\r";
-		//$html .= "<li><a href=\"#\" id=\"select-toggle\">{$this->cms_labels['toggle']}</a></li>\r";
-		$html .= "<li><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
+		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
 		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-none\">{$this->cms_labels['none']}</a></li>\r";
 		$html .= "</ul>\r";
 		$html .= "</th>\r";
@@ -219,7 +264,6 @@ class Media extends MY_Controller {
 
 			$options = array(
 			'name'        => "select[]",
-			'id'          => "select[]",
 			'value'       => $media['media_id'],
 			);
 			
@@ -233,7 +277,7 @@ class Media extends MY_Controller {
 		$form_options = array(''=>'','delete' => 'delete','publish'=>'publish','unpublish'=>'unpublish');
 		$html .= "<p class=\"align-right\">";
 		$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
-		$html .=  form_dropdown('acion', $form_options);
+		$html .=  form_dropdown('action', $form_options);
 		$html .= "&nbsp; ";
 
 		$html .= form_submit('submit', $this->cms_labels['submit']);
@@ -241,20 +285,51 @@ class Media extends MY_Controller {
 		$html .= form_close();
 
 		$this->data['form'] = $html;
+	}
+
+	function _process_manage()
+	{
+		$select = $this->input->post('select');
 		
-		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = $this->cms_labels['media'];
-		
-		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+		if($select !== FALSE && is_array($select))
+		{
+			$this->Media_model->temp_value = $select;
+			$action = $this->input->post('action');
+			if($action)
+			{
+				switch($action)
+				{
+				case 'delete':
+					//$this->Media_model->delete_batch();
+					break;
+				case 'publish':
+					$this->Media_model->publish = 1;
+					if($this->Media_model->update_publish())
+					{
+						$this->Media_model->messages[] = $this->cms_labels['publish_update_success'];
+					}
+					else
+					{
+						$this->Media_model->messages[] = $this->cms_labels['publish_update_failure'];
+					}
+					break;
+				case 'unpublish':
+					$this->Media_model->publish = 0;
+					if($this->Media_model->update_publish())
+					{
+						$this->Media_model->messages[] = $this->cms_labels['publish_update_success'];
+					}
+					else
+					{
+						$this->Media_model->messages[] = $this->cms_labels['publish_update_failure'];
+					}
+					break;
+				default:
+				}
+			}
+		}
+		$this->Media_model->temp_value = '';
 
-		$title_tag[] = $this->cms_labels['media'];
-		$title_tag[] = $this->cms_labels['phsite_cms'];
-		$this->data['title_tag'] = implode(' | ',$title_tag);
-		$this->data['title_h1'] = $this->cms_labels['media'];
-
-		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"/assets/js/jquery_media_filetree.js\"></script>\r";
-
-		$this->load->view('cms/media', $this->data);
 	}
 
 	function reset_cache()

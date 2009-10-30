@@ -14,7 +14,7 @@ echo $title_tag.' | ';
 <script type="text/javascript" src="/assets/js/tinymce_richtext.js"></script>
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery_external_links.js"></script>
-<script type="text/javascript" src="/assets/js/jquery_change_type.js"></script>
+<script type="text/javascript" src="/assets/js/admin_ui/jquery_change_type.js"></script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>

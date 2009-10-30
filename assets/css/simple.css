@@ -367,16 +367,18 @@ div.filetree ul li {
 	padding: 0px;
 	padding-left: 1.375em;
 	margin: 0px;
-	background: url(/assets/js/jqueryFileTree/images/file.png) left top no-repeat;
+	background: url(/assets/icons/other/file.png);
 }
 div.filetree li.directory,
 div.filetree li.collapsed
 {
-	background: url(/assets/js/jqueryFileTree/images/directory.png) left top no-repeat;
+	background: url(/assets/icons/tango/places/folder.png) left top no-repeat;
+	background: url(/assets/icons/other/directory.png) left top no-repeat;
 }
 div.filetree li.expanded
 {
-	background: url(/assets/js/jqueryFileTree/images/folder_open.png) left top no-repeat;
+	background: url(/assets/icons/other/folder_open.png) left top no-repeat;
+	background: url(/assets/icons/tango/status/folder-open.png) left top no-repeat;
 }
 div.filetree li.collapsed ul {
 	display: none;
@@ -390,7 +392,7 @@ div.filetree li.expanded ul {
 	padding: 0px;
 	padding-left: 1.375em;
 	margin: 0px;
-	background: url(/assets/js/jqueryFileTree/images/file.png) left top no-repeat;
+	background: url(/assets/icons/other/file.png) left top no-repeat;
 }
 
 div.filetree ul li.icon_image, span.icon_image { background: url(/assets/icons/fugue/image.png) left top no-repeat; }

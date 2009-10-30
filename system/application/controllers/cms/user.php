@@ -487,7 +487,7 @@ class User extends MY_Controller
 					$tmp_meta[$row_key] = array(
 					'meta_id' => $user_meta_ids[$index],
 					'scope' => 'users',
-					'meta_rel_id' => $this->User_model->user_id,
+					'rel_id' => $this->User_model->user_id,
 					'field_id' => $fd_id,
 					'field_ref_name' => $field_names[$index],
 					'value' => $this->input->post($val_lbl),

@@ -16,6 +16,8 @@ class MY_Controller extends Controller {
 
 	var $data = array();
 	var $cms_labels = array();
+	var $custom_js = array();
+
 	
 	/**
 	 * Constructor
