@@ -8,8 +8,10 @@ class User extends MY_Controller
 
 		$this->load->model('User_model');
 		$this->load->helper('form');
+		$this->load->library('session');
 
-		//$this->_authenticate();
+		$this->_authenticate();
+		//$this->_load_cms_labels();
 
 	} // end constructor
 
@@ -18,12 +20,15 @@ class User extends MY_Controller
 
 		$userlist = array();
 
-//		if($this->session->userdata('admin') != 1)
-//		{
-//			$user_name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
-//			$user_url = "cms/user/edit/id/".$this->session->userdata('user_id');
-//			$userlist[] = anchor($user_url, $user_name);
-//		} else {
+		if($this->session->userdata('admin') != 1)
+		{
+// if logged in user not an admin, then direct to their user account editor
+
+			echo $this->session->userdata('user_id');
+			$user_name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
+			$user_url = "cms/user/edit/id/".$this->session->userdata('user_id');
+			$userlist[] = anchor($user_url, $user_name);
+		} else {
 
 			$this->User_model->get_list();
 
@@ -37,7 +42,7 @@ class User extends MY_Controller
 				}
 			}
 
-//		}
+		}
 		
 		if(count($userlist) > 0)
 		{
@@ -125,7 +130,11 @@ class User extends MY_Controller
 		$menu = "<h2>Users</h2>\r";
 		$menu .=  "<ul>\r";
 		$menu .=  "<li>".anchor("cms/user/","Edit Users")."</li>\r";
-		$menu .=  "<li>".anchor("cms/user/user_meta_fields","Edit user metadata fields")."</li>\r";
+		if($this->session->userdata('admin') == 1)
+		{
+			$menu .=  "<li>".anchor("cms/user/edit",$this->cms_labels['user_new'])."</li>\r";
+			$menu .=  "<li>".anchor("cms/user/user_meta_fields","Edit user metadata fields")."</li>\r";
+		}
 		if($this->User_model->user_id != '')
 		{
 			$menu .= "<li>User Metadata\r";

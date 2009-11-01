@@ -199,13 +199,14 @@ class User_model extends MY_Model {
     }
 
     // authenticate user
-	function authenticate_user($usr = NULL,$pwd = NULL)
+	function authenticate_user()
     {
-		if(isset($usr) && isset($pwd))
+
+		if($this->temp_value != '' && $this->tmp_pwd != '')
 		{
 
 			$this->db->join('r_sites_users', 's_users.user_id = r_sites_users.user_id', 'left');
-			$this->db->where('s_users.user_id', $this->user_id);
+			$this->db->where('s_users.username', $this->temp_value);
 			$this->db->where('site_id', $this->site_id);
 			$this->db->limit(1);
 		
@@ -215,8 +216,9 @@ class User_model extends MY_Model {
 			{
 				$row = $query->row_array();
 				
-				if($this->checkPassword($pwd,$row['password']))
+				if($this->checkPassword($this->tmp_pwd,$row['password']))
 				{
+					$this->user_id = $row['user_id'];
 					$this->name_first = $row['name_first'];
 					$this->name_last = $row['name_last'];
 					$this->username = $row['username'];

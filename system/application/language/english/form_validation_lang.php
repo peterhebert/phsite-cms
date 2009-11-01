@@ -26,7 +26,8 @@ $lang['alpha_num_spaces']	= "'%s' may only contain alpha-numeric characters, spa
 $lang['path_file'] = "'%s' must be an existing file.";
 $lang['path_dir'] = "'%s' must be an existing directory.";
 $lang['any_value'] = "any value";
-$lang['uri_exists'] = "'%s' must be a valid existing file URL";
+$lang['is_uri'] = "'%s' must be a valid URL";
+$lang['uri_exists'] = "'%s' must be a valid and existing URL";
 
 /* End of file form_validation_lang.php */
 /* Location: ./system/application/language/english/form_validation_lang.php */

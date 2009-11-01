@@ -12,6 +12,9 @@ echo $title_tag.' | ';
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<div id="dialog" title="Delete the selected items?" class="hide">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>These items will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block" id="breadcrumb">

@@ -12,9 +12,9 @@ class Content extends MY_Controller
 		$this->load->helper('timezone');
 		$this->load->library('session');
 
-		//$this->_authenticate();
-		$this->_load_site_metadata();
-		$this->_load_cms_labels();
+		$this->_authenticate();
+//		$this->_load_site_metadata();
+//		$this->_load_cms_labels();
 	}
 
 	function index()
@@ -34,7 +34,10 @@ class Content extends MY_Controller
 		$this->data['form'] = $body;
 
 		$this->data['title_h1'] = $this->cms_labels['content'];
-		$this->data['breadcrumb'] = anchor("cms",$this->cms_labels['phsite_cms']).' : '.$this->cms_labels['content'];
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['content'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$this->data['title_tag'] = $this->cms_labels['content'].' ';
 		
@@ -80,12 +83,15 @@ class Content extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= anchor("cms/content","Content").' : ';
-		$breadcrumb .= 'Content editor';
-		$this->data['breadcrumb'] = $breadcrumb;
-		$this->data['title_tag'] = 'Content editor ';
-		$this->data['title_h1'] = 'Content editor';
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/content",$this->cms_labels['content']);
+		$breadcrumb[] = $this->cms_labels['content_editor'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+
+
+		$this->data['title_tag'] = $this->cms_labels['content_editor'];
+		$this->data['title_h1'] = $this->cms_labels['content_editor'];
 		
 		$this->data['sidebar'] = $this->_content_meta_menu();
 
@@ -217,7 +223,7 @@ class Content extends MY_Controller
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
 				$dir_list_temp = $this->Media_model->dir_list;
-				$dir_vals[''] = $this->cms_labels['media_root'];
+				$dir_vals['/'] = $this->cms_labels['media_root'];
 				
 				foreach($dir_list_temp as $the_dir) {
 					$temp_dir_val = str_replace($media_root,'',$the_dir);

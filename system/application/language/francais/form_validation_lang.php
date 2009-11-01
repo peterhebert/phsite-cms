@@ -27,6 +27,7 @@ $lang['path_file'] = "'%s' doit &ecirc;tre un fichier.";
 $lang['path_dir'] = "'%s' doit &ecirc;tre un r&eacute;pertoire.";
 $lang['any_value'] = "n'importe quel valeur";
 $lang['uri_exists'] = "'%s' doit &ecirc;tre un adresse URL valide d'un fichier qui existe";
+$lang['is_uri'] = "'%s' doit &ecirc;tre un adresse URL valide";
 
 
 

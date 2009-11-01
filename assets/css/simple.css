@@ -3,7 +3,7 @@
 body {
 font-family:Georgia, "Times New Roman", Times, serif;
 }
-h1,h2,h3,h4,h5,h6, .menu {
+h1,h2,h3,h4,h5,h6, .menu, button {
 font-family: Tahoma, Arial, Helvetica, sans-serif;
 }
 a { color:#000099; text-decoration:underline}
@@ -454,3 +454,4 @@ div.filetree ul li.ext_ps, span.ext_ps
 { background: url(/assets/icons/fugue/layer-vector.png) left top no-repeat; }
 div.filetree ul li.ext_swf, span.ext_swf
 { background: url(/assets/icons/fugue/document-flash-movie.png) left top no-repeat; }
+

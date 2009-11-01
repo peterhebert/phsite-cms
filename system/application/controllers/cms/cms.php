@@ -111,10 +111,13 @@ class Cms extends MY_Controller
 			// validate and process if all valid
 			if ($this->form_validation->run() == FALSE)
 			{
-				$this->data['msg'] = validation_errors();
+				$this->User_model->messages[] = validation_errors();
 			} else {
 				// perform authentication
-				$auth = $this->User_model->authenticate_user($this->input->post('username'),$this->input->post('password'));
+				$this->User_model->temp_value = $this->input->post('username');
+				$this->User_model->tmp_pwd = $this->input->post('password');
+				
+				$auth = $this->User_model->authenticate_user();
 
 				if($auth === TRUE)
 				{
@@ -140,19 +143,8 @@ class Cms extends MY_Controller
 					$attempts = $attempts +1;
 					$sess = array('attempts' => $attempts);
 					$this->session->set_userdata($sess);
-					switch($attempts)
-					{
-					case 1:
-						$numtxt =  " (1st attempt - 2 remaining)";
-						break;
-					case 2:
-						$numtxt =  " (2nd attempt - 1 remaining)";
-						break;
-					default:
-						$numtxt =  "";
-						break;
-					}
-					$this->data['msg'] = "Login failed{$numtxt}, please try again";
+
+					$this->User_model->messages[] = $this->cms_labels['login_failed'];
 				}
 
 			}
@@ -160,13 +152,28 @@ class Cms extends MY_Controller
 		}
 
 		$this->data['showform'] = TRUE;
-
-		if ($attempts >= 3) {
+		if($attempts <= 0)
+		{
+		}
+		elseif($attempts < 3)
+		{
+			$this->User_model->messages[] = sprintf($this->cms_labels['login_nth_attempt'],$attempts,3 - $attempts);
+		}
+		else
+		{
 			$this->session->sess_destroy();
 			$sess = array('attempts' => $attempts);
 			$this->session->set_userdata($sess);
-			$this->data['msg'] = '3 attempts to login have been made. Access is denied for the next 2 hours';
+
+			$this->User_model->messages[] = sprintf($this->cms_labels['login_lockout'],$attempts,2);
+
 			$this->data['showform'] = FALSE;
+		}
+
+		$msg = $this->User_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
 		}
 
 		$this->data['action'] = site_url("cms/login");
@@ -180,7 +187,13 @@ class Cms extends MY_Controller
 
 	function logout()   
 	{  
-		$this->session->sess_destroy();
+
+		$attempts = $this->session->userdata('attempts');
+		if($attempts === FALSE || $attempts < 3)
+		{
+			$this->session->sess_destroy();
+		}
+
 		redirect('');
 		exit();
 	} 

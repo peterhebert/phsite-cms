@@ -46,10 +46,14 @@ class Media extends MY_Controller {
 		$confirm_delete .= "\t$(\"input[name='submit']\").click(function(){\r";
 		$confirm_delete .= "\t\tvar action = $(\"select[name='action']\").val();\r";
 		$confirm_delete .= "\t\tif(action == 'delete') {\r";
-		$confirm_delete .= "\t\t\tvar answer = confirm(action + ' ' + deleteText);\r";
+		$confirm_delete .= "\t\t\tvar answer = confirm(deleteText);\r";
 		$confirm_delete .= "\t\t\treturn answer // answer is a boolean\r";
 		$confirm_delete .= "\t\t}\r";
 		$confirm_delete .= "\t});\r";
+
+
+
+
 
 		$confirm_delete .= "});\r";
 		$confirm_delete .= "/* ]]> */\r";

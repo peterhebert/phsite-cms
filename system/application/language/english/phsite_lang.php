@@ -25,6 +25,7 @@ $lang['cms_labels'] = array(
 'content_update_success' => "Content has been successfully updated",
 'content_results' => 'Content Results',
 'content' => "Content",
+'content_editor' => "Content editor",
 'data_structure' => "Data Structure",
 'data_type' => "Data Type",
 'date_created_start' => "Created / Start Date",
@@ -81,6 +82,15 @@ $lang['cms_labels'] = array(
 'logged_in_as' => "Logged in as",
 'login' => "Login",
 'logout' => "Logout",
+
+'login_nth_attempt' => "%d failed login attempt has been made. %d attempts remain",
+'login_failed' => "Login failed, please try again",
+'login_lockout' => "%d attempts to login have been made. Access is denied for the next %d hours",
+
+
+
+
+
 'matches' => "Matches for '%s'",
 'max_length' => "Maximum Length",
 'media_edit' => "Edit Media",
@@ -196,6 +206,7 @@ $lang['cms_labels'] = array(
 'update_success' => "'%s' has been successfully updated",
 'user_edit' => "Edit User",
 'user_info_fields_req' => "All user info fields are required",
+'user_new' => "Create New User",
 'user_info' => "User Info",
 'user_metadata' => "User metadata",
 'user_type' => "User type",

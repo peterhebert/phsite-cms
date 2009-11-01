@@ -83,8 +83,9 @@ class MY_Form_validation extends CI_Form_validation {
 	 */	
 	function uri_exists($uri)
 	{
-		$valid = FALSE;
-		if(preg_match('#^(http|https){1}://(www\.)?(.*)\.([a-z0-9]{2,6})$#',$uri))
+		$valid = is_uri($uri);
+		
+		if($valid)
 		{
 			$uri_clean = str_replace(' ','%20',$uri);
 			$headers = get_headers($uri_clean);
@@ -184,7 +185,7 @@ class MY_Form_validation extends CI_Form_validation {
 	 */	
 	function is_uri($str)
 	{
-		$pattern = "/^(http|https|ftp){0,1}(\:){0,1}(//){0,1}[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$/";
+		$pattern = "|^http(s)?:\/\/([a-zA-Z0-9-_]+)\.([a-zA-Z]{2,})([a-zA-Z0-9-_\+% \.\/]+)([a-zA-Z0-9-_\+\.\/\?=&]+)$|";
 		
 		return ( ! preg_match($pattern, $str)) ? FALSE : TRUE;
 	}
