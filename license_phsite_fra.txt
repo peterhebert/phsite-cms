@@ -1,0 +1,26 @@
+Initiative OSI - le license de code source libre de MIT
+
+Le license du MIT
+
+Copyright (c) <année> <teneurs du droit d'auteur>
+
+On accorde par ceci la permission, gratuitement, à toute personne
+obtenant une copie de ce logiciel et dossiers associés de documentation
+(le « logiciel »), pour s'échanger du logiciel sans restriction ou
+limitation, incluant sans limitation les droites pour employer, copier,
+modifier, fusionner, éditer, distribuer, sous-licencer, et/ou vendre des
+copies du logiciel, et pour permettre les personnes à qui le logiciel
+est distribué pour faire ainsi, sujet aux conditions suivantes :
+
+La notification des droits d'auteur (copyright) ci-dessus et cette
+notification de permission seront incluses dedans toutes les copies ou
+parties substantielles du logiciel.
+
+CE LOGICIEL EST FOURNI « COMME TEL », SANS GARANTIE DE SORTE, EXPRIMÉ OU
+IMPLICITE, INCLUANT MAIS NON LIMITÉ AUX GARANTIES DE LA VALEUR
+MARCHANDE, APPLICABILITÉ D'UNE MÉTHODE ET DE NON-VIOLATION DU DROIT
+D'AUTEUR. LES AUTEURS OU LES TENEURS DU DROIT D'AUTEUR NE SOIENT
+RESPONSABLES DANS AUCUNS CAS DE RÉCLAMATION, DOMMAGES OU AUTRE
+RESPONSABILITÉ, SOIENT DANS UNE ACTION DU CONTRAT, UNE ACTE DOMMAGEABLE
+OU AUTRE DÉLIT CIVIL, RÉSULTANT, EN LIAISON OU PAS AVEC L'UTILISATION DU
+LOGICIEL OU DANS AUCUN AUTRES AFFAIRES CONCERNANT LE LOGICIEL.
