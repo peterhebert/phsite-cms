@@ -1,4 +1,24 @@
 <?php
+$lang['file_size_abbr'] = array(
+'bytes' => 'bytes',
+'k' => 'kB',
+'M' => 'MB',
+'G' => 'GB',
+'T' => 'TB',
+'P' => 'PB',
+'E' => 'EB',
+'Z' => 'ZB',
+'Y' => 'YB',
+'Ki' => 'KiB',
+'Mi' => 'MiB',
+'Gi' => 'GiB',
+'Ti' => 'TiB',
+'Pi' => 'PiB',
+'Ei' => 'EiB',
+'Zi' => 'ZiB',
+'Yi' => 'YiB',
+);
+
 $lang['mime_cat'] = array(
 'audio' => 'audio',
 'image' => 'image',

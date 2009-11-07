@@ -1,7 +1,7 @@
 <div id="masthead">
 	<div class="page-wrap block">
 		<div class="column">
-			<h2>phSite</h2>
+			<h2><?php echo anchor("cms",$cms_labels['phsite_cms']) ?></h2>
 		</div>
 		<div class="column lh"><?php echo $cms_labels['slogan']; ?></div>
 		<div class="float-right lh">

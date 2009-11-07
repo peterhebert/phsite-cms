@@ -12,12 +12,12 @@ echo $site_meta_title;
 <link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
 <link href="<?php echo $theme_path; ?>simple_em.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
-<!--
+/* <![CDATA[ */
 ul.thumbnails li {
 	min-height: <?php echo round(($size/15)+2.5,3); ?>em;
 }
 ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
--->
+/* ]]> */
 </style>
 </head>
 <body class="gallery">

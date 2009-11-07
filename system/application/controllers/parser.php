@@ -355,6 +355,7 @@ class Parser extends MY_Controller {
 		
 		// recent posts
 		$tmp_view = 'themes/'.$this->Site_model->theme.'/embed_blog';
+		$this->Content_model->limit = 5;
 		$blog_entries = $this->_blog();
 		$tmp_blog = array('blog' => $blog_entries,'cms_labels' => $this->cms_labels);
 		$this->data['recent'] = $this->load->view($tmp_view,$tmp_blog,true);
@@ -368,12 +369,9 @@ class Parser extends MY_Controller {
 
 		if(isset($parent))
 		{
-			$this->Content_model->list_content($parent,TRUE,TRUE);
+			$this->Content_model->parent_id = $parent;
 		}
-		else
-		{
-			$this->Content_model->list_content(NULL,TRUE,TRUE);
-		}
+		$this->Content_model->list_content(TRUE);
 
 		$recent = $this->Content_model->content_list;
 		$blog = array();

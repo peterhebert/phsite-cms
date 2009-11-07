@@ -51,35 +51,41 @@ if(isset($breadcrumb_links))
 }
 ?>
 	<div class="page-wrap">
+
+		<?php if (isset($recent) && $recent !='') { ?>
 		<div class="block five">
 			<div class="column w3">
 				<?php
-				if (isset($recent)) {
-					echo "<h2 class=\"first\">";
-					echo $cms_labels['recent_content'];
-					echo "</h2>\r";
-					echo $recent;
-				}?>
-			</div>
-			<div class="float w2">
-				<?php
-				if (isset($site_meta_description) && $site_meta_description != '') {
-					echo "<h2 class=\"first\">";
-					echo $cms_labels['about_this_site'];
-					echo "</h2>\r";
-					echo "<p>{$site_meta_description}</p>\r";
-				}
-
-				if(isset($menu) && $menu != '')
-				{
-					echo "<h3>";
-					echo $cms_labels['menu'];
-					echo "</h3>\r";
-					echo $menu;
-				}
+				echo "<h2 class=\"first\">";
+				echo $cms_labels['recent_content'];
+				echo "</h2>\r";
+				echo $recent;
 				?>
 			</div>
+			<div class="float w2">
+
+		<?php
+		}
+		
+		if (isset($site_meta_description) && $site_meta_description != '') {
+			echo "<h2 class=\"first\">";
+			echo $cms_labels['about_this_site'];
+			echo "</h2>\r";
+			echo "<p>{$site_meta_description}</p>\r";
+		}
+
+		if(isset($menu) && $menu != '')
+		{
+			echo "<h3>";
+			echo $cms_labels['menu'];
+			echo "</h3>\r";
+			echo $menu;
+		}
+		
+		if (isset($recent) && $recent !='') { ?>
+			</div>
 		</div>
+		<?php } ?>
 	</div>
 	<div class="page-wrap block" id="footer">
 		<?php

@@ -10,8 +10,7 @@ class Setup extends MY_Controller
 		$this->load->model('Media_model');
 		$this->load->library('form_validation');		
 	
-		//$this->_authenticate();
-		$this->_load_cms_labels();
+		$this->_authenticate();
 	}
 	
 	function index()
@@ -42,6 +41,7 @@ class Setup extends MY_Controller
 	}
 	function site_preferences()
     {
+		$this->load->helper('image');
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
 		$breadcrumb[] = $this->cms_labels['site_prefs'];
@@ -96,12 +96,50 @@ class Setup extends MY_Controller
 		$form .= "</p>\r";
 
 		$this->Site_model->list_themes();
-		$form_options = $this->Site_model->site_themes;
+		$form .= "<p>";
+		$form .= form_label($this->cms_labels['theme'], 'theme');
+
+		foreach($this->Site_model->site_themes as $uri => $theme_info)
+		{
+			$checked = FALSE;
+			if($this->Site_model->theme == $uri)
+			{
+				$checked = TRUE;
+			}
+			
+					
+			$form_options = array(
+			'name'        => 'theme',
+			'value'       => $uri,
+			'checked'     => TRUE,
+			);
+			$width = $this->Site_model->img_size_sm;
+		
+			$form .= "<label class=\"column\" style=\"width: {width}px\">";
+			$path_thumb = $this->Site_model->install_path.'system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
+			if(file_exists($path_thumb))
+			{
+				
+				$alt = sprintf($this->cms_labels['theme_screenshot'],$theme_info['title']);
+				$form .= "<span class=\"image\">";
+				$form .= view_image($path_thumb,$this->Site_model->img_size_sm,array('alt' => $alt));
+				$form .= "</span><br />\r";
+			}
+			$form .= form_radio($form_options);
+			$form .= ' <strong>'.anchor($theme_info['website'], $theme_info['title'], array('rel' => 'external'))."</strong><br />\r";
+			$form .= $this->cms_labels['author'].' : '.mailto($theme_info['email'], $theme_info['author'], array('title' => $this->cms_labels['email_author']))."<br />\r";
+			$form .= $theme_info['description']."</label> ";
+
+			
+		}
+		$form .= "</p>\r";
+/*		
+		$form_options = $theme_list;
 		$form .= "<p>";
 		$form .= form_label($this->cms_labels['theme'], 'theme');
 		$form .= form_dropdown('theme', $form_options, $this->Site_model->theme);		
 		$form .= "</p>\r";
-
+*/
 		$form_options = timezone_dropdown();
 		$form .= "<p>";
 		$form .= form_label($this->cms_labels['timezone'], 'site_timezone');

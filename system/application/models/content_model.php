@@ -14,6 +14,7 @@ class Content_model extends MY_Model {
 	// variables for site map
 	var $current_level = 1;
 	var $levels = 0;
+	var $content_count = 0;
 
     function Content_model()
     {
@@ -28,14 +29,37 @@ class Content_model extends MY_Model {
     }
 
     // list content
-	function list_content($parent = NULL, $recent = FALSE, $include_meta = FALSE)
+	function list_content($include_meta = FALSE)
     {
+		// first get total matching results
+		if($this->parent_id != '')
+		{
+			$this->db->where('parent_id', $this->parent_id);
+		}
+		if($this->type_id != '')
+		{
+			$this->db->where('type_id', $this->type_id);
+		}
+		if($this->link_mode == 0)
+		{
+			$this->db->where('publish', 1);
+		}
+		if($this->date_filter != '')
+		{
+			$this->db->like('date_created', $this->date_filter, 'after'); 
+		}
+		
+		$query = $this->db->get('c_content');
+		$this->content_count = $query->num_rows();	
+		
+		//then get content with limits
+		$query->free_result();
 
 		$list = array();
 
-		if(isset($parent))
+		if($this->parent_id != '')
 		{
-			$this->db->where('parent_id', $parent);
+			$this->db->where('parent_id', $this->parent_id);
 		}
 
 		if($this->type_id != '')
@@ -43,33 +67,27 @@ class Content_model extends MY_Model {
 			$this->db->where('type_id', $this->type_id);
 		}
 
-		if($recent)
+		if($this->limit != '')
 		{
 			$this->db->order_by("date_created", "desc");
 			$this->db->limit($this->limit);
 
 			if($this->page > 1)
 			{
-				// page 1: 0-9
-				// page 2: 10-19
-				// page 3: 20-29
-				
 				$offset = ($this->page - 1) * $this->limit;
 				
 				$this->db->limit($this->limit, $offset);
 			}
 
+		}
 
-			if($this->link_mode == 0)
-			{
-				$this->db->where('publish', 1);
-			}
-
-			if($this->date_filter != '')
-			{
-				$this->db->like('date_created', $this->date_filter, 'after'); 
-			}
-
+		if($this->link_mode == 0)
+		{
+			$this->db->where('publish', 1);
+		}
+		if($this->date_filter != '')
+		{
+			$this->db->like('date_created', $this->date_filter, 'after'); 
 		}
 		
 		$query = $this->db->get('c_content');
@@ -89,6 +107,7 @@ class Content_model extends MY_Model {
 				'date_end_expiry' => $row->date_end_expiry,
 				'date_updated' => $row->date_updated,
 				'publish' => $row->publish,
+				'type_label' => '',
 				'title_id' => '',
 				'scope' => '',
 				'title_rel_id' => '',
@@ -109,7 +128,6 @@ class Content_model extends MY_Model {
 				if ($q2->num_rows() > 0)
 				{
 				   $r2 = $q2->row();
-
 				   $tmp['title_id'] = $r2->title_id;
 				   $tmp['scope'] = $r2->scope;
 				   $tmp['title_rel_id'] = $r2->rel_id;
@@ -119,6 +137,25 @@ class Content_model extends MY_Model {
 				   $tmp['keywords'] = $r2->keywords;
 				   $tmp['title_updated'] = $r2->title_updated;
 				   $tmp['lang_ISO_639_3'] = $r2->lang_ISO_639_3;
+
+				}
+				
+				$q2->free_result();
+
+				// get content type label
+				$this->db->where('s_types.scope', 'content');
+				$this->db->where('s_types.type_id', $row->type_id);
+				$this->db->where('s_labels.scope', 'types');
+				$this->db->where('s_labels.lang_ISO_639_3', $this->temp_lang);
+				$this->db->limit(1);
+				$this->db->join('s_labels', 's_types.type_id = s_labels.rel_id', 'left');
+
+				$q2 = $this->db->get('s_types');
+		
+				if ($q2->num_rows() > 0)
+				{
+				   $r2 = $q2->row();
+				   $tmp['type_label'] = $r2->label;
 				}
 				
 				// if metadata included, get it
@@ -161,7 +198,6 @@ class Content_model extends MY_Model {
 		$this->scope = 'content';
 		$this->temp_id = $this->content_id;
 		$this->load_metadata();
-
 	}
 
     function load_content_form()
@@ -741,18 +777,164 @@ class Content_model extends MY_Model {
 	// attachments
 	function list_attachments()
     {
-		$this->db->where('scope', $this->scope);
 		$this->db->where('content_id', $this->content_id);
 		$query = $this->db->get('r_attachments');
 
+		$this->attachments = array();
 		if ($query->num_rows() > 0)
 		{
 			$this->attachments = $query->result_array();
-			return TRUE;
 		}
+	}
+
+	function remove_attachments()
+    {
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+			foreach($this->temp_value as $a_id)
+			{
+				$this->db->or_where('a_id',$a_id);
+			}
+			$this->temp_value = '';
+			if($this->db->delete('r_attachments'))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function add_attachments()
+    {
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+			$sql = "INSERT INTO `r_attachments` (`content_id`,`media_id`) VALUES ";
+			foreach($this->temp_value as $media_id)
+			{
+				$rows[] = '('.$this->content_id.','.$media_id.')';
+			}
+			$sql .= implode(',',$rows);
+			$this->temp_value = '';
+			
+			if($this->db->query($sql))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function update_publish()
+	{
+
+		$data = array(
+		'publish' => $this->publish,
+		);
+
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $id)
+			{
+				$this->db->or_where('content_id', $id);
+			}
+			// update
+			if($this->db->update('c_content', $data))
+			{
+				return TRUE;
+			}
+
+		}
+
 		return FALSE;
+
 	}
 	
+	function delete_content()
+	{
+		// first load to get file URI
+		$this->load_content_object();
+		$this->temp_id = $this->content_id;
+		$this->load_title();
+		$name = $this->cms_labels['content'].' '.$this->content_id;
+		if($this->title != '')
+		{
+			$name = $this->title;
+		}
+
+		// delete all titles, metadata
+		$this->db->where('scope', 'content');
+		$this->db->where('rel_id', $this->content_id);
+		if(!$this->db->delete('c_titles'))
+		{
+			$this->reset_vars();
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		$this->db->where('scope', 'content');
+		$this->db->where('rel_id', $this->content_id);
+		if(!$this->db->delete('c_metadata'))
+		{
+			$this->reset_vars();
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+		
+		// delete all attachments for this entry
+		$this->db->where('content_id', $this->content_id);
+		if(!$this->db->delete('r_attachments'))
+		{
+			$this->reset_vars();
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		// delete content object
+		$this->db->where('content_id', $this->content_id);
+		if(!$this->db->delete('c_content'))
+		{
+			$this->reset_vars();
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		$this->messages[] = sprintf($this->cms_labels['delete_success'],$name);
+		$this->reset_vars();
+		return TRUE;
+	}
+
+	function delete_batch()
+	{
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $mid)
+			{
+				$this->content_id = $mid;
+				$this->delete_content();
+			}
+
+		}
+	}
+
+	function reset_vars()
+	{
+		$this->temp_value = '';
+		$this->temp_id = '';
+		$this->type_id = '';
+		$this->title = '';
+		$this->content_id = '';
+		$this->user_id = '';
+		$this->parent_id = '';
+		$this->date_created = '';
+		$this->date_end_expiry = '';
+		$this->date_updated = '';
+		$this->publish = '';
+	}
+	
+
+
 }
 
 ?>

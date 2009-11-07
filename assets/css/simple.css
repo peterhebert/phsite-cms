@@ -49,7 +49,7 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .image { margin-bottom: 1em;}
 .image-left { float: left; margin-right: 1em; }
 .image-right { float: right; margin-left: 1em; }
-.image img { border: 1px solid #000000; }
+.image img { border: 1px solid #000000;}
 
 .hide {
 	visibility: hidden;
@@ -77,13 +77,13 @@ ul.option-list li {
 	display:table;
 	}
 	ul.thumbnails:after {
-		 visibility: hidden;
-		 display: block;
-		 font-size: 0;
-		 content: " ";
-		 clear: both;
-		 height: 0;
-		 }
+		visibility: hidden;
+		display: block;
+		font-size: 0;
+		content: " ";
+		clear: both;
+		height: 0;
+	}
 	ul.thumbnails { display: inline-block; }
 	/* start commented backslash hack \*/
 	* html ul.thumbnails { height: 1%; }
@@ -97,14 +97,16 @@ ul.option-list li {
 		padding:0;
 		overflow: visible;
 		position: relative;
-		display: table;
+		display: table-cell;
+		vertical-align:middle;
+		text-align:center;
 	}
-	ul.thumbnails li .thumb a {
+/*	ul.thumbnails li .thumb a {
 		display:table-cell;
 		vertical-align:middle;
 		position: static;
 	}
-
+*/
 	* html ul.thumbnails li .thumb a {
 		position: absolute;
 		top: 50%;
@@ -244,6 +246,9 @@ text,textarea,richtext,checkbox,radio,password,file
 #page form label span {
 	display:none;
 }
+#page form label span.image {
+	display: inline;
+}
 /* post details, comments */
 .post-details p,
 .comments p {margin-bottom: .333em; }
@@ -367,7 +372,7 @@ div.filetree ul li {
 	padding: 0px;
 	padding-left: 1.375em;
 	margin: 0px;
-	background: url(/assets/icons/other/file.png);
+	background: url(/assets/icons/other/file.png) left top no-repeat;
 }
 div.filetree li.directory,
 div.filetree li.collapsed
@@ -388,7 +393,7 @@ div.filetree li.expanded ul {
 }
 
 /* File Extensions */
-.icon {
+.icon, span.icon {
 	padding: 0px;
 	padding-left: 1.375em;
 	margin: 0px;

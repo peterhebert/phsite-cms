@@ -93,7 +93,7 @@ if ( ! function_exists('view_image'))
 
 		// Path to original image and to resized version
 		$orig_image_path = $path;
-		$path_rel = str_replace($_SERVER["DOCUMENT_ROOT"],'',$path);
+		$path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$path);
 
 		$orig_image_path_rel = trim($path,'/');
 		
@@ -170,7 +170,14 @@ if ( ! function_exists('view_image'))
 	
 				// determine file name of scaled image
 				$pi = pathinfo($orig_image_path);
-				$dest_dir = str_replace(MEDIA_PATH_ORIG,MEDIA_PATH_CACHE,$pi['dirname']);
+				if(strstr($orig_image_path,MEDIA_PATH_ORIG))
+				{
+					$dest_dir = str_replace(MEDIA_PATH_ORIG,MEDIA_PATH_CACHE,$pi['dirname']);
+				}
+				else
+				{
+					$dest_dir = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_CACHE.'/system';
+				}
 
 				if($square === TRUE && $orig_ratio != 1) {
 					$fn_copy_short = $pi['filename'].'_'.$size.'_'.$crop_ratio.'.jpg';
@@ -179,7 +186,7 @@ if ( ! function_exists('view_image'))
 				}
 				$scaled_image_path = $dest_dir.'/'.$fn_copy_short;
 
-				$scaled_image_path_rel = str_replace($_SERVER["DOCUMENT_ROOT"],'',$scaled_image_path);
+				$scaled_image_path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$scaled_image_path);
 				$scaled_image_path_rel = trim($scaled_image_path_rel,'/');
 				
 				if(!file_exists ( $dest_dir ) ){
@@ -260,7 +267,7 @@ if ( ! function_exists('get_metadata'))
 {
 
 	function get_metadata($path) {
-		$server_path = $_SERVER["DOCUMENT_ROOT"].$path;
+		$server_path = realpath($_SERVER["DOCUMENT_ROOT"]).$path;
 		$size = getimagesize($server_path, $info);
 		if(isset($info['APP13']))
 		{

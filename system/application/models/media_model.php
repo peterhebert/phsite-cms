@@ -10,6 +10,8 @@ class Media_model extends MY_Model {
 	var $media_list = array(), $media_metadata = array(), $media_meta_fields = array();
 	var $mime_categories = array('image','audio','video','text','application');
 	var $cms_labels;
+	var $max_upload_bytes;
+	var $max_upload_display;
 
 	// iptc / exif metadata
 	var $iptc, $exif;
@@ -31,6 +33,56 @@ class Media_model extends MY_Model {
 
 		$this->load_cms_labels();
 	}
+
+	function calculate_max_size()
+	{
+		$this->lang->load('mime', $this->lang_CI_Name);
+		$abbr = $this->lang->line('file_size_abbr');
+
+		$max = ini_get('upload_max_filesize');
+		$max = preg_replace("/^([0-9]+)([KMGTPEZY]*)/", "$1/$2", $max);
+		$max_size_array = explode('/',$max);
+		
+		switch($max_size_array[1]) {
+		case 'K':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ki'];
+			$this->max_upload_bytes = $max_size_array[0];
+			break;
+		case 'M':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Mi'];
+			$this->max_upload_bytes = $max_size_array[0] * 1024;
+			break;
+		case 'G':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Gi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 2);
+			break;
+		case 'T':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ti'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 3);
+			break;
+		case 'P':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Pi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 4);
+			break;
+		case 'E':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ei'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 5);
+			break;
+		case 'Z':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Zi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 6);
+			break;
+		case 'Y':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Yi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 7);
+			break;
+		default:
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['bytes'];
+			$this->max_upload_bytes = $max_size_array[0] / 1024;
+			break;
+		}
+
+	}
 	
 	function load_cms_labels() {
 		$this->lang_load();
@@ -40,6 +92,10 @@ class Media_model extends MY_Model {
 	
 	// get list of subdirectories
 	function list_dirs() {
+		if($this->dir_current == '')
+		{
+			$this->dir_current = $this->dir_base;
+		}
 		$filepath = $this->dir_current;
 		$dirs = array();
 		$dirs_rel = array();
@@ -57,6 +113,7 @@ class Media_model extends MY_Model {
 					$dirs[] = $newpath;
 					$this->dir_current = $newpath;
 					$newdirs = $this->list_dirs();
+
 					if(is_array($newdirs) && count($newdirs) > 0) {
 						$dirs = array_merge($dirs,$newdirs);
 						unset($newdirs);
@@ -65,22 +122,42 @@ class Media_model extends MY_Model {
 			}
 			// closing the directory
 			closedir($dir_handle);
-
-		
-			// get relative paths for each directory
+			
+			return $dirs;
 	
-			foreach($dirs as $dir) {
-				$dest_dir = str_replace($_SERVER["DOCUMENT_ROOT"],'',$dir);
-				$dirs_rel[$dir] = $dest_dir;
-			}
-	
-			$this->dir_list = $dirs;
-			$this->dir_list_rel = $dirs_rel;
 		}
 		else
 		{
 			$this->messages[] = sprintf($this->cms_labels['file_open_failure'],$filepath);
+			return FALSE;
 		}
+
+	}
+
+	function list_dirs_display()
+	{
+		$dirs = $this->list_dirs();
+		$dirs_rel = array();
+		
+		$media_root = $this->dir_base;
+		
+		$dirs_rel['/'] = $this->cms_labels['media_root'];
+		if($dirs)
+		{
+			// get relative paths for each directory
+			foreach($dirs as $dir) {
+				$dest_dir = str_replace($media_root,'',$dir);
+				$dirs_rel[$dest_dir] = $dest_dir;
+			}
+
+			$this->dir_list = $dirs;
+
+		}
+		else
+		{
+			$this->dir_list = array($media_root);
+		}
+		$this->dir_list_rel = $dirs_rel;
 
 	}
 
@@ -379,6 +456,16 @@ class Media_model extends MY_Model {
 			$this->db->like('mime_type', $this->temp_value, 'after');
 		}
 
+		// exclude certain ids if supplied
+		if(is_array($this->media_list) && count($this->media_list) > 0)
+		{
+			foreach($this->media_list as $id)
+			{
+				$this->db->where('media_id !=', $id);
+			}
+		}
+
+		$this->db->order_by("file_uri", "asc");
 		$query = $this->db->get('c_media');
 		
 		if ($query->num_rows() > 0)
@@ -386,8 +473,8 @@ class Media_model extends MY_Model {
 
 			foreach ($query->result_array() as $row)
 			{
+				$this->reset_media_vars();
 				$tmp_media = array();
-				$this->title_id = '';
 
 				$tmp_media['media_id'] = $row['media_id'];
 				$tmp_media['file_uri'] = $row['file_uri'];
@@ -438,6 +525,15 @@ class Media_model extends MY_Model {
 		if ($this->temp_value != '')
 		{
 			$this->db->like('mime_type', $this->temp_value, 'after');
+		}
+
+		// exclude certain ids if supplied
+		if(is_array($this->media_list) && count($this->media_list) > 0)
+		{
+			foreach($this->media_list as $id)
+			{
+				$this->db->where('media_id !=', $id);
+			}
 		}
 
 		$query = $this->db->get('c_media');
@@ -537,26 +633,29 @@ class Media_model extends MY_Model {
 		}
 		else
 		{
-			$meta = $this->file_list;
+			$meta = $this->field_list;
 		}
 		
-
-		foreach($meta as $index => $info)
+		if(is_array($meta) && count($meta) > 0)
 		{
-			
-			if(array_key_exists($info['field_ref_name'],$field_name_to_iptc))
+			foreach($meta as $index => $info)
 			{
-				$iptc_key = $field_name_to_iptc[$info['field_ref_name']];
-				if(is_array($this->iptc) && array_key_exists($iptc_key, $this->iptc)) {
-					$meta[$index]['value'] = $this->iptc[$iptc_key][0];
-					if($this->media_id != '')
-					{
-						$meta[$index]['rel_id'] = $this->media_id;
+				
+				if(array_key_exists($info['field_ref_name'],$field_name_to_iptc))
+				{
+					$iptc_key = $field_name_to_iptc[$info['field_ref_name']];
+					if(is_array($this->iptc) && array_key_exists($iptc_key, $this->iptc)) {
+						$meta[$index]['value'] = $this->iptc[$iptc_key][0];
+						if($this->media_id != '')
+						{
+							$meta[$index]['rel_id'] = $this->media_id;
+						}
 					}
 				}
+	
 			}
-
 		}
+
 
 		$this->metadata = $meta;
 		
@@ -614,6 +713,7 @@ class Media_model extends MY_Model {
 				$this->update_media_from_file();
 				$tmp_file_info['media_id'] = $this->media_id;
 				$tmp_file_info['mime_type'] = $this->mime_type;
+				$tmp_file_info['external'] = 0;
 				$tmp_file_info['title'] = $this->title;
 			}
 			
@@ -699,6 +799,11 @@ class Media_model extends MY_Model {
 		if(is_array($this->exif) && array_key_exists('DateTimeOriginal', $this->exif)) {
 			$this->date_created = $this->exif['DateTimeOriginal'];
 		}
+		else if(is_array($this->exif) && array_key_exists('FileDateTime',$this->exif))
+		{
+			$timestamp = intval($this->exif['FileDateTime']);
+			$this->date_created = date('Y-m-d H:i:s',$timestamp);
+		}
 		else
 		{
 			$this->date_created = date('Y-m-d H:i:s');
@@ -724,17 +829,17 @@ class Media_model extends MY_Model {
 		// find title if it exists, then update
 		$this->scope = 'media';
 		$this->temp_id = $this->media_id;
-		if(!$this->title_exists())
-		{
-			$this->title_rel_id = $this->media_id;
-			$this->update_title();
-		}
+		$this->title_exists();
+		
+		$this->title_rel_id = $this->media_id;
+		$this->update_title();
 
 		$this->scope = 'media';
 		$this->temp_id = $this->media_id;
+		
+
 		if(is_array($this->metadata) && count($this->metadata) > 0)
 		{
-
 	
 			foreach($this->metadata as $index => $info)
 			{
@@ -803,7 +908,6 @@ class Media_model extends MY_Model {
 			// update
 			if($this->db->update('c_media', $data))
 			{
-				echo "<p>".$this->db->last_query()."</p>\r";
 				return TRUE;
 			}
 
@@ -813,9 +917,9 @@ class Media_model extends MY_Model {
 
 	}
 
-/*	function delete_media()
+	function delete_media()
 	{
-
+		
 		// first load to get file URI
 		$this->load_media();
 		$this->load_title();
@@ -839,30 +943,47 @@ class Media_model extends MY_Model {
 				}
 			}
 		}
-		
+
 		// delete all titles, metadata
-		$tables = array('c_titles', 'c_metadata');
 		$this->db->where('scope', 'media');
 		$this->db->where('rel_id', $this->media_id);
-		if(!$this->db->delete($tables))
+		if(!$this->db->delete('c_titles'))
+		{
+			echo "<p>".$this->db->last_query()."</p>\r";
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
 			return FALSE;
 		}
 
+		$this->db->where('scope', 'media');
+		$this->db->where('rel_id', $this->media_id);
+		if(!$this->db->delete('c_metadata'))
+		{
+			echo "<p>".$this->db->last_query()."</p>\r";
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+		
 		// delete all attached instances of media and media entry
-		$tables = array('c_media', 'r_attachments');
 		$this->db->where('media_id', $this->media_id);
-		if(!$this->db->delete($tables))
+		if(!$this->db->delete('r_attachments'))
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			return FALSE;
+		}
+
+		$this->db->where('media_id', $this->media_id);
+		if(!$this->db->delete('c_media'))
 		{
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
 			return FALSE;
 		}
 
 		$this->messages[] = sprintf($this->cms_labels['delete_success'],$name);
+		$this->file_uri = '';
+		$this->title = '';
 		return TRUE;
-
 	}
-*/
+
 	function delete_batch()
 	{
 		if(is_array($this->temp_value) && count($this->temp_value) > 0)

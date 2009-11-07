@@ -10,7 +10,10 @@ echo $title_tag.' | ';
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
-</head>
+<?php if (isset($custom_header)){
+	echo $custom_header;
+}
+?></head>
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">

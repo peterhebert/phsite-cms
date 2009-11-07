@@ -12,13 +12,11 @@ class Cms extends MY_Controller
 		$this->load->model('User_model');
 		$this->load->library('session');
 
-		$this->_load_site_metadata();
-		$this->_load_cms_labels();
 	}
 	
 	function index()
 	{
-		//$this->_authenticate();
+		$this->_authenticate();
 
 		// load list of content types
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
@@ -27,49 +25,101 @@ class Cms extends MY_Controller
 		$this->data['type_list'] = $this->Content_model->type_list;
 		$this->data['objects'] = $this->load->view('cms/content_types_list',$this->data, true);
 
-		$form = "<h2>{$this->cms_labels['content']}</h2>\r";
 
-		// get recently added pages
-		$form .= "<ul>\r";
-		$form .= "<li>".anchor("cms/content",$this->cms_labels['site_map'])."</li>\r";
-		$this->Content_model->list_content(NULL,TRUE);
-
-		if(count($this->Content_model->content_list) > 0)
-		{
-
-			$form_options = array();
-			$form .= "<li>{$this->cms_labels['recent_content']}\r";
-			foreach ($this->Content_model->content_list as $tc)
-			{
-				$link = 'cms/content/edit/id/'.$tc['content_id'].'/lang/'.$tc['lang_ISO_639_3'];
-				$form_options[] = anchor($link, $tc['title'], array('title' => $this->cms_labels['edit']." '{$tc['title']}'"));
-			}
-			$form .= ul($form_options);
-			$form .= "</li>\r";
-		}
-		$form .= "</ul>\r";
-
+		$html = "<h2>{$this->cms_labels['content']}</h2>\r";
+		$html .= "<ul>\r";
+		$html .= "<li>".anchor("cms/content",$this->cms_labels['content_find'])."</li>\r";
+		$html .= "<li>".anchor("cms/content/site_map",$this->cms_labels['site_map'])."</li>\r";
 		$form_options = $this->Content_model->new_content_dropdown();
-		$form .= "<p>Create New ";
-		$form .= form_dropdown('new_content',$form_options).' ';
+		$html .= "<li>".$this->cms_labels['content_new'].'&nbsp; ';
+		$html .= form_dropdown('new_content',$form_options).' ';
 		$form_options = array(
 			'name' => 'new_go',
 			'id' => 'new_go',
 			'content' => 'Go',
 			'type' => 'button',
 		);
-		$form .= form_button($form_options);
-		$form .= "</p>\r";
+		$html .= form_button($form_options);
+		$html .= "</li>\r";
+		// get recently added pages
+		
+		$this->Content_model->limit = 5;
+		$this->Content_model->page = 1;
+		$this->Content_model->list_content();
 
-		$form .= "<h2>{$this->cms_labels['media']}</h2>\r";
+		if(count($this->Content_model->content_list) > 0)
+		{
+
+			$html .= "<li><strong>{$this->cms_labels['recent_content']}</strong>\r";
+			// generate result table
+			$html .= "<table class=\"borders full\">\r";
+			$html .= "\t<thead>\r";
+			$html .= "\t\t<tr>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"types\">{$this->cms_labels['content_type']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
+			$html .= "\t\t</tr>\r";
+			$html .= "\t</thead>\r";
+			$html .= "\t<tbody>\r";
+			
+			foreach($this->Content_model->content_list as $item)
+			{
+	
+				// determine edit uri
+				$edit_uri = 'cms/content/edit/id/'.$item['content_id'];
+				if($this->Content_model->temp_lang != '')
+				{
+					$edit_uri .= '/lang/'.$this->Content_model->temp_lang;
+				}
+				$cid = $item['content_id'];
+	
+				$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
+				$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
+				$html .= "</th>\r";
+	
+				$type_name = $item['type_uri_name'];
+				if($item['type_label'] != '')
+				{
+					$type_name = $item['type_label'];
+				}
+				$html .= "\t\t\t<td headers=\"content-{$cid} types\">".$type_name."</td>\r";
+	
+				// author info
+				$this->User_model->temp_id = $item['user_id'];
+				$this->User_model->load_user();
+				$name = $this->User_model->name_last.', '.$this->User_model->name_first;
+
+				if($this->session->userdata('admin') == 1)
+				{
+					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".anchor('cms/user/edit/id/'.$item['user_id'],$name,array('title' => $this->cms_labels['user_edit']))."</td>\r";
+				}
+				else
+				{
+					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".$name."</td>\r";
+				}
+	
+				$html .= "\t\t</tr>\r";
+			}
+	
+			$html .= "\t</tbody>\r";
+			$html .= "</table>\r";
+			$html .= "</li>\r";
+		}
+		$html .= "</ul>\r";
+
+		$html .= "<h2>{$this->cms_labels['media']}</h2>\r";
 		
 		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
-		$form .= ul($media_links)."\r";
+		$html .= ul($media_links)."\r";
+		$this->data['form'] = $html;
 
 		$this->Content_model->temp_value = 'cms/setup/site_metadata';
 		$site_metadata = $this->Content_model->lang_meta_menu();
-		$this->data['sidebar'] = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
+		
+		$html = "<p>{$this->cms_labels['phsite_version']} : ".PHSITE_CMS_VERSION."</p>\r";
+		$html .= $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
+		$this->data['sidebar'] = $html;
 
 		$breadcrumb = anchor("",$this->cms_labels['home'],array('rel' => 'external','title' => $this->cms_labels['site_external_link'])).' : ';
 		$breadcrumb .= anchor("cms",$this->cms_labels['phsite_cms']).' : '.$this->cms_labels['phsite_cms_home'];
@@ -77,13 +127,17 @@ class Cms extends MY_Controller
 
 		$this->data['title_h1'] = $this->cms_labels['phsite_cms_home'];
 		
-		$this->data['form'] = $form;
 		$this->load->view('cms/cms_form',$this->data);
 	}
 
 	
 	function login()   
 	{  
+
+		$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
+		$this->_load_site_metadata();
+		$this->_load_cms_labels();
+
 		$this->load->library('form_validation');
 
 		// if already logged in, redirect
@@ -180,10 +234,6 @@ class Cms extends MY_Controller
 
 		$this->load->view('cms/login',$this->data);  
 	} 
-
-
-
-
 
 	function logout()   
 	{  

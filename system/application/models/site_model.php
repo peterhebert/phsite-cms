@@ -2,7 +2,7 @@
 class Site_model extends MY_Model {
 
 	// list variables
-	var $site_themes;
+	var $site_themes, $theme_info;
 	
 	var $site_id, $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id;
 	var $default_content_type;
@@ -17,6 +17,7 @@ class Site_model extends MY_Model {
 
 		$this->site_id = $this->config->item('site_id');
 		$this->load_site();
+		$this->load_theme_info();
     }
 
     // load the site data
@@ -41,6 +42,101 @@ class Site_model extends MY_Model {
 			$this->limit_posts = $row['limit_posts'];
 			$this->limit_thumbs = $row['limit_thumbs'];
 		}
+    }
+
+	function load_theme_info()
+    {
+		if($this->temp_lang == '')
+		{
+			$this->temp_lang = $this->site_default_lang;
+		}
+		$this->lang_load();
+		
+		$theme_info_file = 'system/application/views/themes/'.$this->theme.'/_theme_info/'.$this->lang_CI_Name.'.txt';
+
+		$theme_info = array();
+		$test = file($theme_info_file);
+		foreach($test as $line)
+		{
+			$temp = preg_replace("#:([\t]+)#","::",$line);
+			$vals = explode("::",$temp);
+			$theme_info[$vals[0]] = $vals[1];
+		}
+		
+		$this->theme_info = $theme_info;
+    }
+
+	// get list of themes
+	function list_themes()
+    {
+
+/*		$themeArray = array();
+		// get document directory of index.php
+		$theme_dir = $this->install_path.'system/application/views/themes';
+
+		if (is_dir($theme_dir)) {
+
+			if ($dh = opendir($theme_dir)) {
+				while (($file = readdir($dh)) !== false) {
+					if($file != '.svn' && $file != '.' && $file != '..' && is_dir($theme_dir.'/'.$file)) {
+						$themeArray[$file] = str_replace('_',' ',$file);
+					}
+				}
+				closedir($dh);
+			}
+		}
+		asort($themeArray);
+
+		$this->site_themes = $themeArray;
+    }
+
+	function load_theme_list()
+    {
+*/		if($this->temp_lang == '')
+		{
+			$this->temp_lang = $this->site_default_lang;
+		}
+		$this->lang_load();
+		
+		$theme_folder = $this->install_path.'system/application/views/themes';
+		$filepath = $theme_folder;
+
+		$theme_list = array();
+		$dirs = array();
+
+		$dir_handle = @opendir($filepath);
+		if($dir_handle)
+		{
+			//running the while loop
+			while ($file = readdir($dir_handle)) {
+
+				$newpath = $filepath.'/'.$file;
+				$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
+				if(!in_array($file,$ignore) && is_dir($newpath)) {
+					$theme_uri = basename($newpath);
+					$dirs[] = $newpath;
+					$theme_info_file = $newpath.'/_theme_info/'.$this->lang_CI_Name.'.txt';
+					if(file_exists($theme_info_file))
+					{
+						$theme_info = array();
+						$readfile = file($theme_info_file);
+						foreach($readfile as $line)
+						{
+							$temp = preg_replace("#:([\t]+)#","::",$line);
+							$vals = explode("::",$temp);
+							$theme_info[$vals[0]] = $vals[1];
+						}
+						$theme_list[$theme_uri] = $theme_info;
+						unset($theme_info);
+					}
+				}
+			}
+			// closing the directory
+			closedir($dir_handle);
+		}
+
+		$this->site_themes = $theme_list;
+		
     }
 
 	function load_site_metadata()
@@ -133,31 +229,6 @@ class Site_model extends MY_Model {
     }
 	// end update_site()
 
-
-
-	// get list of themes
-	function list_themes()
-    {
-
-		$themeArray = array();
-		// get document directory of index.php
-		$theme_dir = $this->install_path.'system/application/views/themes';
-
-		if (is_dir($theme_dir)) {
-
-			if ($dh = opendir($theme_dir)) {
-				while (($file = readdir($dh)) !== false) {
-					if($file != '.svn' && $file != '.' && $file != '..' && is_dir($theme_dir.'/'.$file)) {
-						$themeArray[$file] = str_replace('_',' ',$file);
-					}
-				}
-				closedir($dh);
-			}
-		}
-		asort($themeArray);
-
-		$this->site_themes = $themeArray;
-    }
 }
 
 ?>

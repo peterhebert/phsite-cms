@@ -55,6 +55,7 @@ define('SALT_LENGTH', 10);
 define('MEDIA_PATH_ORIG', '/media/originals');
 define('MEDIA_PATH_CACHE', '/media/cache');
 define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\">phSite CMS</a></p>\r");
+define('PHSITE_CMS_VERSION', "0.1");
 
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */

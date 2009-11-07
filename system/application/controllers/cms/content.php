@@ -1,23 +1,375 @@
 <?php
 class Content extends MY_Controller
 {
+	var $whichform;
+	var $selected;
 	
 	function Content()
 	{
 		parent::Controller();
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
+		$this->load->model('Media_model');
 		$this->load->helper('image');
-
+		$this->load->helper('form');
 		$this->load->helper('timezone');
 		$this->load->library('session');
 
 		$this->_authenticate();
-//		$this->_load_site_metadata();
-//		$this->_load_cms_labels();
+
+		$this->whichform = 'list';
+		$this->selected = array();
 	}
 
 	function index()
+	{
+		$this->_process_manage();
+		if(count($this->selected) > 0 && $this->whichform == 'confirm')
+		{
+			$this->_form_delete();
+		}
+		else
+		{
+			$this->_form_list();
+		}
+
+		$this->data['title_h1'] = $this->cms_labels['content'];
+		$this->data['title_tag'] = $this->cms_labels['content'];
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['content'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$this->custom_js[] = "<script type=\"text/javascript\" src=\"/assets/js/admin_ui/select_checkboxes.js\"></script>";
+		
+		$confirm_delete = "<script type=\"text/javascript\">\r";
+		$confirm_delete .= "/* <![CDATA[ */\r";
+		$confirm_delete .= "$().ready(function(){\r";
+		$confirm_delete .= "\tvar deleteText = '".$this->cms_labels['delete_confirm_multiple']."';\r";
+		
+		$confirm_delete .= "\t$(\"input[name='submit']\").click(function(){\r";
+		$confirm_delete .= "\t\tvar action = $(\"select[name='action']\").val();\r";
+		$confirm_delete .= "\t\tif(action == 'delete') {\r";
+		$confirm_delete .= "\t\t\tvar answer = confirm(deleteText);\r";
+
+		$confirm_delete .= "if(answer == true) {\r";
+		$confirm_delete .= "$(\"input[name='confirm']\").val(1);\r";
+		$confirm_delete .= "}\r";
+
+		$confirm_delete .= "\t\t\treturn answer // answer is a boolean\r";
+		$confirm_delete .= "\t\t}\r";
+		$confirm_delete .= "\t});\r";
+
+		$confirm_delete .= "});\r";
+		$confirm_delete .= "/* ]]> */\r";
+		$confirm_delete .= "</script>";
+		
+		$this->custom_js[] = $confirm_delete;
+		$this->data['custom_js'] = implode("\r",$this->custom_js);
+		$msg = $this->Content_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+		
+	
+		$this->load->view('cms/cms_form_no_sidebar',$this->data);
+	}
+
+	function _form_list()
+	{
+		$this->Content_model->levels = -1;
+		$this->Content_model->link_mode = 1;
+		$this->Content_model->lang_mode = $this->Content_model->lang_count;
+
+		if($this->Content_model->lang_ISO_639_3 == '')
+		{
+			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		}
+
+		// get filter for list
+		$params = $this->uri->uri_to_assoc();
+		$limit = $this->input->post('limit');
+		if(array_key_exists('limit',$params))
+		{
+			$limit = $params['limit'];
+		}
+		if(!$limit || $limit == '')
+		{
+			$limit = 10;
+		}
+
+		$this->Content_model->limit = $limit;
+
+		$type = $this->input->post('type_id');
+		if(array_key_exists('type',$params))
+		{
+			$type = $params['type'];
+		}
+		if ($type !== FALSE)
+		{
+			$this->Content_model->type_id = $type;
+		}
+
+		$this->Content_model->page = 1;
+		if(array_key_exists('page',$params))
+		{
+			$this->Content_model->page = $params['page'];
+		}
+
+		$this->Content_model->list_content();
+		$total = $this->Content_model->content_count;
+
+		$end = $this->Content_model->page * $limit;
+		$start = $end - $limit + 1;
+		
+		if($end > $total || $end == 0)
+		{
+			$end = $total;
+		}
+		if($total > 0)
+		{
+			$results = sprintf($this->cms_labels['showing_results'],$start,$end,$total);
+		}
+		else
+		{
+			$results = $this->cms_labels['no_results'];
+		}
+
+		$action = 'cms/content';
+		$attributes = array(
+		'id' => 'content_list'
+		);
+		$html = form_open($action, $attributes);
+		$html .= form_hidden('confirm', '')."\r";
+		
+		// get list of content types
+		$form_options[''] = $this->cms_labels['all'];
+		$this->Content_model->scope = 'content';
+		$this->Content_model->list_types();
+		$list = array();
+		foreach($this->Content_model->type_list as $row)
+		{
+			if($row['label'] != '')
+			{
+				$form_options[$row['type_id']] = $row['label'];
+			} else {
+				$form_options[$row['type_id']] = $row['type_uri_name'];
+			}
+		}
+
+		$html .= "<div class=\"form-filter\">\r";
+		$html .=  form_label($this->cms_labels['content_type'], 'type_id');
+		$html .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
+
+		$form_options = array(10 => 10,20 => 20,30=>30,40=>40,50=>50);
+		$html .=  form_label($this->cms_labels['results_per_page'], 'limit');
+		$html .=  form_dropdown('limit', $form_options, $limit);
+		$html .= form_submit('filter', $this->cms_labels['results_filter']);
+		$html .= "</div>\r";
+
+
+		$html .= "<p class=\"align-center\">\r";
+		$html .= "{$results}<br />\r";
+		$this->load->library('pagination');
+		$base_url = '/cms/content/find';
+		$base_url .= '/limit/'.$limit;
+		if ($this->Content_model->type_id != '')
+		{
+			$base_url .= '/type/'.$this->Content_model->type_id;
+		}
+		$base_url .= '/page/';
+
+		$pconfig['base_url'] = $base_url;
+		$pconfig['total_rows'] = $total;
+		$pconfig['per_page'] = $limit;
+		$pconfig['cur_page'] = $this->Content_model->page;
+		$this->pagination->initialize($pconfig);
+
+		$html .= $this->pagination->create_links_proper();
+		$html .= "</p>\r";
+
+		// generate result table
+		$html .= "<table class=\"borders full\">\r";
+		$html .= "\t<thead>\r";
+		$html .= "\t\t<tr>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"types\">{$this->cms_labels['content_type']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"created\">{$this->cms_labels['date_created']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
+		$html .= "<ul class=\"option-list\">\r";
+		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
+		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-none\">{$this->cms_labels['none']}</a></li>\r";
+		$html .= "</ul>\r";
+		$html .= "</th>\r";
+		$html .= "\t\t</tr>\r";
+		$html .= "\t</thead>\r";
+		$html .= "\t<tbody>\r";
+		
+		foreach($this->Content_model->content_list as $item)
+		{
+
+			// determine edit uri
+			$edit_uri = 'cms/content/edit/id/'.$item['content_id'];
+			if($this->Content_model->temp_lang != '')
+			{
+				$edit_uri .= '/lang/'.$this->Content_model->temp_lang;
+			}
+			$cid = $item['content_id'];
+
+			$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
+			$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
+			$html .= "</th>\r";
+
+			$type_name = $item['type_uri_name'];
+			if($item['type_label'] != '')
+			{
+				$type_name = $item['type_label'];
+			}
+			$html .= "\t\t\t<td headers=\"content-{$cid} types\">".$type_name."</td>\r";
+
+			// author info
+			$this->User_model->temp_id = $item['user_id'];
+			$this->User_model->load_user();
+			$name = $this->User_model->name_last.', '.$this->User_model->name_first;
+
+			if($this->session->userdata('admin') == 1)
+			{
+				$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".anchor('cms/user/edit/id/'.$item['user_id'],$name,array('title' => $this->cms_labels['user_edit']))."</td>\r";
+			}
+			else
+			{
+				$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".$name."</td>\r";
+			}
+
+			$html .= "\t\t\t<td headers=\"content-{$cid} created\">".$item['date_created']."</td>\r";
+
+			$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
+			$html .= "\t\t\t<td headers=\"content-{$cid} published\">";
+			$html .= $options[$item['publish']];
+			$html .= "</td>\r";
+
+
+			$html .= "\t\t\t<td headers=\"content-{$cid} actions\">";
+
+			$options = array(
+			'name'        => "select[]",
+			'value'       => $item['content_id'],
+			);
+			
+			$html .= form_checkbox($options);
+			$html .= "</td>\r";
+			$html .= "\t\t</tr>\r";
+		}
+
+		$html .= "\t</tbody>\r";
+		$html .= "</table>\r";
+
+		$form_options = array(''=>'','delete' => 'delete','publish'=>'publish','unpublish'=>'unpublish');
+		$html .= "<p class=\"align-right\">";
+		$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
+		$html .=  form_dropdown('action', $form_options);
+		$html .= "&nbsp; ";
+
+		$html .= form_submit('submit', $this->cms_labels['submit']);
+		$html .= "</p>\n";
+
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+
+	function _form_comfirm_delete()
+	{
+		$action = 'cms/content';
+		$attributes = array(
+		'id' => 'confirm_delete'
+		);
+		$html = form_open($action, $attributes);
+		
+		foreach($this->selected as $cid)
+		{
+			$html .= form_hidden('select[]', $cid);
+		}
+		$html .= form_hidden('action', 'delete');
+
+		$params = array(
+		'name'        => "confirm",
+		'value'       => 1,
+		);
+		
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['delete_confirm_multiple'], 'confirm',array('class' => 'inline'))."?<br />\r";
+		$html .= form_checkbox($params);
+		$html .= "</p>\n";
+
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['submit']);
+		$html .= "</p>\n";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	
+	}
+
+	function _process_manage()
+	{
+		$select = $this->input->post('select');
+		
+		if($select !== FALSE && is_array($select))
+		{
+			$this->selected = $select;
+			$this->Content_model->temp_value = $select;
+			$action = $this->input->post('action');
+			if($action)
+			{
+				switch($action)
+				{
+				case 'delete':
+					$confirm = $this->input->post('confirm');
+					if($confirm == 1)
+					{
+						$this->Content_model->delete_batch();
+					}
+					else
+					{
+						$this->whichform = 'confirm';
+					}
+
+					break;
+				case 'publish':
+					$this->Content_model->publish = 1;
+					if($this->Content_model->update_publish())
+					{
+						$this->Content_model->messages[] = $this->cms_labels['publish_update_success'];
+					}
+					else
+					{
+						$this->Content_model->messages[] = $this->cms_labels['publish_update_failure'];
+					}
+					break;
+				case 'unpublish':
+					$this->Content_model->publish = 0;
+					if($this->Content_model->update_publish())
+					{
+						$this->Content_model->messages[] = $this->cms_labels['publish_update_success'];
+					}
+					else
+					{
+						$this->Content_model->messages[] = $this->cms_labels['publish_update_failure'];
+					}
+					break;
+				default:
+				}
+			}
+		}
+		$this->Media_model->temp_value = '';
+
+	}
+
+	function site_map()
 	{
 
 		$this->Content_model->levels = -1;
@@ -29,20 +381,22 @@ class Content extends MY_Controller
 			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		}
 
-		$body = $this->Content_model->site_map();
+		$body = "<p>".$this->cms_labels['click_to_edit']."</p>\r";
+		$body .= $this->Content_model->site_map();
 
 		$this->data['form'] = $body;
 
-		$this->data['title_h1'] = $this->cms_labels['content'];
+		$this->data['title_h1'] = $this->cms_labels['site_map'];
+		$this->data['title_tag'] = $this->cms_labels['site_map'];
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = $this->cms_labels['content'];
+		$breadcrumb[] = $this->cms_labels['site_map'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
-		$this->data['title_tag'] = $this->cms_labels['content'].' ';
 		
 		$this->load->view('cms/cms_form',$this->data);
 	}
+
 
 	function edit()
 	{
@@ -118,21 +472,21 @@ class Content extends MY_Controller
 			$action .= '/lang/'.$this->Content_model->temp_lang;
 		}
 
-		$form = form_open($action, $attributes);
-		$form .= form_hidden('content_id',$this->Content_model->content_id);
-		$form .= form_hidden('title_id',$this->Content_model->title_id);
+		$html = form_open($action, $attributes);
+		$html .= form_hidden('content_id',$this->Content_model->content_id);
+		$html .= form_hidden('title_id',$this->Content_model->title_id);
 		
-		$form .= form_hidden('my_url',site_url($my_url));
+		$html .= form_hidden('my_url',site_url($my_url));
 		
-		$this->data['form_open'] = $form;
+		$this->data['form_open'] = $html;
 		
-		$form = form_fieldset('Content');
+		$html = form_fieldset('Content');
 
 		$form_options = $this->Content_model->langs_dropdown();
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['language'], 'content_lang');
-		$form .=  form_dropdown('content_lang', $form_options, $this->Content_model->temp_lang);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['language'], 'content_lang');
+		$html .=  form_dropdown('content_lang', $form_options, $this->Content_model->temp_lang);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'id' => 'title',
@@ -140,10 +494,10 @@ class Content extends MY_Controller
 		'class' => 'text',
 		'value' => $this->Content_model->title
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['title'],'title');
-		$form .= form_input($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['title'],'title');
+		$html .= form_input($form_options);
+		$html .= "</p>";
 
 		$form_options = array(
 		'id' => 'subtitle',
@@ -151,10 +505,10 @@ class Content extends MY_Controller
 		'class' => 'text',
 		'value' => $this->Content_model->subtitle
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['subtitle'],'subtitle');
-		$form .= form_input($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
+		$html .= form_input($form_options);
+		$html .= "</p>";
 
 		// fields
 		foreach($this->Content_model->metadata as $index => $fd)
@@ -194,7 +548,7 @@ class Content extends MY_Controller
 			'field_validation[]' =>  $tmp_validation,
 			'field_needs_lang[]' => $tmp_needs_lang
 			);
-			$form .= form_hidden($form_options);
+			$html .= form_hidden($form_options);
 
 			$this->Content_model->reset_label();
 			$this->Content_model->label_scope = 'field';
@@ -206,8 +560,8 @@ class Content extends MY_Controller
 				$tmp_label = $this->Content_model->label;
 			}
 
-			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $tmp_ref_name);
+			$html .= "<p>\r";
+			$html .= form_label($tmp_label, $tmp_ref_name);
 
 			$form_options = array(
 			'id' => $tmp_ref_name,
@@ -224,49 +578,54 @@ class Content extends MY_Controller
 				$media_root = $this->Media_model->dir_base;
 				$dir_list_temp = $this->Media_model->dir_list;
 				$dir_vals['/'] = $this->cms_labels['media_root'];
-				
-				foreach($dir_list_temp as $the_dir) {
-					$temp_dir_val = str_replace($media_root,'',$the_dir);
-					$dir_vals[$temp_dir_val] = $temp_dir_val;
+				if(count($dir_list_temp) > 0)
+				{
+					foreach($dir_list_temp as $the_dir) {
+						$temp_dir_val = str_replace($media_root,'',$the_dir);
+						$dir_vals[$temp_dir_val] = $temp_dir_val;
+					}
 				}
 				
-				$form .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				
+				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
 				$this->load->model('Media_model');
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
 				$dir_files = array('' => $this->cms_labels['media_no_file']);
-				foreach($this->Media_model->dir_list as $index => $dir)
+				$dir_list_temp = $this->Media_model->dir_list;
+
+				if(count($dir_list_temp) > 0)
 				{
-					$this->Media_model->dir_current = $dir;
-					$dest_dir = str_replace($media_root,'',$dir);
-
-					$this->Media_model->list_files();
-					foreach($this->Media_model->file_list as $file_path) {
-						$file_rel = str_replace($media_root,'',$file_path);
-						$pinfo = pathinfo($file_path);
-						$dir_files[$file_rel] = $pinfo['basename'];
+					foreach($dir_list_temp as $index => $dir)
+					{
+						$this->Media_model->dir_current = $dir;
+						$dest_dir = str_replace($media_root,'',$dir);
+	
+						$this->Media_model->list_files();
+						foreach($this->Media_model->file_list as $file_path) {
+							$file_rel = str_replace($media_root,'',$file_path);
+							$pinfo = pathinfo($file_path);
+							$dir_files[$file_rel] = $pinfo['basename'];
+						}
+						
 					}
-					
 				}
-
-				$form .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
 			case 'textarea':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			case 'richtext':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			default:
-				$form .=  form_input($form_options);
+				$html .=  form_input($form_options);
 			}
-
-
-			$form .= "</p>\r";
+			$html .= "</p>\r";
 		}
 
 		$form_options = array(
@@ -275,43 +634,140 @@ class Content extends MY_Controller
 		'class' => 'textarea',
 		'value' => $this->Content_model->keywords
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['keywords'],'keywords');
-		$form .=  form_textarea($form_options);
-		$form .= "</p>";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
+		$html .= "</p>\r";
 
-		$form .= form_fieldset_close();
+		$html .= form_fieldset_close();
 
-		$this->data['form'] = $form;
+		// show attachments
+		$this->Content_model->list_attachments();
+		$this->Content_model->lang_load();
 
-		$form = form_fieldset($this->cms_labels['general_info']);
+		$html .= form_fieldset($this->cms_labels['attachments']);
+		$html .= "<p>";
+		if(count($this->Content_model->attachments) > 0)
+		{
+			$tmp_txt = $this->cms_labels['attachments_manage'];
+		}
+		else
+		{
+			$tmp_txt = $this->cms_labels['attachments_add'];
+		}
+
+		$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
+		$html .= "</p>\r";
+
+
+		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
+		$mime_labels = $this->lang->line('mime');
+		$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+		
+		if(count($this->Content_model->attachments) > 0)
+		{
+			foreach($this->Content_model->attachments as $att)
+			{
+				$this->Media_model->reset_media_vars();
+				$this->Media_model->temp_id = $att['media_id'];
+
+				if($this->Media_model->load_media())
+				{
+					$this->Media_model->load_title();
+					
+					// determine edit uri
+					$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
+					if($this->Media_model->temp_lang != '')
+					{
+						$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+					}
+
+					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
+					$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+
+					$filename = basename($this->Media_model->file_uri);
+
+					$html .= "<p>";
+
+					// if local image, do thumbnail
+					if($mime_cat == 'image' && $this->Media_model->external == 0)
+					{
+						$html .= "<div class=\"image-left\">";
+						$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+						$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+						$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+						$html .= "</div>";
+					}
+
+					if(array_key_exists($ext,$mime_icon_exts))
+					{
+						$html .= "<span class=\"icon ext_{$ext}\">";
+					}
+					else
+					{
+						$html .= "<span class=\"icon icon_{$mime_cat}\">";
+					}
+
+					if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+					{
+						$filename = $this->Media_model->title;
+					}
+
+					$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+					$html .= "</span><br />\r";
+
+					if(array_key_exists($ext,$mime_labels))
+					{
+						$html .= $mime_labels[$ext];
+					}
+					else
+					{
+						$html .= $this->Media_model->mime_type;
+					}
+					$html .= "</p>\r";
+
+				}
+
+
+			}
+
+		}
+		else
+		{
+			$html .= "<p>";
+			$html .= $this->cms_labels['attachments_none'];
+			$html .= "</p>\r";
+		}
+		$html .= form_fieldset_close();
+		$this->data['form'] = $html;
+
+		$html = form_fieldset($this->cms_labels['general_info']);
 
 		$this->Content_model->scope = 'content';
 		$form_options = $this->Content_model->types_dropdown();
 		
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['content_type'], 'type_id');
-		$form .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['content_type'], 'type_id');
+		$html .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
+		$html .= "</p>\n";
 
 		$form_options = $this->Content_model->get_parents_dropdown();
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['parent'], 'parent_id');
-		$form .=  form_dropdown('parent_id', $form_options, $this->Content_model->parent_id);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['parent'], 'parent_id');
+		$html .=  form_dropdown('parent_id', $form_options, $this->Content_model->parent_id);
+		$html .= "</p>\n";
 	
 		$form_options = array(1 => $this->cms_labels['yes'], 0 => $this->cms_labels['no']);
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['publish'], 'publish');
-		$form .=  form_dropdown('publish', $form_options, $this->Content_model->publish);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['publish'], 'publish');
+		$html .=  form_dropdown('publish', $form_options, $this->Content_model->publish);
+		$html .= "</p>\n";
 
 		$form_options = $this->User_model->get_list_dropdown();
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['author'], 'user_id');
-		$form .=  form_dropdown('user_id', $form_options, $this->Content_model->user_id);
-		$form .= "</p>\n";
-		
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['author'], 'user_id');
+		$html .=  form_dropdown('user_id', $form_options, $this->Content_model->user_id);
+		$html .= "</p>\n";
 
 		// convert dates to user timezone
 		$sys_zone = date_default_timezone_get();
@@ -345,10 +801,10 @@ class Content extends MY_Controller
 		'class'	=> 'small_input',
 		'value' => $this->Content_model->date_created,
 		);
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['date_created_start'], 'date_created');
-		$form .=  form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['date_created_start'], 'date_created');
+		$html .=  form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'name'        => 'date_end_expiry',
@@ -356,21 +812,20 @@ class Content extends MY_Controller
 		'class'	=> 'small_input',
 		'value' => $this->Content_model->date_end_expiry,
 		);
-		$form .= "<p>";
-		$form .=  form_label($this->cms_labels['date_end_expiry'], 'date_end_expiry');
-		$form .=  form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['date_end_expiry'], 'date_end_expiry');
+		$html .=  form_input($form_options);
+		$html .= "</p>\n";
 
-		$form .= form_fieldset_close();
-		$this->data['form_meta'] = $form;
+		$html .= form_fieldset_close();
+		$this->data['form_meta'] = $html;
 
+		$html = "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
 
-		$form = "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
-		$form .= form_close();
-
-		$this->data['form_close'] = $form;
+		$this->data['form_close'] = $html;
 
 	}
 
@@ -565,20 +1020,6 @@ class Content extends MY_Controller
 			$menu .= ul($lang_links);
 			$menu .=  "</li>\r";
 	
-/*			$del_base = 'cms/content/delete/id/'.$this->Content_model->content_id;
-			if($this->Content_model->temp_lang != '')
-			{
-				$del_lang = $del_base.'/lang/'.$this->Content_model->temp_lang;
-				$this->Content_model->lang_load();
-				$del_links[] = anchor($del_lang,$this->Content_model->lang_Ref_Name, array('title' => $this->cms_labels['delete_this_lang']));
-			}
-
-			$del_links[] = anchor($del_base,$this->cms_labels['all_langs'], array('title' => $this->cms_labels['delete_content_all_langs']));
-
-			$menu .= "<li>".$this->cms_labels['delete'];
-			$menu .= ul($del_links);
-			$menu .= "</li>\r";
-*/
 			$menu .=  "</ul>\r";
 
 		}
@@ -610,6 +1051,200 @@ class Content extends MY_Controller
 		$view = 'cms/search_results';
 
 		$this->load->view($view,$this->data);
+	}
+
+	function attachments()
+	{
+		$this->_process_attachments();
+		$this->_form_attachments();
+
+		$this->data['title_h1'] = $this->cms_labels['attachments_manage'];
+		$this->data['title_tag'] = $this->cms_labels['attachments_manage'];
+
+		$width = round(($this->Site_model->img_size_sm/15)+2.5,3);
+		$height = round(($this->Site_model->img_size_th/15)+2.5,3);
+		
+		$custom_header = "<style type=\"text/css\">\r";
+		$custom_header .= "/* <![CDATA[ */\r";
+		$custom_header .= "ul.thumbnails li { min-height: {$height}em; }\r";
+		$custom_header .= "ul.thumbnails li .thumb { width: {$width}em; height: {$height}em; }";
+		$custom_header .= "/* ]]> */\r";
+		$custom_header .= "</style>\r";
+		$custom_header .= "\r";
+		$this->data['custom_header'] = $custom_header;
+		
+		$this->load->view('cms/cms_form_no_sidebar',$this->data);
+	}
+
+	function _form_attachments()
+	{
+		$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+
+		$this->Content_model->content_id = $this->uri->segment(4);
+		$this->Content_model->load_content();
+		$this->Media_model->temp_lang = $this->Content_model->temp_lang;
+		$this->Media_model->lang_load();
+		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$mime_cat_labels = $this->lang->line('mime_cat');
+		$mime_labels = $this->lang->line('mime');
+		
+		$return_uri = 'cms/content/edit/id/'.$this->Content_model->content_id;
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/content",$this->cms_labels['content']);
+		$breadcrumb[] = anchor($return_uri,$this->Content_model->title);
+		$breadcrumb[] = $this->cms_labels['attachments_manage'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$html = "<p>";
+		$html .=  anchor($return_uri,sprintf($this->cms_labels['return_to'],$this->Content_model->title));
+		$html .= "</p>\r";
+		
+		$scan = $this->Media_model->list_media_recursive();
+
+		$this->Content_model->list_attachments();
+
+		$action = '/cms/content/attachments/'.$this->Content_model->content_id;
+		$attributes = array(
+		'id' => 'manage_attachments'
+		);
+		$html .= form_open($action, $attributes)."\r";
+		$html .= form_hidden('content_id', $this->Content_model->content_id)."\r";
+		$html .= form_fieldset($this->cms_labels['attachments']);
+		
+
+		$now_attached = array();
+
+		if(count($this->Content_model->attachments) > 0)
+		{
+			$html .= "<table class=\"borders full\">\r";
+			$html .= "\t<thead>\r";
+			$html .= "\t\t<tr>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"files\">{$this->cms_labels['file']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"removal\">{$this->cms_labels['remove']}</th>\r";
+			$html .= "\t\t</tr>\r";
+			$html .= "\t</thead>\r";
+			$html .= "\t<tbody>\r";
+
+			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+			foreach ($this->Content_model->attachments as $file)
+			{
+				$this->Media_model->reset_media_vars();
+
+				$now_attached[] = $file['media_id'];
+				$this->Media_model->temp_id = $file['media_id'];
+				$this->Media_model->load_media();
+				$this->Media_model->load_title();
+
+				$html .= "\t\t<tr>\r";
+
+				// get mime category
+				// get filename and extension
+				$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
+				$filename = basename($this->Media_model->file_uri);
+				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+				$mid = $this->Media_model->media_id;
+	
+				// determine edit uri
+				$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
+				if($this->Media_model->temp_lang != '')
+				{
+					$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+				}
+	
+				$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\">";
+				if($mime_cat == 'image' && $this->Media_model->external == 0)
+				{
+					$html .= "<div class=\"image-left\">";
+					// get thumbnail
+					$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+					$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+					$html .= "</div>";
+				}
+	
+				if(in_array($ext,$mime_icon_exts))
+				{
+					$html .= "<span class=\"icon ext_{$ext}\">";
+				}
+				else
+				{
+					$html .= "<span class=\"icon icon_{$mime_cat}\">";
+				}
+				if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+				{
+					$html .= $this->Media_model->title."<br />\r";
+				}
+				$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+				$html .= "</span><br />\r".$mime_labels[$ext];
+				$html .= "</th>\r";
+
+				$html .= "\t\t\t<td headers=\"att-{$file['media_id']} removal\">";
+
+				$options = array(
+				'name'        => "remove[]",
+				'value'       => $file['a_id'],
+				);
+				
+				$html .= form_checkbox($options);
+
+				$html .= "</td>\r";
+				$html .= "\t\t</tr>\r";
+			}
+			$html .= "\t</tbody>\r";
+			$html .= "</table>\r";
+		}
+		$html .= form_fieldset_close();
+		$this->Media_model->media_list = $now_attached;
+		// media browser
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+
+		// get filter for list
+		$params = $this->uri->uri_to_assoc(3);
+		$html .= form_fieldset($this->cms_labels['media']);
+
+		$base_url = '/cms/content/attachments/'.$this->Content_model->content_id;
+		$html .= $this->_media_form_table($params,$base_url,false,$this->cms_labels['attach']);
+
+		$html .= form_fieldset_close();
+
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+
+	function _process_attachments()
+	{
+		$this->Content_model->content_id = $this->input->post('content_id');
+		// first remove any marked for removal
+		$remove = $this->input->post('remove');
+		if($remove)
+		{
+			$this->Content_model->temp_value = $remove;
+			if(!$this->Content_model->remove_attachments())
+			{
+				$this->Content_model->messages[] = $this->cms_labels['attachments_remove_failure'];
+			}
+		}
+		// then attach any selected items
+		$this->selected = $this->input->post('select');
+		if(is_array($this->selected) && count($this->selected) > 0)
+		{
+			$this->Content_model->temp_value = $this->selected;
+			if(!$this->Content_model->add_attachments())
+			{
+				$this->Content_model->messages[] = $this->cms_labels['attachments_add_failure'];
+			}
+		}
+		if(count($this->Content_model->messages) == 0)
+		{
+			$this->Content_model->messages[] = $this->cms_labels['attachments_update_success'];
+		}
 	}
 }
 ?>
