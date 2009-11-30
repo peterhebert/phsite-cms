@@ -36,9 +36,9 @@ class Setup extends MY_Controller
 		$this->data['site_metadata'] =  $this->Site_model->lang_meta_menu();
 
 		$this->load->view('cms/setup',$this->data);
-
-
 	}
+
+
 	function site_preferences()
     {
 		$this->load->helper('image');
@@ -75,7 +75,7 @@ class Setup extends MY_Controller
 		$hidden = array('site_id' => $this->Site_model->site_id);
 		$attributes = array('name' => 'site_prefs','id' => 'site_prefs');
 
-		$form = form_open($action, $attributes);
+		$html = form_open($action, $attributes);
 
 		// get list of top level pages for home page
 		$form_options = array();
@@ -90,14 +90,14 @@ class Setup extends MY_Controller
 			$form_options["{$row['content_id']}"] = $row['title'];
 		}
 		
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['home_page'], 'home_content_id');
-		$form .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['home_page'], 'home_content_id');
+		$html .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);		
+		$html .= "</p>\r";
 
 		$this->Site_model->list_themes();
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['theme'], 'theme');
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['theme'], 'theme');
 
 		foreach($this->Site_model->site_themes as $uri => $theme_info)
 		{
@@ -115,71 +115,71 @@ class Setup extends MY_Controller
 			);
 			$width = $this->Site_model->img_size_sm;
 		
-			$form .= "<label class=\"column\" style=\"width: {width}px\">";
+			$html .= "<label class=\"column\" style=\"width: {width}px\">";
 			$path_thumb = $this->Site_model->install_path.'system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
 			if(file_exists($path_thumb))
 			{
 				
 				$alt = sprintf($this->cms_labels['theme_screenshot'],$theme_info['title']);
-				$form .= "<span class=\"image\">";
-				$form .= view_image($path_thumb,$this->Site_model->img_size_sm,array('alt' => $alt));
-				$form .= "</span><br />\r";
+				$html .= "<span class=\"image\">";
+				$html .= view_image($path_thumb,$this->Site_model->img_size_sm,array('alt' => $alt));
+				$html .= "</span><br />\r";
 			}
-			$form .= form_radio($form_options);
-			$form .= ' <strong>'.anchor($theme_info['website'], $theme_info['title'], array('rel' => 'external'))."</strong><br />\r";
-			$form .= $this->cms_labels['author'].' : '.mailto($theme_info['email'], $theme_info['author'], array('title' => $this->cms_labels['email_author']))."<br />\r";
-			$form .= $theme_info['description']."</label> ";
+			$html .= form_radio($form_options);
+			$html .= ' <strong>'.anchor($theme_info['website'], $theme_info['title'], array('rel' => 'external'))."</strong><br />\r";
+			$html .= $this->cms_labels['author'].' : '.mailto($theme_info['email'], $theme_info['author'], array('title' => $this->cms_labels['email_author']))."<br />\r";
+			$html .= $theme_info['description']."</label> ";
 
 			
 		}
-		$form .= "</p>\r";
+		$html .= "</p>\r";
 /*		
 		$form_options = $theme_list;
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['theme'], 'theme');
-		$form .= form_dropdown('theme', $form_options, $this->Site_model->theme);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['theme'], 'theme');
+		$html .= form_dropdown('theme', $form_options, $this->Site_model->theme);		
+		$html .= "</p>\r";
 */
 		$form_options = timezone_dropdown();
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['timezone'], 'site_timezone');
-		$form .= form_dropdown('site_timezone', $form_options, $this->Site_model->site_timezone);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['timezone'], 'site_timezone');
+		$html .= form_dropdown('site_timezone', $form_options, $this->Site_model->site_timezone);		
+		$html .= "</p>\r";
 
 		$form_options = $this->Site_model->langs_dropdown();
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['default_lang'], 'site_default_lang');
-		$form .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['default_lang'], 'site_default_lang');
+		$html .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
+		$html .= "</p>\r";
 
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		$form_options = $this->Content_model->types_dropdown();
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['default_content_type'], 'default_content_type');
-		$form .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['default_content_type'], 'default_content_type');
+		$html .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);		
+		$html .= "</p>\r";
 
 		$form_options = $this->User_model->get_list_dropdown(0,1);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['webmaster'], 'site_admin_id');
-		$form .= form_dropdown('site_admin_id', $form_options, $this->Site_model->site_admin_id);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['webmaster'], 'site_admin_id');
+		$html .= form_dropdown('site_admin_id', $form_options, $this->Site_model->site_admin_id);		
+		$html .= "</p>\r";
 
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['editor'], 'site_editor_id');
-		$form .= form_dropdown('site_editor_id', $form_options, $this->Site_model->site_editor_id);		
-		$form .= "</p>\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['editor'], 'site_editor_id');
+		$html .= form_dropdown('site_editor_id', $form_options, $this->Site_model->site_editor_id);		
+		$html .= "</p>\r";
 
 		$form_options = array(
-		'class'        => 'small_input',
+		'class'	=> 'med_input',
 		'name'        => 'site_date_created',
 		'id'          => 'site_date_created',
 		'value'       => $this->Site_model->site_date_created
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['site_date_created'], 'site_date_created');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['site_date_created'], 'site_date_created');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -187,10 +187,10 @@ class Setup extends MY_Controller
 		'id'          => 'limit_posts',
 		'value'       => $this->Site_model->limit_posts
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['limit_posts'], 'limit_posts');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['limit_posts'], 'limit_posts');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -198,10 +198,10 @@ class Setup extends MY_Controller
 		'id'          => 'limit_thumbs',
 		'value'       => $this->Site_model->limit_thumbs
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['limit_thumbs'], 'limit_thumbs');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['limit_thumbs'], 'limit_thumbs');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -209,10 +209,10 @@ class Setup extends MY_Controller
 		'id'          => 'img_size_th',
 		'value'       => $this->Site_model->img_size_th
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['img_size_th'], 'img_size_th');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['img_size_th'], 'img_size_th');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -220,10 +220,10 @@ class Setup extends MY_Controller
 		'id'          => 'img_size_sm',
 		'value'       => $this->Site_model->img_size_sm
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['img_size_sm'], 'img_size_sm');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['img_size_sm'], 'img_size_sm');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -231,10 +231,10 @@ class Setup extends MY_Controller
 		'id'          => 'img_size_md',
 		'value'       => $this->Site_model->img_size_md
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['img_size_md'], 'img_size_md');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['img_size_md'], 'img_size_md');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'tiny_input align-right',
@@ -242,16 +242,16 @@ class Setup extends MY_Controller
 		'id'          => 'img_size_lg',
 		'value'       => $this->Site_model->img_size_lg
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['img_size_lg'], 'img_size_lg');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['img_size_lg'], 'img_size_lg');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
 
-		$form .= form_close();
-		return $form;
+		$html .= form_close();
+		return $html;
 	}
 
 	function _process_site_preferences()
@@ -359,13 +359,13 @@ class Setup extends MY_Controller
 		$hidden = array('site_id' => $this->Site_model->site_id, 'title_id' => $this->Site_model->title_id);
 		$attributes = array('name' => 'site_metadata','id' => 'site_metadata');
 
-		$form = form_open($action, $attributes, $hidden);
+		$html = form_open($action, $attributes, $hidden);
 
 		$form_options = $this->Site_model->langs_dropdown();
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['language'], 'site_meta_lang');
-		$form .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->temp_lang);		
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'site_meta_lang');
+		$html .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->temp_lang);		
+		$html .= "</p>\r";
 
 		$form_options = array(
 		'class'        => 'text',
@@ -373,10 +373,10 @@ class Setup extends MY_Controller
 		'id'          => 'title',
 		'value'       => $this->Site_model->title
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['title'], 'title');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['title'], 'title');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$form_options = array(
 		'class'        => 'text',
@@ -384,10 +384,10 @@ class Setup extends MY_Controller
 		'id'          => 'subtitle',
 		'value'       => $this->Site_model->subtitle
 		);
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['subtitle'], 'subtitle');
-		$form .= form_input($form_options);
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['subtitle'], 'subtitle');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
 
 		$fd_meta = $this->Site_model->metadata;
 
@@ -401,7 +401,7 @@ class Setup extends MY_Controller
 			'required[]' =>  $fd['required'],
 			'field_needs_lang[]' => $fd['field_needs_lang']
 			);
-			$form .= form_hidden($form_options);
+			$html .= form_hidden($form_options);
 
 			$this->Site_model->label_scope = 'field';
 			$this->Site_model->temp_id = $index;
@@ -411,8 +411,8 @@ class Setup extends MY_Controller
 			{
 				$tmp_label = $this->Site_model->label;
 			}
-			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $fd['field_ref_name']);
+			$html .= "<p>\r";
+			$html .= form_label($tmp_label, $fd['field_ref_name']);
 			$form_options = array(
 			'id' => $fd['field_ref_name'],
 			'name' => 'value_'.$index,
@@ -434,7 +434,7 @@ class Setup extends MY_Controller
 					$dir_vals[$temp_dir_val] = $temp_dir_val;
 				}
 				
-				$form .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
 				$this->load->model('Media_model');
@@ -455,29 +455,29 @@ class Setup extends MY_Controller
 					
 				}
 
-				$form .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
 			case 'textarea':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			case 'richtext':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .=  form_textarea($form_options);
 				break;
 			default:
-				$form .=  form_input($form_options);
+				$html .=  form_input($form_options);
 			}
 
-			$form .= "</p>\r";
+			$html .= "</p>\r";
 		}
 		
-		$form .= "<p>";
-		$form .= form_submit('submit', 'Save');
-		$form .= "</p>\n";
+		$html .= "<p>";
+		$html .= form_submit('submit', 'Save');
+		$html .= "</p>\n";
 
-		$form .= form_close();
-		return $form;
+		$html .= form_close();
+		return $html;
 	}
 	
 	function _site_meta_menu()
@@ -686,12 +686,10 @@ class Setup extends MY_Controller
 		
 		}
 
-		$form = "<h3 class=\"first\">".$this->cms_labels['fields']."</h3>\r";
-		$form .= '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
-		$form .= ul($fields);
-		$this->data['form'] =  $form;
-
-		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$html = "<h3 class=\"first\">".$this->cms_labels['fields']."</h3>\r";
+		$html .= '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
+		$html .= ul($fields);		$this->data['form'] = $html;
+$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
 		$breadcrumb[] = $this->cms_labels['fields'];
 		
@@ -820,21 +818,21 @@ class Setup extends MY_Controller
 		'label_id'  => $this->Content_model->label_id
 		);
 
-		$form = form_open($action,$attributes,$hidden)."\r";
+		$html = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
-		$form .= form_fieldset($this->cms_labels['field_info']);
-		$form .= "\r";
+		$html .= form_fieldset($this->cms_labels['field_info']);
+		$html .= "\r";
 		
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['ref_name'], 'field_ref_name');
-		$form .= form_input('field_ref_name',$this->Content_model->field_ref_name); 
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['ref_name'], 'field_ref_name');
+		$html .= form_input('field_ref_name',$this->Content_model->field_ref_name); 
+		$html .= "</p>\r";
 		
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['input_type'], 'field_input_type');
-		$form .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type); 
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['input_type'], 'field_input_type');
+		$html .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type); 
+		$html .= "</p>\r";
 
 		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
 		if($this->Content_model->field_needs_lang == '')
@@ -845,58 +843,58 @@ class Setup extends MY_Controller
 		{
 			$needs_lang = $this->Content_model->field_needs_lang;
 		}
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
-		$form .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
-		$form .= "</p>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
+		$html .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
+		$html .= "</p>\r";
+		$html .= form_fieldset_close("\r");
 		
 		// metadata
-		$form .= form_fieldset($this->cms_labels['field_metadata']);
-		$form .= "\r";
+		$html .= form_fieldset($this->cms_labels['field_metadata']);
+		$html .= "\r";
 
 		$form_options = $this->Content_model->langs_dropdown();
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['language'], 'field_lang');
-		$form .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang); 
-		$form .= "</p>\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['field_label'], 'field_label');
-		$form .= form_input('field_label',$this->Content_model->label); 
-		$form .= "</p>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'field_lang');
+		$html .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang); 
+		$html .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['field_label'], 'field_label');
+		$html .= form_input('field_label',$this->Content_model->label); 
+		$html .= "</p>\r";
+		$html .= form_fieldset_close("\r");
 
 		// validation
-		$form .= form_fieldset($this->cms_labels['validation']);
-		$form .= "\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['data_type'], 'validation_string');
-		$form .= form_dropdown('validation_string', $this->Content_model->data_types, $this->Content_model->validation_string); 
-		$form .= "</p>\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['exact_length'], 'validation_exact');
-		$form .= form_input('validation_exact',$this->Content_model->validation_exact); 
-		$form .= "</p>\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['min_length'], 'validation_min');
-		$form .= form_input('validation_min',$this->Content_model->validation_min); 
-		$form .= "</p>\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['max_length'], 'validation_max');
-		$form .= form_input('validation_max',$this->Content_model->validation_max); 
-		$form .= "</p>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= form_fieldset($this->cms_labels['validation']);
+		$html .= "\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['data_type'], 'validation_string');
+		$html .= form_dropdown('validation_string', $this->Content_model->data_types, $this->Content_model->validation_string); 
+		$html .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['exact_length'], 'validation_exact');
+		$html .= form_input('validation_exact',$this->Content_model->validation_exact); 
+		$html .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['min_length'], 'validation_min');
+		$html .= form_input('validation_min',$this->Content_model->validation_min); 
+		$html .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['max_length'], 'validation_max');
+		$html .= form_input('validation_max',$this->Content_model->validation_max); 
+		$html .= "</p>\r";
+		$html .= form_fieldset_close("\r");
 
-		$form .= "<p>\r";
+		$html .= "<p>\r";
 		$submit_data = array(
 		'name'  => 'submit',
 		'id'  => 'submit'
 		);
-		$form .= form_submit($submit_data, $this->cms_labels['save']);
-		$form .= "</p>\r";
-		$form .= form_close("\r");
+		$html .= form_submit($submit_data, $this->cms_labels['save']);
+		$html .= "</p>\r";
+		$html .= form_close("\r");
 
-		return $form;
+		return $html;
 	}
 
 	function _process_field_edit()
@@ -1003,7 +1001,7 @@ class Setup extends MY_Controller
 		$hidden = array('site_id' => $this->Site_model->site_id);
 		$attributes = array('name' => 'site_meta_fields','id' => 'site_meta_fields');
 
-		$form = form_open($action, $attributes, $hidden);
+		$html = form_open($action, $attributes, $hidden);
 
 		// fields
 
@@ -1012,17 +1010,17 @@ class Setup extends MY_Controller
 		$fieldCount = count($this->Site_model->field_list);
 		$fieldNo = 1;
 
-		$form .= "<table id=\"properties\">\r";
-		$form .= "<thead>\r";
-		$form .= "<tr>\r";
-		$form .= "<th id=\"fd_name\">".$this->cms_labels['field']."</th>\r";
-		$form .= "<th id=\"fd_exists\">".$this->cms_labels['field_use_for_metadata']."</th>\r";
-		$form .= "<th id=\"fd_req\">".$this->cms_labels['required']."</th>\r";
-		$form .= "<th id=\"fd_order\">".$this->cms_labels['order']."</th>\r";
-		$form .= "</tr>\r";
-		$form .= "</thead>\r";
+		$html .= "<table id=\"properties\">\r";
+		$html .= "<thead>\r";
+		$html .= "<tr>\r";
+		$html .= "<th id=\"fd_name\">".$this->cms_labels['field']."</th>\r";
+		$html .= "<th id=\"fd_exists\">".$this->cms_labels['field_use_for_metadata']."</th>\r";
+		$html .= "<th id=\"fd_req\">".$this->cms_labels['required']."</th>\r";
+		$html .= "<th id=\"fd_order\">".$this->cms_labels['order']."</th>\r";
+		$html .= "</tr>\r";
+		$html .= "</thead>\r";
 		
-		$form .= "<tbody>\r";
+		$html .= "<tbody>\r";
 
 		foreach($this->Site_model->field_list as $field)
 		{
@@ -1076,23 +1074,23 @@ class Setup extends MY_Controller
 
 			$input_order = form_input($params);
 			
-			$form .= "<tr>\r";
-			$form .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
-			$form .= "<td headers=\"fd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
-			$form .= "<td headers=\"fd_req row_{$fieldNo}\">".$chk_req."</td>\r";
-			$form .= "<td headers=\"fd_order row_{$fieldNo}\">".$input_order."</td>\r";
-			$form .= "</tr>\r";
+			$html .= "<tr>\r";
+			$html .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$html .= "<td headers=\"fd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$html .= "<td headers=\"fd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$html .= "<td headers=\"fd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$html .= "</tr>\r";
 
 			$fieldNo += 1;
 
 		}
-		$form .= "</tbody>\r";
-		$form .= "</table>\r";
+		$html .= "</tbody>\r";
+		$html .= "</table>\r";
 
 
-		$form .= form_submit('submit', 'Save');
-		$form .= form_close();
-		return $form;
+		$html .= form_submit('submit', 'Save');
+		$html .= form_close();
+		return $html;
 	}
 
 	function _process_meta_fields()
@@ -1173,20 +1171,20 @@ class Setup extends MY_Controller
 		$attributes = array('name' => "search_langs", 'id' => "search_langs");
 		
 		// search for lang matches
-		$form = form_open($action,$attributes)."\r";
-		$form .= "<p>";
-		$form .= form_label($this->cms_labels['lang_find'], 'search');
+		$html = form_open($action,$attributes)."\r";
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['lang_find'], 'search');
 		$params = array(
 		'name'        => 'find',
 		'id'          => 'find',
 		);
-		$form .= form_input($params);
-		$form .= "</p>\n";
+		$html .= form_input($params);
+		$html .= "</p>\n";
 
-		$form .= "<p>";
-		$form .= form_submit('search_submit', $this->cms_labels['search']);
-		$form .= "</p>\n";
-		$form .= form_close();
+		$html .= "<p>";
+		$html .= form_submit('search_submit', $this->cms_labels['search']);
+		$html .= "</p>\n";
+		$html .= form_close();
 		
 		// enable or disable - list of enabled languages
 		$attributes = array('name' => "langform", 'id' => "langform");
@@ -1202,13 +1200,13 @@ class Setup extends MY_Controller
 			'enabled_langs' => $hidden_list,
 		);
 
-		$form .= form_open($action, $attributes,$hidden);
+		$html .= form_open($action, $attributes,$hidden);
 		$matches = $this->Site_model->matches;
 		if(is_array($matches) && count($matches) > 0)
 		{
-			$form .= "<p>";
-			$form .= form_label($this->Site_model->label);
-			$form .= "<span class=\"radiogroup w4\">";
+			$html .= "<p>";
+			$html .= form_label($this->Site_model->label);
+			$html .= "<span class=\"radiogroup w4\">";
 			
 			foreach($matches as $lang)
 			{
@@ -1218,22 +1216,22 @@ class Setup extends MY_Controller
 				'value'       => $lang['ISO_639_3'],
 				'checked'     => $lang['activated'],
 				);
-				$form .= "<label>";
-				$form .= form_checkbox($params);
-				$form .= ' '.$lang['Inverted_Name'];
+				$html .= "<label>";
+				$html .= form_checkbox($params);
+				$html .= ' '.$lang['Inverted_Name'];
 				if($lang['Native_Name'] != '') {
-					$form .= " ({$lang['Native_Name']})";
+					$html .= " ({$lang['Native_Name']})";
 				}
-				$form .= "</label> ";
+				$html .= "</label> ";
 			}
 			
-			$form .= "</span></p>\r";
+			$html .= "</span></p>\r";
 		}
 
 		if(count($active) > 0) {
-			$form .= "<p>";
-			$form .= form_label($this->cms_labels['langs_activated']);
-			$form .= "<span class=\"radiogroup w4\">";
+			$html .= "<p>";
+			$html .= form_label($this->cms_labels['langs_activated']);
+			$html .= "<span class=\"radiogroup w4\">";
 
 			foreach($enabled as $lang) {
 				$params = array(
@@ -1242,24 +1240,24 @@ class Setup extends MY_Controller
 				'value'       => $lang['ISO_639_3'],
 				'checked'     => TRUE,
 				);
-				$form .= "<label>";
-				$form .= form_checkbox($params);
-				$form .= ' '.$lang['Inverted_Name'];
+				$html .= "<label>";
+				$html .= form_checkbox($params);
+				$html .= ' '.$lang['Inverted_Name'];
 				if($lang['Native_Name'] != '') {
-					$form .= " ({$lang['Native_Name']})";
+					$html .= " ({$lang['Native_Name']})";
 				}
-				$form .= "</label> ";
+				$html .= "</label> ";
 			}
-			$form .= "</span></p>\n";
+			$html .= "</span></p>\n";
 		} else {
-			$form .= "<p>".$this->cms_labels['no_langs_activated']."</p>\n";
+			$html .= "<p>".$this->cms_labels['no_langs_activated']."</p>\n";
 		}
 
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
-		$form .= form_close();
-		return $form;
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
+		return $html;
 	}
 
 	function _process_languages()
@@ -1347,12 +1345,10 @@ class Setup extends MY_Controller
 		
 		}
 
-		$form = "<h3 class=\"first\">".$this->cms_labels['content_types']."</h3>\r";
-		$form .= '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
-		$form .= ul($types);
-		$this->data['form'] =  $form;
-
-		$this->load->view('cms/cms_form',$this->data);
+		$html = "<h3 class=\"first\">".$this->cms_labels['content_types']."</h3>\r";
+		$html .= '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
+		$html .= ul($types);		$this->data['form'] = $html;
+$this->load->view('cms/cms_form',$this->data);
 	}
 	
 	function content_type_edit()
@@ -1428,9 +1424,9 @@ class Setup extends MY_Controller
 		}
 		$this->Content_model->load_type();
 
+		$this->Content_model->list_type_meta_fields();
+
 		if($this->Content_model->type_id != '') {
-			$this->Content_model->list_type_meta_fields();
-			
 			$this->Content_model->reset_label();
 			$this->Content_model->label_scope = "types";
 			$this->Content_model->temp_id = $this->Content_model->type_id;
@@ -1455,48 +1451,48 @@ class Setup extends MY_Controller
 		'label_id' => $this->Content_model->label_id
 		);
 		
-		$form = form_open($action,$attributes,$hidden)."\r";
+		$html = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
-		$form .= "<p class=\"nomargin\">\r";
-		$form .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
-		$form .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
-		$form .= "</p>\r";
-		$form .= "<p class=\"indent\">".$this->cms_labels['note_type_uri_name'];
-		$form .= "</p>\r";
+		$html .= "<p class=\"nomargin\">\r";
+		$html .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
+		$html .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
+		$html .= "</p>\r";
+		$html .= "<p class=\"indent\">".$this->cms_labels['note_type_uri_name'];
+		$html .= "</p>\r";
 
 		// metadata
-		$form .= form_fieldset($this->cms_labels['type_metadata']);
-		$form .= "\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['language'], 'type_lang');
-		$form .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang); 
-		$form .= "</p>\r";
+		$html .= form_fieldset($this->cms_labels['type_metadata']);
+		$html .= "\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'type_lang');
+		$html .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang); 
+		$html .= "</p>\r";
 		
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['type_label'], 'label');
-		$form .= form_input('label',$this->Content_model->label); 
-		$form .= "</p>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['type_label'], 'label');
+		$html .= form_input('label',$this->Content_model->label); 
+		$html .= "</p>\r";
+		$html .= form_fieldset_close("\r");
 
 		// fields
-		$form .= form_fieldset($this->cms_labels['fields']);
-		$form .= "\r";
+		$html .= form_fieldset($this->cms_labels['fields']);
+		$html .= "\r";
 
-		$form .= "<table id=\"properties\">\r";
-		$form .= "<thead>\r";
-		$form .= "<tr>\r";
-		$form .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
-		$form .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
-		$form .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
-		$form .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
-		$form .= "</tr>\r";
-		$form .= "</thead>\r";
+		$html .= "<table id=\"properties\">\r";
+		$html .= "<thead>\r";
+		$html .= "<tr>\r";
+		$html .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$html .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
+		$html .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
+		$html .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
+		$html .= "</tr>\r";
+		$html .= "</thead>\r";
 
 		$fieldCount = count($this->Content_model->field_list);
 		$fieldNo = 1;
 
-		$form .= "<tbody>\r";
+		$html .= "<tbody>\r";
 
 		foreach($this->Content_model->field_list as $field)
 		{
@@ -1551,26 +1547,26 @@ class Setup extends MY_Controller
 
 			$input_order = form_input($params);
 			
-			$form .= "<tr>\r";
-			$form .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
-			$form .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
-			$form .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
-			$form .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
-			$form .= "</tr>\r";
+			$html .= "<tr>\r";
+			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$html .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$html .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$html .= "</tr>\r";
 
 			$fieldNo += 1;
 
 		}
-		$form .= "</tbody>\r";
-		$form .= "</table>\r";
+		$html .= "</tbody>\r";
+		$html .= "</table>\r";
 
-		$form .= form_fieldset_close("\r");
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
-		$form .= form_close();
+		$html .= form_fieldset_close("\r");
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
 
-		return $form;
+		return $html;
 	}
 
 	function _process_content_type()
@@ -1714,11 +1710,9 @@ class Setup extends MY_Controller
 		
 		}
 
-		$form = '<p>'. $this->cms_labels['media_type_mimes']."</p>\r";
-		$form .= ul($types);
-		$this->data['form'] =  $form;
-
-		$this->load->view('cms/cms_form',$this->data);
+		$html = '<p>'. $this->cms_labels['media_type_mimes']."</p>\r";
+		$html .= ul($types);		$this->data['form'] = $html;
+$this->load->view('cms/cms_form',$this->data);
 	}
 
 	function media_type_edit()
@@ -1819,22 +1813,22 @@ class Setup extends MY_Controller
 		'label_id' => $this->Media_model->label_id,
 		);
 		
-		$form = form_open($action,$attributes,$hidden)."\r";
+		$html = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
-		$form .= "<h2>\r";
+		$html .= "<h2>\r";
 		$tmp_editing = sprintf($this->cms_labels['media_type_editing'],$this->Media_model->type_uri_name);
-		$form .= $tmp_editing; 
-		$form .= "</h2>\r";
+		$html .= $tmp_editing; 
+		$html .= "</h2>\r";
 
 		// metadata
 		$options = $this->Media_model->langs_dropdown();
-		$form .= form_fieldset($this->cms_labels['type_metadata']);
-		$form .= "\r";
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['language'], 'type_lang');
-		$form .= form_dropdown('type_lang', $options, $this->Media_model->temp_lang); 
-		$form .= "</p>\r";
+		$html .= form_fieldset($this->cms_labels['type_metadata']);
+		$html .= "\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'type_lang');
+		$html .= form_dropdown('type_lang', $options, $this->Media_model->temp_lang); 
+		$html .= "</p>\r";
 		
 		$options = array(
 		'name'        => 'label',
@@ -1843,32 +1837,32 @@ class Setup extends MY_Controller
 		'class'   => 'text',
 		);
 		
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['type_label'], 'label');
-		$form .= form_input($options); 
-		$form .= "</p>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['type_label'], 'label');
+		$html .= form_input($options); 
+		$html .= "</p>\r";
+		$html .= form_fieldset_close("\r");
 
 		// fields
-		$form .= form_fieldset($this->cms_labels['fields']);
-		$form .= "\r";
+		$html .= form_fieldset($this->cms_labels['fields']);
+		$html .= "\r";
 
 
-		$form .= "<table id=\"properties\">\r";
-		$form .= "<thead>\r";
-		$form .= "<tr>\r";
-		$form .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
-		$form .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
-		$form .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
-		$form .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
-		$form .= "</tr>\r";
-		$form .= "</thead>\r";
+		$html .= "<table id=\"properties\">\r";
+		$html .= "<thead>\r";
+		$html .= "<tr>\r";
+		$html .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$html .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
+		$html .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
+		$html .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
+		$html .= "</tr>\r";
+		$html .= "</thead>\r";
 
 		$field_list = $this->Media_model->field_list;
 		$fieldCount = count($field_list);
 		$fieldNo = 1;
 
-		$form .= "<tbody>\r";
+		$html .= "<tbody>\r";
 
 		$chk_exist = "&nbsp;";
 		$chk_req = "&nbsp;";
@@ -1931,26 +1925,26 @@ class Setup extends MY_Controller
 
 			$input_order = form_input($params);
 			
-			$form .= "<tr>\r";
-			$form .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
-			$form .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
-			$form .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
-			$form .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
-			$form .= "</tr>\r";
+			$html .= "<tr>\r";
+			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
+			$html .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
+			$html .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
+			$html .= "</tr>\r";
 
 			$fieldNo += 1;
 
 		}
-		$form .= "</tbody>\r";
-		$form .= "</table>\r";
-		$form .= form_fieldset_close("\r");
+		$html .= "</tbody>\r";
+		$html .= "</table>\r";
+		$html .= form_fieldset_close("\r");
 
-		$form .= "<p>";
-		$form .= form_submit('submit', $this->cms_labels['save']);
-		$form .= "</p>\n";
-		$form .= form_close();
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
 
-		return $form;
+		return $html;
 	}
 
 	function _process_media_type()
@@ -2036,9 +2030,325 @@ class Setup extends MY_Controller
 		
 	}
 
-/*
+	function lists()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['lists'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['lists'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['lists'];
+		
+		$lists = $this->Content_model->value_lists_all();
+		if($lists)
+		{
+			
+			foreach($lists as $list)
+			{
+				$label = $list['list_ref_name'];
+				$link = 'cms/setup/list_edit/id/'.$list['list_id'].'/lang/'.$this->Content_model->temp_lang;
+				if(array_key_exists('label',$list))
+				{
+					$label = $list['label'];
+				}
+				$edit_links[] = anchor($link,$label);
+				
+			}
+			$html = ul($edit_links);
+			
+		}
+		else
+		{
+			$html = "<p>no lists found</p>\r";
+		}
+		
+		$this->data['form'] = $html;
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+
+	function list_edit()
+	{
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = anchor("cms/setup/lists",$this->cms_labels['lists']);
+		$breadcrumb[] = $this->cms_labels['list_edit'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['list_edit'];
+		$title_tag[] = $this->cms_labels['lists'];
+		$title_tag[] = $this->cms_labels['setup'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['list_edit'];
+		
+		$this->_process_list_edit();
+		$this->_form_list_edit();
+
+		$msg = $this->Content_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$this->load->view('cms/cms_form',$this->data);
+	}
+	
+	function _form_list_edit()
+	{
+		$params = $this->uri->uri_to_assoc(4);
+
+		if(array_key_exists('id',$params))
+		{
+			$this->Content_model->temp_id = $params['id'];
+		}
+		if(array_key_exists('lang',$params))
+		{
+			$this->Content_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
+		}
+		$this->Content_model->lang_load();
+		$this->Content_model->load_value_list();
+		
+		$action = $this->uri->uri_string();
+		$attributes = array('name' => "list_editor", 'id' => "list_editor");
+		$hidden = array('list_id' => $this->Content_model->list_id);
+		$html = form_open($action,$attributes,$hidden)."\r";
+		$html .= form_fieldset($this->cms_labels['general_info']);
+
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['ref_name'], 'list_ref_name');
+		$html .= form_input('list_ref_name',$this->Content_model->list_ref_name); 
+		$html .= "</p>\r";
+
+		$html .= form_fieldset_close("\r");
+
+		// metadata
+		$html .= form_fieldset($this->cms_labels['field_metadata'])."\r";
+
+		$form_options = $this->Content_model->langs_dropdown();
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'list_lang');
+		$html .= form_dropdown('list_lang', $form_options, $this->Content_model->temp_lang); 
+		$html .= "</p>\r";
+		
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['label'], 'label');
+		$html .= form_input('label',$this->Content_model->label); 
+		$html .= "</p>\r";
+
+		$html .= "<div class=\"block\">\r";
+		$html .= form_label($this->cms_labels['list_values'], NULL, array('class' => 'form_label'));
+		$html .= "<div class=\"column w1\">".$this->cms_labels['values']."</div>\r";
+		$html .= "<div class=\"float\">".$this->cms_labels['labels']."</div>\r";
+		$html .= "</div>\r";
+
+		// existing values
+		foreach($this->Content_model->value_list as $value)
+		{
+			$html .= "<div class=\"indent block\">\r";
+			$html .= form_hidden('val_ids[]', $value['val_id']);
+			
+			$form_options = array(
+			'size'        => '13',
+			'name'        => 'list_values[]',
+			'id'          => 'list_values[]',
+			'value'       => $value['value'],
+			);
+			$html .= "<div class=\"column w1\">";
+			$html .= form_input($form_options); 
+			$html .= "</div>\r";
+
+			$form_options = array(
+			'size'        => '25',
+			'name'        => 'list_labels[]',
+			'id'          => 'list_labels[]',
+			'value'       => $value['label'],
+			);
+			$html .= "<div class=\"float\">";
+			$html .= form_input($form_options); 
+			$html .= "</div>\r";
+
+			$html .= "</div>\r";
+		}
+		// new values (5 rows)
+		$i = 1;
+		while ($i <= 5) {
+			$i++;
+
+			$html .= "<div class=\"indent block\">\r";
+			
+			$form_options = array(
+			'size'        => '13',
+			'name'        => 'new_values[]',
+			'id'          => 'new_values[]',
+			);
+			$html .= "<div class=\"column w1\">";
+			$html .= form_input($form_options); 
+			$html .= "</div>\r";
+
+			$form_options = array(
+			'size'        => '25',
+			'name'        => 'new_labels[]',
+			'id'          => 'new_labels[]',
+			);
+			$html .= "<div class=\"float\">";
+			$html .= form_input($form_options); 
+			$html .= "</div>\r";
+
+			$html .= "</div>\r";
 
 
-*/
+		}
+
+		$html .= form_fieldset_close("\r");
+
+
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
+		
+		$this->data['form'] = $html;
+
+		// construct sidebar lang links
+		if($this->Content_model->list_id != '')
+		{
+			$sidebar = "<h2>".$this->cms_labels['edit_by_lang']."</h2>";
+
+			$this->Site_model->list_langs();
+			$enabled = $this->Site_model->lang_list;
+			
+			$lang_links = array();
+			foreach($enabled as $tmp_lang)
+			{
+				$action = "/cms/setup/list_edit/id/".$this->Content_model->list_id."/lang/".$tmp_lang['ISO_639_3'];
+				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
+			}
+			$sidebar .= ul($lang_links);
+			$this->data['sidebar'] = $sidebar;
+		}
+
+	}
+
+	function _process_list_edit()
+	{
+
+		if($this->input->post('submit') != '')
+		{
+			// set validation rules
+			$this->load->library('form_validation');
+
+			$this->form_validation->set_rules('list_ref_name', $this->cms_labels['ref_name'], 'required');
+			$this->form_validation->set_rules('label', $this->cms_labels['label'], 'required');
+			$this->form_validation->set_rules('list_lang', $this->cms_labels['language'], 'required|is_lang');
+
+			$form_is_valid = $this->form_validation->run();
+			
+			// get values from form post data
+			$this->Content_model->list_id = $this->input->post('list_id');
+			$this->Content_model->list_ref_name = $this->input->post('list_ref_name');
+			$this->Content_model->temp_lang = $this->input->post('list_lang');
+			$this->Content_model->label = $this->input->post('label');
+			
+			$val_ids = $this->input->post('val_ids');
+			$list_values = $this->input->post('list_values');
+			$list_labels = $this->input->post('list_labels');
+
+			$new_values = $this->input->post('new_values');
+			$new_labels = $this->input->post('new_labels');
+			
+			$list_values_final = array();
+
+			if ($form_is_valid)
+			{
+				// update list 
+				if($this->Content_model->update_list())
+				{
+					$this->Content_model->label_scope = 'list';
+					$this->Content_model->label_rel_id = $this->Content_model->list_id;
+					$this->Content_model->label_rel_name = $this->Content_model->list_ref_name;
+
+					// update label 
+					if($this->Content_model->update_label())
+					{
+
+						// update list values
+						foreach($val_ids as $index => $v_id)
+						{
+							if($list_values[$index] == '' && $list_labels[$index] == '')
+							{
+								// delete this row
+							}
+							else if($list_values[$index] == '' || $list_labels[$index] == '')
+							{
+								if($list_values[$index] == '')
+								{
+									$this->Content_model->messages[] = 'missing value #'.$v_id;
+								}
+								if($list_labels[$index] == '')
+								{
+									$this->Content_model->messages[] = 'missing label #'.$v_id;
+								}
+							}
+		
+							$tmp_vals = array(
+							'val_id' => $v_id,
+							'value' => $list_values[$index],
+							'label' => $list_labels[$index],
+							);
+							
+							$list_values_final[] = $tmp_vals;
+							
+						}
+						foreach($new_values as $index => $val)
+						{
+							if($val != '')
+							{
+								$tmp_vals = array(
+								'val_id' => '',
+								'value' => $val,
+								'label' => $new_labels[$index],
+								);
+								
+								$list_values_final[] = $tmp_vals;
+							}
+						}
+						
+		
+						if(count($this->Content_model->messages) == 0)
+						{
+							$this->Content_model->value_list = $list_values_final;
+							$this->Content_model->update_list_vals();
+						}
+						
+					}
+				
+				}
+				
+
+			}
+			else
+			{
+				$this->Content_model->messages[] = validation_errors();
+			}
+			
+			if(count($this->Content_model->messages) == 0)
+			{
+				$tmp_msg = sprintf($this->cms_labels['update_success'],$this->Content_model->list_ref_name);
+				$this->Content_model->messages[] = $tmp_msg;
+			}
+			
+		}
+		
+	}
+
 }
 ?>

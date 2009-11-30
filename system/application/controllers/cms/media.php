@@ -434,7 +434,7 @@ class Media extends MY_Controller {
 		$form_options = array(
 		'name'        => 'date_created',
 		'id'          => 'date_created',
-		'class'	=> 'small_input',
+		'class'	=> 'med_input',
 		'value' => $this->Media_model->date_created,
 		);
 		$html .= "<p>";

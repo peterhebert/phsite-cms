@@ -590,26 +590,20 @@ class Content extends MY_Controller
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_files = array('' => $this->cms_labels['media_no_file']);
-				$dir_list_temp = $this->Media_model->dir_list;
+				$this->Content_model->list_attachments();
+				$this->Content_model->lang_load();
 
-				if(count($dir_list_temp) > 0)
+				$dir_files = array('' => $this->cms_labels['media_no_file']);
+
+				if(count($this->Content_model->attachments) > 0)
 				{
-					foreach($dir_list_temp as $index => $dir)
+					foreach($this->Content_model->attachments as $index => $media)
 					{
-						$this->Media_model->dir_current = $dir;
-						$dest_dir = str_replace($media_root,'',$dir);
-	
-						$this->Media_model->list_files();
-						foreach($this->Media_model->file_list as $file_path) {
-							$file_rel = str_replace($media_root,'',$file_path);
-							$pinfo = pathinfo($file_path);
-							$dir_files[$file_rel] = $pinfo['basename'];
-						}
-						
+						$this->Media_model->reset_media_vars();
+						$this->Media_model->temp_id = $media['media_id'];
+						$this->Media_model->load_media();
+						$this->Media_model->load_title();
+						$dir_files[$this->Media_model->media_id] = $this->Media_model->title;
 					}
 				}
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
@@ -798,7 +792,7 @@ class Content extends MY_Controller
 		$form_options = array(
 		'name'        => 'date_created',
 		'id'          => 'date_created',
-		'class'	=> 'small_input',
+		'class'	=> 'med_input',
 		'value' => $this->Content_model->date_created,
 		);
 		$html .= "<p>";
@@ -809,7 +803,7 @@ class Content extends MY_Controller
 		$form_options = array(
 		'name'        => 'date_end_expiry',
 		'id'          => 'date_end_expiry',
-		'class'	=> 'small_input',
+		'class'	=> 'med_input',
 		'value' => $this->Content_model->date_end_expiry,
 		);
 		$html .= "<p>";

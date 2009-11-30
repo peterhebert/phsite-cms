@@ -92,10 +92,13 @@ $lang['cms_labels'] = array(
 'insert_failure' => "incapable d'ins&eacute;rer '%s'",
 'insert_success' => "'%s' ins&eacute;r&eacute;",
 'keywords' => "Mots cl&eacute;s",
+'label' => "&Eacute;tiquette",
 'lang_find' => "Recherchez des langues",
 'langs_activated' => "Langues activ&eacute;s ",
 'language' => "Langue",
 'languages' => "Langues",
+'lists' => "Listes des valeurs",
+'list_edit' => "&Eacute;diter liste",
 'limit_posts' => "Articles par page (blogues)",
 'limit_thumbs' => "Vignettes par page (galeries m&eacute;dias)",
 'logged_in_as' => "Utilisateur courant",
@@ -223,12 +226,14 @@ $lang['cms_labels'] = array(
 'users_edit' => "&Eacute;diter utilisateurs",
 'users_meta_fields' => "Champs de metadonn&eacute;es de l'utilisateur",
 'users' => "Utilisateurs",
+'values' => "Valeurs",
 'validation' => "Validation",
 'view_content_title' => "Visitez la page de contenu dans une nouvelle fen&ecirc;tre",
 'view_content' => "Visitez la page de contenu",
 'webmaster' => "Webmestre",
 'with_selected' => "Avec les items s&eacute;lectionn&eacute;s",
 'yes' => "Oui",
+'list_values' => "Valeurs de la liste",
 );
 
 /* End of file phsite_lang.php */

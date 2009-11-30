@@ -2,8 +2,10 @@
 <ul>
 	<li><?php echo $cms_labels['data_structure']; ?>
 		<ul>
-			<li><?php echo anchor("cms/setup/fields",$cms_labels['fields']); ?></li>
 			<li><?php echo anchor("cms/setup/content_types",$cms_labels['content_types']); ?></li>
+			<li><?php echo anchor("cms/setup/media_types",$cms_labels['media_types']); ?></li>
+			<li><?php echo anchor("cms/setup/fields",$cms_labels['fields']); ?></li>
+			<li><?php echo anchor("cms/setup/lists",$cms_labels['lists']); ?></li>
 		</ul>
 	</li>
 	<li><?php echo $cms_labels['site'] ?>

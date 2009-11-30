@@ -371,6 +371,175 @@ class MY_Controller extends Controller {
 		return $html;
 
 	}
+
+	function _media_form_data($params=array(),$base_url = '',$show_all = true,$action_label = '')
+	{
+		$form_data['cms_labels'] = $this->cms_labels;
+		
+		// get filters from post data
+		$limit = $this->input->post('limit');
+		$media_type = $this->input->post('media_type');
+		$this->Media_model->page = 1;
+		$html = '';
+
+		// limit
+		if(array_key_exists('limit',$params))
+		{
+			$limit = $params['limit'];
+		}
+		if(!$limit || $limit == '')
+		{
+			$limit = 10;
+		}
+		$this->Media_model->limit = $limit;
+
+		// media type
+		if(array_key_exists('type',$params))
+		{
+			$media_type = $params['type'];
+		}
+		if ($media_type !== FALSE && $media_type != '')
+		{
+			$this->Media_model->temp_value = $media_type;
+		}
+
+		if(array_key_exists('page',$params))
+		{
+			$this->Media_model->page = $params['page'];
+		}
+		
+		$total = $this->Media_model->count_media_all();
+		
+		$this->Media_model->list_media();
+		
+		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$mime_cat_labels = $this->lang->line('mime_cat');
+		$mime_labels = $this->lang->line('mime');
+
+		$end = $this->Media_model->page * $limit;
+		$start = $end - $limit + 1;
+		
+		if($end > $total || $end == 0)
+		{
+			$end = $total;
+		}
+		if($total > 0)
+		{
+			$results[] = sprintf($this->cms_labels['showing_results'],$start,$end,$total);
+		}
+		else
+		{
+			$results[] = $this->cms_labels['no_results'];
+		}
+
+		$form_options[''] = $this->cms_labels['all'];
+		foreach($this->Media_model->mime_categories as $cat)
+		{
+			$form_options[$cat] = $mime_cat_labels[$cat];
+		}
+		$form_data['media_types'] = $form_options;	
+		$form_data['media_type'] = $media_type;	
+
+		$form_data['per_page'] = array(10 => 10,20 => 20,30=>30,40=>40,50=>50);
+		$form_data['limit'] = $limit;	
+
+
+		$this->load->library('pagination');
+		$base_url .= '/limit/'.$limit;
+		if ($media_type !== FALSE && $media_type != '')
+		{
+			$base_url .= '/type/'.$media_type;
+		}
+		$base_url .= '/page/';
+
+		$pconfig['base_url'] = $base_url;
+		$pconfig['total_rows'] = $total;
+		$pconfig['per_page'] = $limit;
+		$pconfig['cur_page'] = $this->Media_model->page;
+		$this->pagination->initialize($pconfig);
+
+		$pagination = $this->pagination->create_links_proper();
+		if($pagination != '')
+		{
+			$results[] = $pagination;
+		}
+		$form_data['results_pagination'] = implode("<br />\r",$results);	
+
+		$form_data['show_all'] = $show_all;	
+		$form_data['action_label'] = $action_label;	
+
+		$media_array = array();
+		foreach($this->Media_model->media_list as $media)
+		{
+			$tmp_array = $media;
+
+			// get mime category
+			// get filename and extension
+			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+			$filename = basename($media['file_uri']);
+			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
+			$mid = $media['media_id'];
+
+			// determine edit uri
+			$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
+			if($this->Media_model->temp_lang != '')
+			{
+				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+			}
+
+			if($mime_cat == 'image' && $media['external'] == 0)
+			{
+				// get thumbnail
+				$img_path = $this->Media_model->dir_base.$media['file_uri'];
+				$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+				$tmp_array['thumbnail'] = anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+
+			}
+
+			if(in_array($ext,$mime_icon_exts))
+			{
+				$tmp_array['icon_class'] = "ext_{$ext}";
+			}
+			else
+			{
+				$tmp_array['icon_class'] = "icon_{$mime_cat}";
+			}
+			
+			$tmp_array['edit_link'] = anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+
+			$tmp_array['media_type'] = $mime_labels[$ext];
+
+			if($show_all)
+			{
+	
+				if(count($media['attached_to']) > 0)
+				{
+					$this->Content_model->temp_lang = $this->Media_model->temp_lang;
+					$this->Content_model->link_mode = 1;
+					$attachment_links = array();
+					foreach($media['attached_to'] as $page)
+					{
+						$this->Content_model->temp_id = $page['content_id'];
+						$this->Content_model->load_title();
+						$uri = $this->Content_model->generate_uri();
+						$attachment_links[] = anchor($uri,$this->Content_model->title, array('title' => sprintf($this->cms_labels['edit_this'],$this->Content_model->title)));
+					}
+					$tmp_array['attachment_links'] = ul($attachment_links);
+				}
+				else
+				{
+					$tmp_array['attachment_links'] = $this->cms_labels['none'];
+				}
+	
+				$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
+				$tmp_array['published'] = $options[$media['publish']];
+			}
+		}
+		$html = $this->view('cms/embed/media_manage_table',$form_data,true);
+		return $html;
+
+	}
 }
 // END _Controller class
 

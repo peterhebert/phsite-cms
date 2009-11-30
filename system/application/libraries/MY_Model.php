@@ -49,6 +49,9 @@ class MY_Model extends Model {
 
 	// titles & keywords
 	var $title_id, $title_rel_id, $title, $uri_title, $subtitle, $keywords, $title_updated;
+
+	// value lists
+	var $list_id, $list_ref_name, $val_id, $value_list = array();
 	
 	// Constructor
 	function MY_Model()
@@ -312,10 +315,13 @@ class MY_Model extends Model {
 		$this->list_fields();
 		$field_list_full = $this->field_list;
 		
-		$this->scope = 'types';
-		$this->temp_id = $this->type_id;
-		$this->list_fields_related();
-		$field_list_related = $this->field_list;
+		if($this->type_id != '')
+		{
+			$this->scope = 'types';
+			$this->temp_id = $this->type_id;
+			$this->list_fields_related();
+			$field_list_related = $this->field_list;
+		}
 
 		$field_list_final = array();
 		foreach ($field_list_full as $index => $fd)
@@ -337,17 +343,18 @@ class MY_Model extends Model {
 
 		}
 
-		foreach ($field_list_related as $index => $fd)
+		if(isset($field_list_related))
 		{
-			$field_list_final[$index]['rf_id'] = $fd['rf_id'];
-			$field_list_final[$index]['required'] = $fd['required'];
-			$field_list_final[$index]['order'] = $fd['order'];
+			foreach ($field_list_related as $index => $fd)
+			{
+				$field_list_final[$index]['rf_id'] = $fd['rf_id'];
+				$field_list_final[$index]['required'] = $fd['required'];
+				$field_list_final[$index]['order'] = $fd['order'];
+			}
 		}
 		$this->field_list = $field_list_final;
 		
 	}
-
-
 
 	// field functions
 	function list_fields()
@@ -636,13 +643,13 @@ class MY_Model extends Model {
 			$this->db->where('label_id',$this->label_id);
 		}
 
-		if($this->session->userdata('default_lang'))
-		{
-			$this->db->where('lang_ISO_639_3',$this->session->userdata('default_lang'));
-		}
-		else if ($this->temp_lang != '')
+		if($this->temp_lang != '')
 		{
 			$this->db->where('lang_ISO_639_3',$this->temp_lang);
+		}
+		else if($this->session->userdata('default_lang'))
+		{
+			$this->db->where('lang_ISO_639_3',$this->session->userdata('default_lang'));
 		}
 		
 		$this->db->limit(1);
@@ -1018,6 +1025,160 @@ class MY_Model extends Model {
 		return $results;		
 	}
 
+    // get value lists
+	function value_lists_all()
+	{
+		$query = $this->db->get('s_lists');
+		if($query->num_rows() > 0)
+		{
+			$lists = array();
+			foreach ($query->result() as $row)
+			{
+				$tmp_list = array(
+				'list_id' => $row->list_id,
+				'list_ref_name' => $row->list_ref_name
+				);
+
+				$this->temp_id = $row->list_id;
+				$this->label_scope = 'list';
+				$this->load_label();
+				if($this->label != '')
+				{
+					$tmp_list['label'] = $this->label;
+				}
+				$lists[] = $tmp_list;
+				unset($tmp_list);
+				$this->reset_label();
+			}
+			return $lists;
+		}
+		return false;		
+	}
+
+	function load_value_list()
+	{
+		$this->db->where('list_id', $this->temp_id);
+		$query = $this->db->get('s_lists');
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			$this->list_id = $row->list_id;
+			$this->list_ref_name = $row->list_ref_name;
+			$this->label_scope = 'list';
+			$this->load_label();
+			
+			// now get values
+			$this->db->where('list_id', $this->list_id);
+			if($this->temp_lang != '')
+			{
+				$this->db->where('lang_ISO_639_3', $this->temp_lang);
+			}
+			$q2 = $this->db->get('r_list_vals');
+			if ($q2->num_rows() > 0)
+			{
+				$this->value_list = $q2->result_array();
+				return true;
+			}
+
+		}
+		return false;
+	}
+	
+	function update_list()
+	{
+		// update list name
+		$data = array(
+		'list_ref_name' => $this->list_ref_name,
+		);
+
+		if($this->list_id != '')
+		{
+			// update
+			$this->db->where('list_id',$this->list_id);
+			if($this->db->update('s_lists', $data))
+			{
+				return true;
+			}
+			else
+			{
+				$this->messages[] = sprintf($this->cms_labels['update_failure'],$this->list_ref_name);
+				return false;
+			}
+		}
+		else
+		{
+			// insert 
+			if($this->db->insert('s_lists', $data))
+			{
+				$this->list_id = $this->db->insert_id();
+				return true;
+			}
+			else
+			{
+				$this->messages[] = sprintf($this->cms_labels['insert_failure'],$this->list_ref_name);
+				return false;
+			}
+		}
+		
+	}
+
+	function update_list_vals()
+	{
+		if(is_array($this->value_list) && count($this->value_list) > 0)
+		{
+			
+			foreach($this->value_list as $val)
+			{
+				// if fields are not empty, do insert/update
+				if($val['value'] != '' && $val['label'] != '')
+				{
+					$data = array(
+					'list_id' => $this->list_id,
+					'list_ref_name' => $this->list_ref_name,
+					'value' => $val['value'],
+					'label' => $val['label'],
+					'lang_ISO_639_3' => $this->temp_lang,
+					);
+
+					if($val['val_id'] != '')
+					{
+						// update
+						$this->db->where('val_id',$val['val_id']);
+						if(!$this->db->update('r_list_vals', $data))
+						{
+							$this->messages[] = sprintf($this->cms_labels['update_failure'],$val['label']);
+						}
+					}
+					else
+					{
+						//insert 
+						if(!$this->db->insert('r_list_vals', $data))
+						{
+							$this->messages[] = sprintf($this->cms_labels['insert_failure'],$val['label']);
+						}
+					}
+
+				}
+				else
+				{
+					// delete
+					if($val['val_id'] != '')
+					{
+						$this->db->where('val_id',$val['val_id']);
+						if(!$this->db->delete('r_list_vals'))
+						{
+							$this->messages[] = sprintf($this->cms_labels['delete_failure'],$val['label']);
+						}
+					}
+				
+				}
+				
+			}
+		}
+
+	}
+	
 }
 // END MY_Model class
 

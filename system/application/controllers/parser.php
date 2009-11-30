@@ -14,6 +14,7 @@ class Parser extends MY_Controller {
 	{
 		parent::MY_Controller();	
 		$this->load->model('Content_model');
+		$this->load->model('Media_model');
 		$this->load->model('User_model');
 		$this->load->helper('url');
 
@@ -274,6 +275,9 @@ class Parser extends MY_Controller {
 		$this->data['content_date_updated'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone);
 		$this->data['content_date_updated_W3C'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
 
+		// list attachments
+		$this->_attachment_info();
+
 		// menu options by content type
 		$menu = '';
 		$menu_title = 'menu';
@@ -487,6 +491,35 @@ class Parser extends MY_Controller {
 		return $blog_menu;
 	}
 
+	function _attachment_info()
+	{
+		$this->Content_model->list_attachments();
+		if(count($this->Content_model->attachments) > 0)
+		{
+			$attachments = array();
 
+			foreach($this->Content_model->attachments as $media)
+			{
+				$this->Media_model->reset_media_vars();
+				$tmp_array = $media;
+				$this->Media_model->temp_id = $media['media_id'];
+				$this->Media_model->load_media();
+				$tmp_array['file_uri'] = $this->Media_model->file_uri;
+				$tmp_array['external'] = $this->Media_model->external;
+				$tmp_array['mime_type'] = $this->Media_model->mime_type;
+				$tmp_array['date_created'] = $this->Media_model->date_created;
+				$tmp_array['publish'] = $this->Media_model->publish;
+				$this->Media_model->temp_lang = $this->Content_model->temp_lang;
+				$this->Media_model->load_title();
+				$tmp_array['title'] = $this->Media_model->title;
+				$tmp_array['uri_title'] = $this->Media_model->uri_title;
+				$tmp_array['subtitle'] = $this->Media_model->subtitle;
+				$tmp_array['keywords'] = $this->Media_model->keywords;
+				$attachments[] = $tmp_array;
+				unset($tmp_array);
+			}
+			$this->data['attachments'] = $attachments;
+		}
+	}
 }
 ?>

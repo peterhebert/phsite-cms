@@ -37,10 +37,12 @@ if(isset($breadcrumb_links))
 			{
 				echo $content_body;
 			}
-			/*if(isset($content_keyword_links))
+			if(isset($attachments))
 			{
-				echo "<p>Keywords: {$content_keyword_links}</p>\r";
-			}*/
+				echo "<pre>";
+				print_r($attachments);
+				echo "</pre>\r";
+			}
 			?>
 		</div>
 		<div class="float w2">
