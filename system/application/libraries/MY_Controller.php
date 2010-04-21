@@ -32,6 +32,7 @@ class MY_Controller extends Controller {
 		$this->data['img_size_sm'] = $this->Site_model->img_size_sm;
 		$this->data['img_size_md'] = $this->Site_model->img_size_md;
 		$this->data['img_size_lg'] = $this->Site_model->img_size_lg;
+		$this->data['img_path_orig'] = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG;
 	}
 
 	function _authenticate()

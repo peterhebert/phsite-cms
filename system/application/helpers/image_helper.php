@@ -83,18 +83,18 @@ if ( ! function_exists('view_image'))
 		/* 
 		parameters for function
 		
-		src				path to image
+		path			path to image
 		size			size to fit image to by largest dimension
-		ratio			force ratio of resized image
 		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text', 'id' => 'image tag id')
+		ratio			force ratio of resized image to square
 		
 		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
 		*/
 
 		// Path to original image and to resized version
 		$orig_image_path = $path;
-		$path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$path);
 
+		$path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$path);
 		$orig_image_path_rel = trim($path,'/');
 		
 		if(file_exists($orig_image_path)) {
@@ -604,14 +604,14 @@ I have modified the poster so it does not need to be a JPEG but any image type (
 		$ht_qt = $height + 15;
 		$ht_fl = $height + 20;
 		$code = "<!-- 'Video for Everybody' v0.2 by Kroc Camen <camendesign.com> cc-by -->\r";
+		$code .= "<video width=\"{$width}\" height=\"{$height}\" controls=\"controls\"";
+
 		if($poster)
 		{
-			$code .= "<video width=\"{$width}\" height=\"{$height}\" poster=\"{$poster}\" controls=\"controls\">\r";
+			$code .= " poster=\"{$poster}\"";
 		}
-		else
-		{
-			$code .= "<video width=\"{$width}\" height=\"{$height}\" controls=\"controls\">\r";
-		}
+		$code .= ">\r";
+
 		$code .= "<source src=\"{$src}.ogv\" type=\"video/ogg\" />\r";
 		$code .= "<source src=\"{$src}.mp4\" type=\"video/mp4\" />\r";
 		$code .= "<!--[if gt IE 6]>\r";

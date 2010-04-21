@@ -749,13 +749,6 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		}
 
-		if($loaded)
-		{
-			$this->Content_model->label_scope = 'field';
-			$this->Content_model->label_rel_id = $this->Content_model->field_id;
-			$this->Content_model->load_label();
-		}
-
 		$this->data['form'] = $this->_form_field_edit();
 
 		$sidebar = '<h2>'.$this->cms_labels['edit_by_lang']."</h2>\r";
@@ -808,7 +801,6 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 
 	function _form_field_edit()
 	{
-
 		$action = "cms/setup/field_edit/id/".$this->Content_model->field_id;
 		$action .= "/lang/".$this->Content_model->temp_lang;
 		
@@ -834,6 +826,20 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$html .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type); 
 		$html .= "</p>\r";
 
+		// get all possible value lists
+		$this->Content_model->reset_label();
+		$form_options = array('' => $this->cms_labels['none']);
+		$val_list = $this->Content_model->value_lists_all();
+		foreach($val_list as $list)
+		{
+			$form_options[$list['list_id']] = $list['label'];
+		}
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['list'], 'list_id');
+		$html .= form_dropdown('list_id', $form_options, $this->Content_model->list_id); 
+		$html .= "</p>\r";
+
+
 		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
 		if($this->Content_model->field_needs_lang == '')
 		{
@@ -843,7 +849,7 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		{
 			$needs_lang = $this->Content_model->field_needs_lang;
 		}
-		$html .= "<p>\r";
+		$html .= "<p>";
 		$html .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
 		$html .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
 		$html .= "</p>\r";
@@ -854,11 +860,21 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$html .= "\r";
 
 		$form_options = $this->Content_model->langs_dropdown();
-		$html .= "<p>\r";
+		$html .= "<p>";
 		$html .= form_label($this->cms_labels['language'], 'field_lang');
 		$html .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang); 
 		$html .= "</p>\r";
-		$html .= "<p>\r";
+
+		$this->Content_model->reset_label();
+		if($this->Content_model->field_id != '')
+		{
+			$this->Content_model->label_scope = 'field';
+			$this->Content_model->temp_id = $this->Content_model->field_id;
+			$this->Content_model->load_label();
+		}
+		$html .= form_hidden('label_id', $this->Content_model->label_id);
+
+		$html .= "<p>";
 		$html .= form_label($this->cms_labels['field_label'], 'field_label');
 		$html .= form_input('field_label',$this->Content_model->label); 
 		$html .= "</p>\r";
@@ -927,6 +943,7 @@ $breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 				$this->Content_model->validation_exact = $this->input->post('validation_exact');	
 				$this->Content_model->validation_min = $this->input->post('validation_min');	
 				$this->Content_model->validation_max = $this->input->post('validation_max');	
+				$this->Content_model->list_id = $this->input->post('list_id');	
 
 				$this->Content_model->label_id = $this->input->post('label_id');	
 				$this->Content_model->label = $this->input->post('field_label');

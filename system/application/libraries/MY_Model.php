@@ -334,6 +334,7 @@ class MY_Model extends Model {
 			'field_input_type' => $fd['field_input_type'],
 			'field_validation' => $fd['field_validation'],
 			'field_needs_lang' => $fd['field_needs_lang'],
+			'list_id' => $fd['list_id'],
 			'rf_id' => '',
 			'required' => '',
 			'order' => ''
@@ -414,6 +415,7 @@ class MY_Model extends Model {
 				'field_input_type' => $row->field_input_type,
 				'field_validation' => $row->field_validation,
 				'field_needs_lang' => $row->field_needs_lang,
+				'list_id' => $row->list_id,
 				'required' => $row->required,
 				'order' => $row->order,
 				'meta_id' => '',
@@ -437,7 +439,8 @@ class MY_Model extends Model {
 		'field_ref_name' => $this->field_ref_name,
 		'field_input_type' => $this->field_input_type,
 		'field_validation' => $this->field_validation,
-		'field_needs_lang' => $this->field_needs_lang
+		'field_needs_lang' => $this->field_needs_lang,
+		'list_id' => $this->list_id
 		);
 		
 		if( $this->field_id != '' )
@@ -563,7 +566,7 @@ class MY_Model extends Model {
 			$this->field_input_type = $row['field_input_type'];
 			$this->field_validation = $row['field_validation'];
 			$this->field_needs_lang = $row['field_needs_lang'];
-	
+			$this->list_id = $row['list_id'];
 			if($parse)
 			{
 				$this->field_parse_validation();
@@ -757,11 +760,6 @@ class MY_Model extends Model {
 			{
 
 				$temp_meta = $meta;
-/*				$temp_meta['rf_id'] = '';
-				$temp_meta['scope'] = $this->scope;
-				$temp_meta['rf_rel_id'] = '';
-				$temp_meta['rf_rel_ref_name'] = '';
-*/				
 				$temp_meta['required'] = 0;
 
 				$fields[$key] = $temp_meta;

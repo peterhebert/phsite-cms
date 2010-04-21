@@ -16,7 +16,7 @@ class Parser extends MY_Controller {
 		$this->load->model('Content_model');
 		$this->load->model('Media_model');
 		$this->load->model('User_model');
-		$this->load->helper('url');
+		$this->load->helper(array('url', 'image'));
 
 		$this->Content_model->list_langs();
 		//$this->_load_site_metadata();
@@ -515,6 +515,7 @@ class Parser extends MY_Controller {
 				$tmp_array['uri_title'] = $this->Media_model->uri_title;
 				$tmp_array['subtitle'] = $this->Media_model->subtitle;
 				$tmp_array['keywords'] = $this->Media_model->keywords;
+												
 				$attachments[] = $tmp_array;
 				unset($tmp_array);
 			}

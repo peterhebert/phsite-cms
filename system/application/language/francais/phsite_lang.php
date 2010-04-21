@@ -97,6 +97,7 @@ $lang['cms_labels'] = array(
 'langs_activated' => "Langues activ&eacute;s ",
 'language' => "Langue",
 'languages' => "Langues",
+'list' => "Liste des valeurs",
 'lists' => "Listes des valeurs",
 'list_edit' => "&Eacute;diter liste",
 'limit_posts' => "Articles par page (blogues)",

@@ -441,9 +441,6 @@ class Content extends MY_Controller
 		$breadcrumb[] = anchor("cms/content",$this->cms_labels['content']);
 		$breadcrumb[] = $this->cms_labels['content_editor'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
-
-
-
 		$this->data['title_tag'] = $this->cms_labels['content_editor'];
 		$this->data['title_h1'] = $this->cms_labels['content_editor'];
 		
@@ -524,6 +521,7 @@ class Content extends MY_Controller
 				$tmp_required = $fd['required'];
 				$tmp_input_type = $fd['field_input_type'];
 				$tmp_validation = $fd['field_validation'];
+				$tmp_list_id = $fd['list_id'];
 			}
 			else
 			{
@@ -534,6 +532,7 @@ class Content extends MY_Controller
 				$tmp_needs_lang = $this->Content_model->field_needs_lang;
 				$tmp_input_type = $this->Content_model->field_input_type;
 				$tmp_validation = $this->Content_model->field_validation;
+				$tmp_list_id = $this->Content_model->list_id;
 				$tmp_label = $tmp_ref_name;
 				$tmp_meta_id = '';
 				$tmp_required = '';
@@ -593,7 +592,7 @@ class Content extends MY_Controller
 				$this->Content_model->list_attachments();
 				$this->Content_model->lang_load();
 
-				$dir_files = array('' => $this->cms_labels['media_no_file']);
+				$dir_files = array('' => $this->cms_labels['none']);
 
 				if(count($this->Content_model->attachments) > 0)
 				{
@@ -615,6 +614,15 @@ class Content extends MY_Controller
 			case 'richtext':
 				$form_options['cols'] = 38;
 				$html .=  form_textarea($form_options);
+				break;
+			case 'select' || 'multi':
+				$this->Content_model->temp_id = $tmp_list_id;
+				$this->Content_model->load_value_list();
+				$html .= "<pre>";
+				$html .= print_r($this->Content_model->value_list,true);
+				$html .= "</pre>\r";
+
+				//$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
 			default:
 				$html .=  form_input($form_options);

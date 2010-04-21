@@ -23,6 +23,9 @@ $lang['input_types']['text'] = 'text';
 $lang['input_types']['textarea'] = 'textarea';
 $lang['input_types']['richtext'] = 'rich text editor';
 /*
+'select' => 'list of values (single-select)',
+'multi' => 'list of values (multi-select)',
+
 $lang['input_types']['select'] = 'drop-down select';
 $lang['input_types']['checkbox'] = 'checkbox';
 $lang['input_types']['radio'] = 'radio';

@@ -42,7 +42,15 @@ if(isset($breadcrumb_links))
 				echo "<pre>";
 				print_r($attachments);
 				echo "</pre>\r";
+				foreach($attachments as $att)
+				{
+					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$att['mime_type']);
+					$img_path = $img_path_orig.$att['file_uri'];
+					$thumb = view_image($img_path,$img_size_md,array('alt' => $att['title']));
+					echo $thumb;
+				}
 			}
+
 			?>
 		</div>
 		<div class="float w2">
