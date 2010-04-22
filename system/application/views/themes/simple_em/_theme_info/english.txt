@@ -1,0 +1,7 @@
+title:			Simple Em
+description:	A simple theme with em-based sizes, which is easily scaleable in the browser.
+author:			Peter Hebert
+email:			mail@peterhebert.com
+website:		http://www.peterhebert.com
+version:		0.1
+release_date:	2009-11-30
