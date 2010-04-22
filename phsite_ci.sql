@@ -1,10 +1,10 @@
-# Sequel Pro dump
-# Version 1191
+﻿# Sequel Pro dump
+# Version 1630
 # http://code.google.com/p/sequel-pro
 #
-# Host: localhost (MySQL 5.0.67)
-# Database: phsite_minimal
-# Generation Time: 2009-11-29 20:49:07 -0800
+# Host: dbs.peterhebert.com (MySQL 5.0.89-userstats-log)
+# Database: phsite_ci
+# Generation Time: 2010-04-22 12:00:08 -0700
 # ************************************************************
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -15,6 +15,113 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+# Dump of table c_content
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `c_content`;
+
+CREATE TABLE `c_content` (
+  `content_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `user_id` mediumint(9) unsigned NOT NULL default '1',
+  `parent_id` mediumint(9) NOT NULL default '0' COMMENT '0 is root, -1 is non-hierarchical',
+  `type_id` mediumint(9) unsigned NOT NULL default '1',
+  `type_uri_name` text,
+  `date_created` datetime NOT NULL,
+  `date_end_expiry` datetime default NULL,
+  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `publish` mediumint(9) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`content_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `c_content` WRITE;
+/*!40000 ALTER TABLE `c_content` DISABLE KEYS */;
+INSERT INTO `c_content` (`content_id`,`user_id`,`parent_id`,`type_id`,`type_uri_name`,`date_created`,`date_end_expiry`,`date_updated`,`publish`)
+VALUES
+	(1,1,0,1,'static_page','2010-04-22 11:35:37','0000-00-00 00:00:00','2010-04-22 11:34:18',1);
+
+/*!40000 ALTER TABLE `c_content` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table c_media
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `c_media`;
+
+CREATE TABLE `c_media` (
+  `media_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `file_uri` text,
+  `external` tinyint(1) NOT NULL default '0',
+  `mime_type` varchar(100) default 'image/jpeg',
+  `date_created` datetime NOT NULL,
+  `publish` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`media_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='media file info';
+
+
+
+# Dump of table c_metadata
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `c_metadata`;
+
+CREATE TABLE `c_metadata` (
+  `meta_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `scope` text NOT NULL COMMENT 'metadata for content, user or site',
+  `rel_id` mediumint(9) unsigned NOT NULL,
+  `field_id` mediumint(9) unsigned NOT NULL,
+  `field_ref_name` text NOT NULL,
+  `value` mediumtext NOT NULL,
+  `lang_ISO_639_3` varchar(3) default NULL,
+  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`meta_id`),
+  FULLTEXT KEY `value` (`value`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `c_metadata` WRITE;
+/*!40000 ALTER TABLE `c_metadata` DISABLE KEYS */;
+INSERT INTO `c_metadata` (`meta_id`,`scope`,`rel_id`,`field_id`,`field_ref_name`,`value`,`lang_ISO_639_3`,`date_updated`)
+VALUES
+	(1,'site',1,8,'description','phSite CMS is the content manager you wish you had all these years. Easy to use, multilingual, standards compliant, and seamless.','eng','2010-04-22 11:21:11'),
+	(2,'site',1,5,'copyright','2009 Peter Hebert.','eng','2010-04-22 11:21:11'),
+	(3,'content',1,2,'body','<p>In order to set up phSite, you will need the following server environment:</p>\n<ul>\n<li>A web server &ndash; preferably <a href=\"http://httpd.apache.org/\">Apache</a></li>\n<li><a href=\"http://www.php.net/\">PHP</a> version 4.3.2 or newer.</li>\n<li>A Database server. Supported databases are MySQL (4.1+), MySQLi, MS SQL, PostgreSQL, Oracle, SQLite, and ODBC. I recommend <a href=\"http://www.mysql.com/downloads/mysql/\">MySQL</a> or <a href=\"http://www.postgresql.org/\">PostgreSQL</a>.</li>\n</ul>\n<p>First, you will need to download phSite. You can download the latest release, or get it from the Bazaar development repository.</p>','eng','2010-04-22 11:34:18'),
+	(4,'content',1,8,'description','Instructions on how to install the phSite Content Management System.','eng','2010-04-22 11:34:18');
+
+/*!40000 ALTER TABLE `c_metadata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table c_titles
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `c_titles`;
+
+CREATE TABLE `c_titles` (
+  `title_id` mediumint(9) unsigned NOT NULL auto_increment,
+  `scope` text NOT NULL COMMENT 'title is for content, media or site',
+  `rel_id` mediumint(9) unsigned NOT NULL COMMENT 'the id of the (content,media,site) being described',
+  `title` text NOT NULL,
+  `uri_title` text NOT NULL,
+  `subtitle` text,
+  `keywords` text,
+  `lang_ISO_639_3` varchar(3) NOT NULL,
+  `title_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`title_id`),
+  FULLTEXT KEY `title` (`title`,`subtitle`),
+  FULLTEXT KEY `keywords` (`keywords`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `c_titles` WRITE;
+/*!40000 ALTER TABLE `c_titles` DISABLE KEYS */;
+INSERT INTO `c_titles` (`title_id`,`scope`,`rel_id`,`title`,`uri_title`,`subtitle`,`keywords`,`lang_ISO_639_3`,`title_updated`)
+VALUES
+	(1,'site',1,'phSite CMS','phsite-cms','a content manager for the rest of us','','eng','2010-04-22 11:21:11'),
+	(2,'content',1,'Installation','installation','Instructions on how to set up phSite','download, install','eng','2010-04-22 11:34:18');
+
+/*!40000 ALTER TABLE `c_titles` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table ISO_639_LANG
@@ -2001,7 +2108,7 @@ VALUES
 	('fos','','','','I','E','Siraya','Siraya',NULL,'siraya',0),
 	('fpe','','','','I','L','Fernando Po Creole English','Creole English, Fernando Po',NULL,'english',0),
 	('fqs','','','','I','L','Fas','Fas',NULL,'fas',0),
-	('fra','fre','fra','fr','I','L','French','French','français','francais',1),
+	('fra','fre','fra','fr','I','L','French','French','français','francais',0),
 	('frc','','','','I','L','Cajun French','French, Cajun',NULL,'francais',0),
 	('frd','','','','I','L','Fordata','Fordata',NULL,'fordata',0),
 	('frk','','','','I','E','Frankish','Frankish',NULL,'frankish',0),
@@ -7927,169 +8034,6 @@ VALUES
 UNLOCK TABLES;
 
 
-# Dump of table c_content
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `c_content`;
-
-CREATE TABLE `c_content` (
-  `content_id` mediumint(9) unsigned NOT NULL auto_increment,
-  `user_id` mediumint(9) unsigned NOT NULL default '1',
-  `parent_id` mediumint(9) NOT NULL default '0' COMMENT '0 is root, -1 is non-hierarchical',
-  `type_id` mediumint(9) unsigned NOT NULL default '1',
-  `type_uri_name` text,
-  `date_created` datetime NOT NULL,
-  `date_end_expiry` datetime default NULL,
-  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `publish` mediumint(9) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
-
-LOCK TABLES `c_content` WRITE;
-/*!40000 ALTER TABLE `c_content` DISABLE KEYS */;
-INSERT INTO `c_content` (`content_id`,`user_id`,`parent_id`,`type_id`,`type_uri_name`,`date_created`,`date_end_expiry`,`date_updated`,`publish`)
-VALUES
-	(1,1,2,1,'static_page','2009-07-09 13:37:56',NULL,'2009-11-05 13:28:50',1),
-	(2,1,0,1,'static_page','2009-07-09 13:39:52','0000-00-00 00:00:00','2009-11-05 13:28:50',1),
-	(3,1,0,1,'static_page','2009-07-21 14:18:14','0000-00-00 00:00:00','2009-11-05 13:28:50',1),
-	(5,1,1,1,'static_page','2009-09-18 17:21:44',NULL,'2009-11-05 13:28:50',1),
-	(6,1,0,1,'static_page','2009-09-23 17:47:50',NULL,'2009-11-05 13:28:50',1),
-	(7,1,1,1,'static_page','2009-09-23 18:10:19','0000-00-00 00:00:00','2009-11-05 13:28:50',1),
-	(11,1,0,10,'film','2009-11-15 12:01:07','0000-00-00 00:00:00','2009-11-15 12:01:07',1),
-	(9,1,2,1,'static_page','2009-09-29 15:53:08','0000-00-00 00:00:00','2009-11-05 13:28:50',1);
-
-/*!40000 ALTER TABLE `c_content` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Dump of table c_media
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `c_media`;
-
-CREATE TABLE `c_media` (
-  `media_id` mediumint(9) unsigned NOT NULL auto_increment,
-  `file_uri` text,
-  `external` tinyint(1) NOT NULL default '0',
-  `mime_type` varchar(100) default 'image/jpeg',
-  `date_created` datetime NOT NULL,
-  `publish` tinyint(1) NOT NULL default '0',
-  PRIMARY KEY  (`media_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='media file info';
-
-LOCK TABLES `c_media` WRITE;
-/*!40000 ALTER TABLE `c_media` DISABLE KEYS */;
-INSERT INTO `c_media` (`media_id`,`file_uri`,`external`,`mime_type`,`date_created`,`publish`)
-VALUES
-	(11,'/20040111_Steve_04321.JPG',0,'image/jpeg','2004-01-11 01:38:29',1),
-	(2,'/funny/20040611_Beerfest_0548.JPG',0,'image/jpeg','2004-06-11 18:13:21',1),
-	(3,'/funny/20051014_Beaker-torture_1147.JPG',0,'image/jpeg','2005-10-14 22:08:29',1),
-	(4,'/20090805_Caroline_birthday_100_4145.JPG',0,'image/jpeg','2009-08-05 00:38:11',1),
-	(7,'/20040111_Steve_0432.JPG',0,'image/jpeg','2004-01-11 01:38:29',1),
-	(10,'/20030510_film-Lucky-or-Not_0135.JPG',0,'image/jpeg','2003-05-10 18:32:17',1);
-
-/*!40000 ALTER TABLE `c_media` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Dump of table c_metadata
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `c_metadata`;
-
-CREATE TABLE `c_metadata` (
-  `meta_id` mediumint(9) unsigned NOT NULL auto_increment,
-  `scope` text NOT NULL COMMENT 'metadata for content, user or site',
-  `rel_id` mediumint(9) unsigned NOT NULL,
-  `field_id` mediumint(9) unsigned NOT NULL,
-  `field_ref_name` text NOT NULL,
-  `value` mediumtext NOT NULL,
-  `lang_ISO_639_3` varchar(3) default NULL,
-  `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`meta_id`),
-  FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=120 DEFAULT CHARSET=utf8;
-
-LOCK TABLES `c_metadata` WRITE;
-/*!40000 ALTER TABLE `c_metadata` DISABLE KEYS */;
-INSERT INTO `c_metadata` (`meta_id`,`scope`,`rel_id`,`field_id`,`field_ref_name`,`value`,`lang_ISO_639_3`,`date_updated`)
-VALUES
-	(1,'content',1,2,'body','<p>Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He&rsquo;s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?</p>','eng','2009-09-24 12:03:29'),
-	(2,'content',1,8,'description','Louis Bach is a man who wins every bet he makes. He is recruited into the mafia to place and win bets on horse races. The cops have been tracking the local mafia boss for some time, and they decide Louis is their way to get a man on the inside. Louis is picked up, and promised immunity if he helps bring in the big boss. He’s being used by both the mob and the police, and he realizes his only way out is to start losing. Will his luck change in time to get his life back?','eng','2009-09-24 12:03:29'),
-	(4,'content',2,8,'description','Information about Peter\'s films.','eng','2009-09-24 12:03:29'),
-	(29,'content',7,2,'body','<ul>\n<li>Mark Leahy as Louis Bach</li>\n<li>Jamie Douglas as Frankie</li>\n<li>Derick Fage as Joey</li>\n<li>Heather Earle as Detective O\'Brien</li>\n<li>Mike Caza as Detective Walker</li>\n<li>Franco Mascitto as the Big Boss</li>\n<li>Rod Davison as Lieutenant Monroe</li>\n<li>David Scarcella as the Racetrack Announcer</li>\n<li>Helen Batabyal as the Maid</li>\n<li>Leah Miller as the Good Looking Woman</li>\n<li>Mike Girardin as the Tough Guy</li>\n</ul>\n<h2>Extras</h2>\n<p>Cindy Bertinato<br /> Ray Besharah<br /> Anda Carabineanu<br /> Barry Comer<br /> Bob Ford<br /> Kay Matthews<br /> Kelly McGilvery<br /> Michelle Mulligan<br /> Brenda Scherloski<br /> Cathy Symonds</p>','eng','2009-10-01 13:32:32'),
-	(6,'content',3,2,'body','<p>Here are the various ways you can contact me:</p>\n<ul class=\"social-icons\">\n<li><a href=\"mailto:mail@peterhebert.com\"><img src=\"/assets/icons/fugue/mail.png\" alt=\"e-mail\" /></a></li>\n<li><a href=\"xmpp:mail@peterhebert.com\"><img src=\"/assets/icons/favicons/xmpp-jabber.png\" alt=\"XMPP (Jabber)\" /></a></li>\n<li><a href=\"gtalk:chat?hebert.pj@gmail.com\"><img src=\"/assets/icons/favicons/google.png\" alt=\"XMPP (Google Talk)\" /></a></li>\n<li><a href=\"callto://peterhebert\"><img longdesc=\"http://www.skype.com\" src=\"/assets/icons/favicons/skype.png\" alt=\"Skype\" /></a></li>\n<li><a href=\"msnim:add?contact=peterhebert@hotmail.com\"><img src=\"/assets/icons/favicons/windows.png\" alt=\"MSN / Windows Live Messenger\" /></a></li>\n</ul>\n<p>You can also find me on these social networks:</p>\n<ul class=\"social-icons\">\n<li><a href=\"http://www.facebook.com/peter.j.hebert\"><img longdesc=\"http://www.facebook.com\" src=\"/assets/icons/favicons/facebook.png\" alt=\"Facebook\" /></a></li>\n<li><a href=\"http://www.linkedin.com/in/peterhebert\"><img longdesc=\"http://www.linkedin.com\" src=\"/assets/icons/favicons/linkedin.png\" alt=\"LinkedIn\" /></a></li>\n<li><a href=\"http://www.twitter.com/peter_hebert\"><img longdesc=\"http://www.twitter.com\" src=\"/assets/icons/favicons/twitter.png\" alt=\"Twitter\" /></a></li>\n</ul>','eng','2009-09-30 15:34:24'),
-	(7,'content',3,8,'description','Here are the different ways you can get hold of Peter Hebert.','eng','2009-09-24 12:03:29'),
-	(13,'content',5,2,'body','<dl> <dt>Executive Producer</dt> <dd>Peter Hebert</dd> <dt>Associate Producer</dt> <dd>Mark McKay</dd> <dt>Screenwriters</dt> <dd>Stef Faro</dd> <dd>Peter Hebert</dd> <dt>Director</dt> <dd>Peter Hebert</dd> <dt>Director of Photography</dt> <dd>Peter Hebert</dd> <dt>Camera</dt> <dd>Peter Hebert</dd> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dt>Lighting</dt> <dd>Bryon Hunter</dd> <dd>Mark McKay</dd> <dd>Jason Tetro</dd> <dd>Joyce MacPhee</dd> <dd>Jeff Miles</dd> <dt>Sound recording</dt> <dd>Mark McKay</dd> <dd>Bryon Hunter</dd> <dd>Joyce MacPhee</dd> <dt>Properties</dt> <dd>Bryon Hunter</dd> <dd>Peter Hebert</dd> <dt>Set construction</dt> <dd>Steven Giouras</dd> <dt>Catering /craft service</dt> <dd>Peter Hebert</dd> <dt>Video Editing</dt> <dd>Peter Hebert</dd> <dt>Colorist</dt> <dd>Peter Hebert</dd> <dt>Sound Editing</dt> <dd>Peter Hebert</dd> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Music by </dt> <dd>Mark Bolton</dd> <dt>Music Supervisor </dt> <dd>Scott Payne</dd> <dt>Audio mix</dt> <dd>Mark Bolton</dd> <dd>Scott Payne</dd> <dt>Documentary videographer</dt> <dd>Christophe Forget</dd> <dt>Documentary interviews</dt> <dd>Joyce MacPhee</dd> <dt>Still photography</dt> <dd>Maggie Euteneier</dd> <dd>Peter Hebert</dd> <dd>Jamie Douglas</dd> <dt>Casting</dt> <dd>Peter Hebert</dd> <dd>Guy Marsan</dd> <dt>Production Assistants</dt> <dd>Maggie Euteneier</dd> <dd>Guy Marsan</dd> <dd>Jeff Miles</dd> </dl>','eng','2009-09-25 15:27:00'),
-	(15,'content',6,8,'description','Peter\'s commitment to making his website accessbile to all.','eng','2009-09-24 12:03:29'),
-	(17,'content',7,8,'description','A list of the cast from the movie \'Lucky - or Not?\'.','eng','2009-09-24 12:03:29'),
-	(19,'site',1,5,'copyright','Peter Hebert. All rights reserved unless stated otherwise','eng','2009-09-24 12:03:29'),
-	(20,'site',1,8,'description','This site is the online home of Peter Hebert, a web developer, designer and filmmaker based in Vancouver, BC.','eng','2009-09-24 12:03:29'),
-	(22,'users',1,1,'biography','<p>Peter is a web developer and filmmaker based in Vancouver, BC</p>','eng','2009-09-24 12:03:29'),
-	(23,'users',1,15,'location','Vancouver, British Columbia','eng','2009-09-24 12:03:29'),
-	(24,'users',1,14,'website_url','http://www.peterhebert.com','','2009-10-31 15:42:21'),
-	(118,'media',4,16,'province_state','BC','eng','2009-11-06 14:50:21'),
-	(119,'content',11,2,'body','<p>crazy shit</p>','eng','2009-11-15 12:01:07'),
-	(112,'media',2,8,'description','','eng','2009-11-06 14:50:21'),
-	(113,'media',3,8,'description','Poor Beaker was kidnapped, chained up and strapped to this elephant.','eng','2009-11-06 14:50:21'),
-	(114,'media',7,8,'description','','eng','2009-11-06 14:50:21'),
-	(115,'media',11,8,'description','','eng','2009-11-06 14:50:21'),
-	(116,'media',4,8,'description','Celebrating Caroline\'s birthday at Chill Winston in Vancouver, August 4, 2009','eng','2009-11-06 14:50:21'),
-	(117,'media',4,15,'location','Chill Winston lounge','eng','2009-11-06 14:50:21'),
-	(28,'content',2,2,'body','<p><a href=\"http://www.imdb.com/name/nm2451928/\">My IMDB profile</a></p>\n<p>Here are some of my films, and others that I have worked on.</p>\n<table border=\"0\">\n<tbody>\n<tr>\n<th scope=\"col\">Year</th> <th scope=\"col\">Production title </th> <th scope=\"col\">format</th> <th scope=\"col\">Position(s)</th> <th scope=\"col\">Producer</th>\n</tr>\n<tr>\n<td>2008</td>\n<td><a rel=\"external\" href=\"http://www.thegreenfilm.com/\">The Green Film</a> (Crazy 8s festival intro film)</td>\n<td>4K (RED)</td>\n<td>PA, Grip, Set dressing</td>\n<td>Juggernaut Pictures Inc. / Scott Renyard</td>\n</tr>\n<tr>\n<td>2007</td>\n<td><a rel=\"external\" href=\"http://pastperfectpro.com/roth.html\">Revenge of the Hunted</a></td>\n<td>HD</td>\n<td>Lighting, grip</td>\n<td>Aaron Floresco</td>\n</tr>\n<tr>\n<td>2006</td>\n<td><a href=\"/film/the-leaves\">The Leaves</a></td>\n<td>16mm</td>\n<td>Director, camera</td>\n<td>Peter Hebert</td>\n</tr>\n<tr>\n<td>2005</td>\n<td><a href=\"/film/lucky-or-not\">Lucky - or Not?</a></td>\n<td>DV</td>\n<td>Producer, director, editor, camera</td>\n<td>Peter Hebert (PH new media)</td>\n</tr>\n</tbody>\n</table>','eng','2009-09-30 13:55:03'),
-	(30,'content',9,2,'body','<p>(2006 - B&amp;W - 16mm)</p>\n<p>On November 19, 2006, I shot \"The Leaves\", my entry in IFCO\'s Fall 2006 16mm <a rel=\"external\" href=\"http://www.ifco.ca/events/dogmechallenge.html\">Dogme Challenge</a>. I got one roll of 16mm 7222 black and white negative film, a Bolex camera and had 24 hours to make a film within the following constraints:</p>\n<ul>\n<li>only use available light. </li>\n<li>only in-camera editing.</li>\n<li>no post-production work whatsoever (no editing, no sound, no cuts, no dissolves, etc.)</li>\n<li>include the following credits at some point in your film: <ol class=\"alpha\">\n<li>the words: &ldquo;Fall 2006 IFCO Dogme Challenge &rdquo;;</li>\n<li>your name;</li>\n<li>the film title. </li>\n</ol></li>\n</ul>\n<h3>Cast and Crew</h3>\n<ul>\n<li>Sebastien Fournier: \"The Leaf Guy\"</li>\n<li> Paul Finnegan: \"The Raker\"</li>\n<li>Peter Hebert: Director, camera operator </li>\n<li>Steven Giouras: Camera assistant, still photos </li>\n</ul>\n<p><em>The Leaves</em> had its premiere screening at IFCO\'s Holiday party on December 14, 2006 at the Mercury Lounge.</p>','eng','2009-10-01 14:10:13'),
-	(31,'content',9,8,'description','On November 19, 2006, I shot \"The Leaves\", my entry in IFCO\'s Fall 2006 16mm Dogme Challenge. I got one roll of 16mm 7222 black and white negative film, a Bolex camera and had 24 hours to make a film.','eng','2009-10-01 13:38:55'),
-	(111,'media',10,16,'province_state','Ontario','eng','2009-11-02 14:39:51'),
-	(110,'media',10,8,'description','Joey (Derick Fage) and Frankie (Jamie Douglas) strut their stuff as mobsters in the film \"Lucky or Not?\"','eng','2009-11-02 14:39:51');
-
-/*!40000 ALTER TABLE `c_metadata` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
-# Dump of table c_titles
-# ------------------------------------------------------------
-
-DROP TABLE IF EXISTS `c_titles`;
-
-CREATE TABLE `c_titles` (
-  `title_id` mediumint(9) unsigned NOT NULL auto_increment,
-  `scope` text NOT NULL COMMENT 'title is for content, media or site',
-  `rel_id` mediumint(9) unsigned NOT NULL COMMENT 'the id of the (content,media,site) being described',
-  `title` text NOT NULL,
-  `uri_title` text NOT NULL,
-  `subtitle` text,
-  `keywords` text,
-  `lang_ISO_639_3` varchar(3) NOT NULL,
-  `title_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`title_id`),
-  FULLTEXT KEY `title` (`title`,`subtitle`),
-  FULLTEXT KEY `keywords` (`keywords`)
-) ENGINE=MyISAM AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
-
-LOCK TABLES `c_titles` WRITE;
-/*!40000 ALTER TABLE `c_titles` DISABLE KEYS */;
-INSERT INTO `c_titles` (`title_id`,`scope`,`rel_id`,`title`,`uri_title`,`subtitle`,`keywords`,`lang_ISO_639_3`,`title_updated`)
-VALUES
-	(1,'site',1,'Peter Hebert','peter-hebert','Web, film and design','accessibility, CSS, design, development, PHP, web','eng','2009-09-25 15:36:00'),
-	(5,'content',1,'Lucky - or Not?','lucky-or-not','','crime, DV, film, harness racing, horses, luck, lucky, mob, Ottawa, racing, short','eng','2009-09-28 12:37:07'),
-	(3,'content',2,'Film','film','','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-09-28 12:37:07'),
-	(4,'content',3,'Contact','contact','','contact info, email, IM, social media','eng','2009-09-28 12:37:07'),
-	(2,'content',5,'Crew','crew','Production credits for \'Lucky - or Not?\'','credits, crew, film, Lucky - or Not?, production','eng','2009-09-29 12:40:28'),
-	(7,'content',6,'Accessibility','accessibility','','accessibility, disabilities, web standards','eng','2009-09-28 12:37:07'),
-	(8,'content',7,'Cast','cast','','cast, Lucky - or Not?, movie, short','eng','2009-09-28 12:37:07'),
-	(10,'content',9,'The Leaves','the-leaves','','4K, 16 mm, DV, film, HD, independent, Lucky - or Not?, RED, short, super 8 mm, The Leaves, video','eng','2009-09-28 12:37:07'),
-	(71,'media',11,'svenn-ticles','svenn-ticles','','friends, Steven Giouras','eng','2009-11-06 14:50:21'),
-	(72,'content',11,'Driving Test','driving-test','','','eng','2009-11-15 12:01:07'),
-	(68,'media',10,'Walking the Walk','walking-the-walk','','film, Lucky - or Not?, production','eng','2009-11-06 14:50:21'),
-	(65,'media',7,'svenn-ticles','svenn-ticles','','friends, Steven Giouras','eng','2009-11-06 14:50:21'),
-	(69,'media',2,'upside down chug 2','upside-down-chug-2','','beer, festival, Ottawa','eng','2009-11-06 14:50:21'),
-	(70,'media',3,'Beaker - 1','beaker-1','','Beaker, elephant, frame','eng','2009-11-06 14:50:21'),
-	(62,'media',4,'20090805_Caroline_birthday_100_4145.JPG','20090805-caroline-birthday-100-4145-jpg','','Caroline Douville','eng','2009-11-06 14:50:21');
-
-/*!40000 ALTER TABLE `c_titles` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
 # Dump of table r_attachments
 # ------------------------------------------------------------
 
@@ -8100,20 +8044,8 @@ CREATE TABLE `r_attachments` (
   `content_id` mediumint(9) unsigned NOT NULL,
   `media_id` mediumint(9) unsigned NOT NULL,
   PRIMARY KEY  (`a_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='relate file attachments to content';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='relate file attachments to content';
 
-LOCK TABLES `r_attachments` WRITE;
-/*!40000 ALTER TABLE `r_attachments` DISABLE KEYS */;
-INSERT INTO `r_attachments` (`a_id`,`content_id`,`media_id`)
-VALUES
-	(4,1,10),
-	(5,1,11),
-	(6,1,2),
-	(7,9,2),
-	(8,11,3);
-
-/*!40000 ALTER TABLE `r_attachments` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table r_fields
@@ -8352,30 +8284,31 @@ CREATE TABLE `s_fields` (
   `field_input_type` varchar(9) NOT NULL,
   `field_validation` text,
   `field_needs_lang` tinyint(1) unsigned NOT NULL default '1',
+  `list_id` mediumint(9) unsigned NOT NULL,
   PRIMARY KEY  (`field_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `s_fields` WRITE;
 /*!40000 ALTER TABLE `s_fields` DISABLE KEYS */;
-INSERT INTO `s_fields` (`field_id`,`field_ref_name`,`field_input_type`,`field_validation`,`field_needs_lang`)
+INSERT INTO `s_fields` (`field_id`,`field_ref_name`,`field_input_type`,`field_validation`,`field_needs_lang`,`list_id`)
 VALUES
-	(1,'biography','richtext','',1),
-	(2,'body','richtext','',1),
-	(3,'city','text','',1),
-	(4,'contributor','text','',1),
-	(5,'copyright','text','',1),
-	(6,'country','text','',1),
-	(7,'creator','text','',1),
-	(8,'description','textarea','',1),
-	(9,'directory','directory','path_dir',0),
-	(10,'e-mail','text','valid_email ',0),
-	(11,'excerpt','richtext','max_length[512]',1),
-	(12,'image_banner','file','path_file',0),
-	(13,'image_poster','file','path_file',0),
-	(15,'location','text','',1),
-	(16,'province_state','text','',1),
-	(17,'transcript','richtext','',1),
-	(14,'website_url','text','is_uri',0);
+	(1,'biography','richtext','',1,0),
+	(2,'body','richtext','',1,0),
+	(3,'city','text','',1,0),
+	(4,'contributor','text','',1,0),
+	(5,'copyright','text','',1,0),
+	(6,'country','text','',1,0),
+	(7,'creator','text','',1,0),
+	(8,'description','textarea','',1,0),
+	(9,'directory','directory','path_dir',0,0),
+	(10,'e-mail','text','valid_email ',0,0),
+	(11,'excerpt','richtext','max_length[512]',1,0),
+	(12,'image_banner','file','path_file',0,0),
+	(13,'image_poster','file','path_file',0,0),
+	(15,'location','text','',1,0),
+	(16,'province_canada','text','',0,1),
+	(17,'transcript','richtext','',1,0),
+	(14,'website_url','text','is_uri',0,0);
 
 /*!40000 ALTER TABLE `s_fields` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8394,7 +8327,7 @@ CREATE TABLE `s_labels` (
   `label` text NOT NULL,
   `lang_ISO_639_3` char(3) NOT NULL default 'eng',
   PRIMARY KEY  (`label_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
+) ENGINE=MyISAM AUTO_INCREMENT=40 DEFAULT CHARSET=utf8 COMMENT='labels for fields, types';
 
 LOCK TABLES `s_labels` WRITE;
 /*!40000 ALTER TABLE `s_labels` DISABLE KEYS */;
@@ -8414,7 +8347,7 @@ VALUES
 	(12,'field',12,'image_banner','Image Banner','eng'),
 	(13,'field',13,'image_poster','Image Poster','eng'),
 	(15,'field',15,'location','Location','eng'),
-	(16,'field',16,'province_state','Province/State','eng'),
+	(16,'field',16,'province_canada','Province (Canada)','eng'),
 	(17,'field',17,'transcript','Transcript','eng'),
 	(18,'field',14,'website_url','Website URL','eng'),
 	(19,'types',1,'static_page','Static Page','eng'),
@@ -8493,7 +8426,7 @@ LOCK TABLES `s_site_prefs` WRITE;
 /*!40000 ALTER TABLE `s_site_prefs` DISABLE KEYS */;
 INSERT INTO `s_site_prefs` (`site_id`,`theme`,`timezone`,`default_lang`,`default_content_type`,`date_created`,`date_updated`,`home_content_id`,`site_admin_id`,`site_editor_id`,`img_size_th`,`img_size_sm`,`img_size_md`,`img_size_lg`,`limit_posts`,`limit_thumbs`)
 VALUES
-	(1,'simple_em','America/Vancouver','eng',1,'1997-07-06 00:00:00','2009-09-24 12:03:29',0,1,1,90,180,360,640,5,30);
+	(1,'simple_em','America/Vancouver','eng',1,'2010-04-22 11:20:00','2010-04-22 11:19:21',0,1,1,90,180,360,640,5,30);
 
 /*!40000 ALTER TABLE `s_site_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
