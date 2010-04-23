@@ -18,6 +18,43 @@ class Media extends MY_Controller {
 		$this->selected = array();
 	}
 	
+	function scan()
+	{
+		$html = "";
+		$this->Media_model->lang_load();
+		$tmp_files = $this->Media_model->list_media_recursive();
+		
+		if(count($this->Media_model->file_list) > 0)
+		{
+			$html .= "<pre>";
+			$html .= print_r($this->Media_model->file_list,true);
+			$html .= "</pre>\r";
+		}
+		else
+		{
+			$html .= "<p>";
+			$html .= $this->cms_labels['media_scan_no_results'];
+			$html .= "</p>\r";
+		}
+
+
+		$this->data['form'] = $html;
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/media",$this->cms_labels['media']);
+		$breadcrumb[] = $this->cms_labels['media_scan'];
+		
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$title_tag[] = $this->cms_labels['media_scan'];
+		$title_tag[] = $this->cms_labels['media'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['media_scan'];
+
+		$this->load->view('cms/media', $this->data);
+	}
+
 	function manage()
 	{	
 		$this->Media_model->lang_load();

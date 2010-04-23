@@ -19,6 +19,9 @@ class Media_model extends MY_Model {
 	// directory / file managment 
 	var $dir_base, $dir_current, $dir_list, $dir_list_rel, $file_current, $file_list, $file_count;
 
+	// track db entries
+	var $exists = FALSE;
+
     function Media_model()
     {
         // Call the Model constructor
@@ -689,6 +692,7 @@ class Media_model extends MY_Model {
 		}
 
 		$list = array();
+		$new_list = array();
 
 		// get files in this directory (unique)
 		$this->list_files_unique(TRUE);
@@ -716,11 +720,17 @@ class Media_model extends MY_Model {
 				$tmp_file_info['external'] = 0;
 				$tmp_file_info['title'] = $this->title;
 			}
+
+			if(!$this->exists)
+			{
+				// add new id to list
+				$new_list[$path_rel] = $tmp_file_info;
+			}
 			
 			$list[$path_rel] = $tmp_file_info;
 			unset($tmp_file_info);
 		}
-
+		$this->file_list = $new_list;
 		return $list;
 	}
 
@@ -809,6 +819,7 @@ class Media_model extends MY_Model {
 			$this->date_created = date('Y-m-d H:i:s');
 		}
 
+		$this->exists = FALSE;
 		// if file not in database, add to database
 		if(!$this->find_media_by_uri())
 		{
@@ -816,6 +827,12 @@ class Media_model extends MY_Model {
 			$this->publish = 1;
 			
 		}
+		else
+		{
+			// file is already in db
+			$this->exists = TRUE;
+		}
+		
 		$this->mime_type = $this->get_mime($this->file_current);
 
 		$this->get_file_metadata();
