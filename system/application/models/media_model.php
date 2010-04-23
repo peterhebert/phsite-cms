@@ -719,6 +719,7 @@ class Media_model extends MY_Model {
 				$tmp_file_info['mime_type'] = $this->mime_type;
 				$tmp_file_info['external'] = 0;
 				$tmp_file_info['title'] = $this->title;
+				$tmp_file_info['file_uri'] = $this->file_uri;
 			}
 
 			if(!$this->exists)
@@ -731,6 +732,7 @@ class Media_model extends MY_Model {
 			unset($tmp_file_info);
 		}
 		$this->file_list = $new_list;
+		$this->file_count = count($new_list);
 		return $list;
 	}
 

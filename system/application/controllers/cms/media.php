@@ -24,11 +24,59 @@ class Media extends MY_Controller {
 		$this->Media_model->lang_load();
 		$tmp_files = $this->Media_model->list_media_recursive();
 		
-		if(count($this->Media_model->file_list) > 0)
+		if($this->Media_model->file_count > 0)
 		{
-			$html .= "<pre>";
-			$html .= print_r($this->Media_model->file_list,true);
-			$html .= "</pre>\r";
+
+			$new_files = $this->Media_model->file_list;
+			$html .= "<p>".sprintf($this->cms_labels['media_scan_x_results'],$this->Media_model->file_count)."</p>\r";
+		
+			foreach($new_files as $media)
+			{
+
+				$html .= "<p>";
+				// get mime category
+				// get filename and extension
+				$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+				$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+				$filename = basename($media['file_uri']);
+				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
+				$mid = $media['media_id'];
+	
+				// determine edit uri
+				$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
+				if($this->Media_model->temp_lang != '')
+				{
+					$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+				}
+
+				if($mime_cat == 'image')
+				{
+					$html .= "<div class=\"image-left\">";
+					// get thumbnail
+					$img_path = $this->Media_model->dir_base.$media['file_uri'];
+					$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+					$html .= "</div>";
+				}
+	
+				if(in_array($ext,$mime_icon_exts))
+				{
+					$html .= "<span class=\"icon ext_{$ext}\">";
+				}
+				else
+				{
+					$html .= "<span class=\"icon icon_{$mime_cat}\">";
+				}
+				if($media['title'] != '' && $media['title'] != $filename)
+				{
+					$html .= $media['title']."<br />\r";
+				}
+				$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+				$html .= "</span></p>\r";
+
+				
+			}
+
 		}
 		else
 		{
@@ -121,6 +169,7 @@ class Media extends MY_Controller {
 		$params = $this->uri->uri_to_assoc(3);
 
 		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
+		$links[] = anchor("cms/media/scan",$this->cms_labels['media_scan']);
 		$links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
 		$html = ul($links);
 		$this->data['sidebar'] = $html;
