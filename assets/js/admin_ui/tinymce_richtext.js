@@ -13,7 +13,7 @@ tinyMCE.init({
 	theme : "advanced",
 	plugins : "safari,xhtmlxtras,table,fullscreen",
 	theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,image,charmap",
-	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,blockquote,cite,abbr,acronym,ins,del",
+	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,blockquote,cite,abbr,acronym,|,ins,del",
 	theme_advanced_buttons3 : "tablecontrols",
 	theme_advanced_buttons4 : "cut,copy,paste,|,undo,redo,|,link,unlink,anchor,|,code,removeformat,cleanup,fullscreen",
 	theme_advanced_toolbar_align : "left",

@@ -2,9 +2,9 @@
 # Version 1630
 # http://code.google.com/p/sequel-pro
 #
-# Host: dbs.peterhebert.com (MySQL 5.0.89-userstats-log)
-# Database: phsite_ci
-# Generation Time: 2010-04-22 12:00:08 -0700
+# Host: localhost (MySQL 5.0.67)
+# Database: phsite_minimal
+# Generation Time: 2010-04-22 13:57:22 -0700
 # ************************************************************
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -33,16 +33,8 @@ CREATE TABLE `c_content` (
   `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `publish` mediumint(9) unsigned NOT NULL default '1',
   PRIMARY KEY  (`content_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `c_content` WRITE;
-/*!40000 ALTER TABLE `c_content` DISABLE KEYS */;
-INSERT INTO `c_content` (`content_id`,`user_id`,`parent_id`,`type_id`,`type_uri_name`,`date_created`,`date_end_expiry`,`date_updated`,`publish`)
-VALUES
-	(1,1,0,1,'static_page','2010-04-22 11:35:37','0000-00-00 00:00:00','2010-04-22 11:34:18',1);
-
-/*!40000 ALTER TABLE `c_content` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table c_media
@@ -78,19 +70,8 @@ CREATE TABLE `c_metadata` (
   `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   PRIMARY KEY  (`meta_id`),
   FULLTEXT KEY `value` (`value`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `c_metadata` WRITE;
-/*!40000 ALTER TABLE `c_metadata` DISABLE KEYS */;
-INSERT INTO `c_metadata` (`meta_id`,`scope`,`rel_id`,`field_id`,`field_ref_name`,`value`,`lang_ISO_639_3`,`date_updated`)
-VALUES
-	(1,'site',1,8,'description','phSite CMS is the content manager you wish you had all these years. Easy to use, multilingual, standards compliant, and seamless.','eng','2010-04-22 11:21:11'),
-	(2,'site',1,5,'copyright','2009 Peter Hebert.','eng','2010-04-22 11:21:11'),
-	(3,'content',1,2,'body','<p>In order to set up phSite, you will need the following server environment:</p>\n<ul>\n<li>A web server &ndash; preferably <a href=\"http://httpd.apache.org/\">Apache</a></li>\n<li><a href=\"http://www.php.net/\">PHP</a> version 4.3.2 or newer.</li>\n<li>A Database server. Supported databases are MySQL (4.1+), MySQLi, MS SQL, PostgreSQL, Oracle, SQLite, and ODBC. I recommend <a href=\"http://www.mysql.com/downloads/mysql/\">MySQL</a> or <a href=\"http://www.postgresql.org/\">PostgreSQL</a>.</li>\n</ul>\n<p>First, you will need to download phSite. You can download the latest release, or get it from the Bazaar development repository.</p>','eng','2010-04-22 11:34:18'),
-	(4,'content',1,8,'description','Instructions on how to install the phSite Content Management System.','eng','2010-04-22 11:34:18');
-
-/*!40000 ALTER TABLE `c_metadata` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table c_titles
@@ -111,17 +92,8 @@ CREATE TABLE `c_titles` (
   PRIMARY KEY  (`title_id`),
   FULLTEXT KEY `title` (`title`,`subtitle`),
   FULLTEXT KEY `keywords` (`keywords`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-LOCK TABLES `c_titles` WRITE;
-/*!40000 ALTER TABLE `c_titles` DISABLE KEYS */;
-INSERT INTO `c_titles` (`title_id`,`scope`,`rel_id`,`title`,`uri_title`,`subtitle`,`keywords`,`lang_ISO_639_3`,`title_updated`)
-VALUES
-	(1,'site',1,'phSite CMS','phsite-cms','a content manager for the rest of us','','eng','2010-04-22 11:21:11'),
-	(2,'content',1,'Installation','installation','Instructions on how to set up phSite','download, install','eng','2010-04-22 11:34:18');
-
-/*!40000 ALTER TABLE `c_titles` ENABLE KEYS */;
-UNLOCK TABLES;
 
 
 # Dump of table ISO_639_LANG
@@ -2108,7 +2080,7 @@ VALUES
 	('fos','','','','I','E','Siraya','Siraya',NULL,'siraya',0),
 	('fpe','','','','I','L','Fernando Po Creole English','Creole English, Fernando Po',NULL,'english',0),
 	('fqs','','','','I','L','Fas','Fas',NULL,'fas',0),
-	('fra','fre','fra','fr','I','L','French','French','français','francais',0),
+	('fra','fre','fra','fr','I','L','French','French','Français','francais',1),
 	('frc','','','','I','L','Cajun French','French, Cajun',NULL,'francais',0),
 	('frd','','','','I','L','Fordata','Fordata',NULL,'fordata',0),
 	('frk','','','','I','E','Frankish','Frankish',NULL,'frankish',0),
@@ -6208,8 +6180,7 @@ VALUES
 	('sox','','','','I','L','So (Cameroon)','So (Cameroon)',NULL,'so',0),
 	('soy','','','','I','L','Miyobe','Miyobe',NULL,'miyobe',0),
 	('soz','','','','I','L','Temi','Temi',NULL,'temi',0),
-	('spa','spa','spa','es','I','L','Spanish','Castilian','español,castellano','espanol',0),
-	('spa','spa','spa','es','I','L','Spanish','Spanish','español,castellano','espanol',0),
+	('spa','spa','spa','es','I','L','Spanish','Spanish','Español (castellano)','espanol',0),
 	('spb','','','','I','L','Sepa (Indonesia)','Sepa (Indonesia)',NULL,'sepa',0),
 	('spc','','','','I','L','Sapé','Sapé',NULL,'sape',0),
 	('spd','','','','I','L','Saep','Saep',NULL,'saep',0),
@@ -8090,9 +8061,7 @@ VALUES
 	(29,'types',8,'image',8,'description',1,0),
 	(30,'types',8,'image',15,'location',0,0),
 	(31,'types',8,'image',16,'province_state',0,0),
-	(32,'types',6,'video',8,'description',0,0),
-	(33,'types',10,'film',2,'body',0,0),
-	(34,'types',10,'film',13,'image_poster',0,0);
+	(32,'types',6,'video',8,'description',0,0);
 
 /*!40000 ALTER TABLE `r_fields` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8426,7 +8395,7 @@ LOCK TABLES `s_site_prefs` WRITE;
 /*!40000 ALTER TABLE `s_site_prefs` DISABLE KEYS */;
 INSERT INTO `s_site_prefs` (`site_id`,`theme`,`timezone`,`default_lang`,`default_content_type`,`date_created`,`date_updated`,`home_content_id`,`site_admin_id`,`site_editor_id`,`img_size_th`,`img_size_sm`,`img_size_md`,`img_size_lg`,`limit_posts`,`limit_thumbs`)
 VALUES
-	(1,'simple_em','America/Vancouver','eng',1,'2010-04-22 11:20:00','2010-04-22 11:19:21',0,1,1,90,180,360,640,5,30);
+	(1,'simple_em','America/Vancouver','eng',2,'1997-07-06 00:00:00','2010-04-22 13:20:17',0,1,1,90,180,360,640,5,30);
 
 /*!40000 ALTER TABLE `s_site_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -8484,7 +8453,7 @@ LOCK TABLES `s_users` WRITE;
 /*!40000 ALTER TABLE `s_users` DISABLE KEYS */;
 INSERT INTO `s_users` (`user_id`,`name_first`,`name_last`,`username`,`password`,`timezone`,`default_lang`,`email`)
 VALUES
-	(1,'Peter','Hebert','peterhebert','4c11a8591768d6acd64c5bfb984d5e02062ccf41323e7840c4','America/Vancouver','eng','mail@peterhebert.com');
+	(1,'Admin','User','administrator','ff7662c12b2a2cab7de073024d06fb05a3d714f545142fa8fa','America/Vancouver','eng','admin@mail.com');
 
 /*!40000 ALTER TABLE `s_users` ENABLE KEYS */;
 UNLOCK TABLES;

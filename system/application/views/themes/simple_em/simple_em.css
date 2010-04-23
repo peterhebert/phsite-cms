@@ -368,3 +368,11 @@ dl.exif-itpc dd
 {
 	vertical-align: bottom;
 }
+/* preformatted text, code snippets */
+pre,code,kbd,samp,tt {
+padding: 1ex;
+margin:1ex 0;
+border: 1px solid #cccccc;
+background-color:#eeeeee;
+overflow:scroll;
+}

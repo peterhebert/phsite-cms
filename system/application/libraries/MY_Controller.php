@@ -96,7 +96,16 @@ class MY_Controller extends Controller {
 		$tmp_cr_yr = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y");
 		$tmp_mod_yr = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y");
 
-		$tmp_site_dates = $tmp_cr_yr.'-'.$tmp_mod_yr;
+		// if site created year before mod year, show range - if not just created year
+		if($tmp_cr_yr < $tmp_mod_yr)
+		{
+			$tmp_site_dates = $tmp_cr_yr.'-'.$tmp_mod_yr;
+		}
+		else
+		{
+			$tmp_site_dates = $tmp_cr_yr;
+		}
+		
 
 		$this->data['site_meta_updated'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone);
 		$this->data['site_meta_updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");

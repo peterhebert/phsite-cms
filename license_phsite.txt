@@ -1,7 +1,7 @@
 phSite CMS
-Copyright (c) 2009 Peter Hebert
+Copyright (c) 2010 Peter Hebert
 http://www.peterhebert.com
-Code specific to phSite CMS (to be found in sysytem/application folder)
+Code specific to phSite CMS (to be found in system/application folder)
 is licensed under the MIT License
 
 phSite CMS is built on top of the CodeIgniter PHP framework by EllisLab, Inc.
@@ -10,7 +10,7 @@ Please see license_codeigniter.txt for licensing terms.
 
 The MIT License
 
-Copyright (c) 2009 Peter Hebert
+Copyright (c) 2010 Peter Hebert
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
