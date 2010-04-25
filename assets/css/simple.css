@@ -233,7 +233,7 @@ text,textarea,richtext,checkbox,radio,password,file
 #page form .tiny_input { width: 2.5em;}
 #page form .textarea { width: 22em; height: 8em; }
 #page form .textarea_narrow { width: 8em; height: 10em; }
-#page form .richtext { width: 22em; height: 36em; }
+#page form .richtext { width: 22em; height: 32em; }
 
 #page form div.row label, div.row div {
 	float: left;

@@ -73,8 +73,6 @@ if ( ! function_exists('url_exists'))
 	}
 }
 
-
-
 if ( ! function_exists('view_image'))
 {
 

@@ -76,9 +76,6 @@ if(isset($breadcrumb_links))
 
 		if(isset($menu) && $menu != '')
 		{
-			echo "<h3>";
-			echo $cms_labels['menu'];
-			echo "</h3>\r";
 			echo $menu;
 		}
 		
