@@ -238,6 +238,23 @@ class Content_model extends MY_Model {
 
 	}
 
+    function content_exists()
+    {
+
+		if ($this->content_id != '')
+		{
+			// first get data from 'c_content' table
+			$this->db->where('content_id', $this->content_id);
+			$query = $this->db->get('c_content');
+	
+			if ($query->num_rows() > 0)
+			{
+				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
     function load_content_object()
     {
 

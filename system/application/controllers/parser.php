@@ -38,7 +38,26 @@ class Parser extends MY_Controller {
 		}
 		else
 		{
-			$this->_home();
+			// if site preferences specify a vaild home page ID, then redirect, otherwise auto-generate home page
+			if($this->Site_model->home_content_id > 0)
+			{
+				$this->Content_model->content_id = $this->Site_model->home_content_id;
+				if($this->Content_model->content_exists() === TRUE)
+				{
+					$this->Content_model->load_content();
+					$this->_prepare_view();
+				}
+				else
+				{
+					$this->_home();
+					
+				}
+				
+			}
+			else
+			{
+				$this->_home();
+			}
 		}
 
 		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
