@@ -15,6 +15,7 @@ class Content_model extends MY_Model {
 	var $current_level = 1;
 	var $levels = 0;
 	var $content_count = 0;
+	var $omit_id = NULL;
 
     function Content_model()
     {
@@ -519,7 +520,7 @@ class Content_model extends MY_Model {
 
 	}
 
-	function site_map()
+	function site_map($omit_id = NULL)
 	{
 		$this->scope = 'content';
 
@@ -543,36 +544,38 @@ class Content_model extends MY_Model {
 
 			foreach ($query->result_array() as $row)
 			{
-				
-				$this->db->where('scope', $this->scope);
-				$this->db->where('rel_id', $row['content_id']);
-				$this->db->where('lang_ISO_639_3', $this->temp_lang);
-				$this->db->limit(1);
-				$q2 = $this->db->get('c_titles');
-				$r2 = $q2->row_array();
-
-				if ($q2->num_rows() > 0)
+				if($this->omit_id !== NULL && $row['content_id'] != $this->omit_id)
 				{
-					if($this->link_mode == 1)
+					$this->db->where('scope', $this->scope);
+					$this->db->where('rel_id', $row['content_id']);
+					$this->db->where('lang_ISO_639_3', $this->temp_lang);
+					$this->db->limit(1);
+					$q2 = $this->db->get('c_titles');
+					$r2 = $q2->row_array();
+	
+					if ($q2->num_rows() > 0)
 					{
-						$link = 'cms/content/edit/id/'.$row['content_id'].'/lang/'.$r2['lang_ISO_639_3'];
+						if($this->link_mode == 1)
+						{
+							$link = 'cms/content/edit/id/'.$row['content_id'].'/lang/'.$r2['lang_ISO_639_3'];
+						}
+						else
+						{
+							$this->temp_id = $row['content_id'];
+							$this->temp_lang = $r2['lang_ISO_639_3'];
+							$link = $this->generate_uri();
+						}
+						
+						$site_map .= '<li>'.anchor($link,$r2['title']);
+						
+						if( ($this->levels > 0 && $this->current_level <= $this->levels) || $this->levels == -1 )
+						{
+							$this->temp_id = $row['content_id'];
+							$this->current_level = $this->current_level + 1;
+							$site_map .= $this->site_map();
+						}
+						$site_map .= "</li>\r";
 					}
-					else
-					{
-						$this->temp_id = $row['content_id'];
-						$this->temp_lang = $r2['lang_ISO_639_3'];
-						$link = $this->generate_uri();
-					}
-					
-					$site_map .= '<li>'.anchor($link,$r2['title']);
-					
-					if( ($this->levels > 0 && $this->current_level <= $this->levels) || $this->levels == -1 )
-					{
-						$this->temp_id = $row['content_id'];
-						$this->current_level = $this->current_level + 1;
-						$site_map .= $this->site_map();
-					}
-					$site_map .= "</li>\r";
 				}
 
 			}

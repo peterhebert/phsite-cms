@@ -33,15 +33,31 @@ class Parser extends MY_Controller {
 		
 		if(count($this->segments) > 0)
 		{
+
+			// if site preferences specify a vaild home page ID, then omit home page from menu
+			if($this->Site_model->home_content_id > 0)
+			{
+				$this->Content_model->content_id = $this->Site_model->home_content_id;
+				$this->Content_model->omit_id = $this->Site_model->home_content_id;
+				
+				if($this->Content_model->content_exists() === TRUE)
+				{
+					$this->Content_model->omit_id = $this->Site_model->home_content_id;
+				}
+
+			}
+
 			$this->_find_content();
 			$this->_prepare_view();
 		}
 		else
 		{
-			// if site preferences specify a vaild home page ID, then redirect, otherwise auto-generate home page
+			// if site preferences specify a vaild home page ID, then redirect and omit home page from menu, otherwise auto-generate home page
 			if($this->Site_model->home_content_id > 0)
 			{
 				$this->Content_model->content_id = $this->Site_model->home_content_id;
+				$this->Content_model->omit_id = $this->Site_model->home_content_id;
+				
 				if($this->Content_model->content_exists() === TRUE)
 				{
 					$this->Content_model->load_content();
