@@ -88,6 +88,7 @@ class MY_Controller extends Controller {
 		$this->data['site_meta_keywords'] = $this->Site_model->keywords;
 
 		// format the date according to site timezone
+		date_default_timezone_set("America/Los_Angeles");
 
 		$this->data['site_meta_created'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone);
 		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");

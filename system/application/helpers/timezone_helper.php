@@ -5,6 +5,8 @@ if ( ! function_exists('convert_time'))
 {
 	function convert_time($time, $zone_to, $format = "Y-m-d H:i:s", $zone_from = '')
 	{
+		date_default_timezone_set("America/Los_Angeles");
+
 		if($zone_from == '')
 		{
 			$zone_from = date_default_timezone_get();
