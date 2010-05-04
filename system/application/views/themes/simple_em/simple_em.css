@@ -125,6 +125,7 @@ body.gallery h1,body.gallery h2,body.gallery h3,body.gallery h4,body.gallery h5,
 		white-space:normal;
 	}
 
+blockquote { border:1px solid #CCCCCC; margin:1em; padding:0 1ex; }
 
 /* image containers */
 .placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }

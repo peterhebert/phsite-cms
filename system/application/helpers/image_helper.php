@@ -4,8 +4,6 @@
 if ( ! function_exists('file_is_image'))
 {
 	function is_image($path) {
-
-
 	
 		$is_image = FALSE;
 
@@ -648,6 +646,65 @@ I have modified the poster so it does not need to be a JPEG but any image type (
 
 	}
 }
+
+if ( ! function_exists('embed_media'))
+{
+	function embed_media($path) {
+	
+	$media_types = array(
+	'image' => array(
+		'bmp' => 'image/x-windows-bmp',
+		'gif' => 'image/gif',
+		'ico' => 'image/vnd.microsoft.icon',
+		'j2k' => 'image/jp2',
+		'jp2' => 'image/jp2',
+		'jpe' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'jpf' => 'image/jpx',
+		'jpg' => 'image/jpeg',
+		'jpm' => 'image/jpm',
+		'jpx' => 'image/jpx',
+		'pct' => 'image/x-pict',
+		'pcx' => 'image/x-pcx',
+		'png' => 'image/png',
+		'svg' => 'image/svg+xml',
+		'tif' => 'image/tiff',
+		'tiff' => 'image/tiff',
+		'wbmp' => 'image/vnd.wap.wbmp',
+		'psd' => 'image/psd',
+		'xbm' => 'image/xbm',
+		),
+	'media' => array(),
+	'file' => '',
+	);
+
+
+		if(file_exists($path))
+		{
+			$pathinfo = pathinfo($path);
+			$file_info = getimagesize($path);
+			if(!$file_info)
+			{
+				if(array_key_exists($pathinfo['extension'],$acceptable_types))
+				{
+					$is_image = TRUE;
+				}
+			
+			}
+			else
+			{
+				if( in_array($file_info['mime'],$acceptable_types) )
+				{
+					$is_image = TRUE;
+				}
+			}
+		}
+		
+		return $is_image;
+
+	}
+}
+
 
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

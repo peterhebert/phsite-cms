@@ -44,6 +44,8 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .nomargin { margin: 0; }
 .padded { padding: 0.5em }
 
+blockquote { border:1px solid #CCCCCC; margin:1em; padding:0 1ex; }
+
 /* image containers */
 .placeholder { background-color:#222222; color: #eeeeee; padding:1em; margin:0 auto 1em auto; border:double #000000 }
 .image { margin-bottom: 1em;}

@@ -4,7 +4,13 @@ AddType video/mp4 .mp4
 <IfModule mod_rewrite.c>
  
     RewriteEngine On
-    RewriteBase /
+	
+	# you want to set your Rewrite base to whatever the path of your phSite install is
+	# if it is in the web root, then use /
+	# if not use /my_folder/
+	# or /path/to/my/phsite-folder
+	
+    RewriteBase /phsite_cms_bzr/
  
     ### Canonicalize codeigniter URLs
  

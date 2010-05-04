@@ -9,9 +9,11 @@
 | WITH a trailing slash:
 |
 |	http://example.com/
+|	http://example.com/path/to/codeigniter-root/
+|	http://localhost/path/to/codeigniter-root/
 |
 */
-$config['base_url']	= "http://phsite.local/";
+$config['base_url']	= "http://localhost/phsite_cms_bzr/";
 
 /*
 |--------------------------------------------------------------------------
