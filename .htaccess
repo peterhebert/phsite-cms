@@ -10,7 +10,7 @@ AddType video/mp4 .mp4
 	# if not use /my_folder/
 	# or /path/to/my/phsite-folder
 	
-    RewriteBase /phsite_cms_bzr/
+    #RewriteBase /
  
     ### Canonicalize codeigniter URLs
  
@@ -35,7 +35,7 @@ AddType video/mp4 .mp4
     # request to index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php/$1 [L]
+    RewriteRule ^(.*)$ ./index.php/$1 [L]
  
 </IfModule>
  

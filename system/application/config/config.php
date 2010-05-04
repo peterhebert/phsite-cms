@@ -13,7 +13,7 @@
 |	http://localhost/path/to/codeigniter-root/
 |
 */
-$config['base_url']	= "http://localhost/phsite_cms_bzr/";
+$config['base_url']	= "http://phsite.local/";
 
 /*
 |--------------------------------------------------------------------------

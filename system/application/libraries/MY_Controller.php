@@ -76,7 +76,7 @@ class MY_Controller extends Controller {
 		}
 		$this->data['site_meta_lang'] = $this->Site_model->temp_lang;
 
-		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
+		$this->data['theme_path'] = $base_raw.'system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
 		$this->Site_model->temp_id = $this->Site_model->site_id;
