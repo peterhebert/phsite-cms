@@ -3,8 +3,8 @@
 <head>
 <title>Media manager | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo base_url(); ?>assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo base_url(); ?>assets/css/simple.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $base_path; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $base_path; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
 <!--
 ul.thumbnails li {
@@ -13,7 +13,7 @@ ul.thumbnails li {
 ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
 -->
 </style>
-<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="<?php echo $base_path; ?>/assets/js/jquery-1.3.1.min.js"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 $().ready(function(){

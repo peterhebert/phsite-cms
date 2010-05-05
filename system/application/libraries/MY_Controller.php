@@ -50,23 +50,13 @@ class MY_Controller extends Controller {
 			$this->Site_model->temp_lang = $this->session->userdata('default_lang');
 			$this->_load_site_metadata();
 			$this->_load_cms_labels();
-
 		}
-
 	}
 
 	function _load_site_metadata() {
 
-		$base_raw = base_url();
-		$base_array = explode('/',$base_raw);
-		$base_array = removeEmptyArrayElements($base_array);	
-		array_shift($base_array);	
-		array_shift($base_array);	
-		$base = implode('/',$base_array);
-		
-		if($base != '') {
-			$base = '/'.$base;
-		}
+		$base_raw = $_SERVER['PHP_SELF'];
+		$base = preg_replace("#^(.*)/index.php(.*)#", "$1", $base_raw);
 		$this->data['base_path'] = $base;
 
 		$this->Site_model->load_site();
@@ -76,7 +66,7 @@ class MY_Controller extends Controller {
 		}
 		$this->data['site_meta_lang'] = $this->Site_model->temp_lang;
 
-		$this->data['theme_path'] = $base_raw.'system/application/views/themes/'.$this->Site_model->theme.'/';
+		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
 		$this->Site_model->temp_id = $this->Site_model->site_id;

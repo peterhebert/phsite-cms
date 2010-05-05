@@ -8,8 +8,8 @@ echo $title_tag.' | ';
 }
 ?>phSite CMS</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo base_url(); ?>assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo base_url(); ?>assets/css/simple.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $base_path; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $base_path; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="dialog" title="Delete the selected items?" class="hide">
@@ -48,7 +48,7 @@ echo $title_tag.' | ';
 	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
 <?php
-require_once('js_includes.html');
+require_once('js_includes.php');
 if (isset($custom_js)){
 	echo $custom_js;
 }

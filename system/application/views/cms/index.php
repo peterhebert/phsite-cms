@@ -3,11 +3,11 @@
 <head>
 <title>CMS Home | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo base_url(); ?>assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo base_url(); ?>assets/css/simple.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery-1.3.1.min.js"></script>
-<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery_external_links.js"></script>
-<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery_new_content.js"></script>
+<link href="<?php echo $base_path; ?>//assets/css/base.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo $base_path; ?>//assets/css/simple.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="<?php echo $base_path; ?>/assets/js/jquery-1.3.1.min.js"></script>
+<script type="text/javascript" src="<?php echo $base_path; ?>/assets/js/jquery_external_links.js"></script>
+<script type="text/javascript" src="<?php echo $base_path; ?>/assets/js/jquery_new_content.js"></script>
 </head>
 <body>
 <?php require_once('masthead.php'); ?>

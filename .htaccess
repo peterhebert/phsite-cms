@@ -5,20 +5,6 @@ AddType video/mp4 .mp4
  
     RewriteEngine On
 	
-	# you want to set your Rewrite base to whatever the path of your phSite install is
-	# if it is in the web root, then use /
-	# if not use /my_folder/
-	# or /path/to/my/phsite-folder
-	
-    #RewriteBase /
- 
-    ### Canonicalize codeigniter URLs
- 
-    # If your default controller is something other than
-    # "welcome" you should probably change this
-    # RewriteRule ^(home(/index)?|index(\.php)?)/?$ / [L,R=301]
-    # RewriteRule ^(.*)/index/?$ $1 [L,R=301]
- 
     # Removes trailing slashes (prevents SEO duplicate content issues)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.+)/$ $1 [L,R=301]
