@@ -404,7 +404,10 @@ class Parser extends MY_Controller {
 	function _blog($parent=NULL,$mode='excerpt')
 	{
 
-		$this->Content_model->type_id = 2;
+		if($this->Site_model->home_content_type > 0)
+		{
+			$this->Content_model->type_id = $this->Site_model->home_content_type;
+		}
 
 		if(isset($parent))
 		{

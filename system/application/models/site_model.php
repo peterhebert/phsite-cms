@@ -4,7 +4,7 @@ class Site_model extends MY_Model {
 	// list variables
 	var $site_themes, $theme_info;
 	
-	var $site_id, $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id;
+	var $site_id, $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id, $home_content_type;
 	var $default_content_type;
 	var $site_admin_id, $site_editor_id;
 	var $img_size_th, $img_size_sm, $img_size_md, $img_size_lg;
@@ -35,6 +35,7 @@ class Site_model extends MY_Model {
 			$this->site_date_created = $row['date_created'];
 			$this->site_date_updated = $row['date_updated'];
 			$this->home_content_id = $row['home_content_id'];
+			$this->home_content_type = $row['home_content_type'];
 			$this->img_size_th = $row['img_size_th'];
 			$this->img_size_sm = $row['img_size_sm'];
 			$this->img_size_md = $row['img_size_md'];
@@ -70,29 +71,7 @@ class Site_model extends MY_Model {
 	function list_themes()
     {
 
-/*		$themeArray = array();
-		// get document directory of index.php
-		$theme_dir = $this->install_path.'system/application/views/themes';
-
-		if (is_dir($theme_dir)) {
-
-			if ($dh = opendir($theme_dir)) {
-				while (($file = readdir($dh)) !== false) {
-					if($file != '.svn' && $file != '.' && $file != '..' && is_dir($theme_dir.'/'.$file)) {
-						$themeArray[$file] = str_replace('_',' ',$file);
-					}
-				}
-				closedir($dh);
-			}
-		}
-		asort($themeArray);
-
-		$this->site_themes = $themeArray;
-    }
-
-	function load_theme_list()
-    {
-*/		if($this->temp_lang == '')
+		if($this->temp_lang == '')
 		{
 			$this->temp_lang = $this->site_default_lang;
 		}
@@ -200,6 +179,7 @@ class Site_model extends MY_Model {
 		'default_content_type' => $this->default_content_type,
 		'date_created' => $this->site_date_created,
 		'home_content_id' => $this->home_content_id,
+		'home_content_type' => $this->home_content_type,
 		'site_admin_id' => $this->site_admin_id,
 		'site_editor_id' => $this->site_editor_id,
 		'img_size_th' => $this->img_size_th,

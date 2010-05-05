@@ -95,6 +95,26 @@ class Setup extends MY_Controller
 		$html .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);		
 		$html .= "</p>\r";
 
+		// list of content types for auto-generating home page 'recent content'
+		// load list of content types
+		$form_options = array();
+		$form_options['0'] = $this->cms_labels['all_content_types'];
+
+		$this->Site_model->scope = 'content';
+		$this->Site_model->list_types();
+
+		foreach($this->Site_model->type_list as $row)
+		{
+			$form_options["{$row['type_id']}"] = $row['label'];
+		}
+
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['home_content_type'], 'home_content_type');
+		$html .= form_dropdown('home_content_type', $form_options, $this->Site_model->home_content_type)."<br />\r";
+		$html .= $this->cms_labels['home_content_type_explain']."</p>\r";
+
+		// now list themes
+
 		$this->Site_model->list_themes();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['theme'], 'theme');
@@ -129,17 +149,10 @@ class Setup extends MY_Controller
 			$html .= ' <strong>'.anchor($theme_info['website'], $theme_info['title'], array('rel' => 'external'))."</strong><br />\r";
 			$html .= $this->cms_labels['author'].' : '.mailto($theme_info['email'], $theme_info['author'], array('title' => $this->cms_labels['email_author']))."<br />\r";
 			$html .= $theme_info['description']."</label> ";
-
 			
 		}
 		$html .= "</p>\r";
-/*		
-		$form_options = $theme_list;
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['theme'], 'theme');
-		$html .= form_dropdown('theme', $form_options, $this->Site_model->theme);		
-		$html .= "</p>\r";
-*/
+
 		$form_options = timezone_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['timezone'], 'site_timezone');
@@ -260,6 +273,7 @@ class Setup extends MY_Controller
 		{
 			// set validation rules
 			$this->form_validation->set_rules('home_content_id', $this->cms_labels['home_page'], 'required|is_natural');
+			$this->form_validation->set_rules('home_content_type', $this->cms_labels['home_content_type'], 'required|is_natural');
 			$this->form_validation->set_rules('site_admin_id', $this->cms_labels['webmaster'], 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('site_editor_id', $this->cms_labels['editor'], 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('site_default_lang', $this->cms_labels['default_lang'], 'required|alpha|exact_length[3]');
@@ -294,6 +308,7 @@ class Setup extends MY_Controller
 				}
 
 				$this->Site_model->home_content_id = $this->input->post('home_content_id');
+				$this->Site_model->home_content_type = $this->input->post('home_content_type');
 				$this->Site_model->site_timezone = $this->input->post('site_timezone');
 				$this->Site_model->theme = $this->input->post('theme');
 				$this->Site_model->site_default_lang = $this->input->post('site_default_lang');

@@ -26,12 +26,16 @@ foreach($blog as $entry)
 		echo "<p>{$byline}</p>\r";
 	}
 	
-	if(array_key_exists('content_excerpt',$entry)) 
+	if(array_key_exists('content_excerpt',$entry) && $entry['content_excerpt'] != '') 
 	{
 		echo $entry['content_excerpt'];
+	} 
+	else
+	{
+		echo $entry['content_body'];
 	}
 	
-	if(array_key_exists('content_keyword_links',$entry)) 
+	if(array_key_exists('content_keyword_links',$entry) && $entry['content_keyword_links'] != '') 
 	{
 		echo "<p>".$cms_labels['keywords']." : ".$entry['content_keyword_links']."</p>\r";
 	}
@@ -40,7 +44,17 @@ foreach($blog as $entry)
 	{
 		$pl_title = sprintf($cms_labels['permalink_title'],$entry['title']);
 		
-		$permalink = anchor($entry['permalink'], $cms_labels['read_more'], array('title' => $pl_title));
+
+		if(array_key_exists('content_excerpt',$entry) && $entry['content_excerpt'] != '') 
+		{
+			$pl_label = $cms_labels['read_more'];
+		} 
+		else
+		{
+			$pl_label = $cms_labels['permalink'];
+		}
+
+		$permalink = anchor($entry['permalink'], $pl_label, array('title' => $pl_title));
 		echo "<p>{$permalink}</p>\r";
 	}
 	
