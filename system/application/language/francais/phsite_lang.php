@@ -100,6 +100,7 @@ $lang['cms_labels'] = array(
 'langs_activated' => "Langues activ&eacute;s ",
 'language' => "Langue",
 'languages' => "Langues",
+'languages_other' => "Autres langues",
 'list' => "Liste des valeurs",
 'lists' => "Listes des valeurs",
 'list_edit' => "&Eacute;diter liste",
@@ -245,4 +246,4 @@ $lang['cms_labels'] = array(
 );
 
 /* End of file phsite_lang.php */
-/* Location: ./system/application/language/english/phsite_lang.php */
+/* Location: ./system/application/language/francais/phsite_lang.php */

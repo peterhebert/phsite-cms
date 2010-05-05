@@ -125,6 +125,11 @@ class Site_model extends MY_Model {
 		$this->scope = 'site';
 		$this->list_fields_related();
 		
+/*		if($this->temp_lang == '')
+		{
+			$this->temp_lang = $this->site_default_lang;
+		}
+*/
 		$this->load_metadata();
 	}
 

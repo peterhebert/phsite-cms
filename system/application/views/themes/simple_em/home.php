@@ -56,10 +56,17 @@ if(isset($breadcrumb_links))
 		<div class="block five">
 			<div class="column w3">
 				<?php
+
+
+
+
 				echo "<h2 class=\"first\">";
 				echo $cms_labels['recent_content'];
 				echo "</h2>\r";
 				echo $recent;
+
+
+
 				?>
 			</div>
 			<div class="float w2">

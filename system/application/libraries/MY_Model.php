@@ -58,11 +58,7 @@ class MY_Model extends Model {
 	{	
 		parent::Model();
 
-		$docroot = realpath($_SERVER['DOCUMENT_ROOT']);
-		$script = $_SERVER['SCRIPT_NAME'];
-		$basedir = preg_replace('/(.*)index\.php(.*)/','\1',$script);
-
-		$this->install_path = $docroot.$basedir;
+		$this->install_path = realpath(getcwd());
 
 	}
 

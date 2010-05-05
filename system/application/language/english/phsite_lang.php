@@ -99,6 +99,7 @@ $lang['cms_labels'] = array(
 'langs_activated' => "Activated Languages",
 'language' => "Language",
 'languages' => "Languages",
+'languages_other' => "Other languages",
 'label' => "Label",
 'labels' => "Labels",
 'list' => "Value list",

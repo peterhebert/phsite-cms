@@ -32,7 +32,8 @@ class MY_Controller extends Controller {
 		$this->data['img_size_sm'] = $this->Site_model->img_size_sm;
 		$this->data['img_size_md'] = $this->Site_model->img_size_md;
 		$this->data['img_size_lg'] = $this->Site_model->img_size_lg;
-		$this->data['img_path_orig'] = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG;
+		$this->data['img_path_orig'] = realpath(getcwd()).MEDIA_PATH_ORIG;
+
 	}
 
 	function _authenticate()
@@ -65,7 +66,6 @@ class MY_Controller extends Controller {
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
 		$this->data['site_meta_lang'] = $this->Site_model->temp_lang;
-
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
@@ -139,20 +139,22 @@ class MY_Controller extends Controller {
 			}
 		}
 		
+
 		if($this->Site_model->temp_lang == '')
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
 		$this->Site_model->lang_load();
-		
-		// load validation rules and input types from language files
-		$load_lang = $this->Site_model->lang_CI_Name;
-		if($load_lang == '')
-		{
-			$load_lang = 'english';
-		}
 
-		$this->lang->load('phsite', $load_lang);
+		// load validation rules and input types from language files
+		if($this->Site_model->lang_ISO_639_3 != '')
+		{
+			$this->lang->load('cms', $this->Site_model->lang_CI_Name);
+		}
+		else
+		{
+			$this->lang->load('cms', 'english');
+		}
 		$this->cms_labels = $this->lang->line('cms_labels');
 		$this->data['cms_labels'] = $this->lang->line('cms_labels');
 

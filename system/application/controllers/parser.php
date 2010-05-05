@@ -19,7 +19,6 @@ class Parser extends MY_Controller {
 		$this->load->helper(array('url', 'image'));
 
 		$this->Content_model->list_langs();
-		//$this->_load_site_metadata();
 	}
 	
     function index()
@@ -143,26 +142,20 @@ class Parser extends MY_Controller {
 			$segment_current += 1;
 
 		}
-		
+
 		$this->segments = $uri_segments;
 
 		if($params['date'] != '')
 		{
 			$this->Content_model->date_filter = $params['date'];
 		}
-		if(preg_match('|^([a-z]{3})$|',$params['lang']))
-		{
-			$this->Site_model->temp_lang = $params['lang'];
-			$this->Content_model->temp_lang = $params['lang'];
-		}
-		else
-		{
-			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
-			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
-		}
+
+		$this->Site_model->temp_lang = $params['lang'];
+		$this->Content_model->temp_lang = $params['lang'];
+
 		$this->Site_model->lang_load();
-		$this->_load_site_metadata();
 		$this->_load_cms_labels();
+		$this->_load_site_metadata();
 
 		if($params['page'] != '')
 		{
@@ -246,6 +239,7 @@ class Parser extends MY_Controller {
 		{
 			$this->data['other_langs'] = $other_langs;
 		}
+		
 		// load author user data
 
 		$this->User_model->temp_id = $this->Content_model->user_id;

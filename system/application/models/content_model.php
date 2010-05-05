@@ -320,7 +320,37 @@ class Content_model extends MY_Model {
 		
 		if ($query->num_rows() > 0)
 		{
-			return $query->result_array();
+			$otherlangs = array();
+
+			foreach ($query->result_array() as $row)
+			{
+				$this->temp_id = $row['rel_id'];
+				$this->temp_lang = $row['lang_ISO_639_3'];
+
+				$this->lang_load();
+
+				$tmp_uri = $this->generate_uri();
+
+				$tmp_langinfo = array(
+				'title_id' => $row['title_id'],
+				'scope' => $row['scope'],
+				'rel_id' => $row['rel_id'],
+				'title' => $row['title'],
+				'uri_title' => $row['uri_title'],
+				'subtitle' => $row['subtitle'],
+				'keywords' => $row['keywords'],
+				'lang_ISO_639_3' => $row['lang_ISO_639_3'],
+				'lang_Ref_Name' => $this->lang_Ref_Name,
+				'lang_Inverted_Name' => $this->lang_Inverted_Name,
+				'lang_Native_Name' => $this->lang_Native_Name,
+				'title_updated' => $row['title_updated'],
+				'uri' => $tmp_uri
+				);
+
+				$otherlangs[] = $tmp_langinfo;
+			}
+			
+			return $otherlangs;
 		}
 		return FALSE;
     }
