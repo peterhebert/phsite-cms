@@ -8380,6 +8380,7 @@ CREATE TABLE `s_site_prefs` (
   `date_created` datetime NOT NULL,
   `date_updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `home_content_id` mediumint(9) unsigned NOT NULL default '0',
+  `home_content_type` mediumint(9) unsigned NOT NULL default '0',
   `site_admin_id` mediumint(9) unsigned NOT NULL default '1',
   `site_editor_id` mediumint(9) unsigned NOT NULL default '1',
   `img_size_th` smallint(5) unsigned NOT NULL default '120',
@@ -8393,9 +8394,9 @@ CREATE TABLE `s_site_prefs` (
 
 LOCK TABLES `s_site_prefs` WRITE;
 /*!40000 ALTER TABLE `s_site_prefs` DISABLE KEYS */;
-INSERT INTO `s_site_prefs` (`site_id`,`theme`,`timezone`,`default_lang`,`default_content_type`,`date_created`,`date_updated`,`home_content_id`,`site_admin_id`,`site_editor_id`,`img_size_th`,`img_size_sm`,`img_size_md`,`img_size_lg`,`limit_posts`,`limit_thumbs`)
+INSERT INTO `s_site_prefs` (`site_id`,`theme`,`timezone`,`default_lang`,`default_content_type`,`date_created`,`date_updated`,`home_content_id`,`home_content_type`,`site_admin_id`,`site_editor_id`,`img_size_th`,`img_size_sm`,`img_size_md`,`img_size_lg`,`limit_posts`,`limit_thumbs`)
 VALUES
-	(1,'simple_em','America/Vancouver','eng',2,'1997-07-06 00:00:00','2010-04-22 13:20:17',0,1,1,90,180,360,640,5,30);
+	(1,'simple_em','America/Vancouver','eng',1,'2010-04-22 10:00:00','2010-05-05 12:28:01',0,0,1,1,90,180,360,640,5,30);
 
 /*!40000 ALTER TABLE `s_site_prefs` ENABLE KEYS */;
 UNLOCK TABLES;
