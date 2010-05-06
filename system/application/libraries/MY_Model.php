@@ -879,6 +879,16 @@ class MY_Model extends Model {
 
     }
 
+	function clear_title()
+    {
+	   $this->title_id = '';
+	   $this->title = '';
+	   $this->uri_title = '';
+	   $this->subtitle = '';
+	   $this->keywords = '';
+	   $this->title_updated = '';
+    }
+
 	function title_exists()
     {
 

@@ -67,7 +67,7 @@ echo "<meta name=\"dc.creator\" content=\"{$site_meta_creator}\" />\n";
 	if (isset($site_meta_copyright) ) {
 		echo "<p>".$site_meta_copyright."</p>\r";
 	}
-	echo POWERED_BY;
+	echo $cms_labels['powered_by'];
 	?></div>
 </div>
 </body>

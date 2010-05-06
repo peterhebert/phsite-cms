@@ -55,7 +55,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 	echo "<p>";
 	echo $site_meta_copyright;
 	echo "</p>\r";
-	echo POWERED_BY;
+	echo $cms_labels['powered_by'];
 	?></div>
 </div>
 </body>

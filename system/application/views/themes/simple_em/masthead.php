@@ -10,7 +10,7 @@
 		<div class="float-right w2 lh align-right">
 			<form action="search" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />
-				<input name="search-submit" type="submit" id="search-submit" value="Search" />
+				<input name="search-submit" type="submit" id="search-submit" value="<?php echo $cms_labels['search']; ?>" />
 			</form>
 		</div>
 	</div>

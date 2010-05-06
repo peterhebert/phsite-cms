@@ -427,6 +427,7 @@ class Content extends MY_Controller
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
 
+		$this->data['sidebar'] = $this->_content_meta_menu();
 		$this->Content_model->load_content_form();
 		
 		$this->_form_edit();
@@ -444,7 +445,6 @@ class Content extends MY_Controller
 		$this->data['title_tag'] = $this->cms_labels['content_editor'];
 		$this->data['title_h1'] = $this->cms_labels['content_editor'];
 		
-		$this->data['sidebar'] = $this->_content_meta_menu();
 
 		$this->load->view('cms/content_edit',$this->data);
 
@@ -1013,6 +1013,7 @@ class Content extends MY_Controller
 			}
 	
 			$this->Content_model->temp_id = $this->Content_model->content_id;
+			
 			$my_uri = $this->Content_model->generate_uri();
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
 			

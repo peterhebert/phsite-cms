@@ -150,12 +150,16 @@ class Parser extends MY_Controller {
 			$this->Content_model->date_filter = $params['date'];
 		}
 
+		if($params['lang'] == '')
+		{
+			$params['lang'] = $this->Site_model->site_default_lang;
+		}
 		$this->Site_model->temp_lang = $params['lang'];
 		$this->Content_model->temp_lang = $params['lang'];
 
 		$this->Site_model->lang_load();
-		$this->_load_cms_labels();
 		$this->_load_site_metadata();
+		$this->_load_cms_labels();
 
 		if($params['page'] != '')
 		{

@@ -146,17 +146,10 @@ class MY_Controller extends Controller {
 		}
 		$this->Site_model->lang_load();
 
-		// load validation rules and input types from language files
-		if($this->Site_model->lang_ISO_639_3 != '')
-		{
-			$this->lang->load('cms', $this->Site_model->lang_CI_Name);
-		}
-		else
-		{
-			$this->lang->load('cms', 'english');
-		}
-		$this->cms_labels = $this->lang->line('cms_labels');
-		$this->data['cms_labels'] = $this->lang->line('cms_labels');
+		$this->load->library('langues');
+
+		$this->cms_labels = $this->langues->load('cms', 'cms_labels', $this->Site_model->lang_CI_Name);
+		$this->data['cms_labels'] = $this->cms_labels;
 
     }
 

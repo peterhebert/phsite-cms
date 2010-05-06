@@ -5,10 +5,6 @@ AddType video/mp4 .mp4
  
     RewriteEngine On
 	
-    # Removes trailing slashes (prevents SEO duplicate content issues)
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.+)/$ $1 [L,R=301]
- 
     # Removes access to the system folder by users.
     # Additionally this will allow you to create a System.php controller,
     # previously this would not have been possible.

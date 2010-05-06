@@ -89,7 +89,7 @@ class Media_model extends MY_Model {
 	
 	function load_cms_labels() {
 		$this->lang_load();
-		$this->lang->load('phsite', $this->lang_CI_Name);
+		$this->lang->load('cms', $this->lang_CI_Name);
 		$this->cms_labels = $this->lang->line('cms_labels');
 	}
 	

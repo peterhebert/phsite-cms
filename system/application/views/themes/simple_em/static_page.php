@@ -98,7 +98,7 @@ if(isset($breadcrumb_links))
 	} else {
 		echo "<p>{$site_meta_copyright}</p>\r";
 	}
-	echo POWERED_BY;
+	echo $cms_labels['powered_by'];
 	?></div>
 </div>
 </body>

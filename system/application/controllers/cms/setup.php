@@ -367,8 +367,12 @@ class Setup extends MY_Controller
 		{
 			$this->Site_model->temp_lang = $this->uri->segment(5);
 		}
-		
+
+		$this->Site_model->lang_load();
 		$this->Site_model->load_site_metadata();
+
+		$this->Site_model->clear_title();
+		$this->Site_model->load_title();
 
 		$action = $this->uri->uri_string();
 		$hidden = array('site_id' => $this->Site_model->site_id, 'title_id' => $this->Site_model->title_id);
@@ -548,7 +552,6 @@ class Setup extends MY_Controller
 
 	function _process_site_metadata()
     {
-		//echo "processsing";
 
 		// process form
 		if( $this->input->post('submit') != '' )

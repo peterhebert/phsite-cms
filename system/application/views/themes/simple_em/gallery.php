@@ -72,7 +72,7 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 	if (isset($site_meta_copyright) ) {
 		echo "<p>".$site_meta_copyright."</p>\r";
 	}
-	echo POWERED_BY;
+	echo $cms_labels['powered_by'];
 	?>
 	</div>
 </div>
