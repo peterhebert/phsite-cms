@@ -11,8 +11,8 @@ tinyMCE_GZ.init({
 tinyMCE.init({
 	mode : "textareas",
 	theme : "advanced",
-	plugins : "safari,xhtmlxtras,table,fullscreen",
-	theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,image,charmap",
+	plugins : "safari,xhtmlxtras,table,fullscreen,embed",
+	theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,image,media,charmap,embed",
 	theme_advanced_buttons2 : "bullist,numlist,|,outdent,indent,|,blockquote,cite,abbr,acronym,|,ins,del",
 	theme_advanced_buttons3 : "tablecontrols",
 	theme_advanced_buttons4 : "cut,copy,paste,|,undo,redo,|,link,unlink,anchor,|,code,removeformat,cleanup,fullscreen",
@@ -21,8 +21,12 @@ tinyMCE.init({
 	editor_deselector : "textarea",
 	content_css : "/assets/css/tinymce.css",
 	relative_urls : false,
-	convert_urls : false
+	convert_urls : false,
+	apply_source_formatting : true,
+	extended_valid_elements: "object[data|classid|archive|codebase|width|height|name|usemap|type|codetype|standby|tabindex|declare],"
+	+ "embed[src|type|allowscriptaccess|allowfullscreen|width|height|classid|width|height|codebase|*]"
 });
+
 
 function toggleEditor(id) {
 	if (!tinyMCE.getInstanceById(id))

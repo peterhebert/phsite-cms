@@ -486,6 +486,7 @@ class User extends MY_Controller
 				{
 					$row_key = strval($fd_id);
 					$val_lbl = 'value_'.$fd_id;
+					$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
 					
 					$tmp_lang = '';
 					if($needs_lang[$index] == 1)
@@ -499,7 +500,7 @@ class User extends MY_Controller
 					'rel_id' => $this->User_model->user_id,
 					'field_id' => $fd_id,
 					'field_ref_name' => $field_names[$index],
-					'value' => $this->input->post($val_lbl),
+					'value' => $value,
 					'lang_ISO_639_3' => $tmp_lang,
 					'required' => $required_fds[$index]
 					);

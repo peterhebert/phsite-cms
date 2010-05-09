@@ -490,6 +490,17 @@ class Setup extends MY_Controller
 
 			$html .= "</p>\r";
 		}
+
+		$form_options = array(
+		'id' => 'keywords',
+		'name' => 'keywords',
+		'class' => 'textarea',
+		'value' => $this->Site_model->keywords
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
+		$html .= "</p>\r";
 		
 		$html .= "<p>";
 		$html .= form_submit('submit', 'Save');
@@ -612,6 +623,7 @@ class Setup extends MY_Controller
 				$this->Site_model->temp_lang = $this->input->post('site_meta_lang');
 				$this->Site_model->title = $this->input->post('title');
 				$this->Site_model->subtitle = $this->input->post('subtitle');
+				$this->Site_model->keywords = csv_normalize($this->input->post('keywords'));
 	
 				$tmp_field_id = $this->input->post('field_id');
 				$tmp_field_name = $this->input->post('field_name');
@@ -624,17 +636,11 @@ class Setup extends MY_Controller
 				foreach($tmp_field_id as $index => $fd_id)
 				{
 					$val_lbl = 'value_'.$fd_id;
-					$value = $this->input->post($val_lbl);
+					$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
 					
 					$this->Site_model->temp_id = $fd_id;
 					$this->Site_model->load_field();
 					
-					if($this->Site_model->field_ref_name == 'keywords')
-					{
-						$value = csv_normalize($value);
-					}
-					
-
 					$tmp_meta = array(
 					'meta_id' => $tmp_meta_id[$index],
 					'scope' => $this->Site_model->scope,

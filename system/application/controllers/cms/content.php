@@ -906,7 +906,7 @@ class Content extends MY_Controller
 				$this->Content_model->temp_lang = $this->input->post('content_lang');
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->subtitle = $this->input->post('subtitle');
-				$this->Content_model->keywords = $this->input->post('keywords');
+				$this->Content_model->keywords = csv_normalize($this->input->post('keywords'));
 
 				$this->Content_model->temp_id = $this->input->post('type_id');
 				$this->Content_model->scope = 'content';
@@ -936,7 +936,8 @@ class Content extends MY_Controller
 					foreach($tmp_field_id as $index => $fd_id)
 					{
 						$val_lbl = 'value_'.$fd_id;
-						$value = $this->input->post($val_lbl);
+
+						$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
 						
 						$this->Content_model->temp_id = $fd_id;
 						$this->Content_model->load_field();

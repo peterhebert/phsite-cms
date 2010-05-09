@@ -237,12 +237,6 @@ class Parser extends MY_Controller {
 
 	function _prepare_view()
 	{
-		// see if there are other languages for this content
-		$other_langs = $this->Content_model->get_other_lang_ids();
-		if($other_langs)
-		{
-			$this->data['other_langs'] = $other_langs;
-		}
 		
 		// load author user data
 
@@ -377,6 +371,14 @@ class Parser extends MY_Controller {
 			case 'static_page':
 				break;
 			default:
+		}
+
+		// see if there are other languages for this content
+
+		$other_langs = $this->Content_model->get_other_lang_ids();
+		if($other_langs)
+		{
+			$this->data['other_langs'] = $other_langs;
 		}
 
 	}
