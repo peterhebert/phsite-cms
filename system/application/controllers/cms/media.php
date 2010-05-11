@@ -623,13 +623,9 @@ class Media extends MY_Controller {
 			);
 
 			switch($tmp_input_type) {
-			case 'textarea':
+			case 'textarea' || 'richtext':
 				$form_options['cols'] = 38;
-				$html .=  form_textarea($form_options);
-				break;
-			case 'richtext':
-				$form_options['cols'] = 38;
-				$html .=  form_textarea($form_options);
+				$html .= ph_form_textarea($form_options);
 				break;
 			default:
 				$html .=  form_input($form_options);

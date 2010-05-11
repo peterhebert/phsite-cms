@@ -354,13 +354,9 @@ class User extends MY_Controller
 
 				$form .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
-			case 'textarea':
+			case 'textarea' || 'richtext':
 				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
-				break;
-			case 'richtext':
-				$form_options['cols'] = 38;
-				$form .=  form_textarea($form_options);
+				$html .= ph_form_textarea($form_options);
 				break;
 			default:
 				$form .=  form_input($form_options);

@@ -476,13 +476,9 @@ class Setup extends MY_Controller
 
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
-			case 'textarea':
+			case 'textarea' || 'richtext':
 				$form_options['cols'] = 38;
-				$html .=  form_textarea($form_options);
-				break;
-			case 'richtext':
-				$form_options['cols'] = 38;
-				$html .=  form_textarea($form_options);
+				$html .= ph_form_textarea($form_options);
 				break;
 			default:
 				$html .=  form_input($form_options);

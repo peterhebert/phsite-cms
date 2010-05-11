@@ -254,6 +254,83 @@ if ( ! function_exists('convert_entities'))
 	}
 }
 
+if ( ! function_exists('encode_entities_textarea'))
+{
+	function encode_entities_textarea($text) {
+
+		// entities in pre / code blocks
+		$patterns[] = '!(<pre.*?>)(.*?)</pre>!ise';
+		$patterns[] = '!(<code.*?>)(.*?)</code>!ise';
+
+		$replacements[] =  " '$1' .  stripslashes( htmlentities( '$2' ) ) . '</pre>' ";
+		$replacements[] =  " '$1' .  stripslashes( htmlentities( '$2' ) ) . '</code>' ";
+		
+		$text = preg_replace($patterns,$replacements,$text);
+
+		// now do full entity encode
+		$text = htmlentities($text);
+		
+		return $text;
+	}
+}
+
+if ( ! function_exists('ph_form_textarea'))
+{
+	function ph_form_textarea($options)
+	{
+		$value = '';
+		if(!is_array($options))
+		{
+			$value = $options;
+			unset($options);
+			$options = array();
+		}
+		
+		if(!array_key_exists('cols',$options))
+		{
+			$options['cols'] = 30;
+		}
+
+		if(!array_key_exists('cols',$options))
+		{
+			$options['cols'] = 30;
+		}
+		if(!array_key_exists('rows',$options))
+		{
+			$options['rows'] = 5;
+		}
+
+		$attributes = ' ';
+		foreach ($options as $key => $val)
+		{
+			if($key != 'value') {
+				$attributes .= "{$key}=\"{$val}\" ";
+			}
+		}
+		
+		if(is_array($options) && array_key_exists('value',$options))
+		{
+			$value = $options['value'];
+		}
+		$encoded = encode_entities_textarea($value);
+
+		$textarea = "<textarea{$attributes}>$encoded</textarea>";
+		return $textarea;
+	}
+}
+
+if ( ! function_exists('decode_html_entities'))
+{
+	function decode_html_entities($str)
+	{
+		// decode all html entities
+		$text = html_entity_decode($str);
+	
+		return $text;
+	
+	}
+}
+
 if ( ! function_exists('get_max_upload_size'))
 {
 	function get_max_upload_size() {
