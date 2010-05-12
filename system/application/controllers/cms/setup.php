@@ -709,7 +709,7 @@ class Setup extends MY_Controller
 		$html = "<h3 class=\"first\">".$this->cms_labels['fields']."</h3>\r";
 		$html .= '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
 		$html .= ul($fields);		$this->data['form'] = $html;
-$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
 		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
 		$breadcrumb[] = $this->cms_labels['fields'];
 		
