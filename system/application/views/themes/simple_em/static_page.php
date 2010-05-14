@@ -25,20 +25,30 @@ if(isset($breadcrumb_links))
 	<div class="page-wrap block five">
 		<div class="column w3">
 			<?php
-			if(isset($title))
+			if(isset($content['title']))
 			{
-				echo "<h1>{$title}</h1>\r";
+				echo "<h1>{$content['title']}</h1>\r";
 			}
-			if(isset($subtitle))
+			if(isset($content['subtitle']))
 			{
-				echo "<h2>{$subtitle}</h2>\r";
+				echo "<h2>{$content['subtitle']}</h2>\r";
 			}
-			if(isset($content_body))
+			if(isset($content['body']))
 			{
-				echo $content_body;
+				echo $content['body'];
 			}
-			if(isset($attachments))
+
+			if(isset($parents) && count($parents) > 0)
 			{
+				echo "<p>parents:</p>\r";
+				echo "<pre>";
+				print_r($parents);
+				echo "</pre>\r";
+			}
+
+			if(isset($attachments) && count($attachments) > 0)
+			{
+				echo "<p>attachments:</p>\r";
 				echo "<pre>";
 				print_r($attachments);
 				echo "</pre>\r";
@@ -81,20 +91,28 @@ if(isset($breadcrumb_links))
 		</div>
 		<div class="float w2">
 			<?php
-			if(isset($menu_title))
-			{
-				echo "<h3>{$menu_title}</h3>\r";
-			}
-			if(isset($menu))
-			{
-				echo $menu;
-			}
+
+				if(count($parents) == 0)
+				{
+					$menu_title = $this->Site_model->title;
+				}
+				else
+				{
+					$menu_title = $parents[0]['title'];
+				}
+				if(isset($menu))
+				{
+					echo "<h4>{$menu_title}</h4>\r";
+					echo build_menu($menu,2);
+				}
+
+			
 			?>
 		</div>
 	</div>
 	<div class="page-wrap block" id="footer"><?php 
-	if (isset($copyright)) {
-		echo "<p>{$content_copyright}</p>\r";
+	if (isset($content['copyright'])) {
+		echo "<p>{$content['copyright']}</p>\r";
 	} else {
 		echo "<p>{$site_meta_copyright}</p>\r";
 	}

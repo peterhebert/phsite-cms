@@ -254,9 +254,9 @@ if ( ! function_exists('convert_entities'))
 	}
 }
 
-if ( ! function_exists('encode_entities_textarea'))
+if ( ! function_exists('encode_entities'))
 {
-	function encode_entities_textarea($text) {
+	function encode_entities($text,$textarea=FALSE) {
 
 		// entities in pre / code blocks
 		$patterns[] = '!(<pre.*?>)(.*?)</pre>!ise';
@@ -267,8 +267,11 @@ if ( ! function_exists('encode_entities_textarea'))
 		
 		$text = preg_replace($patterns,$replacements,$text);
 
-		// now do full entity encode
-		$text = htmlentities($text);
+		// now do full string entity encode FOR TEXTAREA ONLY
+		if($textarea)
+		{
+			$text = htmlentities($text);
+		}
 		
 		return $text;
 	}
@@ -312,7 +315,7 @@ if ( ! function_exists('ph_form_textarea'))
 		{
 			$value = $options['value'];
 		}
-		$encoded = encode_entities_textarea($value);
+		$encoded = encode_entities($value,TRUE);
 
 		$textarea = "<textarea{$attributes}>$encoded</textarea>";
 		return $textarea;
@@ -434,6 +437,34 @@ if ( ! function_exists('uri_exists'))
 	{
 		$headers = get_headers($uri);
 		return $headers;
+	}
+}
+
+if ( ! function_exists('build_menu'))
+{	
+	function build_menu($content_array,$levels=2,$skip_id=NULL,$current_level=0)
+	{
+		$menu = '';
+
+		foreach($content_array as $item)
+		{
+			if($skip_id != $item['content_id'])
+			{
+				$menu .= "<li><a href=\"{$item['uri']}\">{$item['title']}</a>";
+				$tmp_level = $current_level;
+				if(count($item['children']) > 0 && $current_level < $levels)
+				{
+					$menu .= build_menu($item['children'],$levels,$skip_id,$current_level+1);
+				}
+				$current_level = $tmp_level;
+				$menu .= "</li>\r";
+			}
+		}
+		if($menu != '')
+		{
+			$menu = "\r<ul>{$menu}</ul>\r";
+		}
+		return $menu;
 	}
 }
 

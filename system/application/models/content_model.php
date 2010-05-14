@@ -550,74 +550,73 @@ class Content_model extends MY_Model {
 
 	}
 
-	function site_map($omit_id = NULL)
+	function get_descendant_content($parent = 0)
 	{
-		$this->scope = 'content';
+		$descendants = array();
 
-		$site_map = "";
+		$this->db->where('parent_id', $parent);
+		$this->db->where('content_id !=', $parent);
 		
-		if($this->temp_id == '')
-		{
-			$this->temp_id = 0;
-		}
-
-		$this->db->where('parent_id', $this->temp_id);
-
-		if($this->link_mode == 0)
-		{
-			$this->db->where('publish', 1);
-		}
 		$query = $this->db->get('c_content');
-
+		
 		if ($query->num_rows() > 0)
 		{
-
-			foreach ($query->result_array() as $row)
+			foreach ($query->result() as $row)
 			{
-				if($this->omit_id !== NULL && $row['content_id'] != $this->omit_id)
+				$info = array(
+				'content_id' => $row->content_id,
+				'user_id' => $row->user_id,
+				'parent_id' => $row->parent_id,
+				'type_id' => $row->type_id,
+				'type_uri_name' => $row->type_uri_name,
+				'date_created' => $row->date_created,
+				'date_end_expiry' => $row->date_end_expiry,
+				'date_updated' => $row->date_updated,
+				'publish' => $row->publish
+                );
+
+
+				if($this->link_mode == 1)
 				{
-					$this->db->where('scope', $this->scope);
-					$this->db->where('rel_id', $row['content_id']);
-					$this->db->where('lang_ISO_639_3', $this->temp_lang);
-					$this->db->limit(1);
-					$q2 = $this->db->get('c_titles');
-					$r2 = $q2->row_array();
-	
-					if ($q2->num_rows() > 0)
-					{
-						if($this->link_mode == 1)
-						{
-							$link = 'cms/content/edit/id/'.$row['content_id'].'/lang/'.$r2['lang_ISO_639_3'];
-						}
-						else
-						{
-							$this->temp_id = $row['content_id'];
-							$this->temp_lang = $r2['lang_ISO_639_3'];
-							$link = $this->generate_uri();
-						}
-						
-						$site_map .= '<li>'.anchor($link,$r2['title']);
-						
-						if( ($this->levels > 0 && $this->current_level <= $this->levels) || $this->levels == -1 )
-						{
-							$this->temp_id = $row['content_id'];
-							$this->current_level = $this->current_level + 1;
-							$site_map .= $this->site_map();
-						}
-						$site_map .= "</li>\r";
-					}
+					$link = 'cms/content/edit/id/'.$row->content_id.'/lang/'.$this->lang_ISO_639_3;
+				}
+				else
+				{
+					$this->temp_id = $row->content_id;
+					$link = $this->generate_uri();
 				}
 
-			}
+				$info['uri'] = $link;
 
- 		}
-		
-		if($site_map != '')
-		{
-			$site_map = "<ul>\r".$site_map."</ul>\r";
+				$this->temp_id = $row->content_id;
+				$this->load_title();
+				$info['title_id'] = $this->title_id;
+				$info['title_rel_id'] = $this->title_rel_id;
+				$info['title'] = $this->title;
+				$info['uri_title'] = $this->uri_title;
+				$info['subtitle'] = $this->subtitle;
+				$info['keywords'] = $this->keywords;
+				$info['title_updated'] = $this->title_updated;
+				
+				$this->temp_id = $row->type_id;
+				$this->scope = 'types';
+				
+				$this->list_fields_related();
+				$this->scope = 'content';
+				$this->temp_id = $this->content_id;
+				$this->load_metadata();
+				foreach($this->metadata as $field)
+				{
+					$info[$field['field_ref_name']] = encode_entities($field['value']);
+				}
+
+				$this->reset_vars();
+				$info['children'] = $this->get_descendant_content($row->content_id);
+				$descendants[] = $info;
+		   }
 		}
-
-		return $site_map;
+		
+		return $descendants;
 
 	}
 
@@ -973,7 +972,15 @@ class Content_model extends MY_Model {
 		$this->temp_value = '';
 		$this->temp_id = '';
 		$this->type_id = '';
+
+		$this->title_id = '';
+		$this->title_rel_id = '';
 		$this->title = '';
+		$this->uri_title = '';
+		$this->subtitle = '';
+		$this->keywords = '';
+		$this->title_updated = '';
+
 		$this->content_id = '';
 		$this->user_id = '';
 		$this->parent_id = '';
@@ -983,7 +990,10 @@ class Content_model extends MY_Model {
 		$this->publish = '';
 	}
 	
+/*
+	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish;
 
+*/
 
 }
 

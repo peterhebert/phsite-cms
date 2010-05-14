@@ -16,7 +16,7 @@ foreach($blog as $entry)
 
 	if(array_key_exists('subtitle',$entry) && $entry['subtitle'] != '') 
 	{
-		echo "<h4>{$subtitle}</h4>\r";
+		echo "<h4>{$entry['subtitle']}</h4>\r";
 	}
 	
 	if(array_key_exists('author',$entry)) 
@@ -30,7 +30,7 @@ foreach($blog as $entry)
 	{
 		echo $entry['content_excerpt'];
 	} 
-	else
+	else if (array_key_exists('content_body',$entry) && $entry['content_body'] != '') 
 	{
 		echo $entry['content_body'];
 	}

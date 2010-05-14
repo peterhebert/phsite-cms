@@ -195,6 +195,14 @@ class Parser extends MY_Controller {
 		$this->temp_uri = '';
 		if($result_count > 0)
 		{
+			
+			// create parent hierarchy
+			$parents = $tree;
+			array_pop($parents);
+			array_reverse($parents);
+			$this->data['parents'] = $parents;
+
+			// create breadcrumb links
 			$this->breadcrumb_links = array(anchor($this->temp_uri,$this->cms_labels['home']));
 
 			foreach($tree as $index => $vals)
@@ -258,24 +266,29 @@ class Parser extends MY_Controller {
 		$this->Content_model->load_type();
 		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
-		$this->data['type_uri_name'] = $this->Content_model->type_uri_name;
-		$this->data['title'] = $this->Content_model->title;
+		// initialize content array
+		$content_vars = array();
+
+		$content_vars['content_id'] = $this->Content_model->content_id;
+
+		$content_vars['type_uri_name'] = $this->Content_model->type_uri_name;
+		$content_vars['title'] = $this->Content_model->title;
 		if($this->Content_model->subtitle != '') {
-			$this->data['subtitle'] = $this->Content_model->subtitle;
+			$content_vars['subtitle'] = $this->Content_model->subtitle;
 		}
 
 		if($this->Content_model->keywords != '') {
-			$this->data['keywords'] = $this->Content_model->keywords;
-			$this->data['content_keyword_links'] = $this->Content_model->keyword_links();
+			$content_vars['keywords'] = $this->Content_model->keywords;
+			$content_vars['keyword_links'] = $this->Content_model->keyword_links();
 		}
 
-		$this->data['content_date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
-		$this->data['content_date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
+		$content_vars['date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
+		$content_vars['date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
 
 		if($this->Content_model->date_end_expiry != '0000-00-00 00:00:00')
 		{
-			$this->data['content_date_expiry'] = convert_time($this->Content_model->date_end_expiry, $this->Site_model->site_timezone,DATE_RFC1123);
-			$this->data['content_date_expiry_RFC850'] = convert_time($this->Content_model->date_end_expiry, 'UTC',DATE_RFC850);
+			$content_vars['date_expiry'] = convert_time($this->Content_model->date_end_expiry, $this->Site_model->site_timezone,DATE_RFC1123);
+			$content_vars['date_expiry_RFC850'] = convert_time($this->Content_model->date_end_expiry, 'UTC',DATE_RFC850);
 		}
 
 		$this->Content_model->temp_id = $this->Content_model->type_id;
@@ -289,9 +302,7 @@ class Parser extends MY_Controller {
 		$c_meta = $this->Content_model->metadata;
 		
 		foreach($c_meta as $id => $field) {
-			$tmp_field_label = 'content_'.$field['field_ref_name'];
-
-			$this->data["$tmp_field_label"] = $field['value'];
+			$content_vars[$field['field_ref_name']] = $field['value'];
 			
 			if($field['date_updated'] > $this->Content_model->date_updated) {
 				$this->Content_model->date_updated = $field['date_updated'];
@@ -299,79 +310,34 @@ class Parser extends MY_Controller {
 
 		}
 
-		$this->data['content_date_updated'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone);
-		$this->data['content_date_updated_W3C'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
+		$content_vars['date_updated'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone);
+		$content_vars['date_updated_W3C'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
+
+		$this->data['content'] = $content_vars;
+
 
 		// list attachments
 		$this->_attachment_info();
 
-		// menu options by content type
-		$menu = '';
-		$menu_title = 'menu';
-		switch ($this->Content_model->type_uri_name)
+		// build menu array
+
+		if($this->Content_model->parent_id == 0)
 		{
-
-			case 'blog_entry':
-				$entries = $this->_blog_menu($this->Content_model->parent_id);
-
-				if(count($entries) > 0)
-				{
-					if($this->Content_model->parent_id > 0 && $this->parent_title != '')
-					{
-						$menu_title = sprintf($this->cms_labels['recently_posted_to'],$this->parent_title);
-					}
-					else
-					{
-						$menu_title = $this->cms_labels['recent_content'];
-					}
-
-					$tmp_view = 'themes/'.$this->Site_model->theme.'/embed_menu';
-					$tmp_blog = array('entries' => $entries,'cms_labels' => $this->cms_labels);
-					
-					$menu = $this->load->view($tmp_view,$tmp_blog,true);
-				}
-				else
-				{
-					$menu_title = $this->Site_model->title;
-	
-					$this->Content_model->temp_id = 0;
-					$this->Content_model->current_level = 1;
-					$this->Content_model->levels = 1;
-					$menu = $this->Content_model->site_map();
-				}
-
-				break;
-			default:
-				if($this->Content_model->parent_id == 0)
-				{
-					$menu_title = $this->Site_model->title;
-				}
-				else
-				{
-					$menu_title = $this->parent_title;
-				}
-
-				$this->Content_model->temp_id = $this->Content_model->parent_id;
-				$this->Content_model->current_level = 1;
-				$this->Content_model->levels = 2;
-				$menu = $this->Content_model->site_map();
+			$menu_title = $this->Site_model->title;
+			$menu_parent = 0;
 		}
-		$this->data['menu_title'] = $menu_title;
+		else
+		{
+			$menu_title = $this->parent_title;
+			$menu_parent = $this->Content_model->parent_id;
+		}
+
+		$menu = $this->Content_model->get_descendant_content($menu_parent);
+
 		$this->data['menu'] = $menu;
-
 		
-		// children options by content type
-		switch ($this->Content_model->type_uri_name) {
-			case 'blog':
-				$tmp_view = 'themes/'.$this->Site_model->theme.'/embed_blog';
-				$blog_entries = $this->_blog($this->Content_model->content_id);
-				$tmp_blog = array('blog' => $blog_entries,'cms_labels' => $this->cms_labels);
-				$this->data['blog'] = $this->load->view($tmp_view,$tmp_blog,true);
-				break;
-			case 'static_page':
-				break;
-			default:
-		}
+		// build descendant array
+		$this->data['children'] = $this->Content_model->get_descendant_content($content_vars['content_id']);
 
 		// see if there are other languages for this content
 
