@@ -23,7 +23,7 @@ class Parser extends MY_Controller {
 	
     function index()
     {
-		$this->view = 'test';
+
 		$this->Content_model->link_mode = 0;
 		$this->Content_model->lang_mode = $this->Content_model->lang_count;
 
@@ -353,21 +353,17 @@ class Parser extends MY_Controller {
 	{
 		$this->view = 'themes/'.$this->Site_model->theme.'/home';
 
-		$menu = $this->Content_model->site_map();
+		$menu = $this->Content_model->get_descendant_content();
 
 		$this->data['menu'] = $menu;
 		$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 		
-		// recent posts
-		$tmp_view = 'themes/'.$this->Site_model->theme.'/embed_blog';
+		// recently added content
 		$this->Content_model->limit = 5;
-		$blog_entries = $this->_blog();
-		$tmp_blog = array('blog' => $blog_entries,'cms_labels' => $this->cms_labels);
-		$this->data['recent'] = $this->load->view($tmp_view,$tmp_blog,true);
-
+		$this->data['recent'] = $this->_recent();
 	}
 
-	function _blog($parent=NULL,$mode='excerpt')
+	function _recent($parent=NULL)
 	{
 
 		if($this->Site_model->home_content_type > 0)
@@ -382,23 +378,33 @@ class Parser extends MY_Controller {
 		$this->Content_model->list_content(TRUE);
 
 		$recent = $this->Content_model->content_list;
-		$blog = array();
+		$recent_entries = array();
 
 		
 		if(count($recent) > 0)
 		{
 			foreach($recent as $index => $post)
 			{
-				$blog_data = array();
-				$blog_data['mode'] = $mode;
-				$blog_data['title'] = $post['title'];
-				$blog_data['subtitle'] = $post['subtitle'];
-				
+				$entry = array(
+				'content_id' => $post['content_id'],
+				'user_id' => $post['user_id'],
+				'parent_id' => $post['parent_id'],
+				'type_id' => $post['type_id'],
+				'type_uri_name' => $post['type_uri_name'],
+				'type_label' => $post['type_label'],
+				'title_id' => $post['title_id'],
+				'title' => $post['title'],
+				'uri_title' => $post['uri_title'],
+				'subtitle' => $post['subtitle'],
+				'keywords' => $post['keywords'],
+				'lang_ISO_639_3' => $post['lang_ISO_639_3']
+				);
+
 				// get author info
 				$this->User_model->temp_id = $post['user_id'];
 				if($this->User_model->load_user())
 				{
-					$blog_data['author'] = array(
+					$entry['author'] = array(
 					'name_first' => $this->User_model->name_first,
 					'name_last' => $this->User_model->name_last,
 					'username' => $this->User_model->username,
@@ -406,26 +412,29 @@ class Parser extends MY_Controller {
 					);
 				}
 
-				$blog_data['date_created'] = convert_time($post['date_created'], $this->Site_model->site_timezone);
+				$entry['date_created'] = convert_time($post['date_created'], $this->Site_model->site_timezone);
 	
 				$date_updated = $post['date_updated'];
+
+				if($post['date_end_expiry'] != '0000-00-00 00:00:00')
+				{
+					$entry['date_end_expiry'] = convert_time($post['date_end_expiry'], $this->Site_model->site_timezone);
+				}
 	
 				foreach($post['metadata'] as $id => $field) {
 				
 					if(array_key_exists('field_ref_name',$field))
 					{
-						$tmp_field_label = 'content_'.$field['field_ref_name'];
 						$tmp_field_name = $field['field_ref_name'];
 					}
 					else
 					{
 						$this->Content_model->temp_id = $id;
 						$this->Content_model->load_field();
-						$tmp_field_label = 'content_'.$this->Content_model->field_ref_name;;
 						$tmp_field_name = $this->Content_model->field_ref_name;;
 					}
 		
-					$blog_data[$tmp_field_label] = $field['value'];
+					$entry[$tmp_field_name] = encode_entities($field['value']);
 					
 					if($field['date_updated'] > $date_updated) {
 						$date_updated = $field['date_updated'];
@@ -433,68 +442,30 @@ class Parser extends MY_Controller {
 		
 				}
 	
-				$blog_data['date_updated'] = convert_time($date_updated, $this->Site_model->site_timezone);
+				$entry['date_updated'] = convert_time($date_updated, $this->Site_model->site_timezone);
 				
 				// keyword links
 				if($post['keywords']  != '') {
 					$this->Content_model->keywords = $post['keywords'];
-					$blog_data['content_keyword_links'] = $this->Content_model->keyword_links();
+					$entry['keyword_links'] = $this->Content_model->keyword_links();
 				}
 
-				// get uri to full post
+				// get uri of content
 				$this->Content_model->scope = 'content';
 				$this->Content_model->temp_id = $post['content_id'];
 				$this->Content_model->temp_lang = $post['lang_ISO_639_3'];
-				$blog_data['permalink'] = $this->Content_model->generate_uri();
+				$entry['uri'] = $this->Content_model->generate_uri();
 				
-				$blog[] = $blog_data;
+				$recent_entries[] = $entry;
+				$this->Content_model->reset_vars();
 			
 			}
 		}
 
-		return $blog;
+		return $recent_entries;
 
 	}
 	
-	function _blog_menu($parent=NULL)
-	{
-		$my_id = $this->Content_model->content_id;		
-		$this->Content_model->type_id = 2;
-		if(isset($parent))
-		{
-			$this->Content_model->list_content($parent,TRUE);
-		}
-		else
-		{
-			$this->Content_model->list_content(NULL,TRUE);
-		}
-		
-		$recent = $this->Content_model->content_list;
-
-		$blog_menu = array();
-
-		if(count($recent) > 0)
-		{
-			foreach($recent as $index => $post)
-			{
-
-				if($post['content_id'] != $my_id)
-				{
-					$tmp_entry = $post;
-	
-					// get uri to full post
-					$this->Content_model->scope = 'content';
-					$this->Content_model->temp_id = $post['content_id'];
-					$this->Content_model->temp_lang = $post['lang_ISO_639_3'];
-					$tmp_entry['permalink'] = $this->Content_model->generate_uri();
-					
-					$blog_menu[] = $tmp_entry;
-				}
-			}
-		}
-		return $blog_menu;
-	}
-
 	function _attachment_info()
 	{
 		$this->Content_model->list_attachments();

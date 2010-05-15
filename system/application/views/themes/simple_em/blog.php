@@ -30,8 +30,8 @@ if(isset($breadcrumb_links))
 				if (isset($subtitle) && $subtitle != '') {
 					echo "<h2>".$subtitle."</h2>\r";
 				}
-				if (isset($content_description)) {
-					echo "<p>".$content_description."</p>\r";
+				if (isset($content['description'])) {
+					echo "<p>".$content['description']."</p>\r";
 				}
 				if (isset($blog)) {
 					echo $blog;
@@ -54,8 +54,8 @@ if(isset($breadcrumb_links))
 	</div>
 	<div class="page-wrap block" id="footer">
 	<?php
-	if (isset($site_meta_copyright) ) {
-		echo "<p>".$site_meta_copyright."</p>\r";
+	if (isset($site['copyright']) ) {
+		echo "<p>".$site['copyright']."</p>\r";
 	}
 	echo $cms_labels['powered_by'];
 	?>

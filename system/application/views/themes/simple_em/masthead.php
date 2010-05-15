@@ -1,11 +1,11 @@
 <div id="masthead">
 	<div class="page-wrap block">
 		<div class="column w1">
-			<h2><?php echo $site_meta_title; ?></h2>
+			<h2><?php echo $site['title']; ?></h2>
 		</div>
 		<?php
-		if ($site_meta_subtitle != '') {
-		echo "<div class=\"column w2 lh\">{$site_meta_subtitle}</div>\n";
+		if ($site['subtitle'] != '') {
+		echo "<div class=\"column w2 lh\">{$site['subtitle']}</div>\n";
 		} ?>
 		<div class="float-right w2 lh align-right">
 			<form action="search" method="post" id="site-search">

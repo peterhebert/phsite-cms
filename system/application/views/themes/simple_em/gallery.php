@@ -37,9 +37,9 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 			echo $title;
 			echo "</h1>\r";
 		}
-		if (isset($content_description)) {
+		if (isset($content['description'])) {
 			echo "<p>";
-			echo $content_description;
+			echo $content['description'];
 			echo "</p>\r";
 		}
 
@@ -69,8 +69,8 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 	</div>
 	<div class="page-wrap block" id="footer">
 	<?php
-	if (isset($site_meta_copyright) ) {
-		echo "<p>".$site_meta_copyright."</p>\r";
+	if (isset($site['copyright']) ) {
+		echo "<p>".$site['copyright']."</p>\r";
 	}
 	echo $cms_labels['powered_by'];
 	?>

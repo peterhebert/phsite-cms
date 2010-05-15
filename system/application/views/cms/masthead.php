@@ -15,9 +15,9 @@
 	<div class="page-wrap block">
 		<div class="column">
 		<?php
-		if(isset($site_meta_title)) {
+		if(isset($site['title'])) {
 			echo "<p>{$cms_labels['site']} : ";
-			echo anchor('', $site_meta_title, array('title' => $cms_labels['site_external_link'], 'rel' => 'external'));;
+			echo anchor('', $site['title'], array('title' => $cms_labels['site_external_link'], 'rel' => 'external'));;
 			echo "</p>\r";
 		}
 		?>

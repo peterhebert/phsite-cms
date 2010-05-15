@@ -38,14 +38,6 @@ if(isset($breadcrumb_links))
 				echo $content['body'];
 			}
 
-			if(isset($parents) && count($parents) > 0)
-			{
-				echo "<p>parents:</p>\r";
-				echo "<pre>";
-				print_r($parents);
-				echo "</pre>\r";
-			}
-
 			if(isset($attachments) && count($attachments) > 0)
 			{
 				echo "<p>attachments:</p>\r";
@@ -114,7 +106,7 @@ if(isset($breadcrumb_links))
 	if (isset($content['copyright'])) {
 		echo "<p>{$content['copyright']}</p>\r";
 	} else {
-		echo "<p>{$site_meta_copyright}</p>\r";
+		echo "<p>{$site['copyright']}</p>\r";
 	}
 	echo $cms_labels['powered_by'];
 	?></div>

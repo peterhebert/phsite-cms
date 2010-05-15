@@ -17,16 +17,16 @@
 		if (isset($image)) {
 			echo "<div class=\"image\">$image</div>\r"; 
 		}?>
-		<p>Keywords: <?php echo $content_data['keywords']; ?>
+		<p>Keywords: <?php echo $content['data']['keywords']; ?>
 		<pre><?php
-		print_r($content_data); 
+		print_r($content['data']); 
 		
 		
 		if (isset($image_meta) && is_array($image_meta)) {
 		print_r($image_meta);
 		} ?></pre>
 	</div>
-	<div class="page-wrap block" id="footer"><?php echo $site_meta_copyright; ?></div>
+	<div class="page-wrap block" id="footer"><?php echo $site['copyright']; ?></div>
 </div>
 </body>
 </html>

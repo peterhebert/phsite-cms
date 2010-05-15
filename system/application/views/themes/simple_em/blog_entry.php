@@ -51,20 +51,20 @@ if(isset($subtitle) && $subtitle != '')
 if(isset($author)) 
 {
 	$user_name_formatted = $author['name_first'].' '.$author['name_last'];
-	$byline = sprintf($cms_labels['posted_by'],$content_date_created,$user_name_formatted);
+	$byline = sprintf($cms_labels['posted_by'],$content['date_created'],$user_name_formatted);
 	echo "<p>{$byline}</p>\r";
 }
 
-if(isset($content_body)) 
+if(isset($content['body'])) 
 {
-	echo $content_body;
+	echo $content['body'];
 }
 
 // keywords
 
-if(isset($content_keyword_links)) 
+if(isset($content['keyword_links'])) 
 {
-	echo "<p>{$content_keyword_links}</p>\r";
+	echo "<p>{$content['keyword_links']}</p>\r";
 }
 
 ?>
@@ -85,8 +85,8 @@ if(isset($content_keyword_links))
 	</div>
 	<div class="page-wrap block" id="footer">
 		<?php
-	if (isset($site_meta_copyright) ) {
-		echo "<p>".$site_meta_copyright."</p>\r";
+	if (isset($site['copyright']) ) {
+		echo "<p>".$site['copyright']."</p>\r";
 	}
 	echo $cms_labels['powered_by'];
 	?>

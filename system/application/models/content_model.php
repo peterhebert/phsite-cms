@@ -989,11 +989,6 @@ class Content_model extends MY_Model {
 		$this->date_updated = '';
 		$this->publish = '';
 	}
-	
-/*
-	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish;
-
-*/
 
 }
 

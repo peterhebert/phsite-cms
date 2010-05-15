@@ -6,7 +6,7 @@ if(isset($title))
 {
 echo $title.' | ';
 }
-echo $site_meta_title;
+echo $site['title'];
 ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
@@ -53,7 +53,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 	</div>
 	<div class="page-wrap block" id="footer"><?php 
 	echo "<p>";
-	echo $site_meta_copyright;
+	echo $site['copyright'];
 	echo "</p>\r";
 	echo $cms_labels['powered_by'];
 	?></div>

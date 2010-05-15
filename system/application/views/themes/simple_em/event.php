@@ -12,17 +12,17 @@
 	<div class="page-wrap block" id="breadcrumb"><?php echo $breadcrumb; ?></div>
 	<div class="page-wrap block">
 		<h1><?php echo $title; ?></h1>
-		<p>Start: <?php echo $content_data['start']; ?>
-		<p>End: <?php echo $content_data['end']; ?>
-		<p>Location: <?php echo $content_data['location']; ?>
-		<p><?php echo $content_data['description']; ?></p>
+		<p>Start: <?php echo $content['data']['start']; ?>
+		<p>End: <?php echo $content['data']['end']; ?>
+		<p>Location: <?php echo $content['data']['location']; ?>
+		<p><?php echo $content['data']['description']; ?></p>
 	</div>
 	<div class="page-wrap block" id="footer"><?php 
 	echo "<p>";
-	if (array_key_exists('copyright',$content_data) && $content_data['copyright'] != '') {
-		echo $content_data['copyright'];
+	if (array_key_exists('copyright',$content['data']) && $content['data']['copyright'] != '') {
+		echo $content['data']['copyright'];
 	} else {
-		echo $site_meta_copyright;
+		echo $site['copyright'];
 	}
 	echo "</p>\r";
 	echo $footer;

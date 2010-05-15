@@ -58,6 +58,9 @@ class MY_Controller extends Controller {
 
 		$base_raw = $_SERVER['PHP_SELF'];
 		$base = preg_replace("#^(.*)/index.php(.*)#", "$1", $base_raw);
+		
+		$site_meta = array();
+		
 		$this->data['base_path'] = $base;
 
 		$this->Site_model->load_site();
@@ -65,7 +68,7 @@ class MY_Controller extends Controller {
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		$this->data['site_meta_lang'] = $this->Site_model->temp_lang;
+		$site_meta['lang'] = $this->Site_model->temp_lang;
 		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
@@ -73,15 +76,14 @@ class MY_Controller extends Controller {
 		$this->Site_model->scope = 'site';
 		$this->Site_model->load_title();
 
-		$this->data['site_meta_title'] = $this->Site_model->title;
-		$this->data['site_meta_subtitle'] = $this->Site_model->subtitle;
-		$this->data['site_meta_keywords'] = $this->Site_model->keywords;
+		$site_meta['title'] = $this->Site_model->title;
+		$site_meta['subtitle'] = $this->Site_model->subtitle;
+		$site_meta['keywords'] = $this->Site_model->keywords;
 
 		// format the date according to site timezone
 
-		$this->data['site_meta_created'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone);
-		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
-		$this->data['site_meta_created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
+		$site_meta['created'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone);
+		$site_meta['created_W3C'] = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y-m-d");
 
 		$tmp_cr_yr = convert_time($this->Site_model->site_date_created, $this->Site_model->site_timezone, "Y");
 		$tmp_mod_yr = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y");
@@ -97,32 +99,32 @@ class MY_Controller extends Controller {
 		}
 		
 
-		$this->data['site_meta_updated'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone);
-		$this->data['site_meta_updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");
+		$site_meta['updated'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone);
+		$site_meta['updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");
 
 		// get site metadata
 		$this->Site_model->load_site_metadata();
 		
 		foreach($this->Site_model->metadata as $fd_id => $meta)
 		{
-			$key = 'site_meta_'.$meta['field_ref_name'];
+			$key = $meta['field_ref_name'];
 			
 			if($meta['field_ref_name'] == 'copyright')
 			{
 				$val = '&#169; '.$tmp_site_dates.' '.$meta['value'];
 				
 				$val_xml = '&#x00A9;'.$tmp_site_dates.' '.$meta['value'];
-				$this->data['site_meta_copyright_xml'] = $val_xml;
+				$site_meta['copyright_xml'] = $val_xml;
 			}
 			else
 			{
 				$val = $meta['value'];
 			}
 			
-			$this->data[$key] = $val;
+			$site_meta[$key] = $val;
 			
 		}
-
+		$this->data['site'] = $site_meta;
 	}
 
 
