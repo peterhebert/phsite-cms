@@ -1,3 +1,4 @@
 *.DS_Store
 media/originals/*
 media/cache/*
+system/application/models/file_model.php

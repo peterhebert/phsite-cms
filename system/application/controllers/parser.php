@@ -12,7 +12,7 @@ class Parser extends MY_Controller {
 	
 	function Parser()
 	{
-		parent::MY_Controller();	
+		parent::MY_Controller();
 		$this->load->model('Content_model');
 		$this->load->model('Media_model');
 		$this->load->model('User_model');
@@ -80,7 +80,13 @@ class Parser extends MY_Controller {
 			$this->data['breadcrumb_links'] = $this->breadcrumb_links;
 		}
 		
-		$this->data['html_header'] = $this->load->view('embed_html_header',$this->data,true);
+		$header_view = 'themes/'.$this->Site_model->theme.'/inc_header';
+
+		$header_view_full = APPPATH.'views/'.$header_view.'.php';
+		if(file_exists($header_view_full))
+		{
+			$this->data['html_header'] = $this->load->view($header_view,$this->data,TRUE);
+		}
 		
 		$this->load->view($this->view,$this->data);
 
@@ -246,13 +252,16 @@ class Parser extends MY_Controller {
 	function _prepare_view()
 	{
 		
+		// initialize content array
+		$content_vars = array();
+
 		// load author user data
 
 		$this->User_model->temp_id = $this->Content_model->user_id;
 		$this->User_model->load_user();
 		if($this->User_model->name_first != '')
 		{
-			$this->data['author'] = array(
+			$content_vars['author'] = array(
 			'name_first' => $this->User_model->name_first,
 			'name_last' => $this->User_model->name_last,
 			'username' => $this->User_model->username,
@@ -266,8 +275,6 @@ class Parser extends MY_Controller {
 		$this->Content_model->load_type();
 		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
-		// initialize content array
-		$content_vars = array();
 
 		$content_vars['content_id'] = $this->Content_model->content_id;
 
@@ -306,6 +313,19 @@ class Parser extends MY_Controller {
 			
 			if($field['date_updated'] > $this->Content_model->date_updated) {
 				$this->Content_model->date_updated = $field['date_updated'];
+			}
+
+			if($field['field_input_type'] == 'directory') {
+				
+				$dir = ROOT_REL.MEDIA_PATH_ORIG.$field['value'];
+
+				$this->Media_model->temp_lang = $this->Content_model->temp_lang;
+				$this->Media_model->lang_load();
+				$content_vars['dir_listing'] = $this->Media_model->list_media_recursive();
+
+//				$this->Media_model->dir_current = ROOT_REL.MEDIA_PATH_ORIG.$field['value'];
+//				$this->Media_model->list_files_unique();
+//				$content_vars['dir_listing'] = $this->Media_model->file_list;
 			}
 
 		}
@@ -468,6 +488,11 @@ class Parser extends MY_Controller {
 	
 	function _attachment_info()
 	{
+
+		// load mime type labels
+		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
+		$this->data['mime_labels'] = $this->lang->line('mime');
+
 		$this->Content_model->list_attachments();
 		if(count($this->Content_model->attachments) > 0)
 		{
@@ -482,6 +507,10 @@ class Parser extends MY_Controller {
 				$tmp_array['file_uri'] = $this->Media_model->file_uri;
 				$tmp_array['external'] = $this->Media_model->external;
 				$tmp_array['mime_type'] = $this->Media_model->mime_type;
+				$tmp_array['mime_cat'] = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
+				$tmp_array['ext'] = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+				$tmp_array['filename'] = basename($this->Media_model->file_uri);
+
 				$tmp_array['date_created'] = $this->Media_model->date_created;
 				$tmp_array['publish'] = $this->Media_model->publish;
 				$this->Media_model->temp_lang = $this->Content_model->temp_lang;
@@ -490,12 +519,13 @@ class Parser extends MY_Controller {
 				$tmp_array['uri_title'] = $this->Media_model->uri_title;
 				$tmp_array['subtitle'] = $this->Media_model->subtitle;
 				$tmp_array['keywords'] = $this->Media_model->keywords;
-												
+
 				$attachments[] = $tmp_array;
 				unset($tmp_array);
 			}
 			$this->data['attachments'] = $attachments;
 		}
 	}
+
 }
 ?>

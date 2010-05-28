@@ -52,7 +52,6 @@ if(isset($breadcrumb_links))
 ?>
 	<div class="page-wrap">
 
-		<?php if (isset($recent) && $recent !='') { ?>
 		<div class="block five">
 			<div class="column w3">
 				<?php
@@ -68,10 +67,10 @@ if(isset($breadcrumb_links))
 						if(array_key_exists('title',$entry) && $entry['title'] != '') 
 						{
 							$title = $entry['title'];
-							if(array_key_exists('permalink',$entry)) 
+							if(array_key_exists('uri',$entry)) 
 							{
 								$pl_title = sprintf($cms_labels['permalink_title'],$entry['title']);
-								$title = anchor($entry['permalink'], $entry['title'], array('title' => $pl_title));
+								$title = anchor($entry['uri'], $entry['title'], array('title' => $pl_title));
 						
 							}
 							echo "<h3>".$title."</h3>\r";
@@ -130,25 +129,23 @@ if(isset($breadcrumb_links))
 			</div>
 			<div class="float w2">
 
-		<?php
-		}
-		
-		if (isset($site['description']) && $site['description'] != '') {
-			echo "<h2 class=\"first\">";
-			echo $cms_labels['about_this_site'];
-			echo "</h2>\r";
-			echo "<p>{$site['description']}</p>\r";
-		}
-
-		if(isset($menu) && $menu != '')
-		{
-			echo $menu;
-		}
-		
-		if (isset($recent) && $recent !='') { ?>
+			<?php
+			
+			if (isset($site['description']) && $site['description'] != '') {
+				echo "<h2 class=\"first\">";
+				echo $cms_labels['about_this_site'];
+				echo "</h2>\r";
+				echo "<p>{$site['description']}</p>\r";
+			}
+	
+			if(isset($menu))
+			{
+				echo "<h3>".$cms_labels['menu']."</h3>\r";
+				echo build_menu($menu,2);
+			}
+			?>
 			</div>
 		</div>
-		<?php } ?>
 	</div>
 	<div class="page-wrap block" id="footer">
 		<?php

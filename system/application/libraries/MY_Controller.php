@@ -18,7 +18,6 @@ class MY_Controller extends Controller {
 	var $cms_labels = array();
 	var $custom_js = array();
 
-	
 	/**
 	 * Constructor
 	 *
@@ -34,6 +33,9 @@ class MY_Controller extends Controller {
 		$this->data['img_size_lg'] = $this->Site_model->img_size_lg;
 		$this->data['img_path_orig'] = realpath(getcwd()).MEDIA_PATH_ORIG;
 
+		// load mime icon extensions
+		$this->config->load('mime_info');
+		$this->data['mime_icons'] = $this->config->item('mime_icons');
 	}
 
 	function _authenticate()

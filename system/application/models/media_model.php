@@ -30,7 +30,7 @@ class Media_model extends MY_Model {
 		$this->dir_base = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG;
 		$this->dir_current = $this->dir_base;
 
-		$this->config->load('phsite_prefs');
+		$this->config->load('mime_info');
 		$this->mime_types = $this->config->item('mime_types');
 		$this->scope = 'media';
 
@@ -172,13 +172,16 @@ class Media_model extends MY_Model {
 		//using the opendir function
 		$dir_handle = @opendir($filepath) or die("Unable to open $filepath");
 		$files = array();
-	
+		
 		//running the while loop
 		while ($file = readdir($dir_handle)) {
-			$newpath = $filepath.'/'.$file;
+			$newpath = str_replace('//','/',$filepath.'/'.$file);
 			$ignore = array(".","..",".DS_Store",".localized",".htaccess",".svn");
-			
 			if(!in_array($file,$ignore)) {
+
+//			$ignore = preg_match("#^\..*$#",$file);
+//			if($ignore > 0) {
+
 				if($include_dirs)
 				{
 					$files[] = $newpath;
@@ -194,7 +197,7 @@ class Media_model extends MY_Model {
 		}
 		//closing the directory
 		closedir($dir_handle);
-		
+
 		$this->file_count = count($files);
 		$this->file_list = $files;
 
@@ -263,7 +266,7 @@ class Media_model extends MY_Model {
 
 		if($this->file_current == '')
 		{
-			$this->file_current = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_ORIG.$this->file_uri;
+			$this->file_current = realpath(ROOT_REL).MEDIA_PATH_ORIG.$this->file_uri;
 		}
 		if(file_exists($this->file_current) && !is_dir($this->file_current)) {
 
@@ -716,10 +719,30 @@ class Media_model extends MY_Model {
 				$this->file_uri = $path_rel;
 				$this->update_media_from_file();
 				$tmp_file_info['media_id'] = $this->media_id;
-				$tmp_file_info['mime_type'] = $this->mime_type;
-				$tmp_file_info['external'] = 0;
-				$tmp_file_info['title'] = $this->title;
 				$tmp_file_info['file_uri'] = $this->file_uri;
+				$tmp_file_info['external'] = 0;
+				$tmp_file_info['mime_type'] = $this->mime_type;
+				$tmp_file_info['mime_cat'] = preg_replace("#^([a-z]+)/.*$#","$1",$this->mime_type);
+
+				//$tmp_file_info[''] = $this->;
+				//$tmp_file_info[''] = $this->;
+				$tmp_file_info['title'] = $this->title;
+
+				$tmp_file_info['uri_title'] = $this->uri_title;
+				$tmp_file_info['subtitle'] = $this->subtitle;
+				$tmp_file_info['keywords'] = $this->keywords;
+/*
+
+            [ext] => jpg
+            [filename] => 20030101_Friday-night-hockey_Goalie-Pete-6.JPG
+            [date_created] => 2003-01-01 12:06:29
+            [publish] => 1
+            [title] => Goalie Pete 6
+            [uri_title] => goalie-pete-6
+            [subtitle] => 
+            [keywords] => goalie, Hockey, Peter Hebert, sports
+*/
+
 			}
 
 			if(!$this->exists)
@@ -1017,6 +1040,5 @@ class Media_model extends MY_Model {
 		}
 	}
 }
-
 
 ?>

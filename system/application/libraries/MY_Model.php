@@ -153,6 +153,34 @@ class MY_Model extends Model {
 		return FALSE;
 
     }
+
+	function lang_find_by_CI_Name()
+    {
+
+		$this->db->where('CI_Name', $this->temp_lang);
+		$query = $this->db->get('ISO_639_LANG');
+ 
+ 		if ($query->num_rows() > 0)
+		{
+			$row = $query->row_array();
+			$this->lang_ISO_639_3 = $row['ISO_639_3'];
+			$this->lang_ISO_639_2B = $row['ISO_639_2B'];
+			$this->lang_ISO_639_2T = $row['ISO_639_2T'];
+			$this->lang_ISO_639_1 = $row['ISO_639_1'];
+			$this->lang_Scope = $row['Scope'];
+			$this->lang_Type = $row['Type'];
+			$this->lang_Ref_Name = $row['Ref_Name'];
+			$this->lang_Inverted_Name = $row['Inverted_Name'];
+			$this->lang_Native_Name = $row['Native_Name'];
+			$this->lang_CI_Name = $row['CI_Name'];
+			$this->lang_activated = $row['activated'];
+			$this->temp_lang = $row['ISO_639_3'];
+			
+			return TRUE;
+		}
+		return FALSE;
+
+    }
 	
 	function lang_set_active()
     {
@@ -374,8 +402,6 @@ class MY_Model extends Model {
 
 		$list = array();
 
-// select * from r_fields left join s_fields on r_fields.field_id = s_fields.field_id where scope = 'types' and rf_rel_id = 3
-		
 		$this->db->where('scope',$this->scope);
 		if ($this->temp_id != '' && $this->scope == 'types')
 		{
@@ -901,6 +927,13 @@ class MY_Model extends Model {
 		{
 		   $row = $query->row();
 		   $this->title_id = $row->title_id;
+		   $this->title_rel_id = $row->rel_id;
+		   $this->title = $row->title;
+		   $this->uri_title = $row->uri_title;
+		   $this->subtitle = $row->subtitle;
+		   $this->keywords = $row->keywords;
+		   $this->title_updated = $row->title_updated;
+
 		   return true;
 		}
 	   return false;

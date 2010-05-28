@@ -2,9 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <?php
-if(isset($html_header))
-{
-echo $html_header;
+if (isset($html_header)) {
+	echo($html_header);
 }
 ?>
 <script type="text/javascript" src="/assets/js/jquery-1.3.1.min.js"></script>
@@ -20,8 +19,6 @@ if(isset($breadcrumb_links))
 	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 }
 ?>
-
-	
 	<div class="page-wrap block five">
 		<div class="column w3">
 			<?php
@@ -40,42 +37,81 @@ if(isset($breadcrumb_links))
 
 			if(isset($attachments) && count($attachments) > 0)
 			{
-				echo "<p>attachments:</p>\r";
-				echo "<pre>";
-				print_r($attachments);
-				echo "</pre>\r";
+				echo "<h3>{$cms_labels['attachments']}</h3>\r";
+
 				foreach($attachments as $att)
 				{
 					// embed media or link to file
-					
+					$orig_path = $img_path_orig.$att['file_uri'];
 
-					/*
+					// if local image, do thumbnail
+					if ($att['mime_cat'] == 'image' && $att['external'] == 0)
+					{
+						echo "<div class=\"image-left\">";
+						$thumb = view_image($orig_path,$img_size_th,array('alt' => $att['title']));
+						echo $thumb;
+						echo "</div>";
+					}
+
+					echo "<p>";
+
+					if(array_key_exists($att['ext'],$mime_icons))
+					{
+						echo "<span class=\"icon ext_{$att['ext']}\">";
+					}
+					else
+					{
+						echo "<span class=\"icon icon_{$att['mime_cat']}\">";
+					}
+					if($att['title'] != '' && $att['title'] != $att['filename'])
+					{
+						$filename = $att['title'];
+					}
+					else
+					{
+						$filename = $att['filename'];
+					}
+
+					echo anchor($orig_path, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+					echo "</span><br />\r";
+
+					if(array_key_exists($att['ext'],$mime_labels))
+					{
+						echo $mime_labels[$att['ext']];
+					}
+					else
+					{
+						echo $att['mime_type'];
+					}
+
+					echo "</p>\r";
+/*
+
+
 					Array
 					(
 						[0] => Array
-							(
-								[a_id] => 2
-								[content_id] => 2
-								[media_id] => 1
-								[file_uri] => /phsite_0.1.zip
-								[external] => 0
-								[mime_type] => application/zip
-								[date_created] => 2010-04-23 15:56:28
-								[publish] => 1
-								[title] => phsite_0.1.zip
-								[uri_title] => phsite-0-1-zip
-								[subtitle] => 
-								[keywords] => 
-							)
-					
+								(
+									[a_id] => 2
+									[content_id] => 2
+									[media_id] => 1
+									[file_uri] => /hockey/20030101_Friday-night-hockey_Goalie-Pete-3.JPG
+									[external] => 0
+									[mime_type] => image/jpeg
+									[mime_cat] => image
+									[ext] => jpg
+									[filename] => 20030101_Friday-night-hockey_Goalie-Pete-3.JPG
+									[date_created] => 2003-01-01 12:04:25
+									[publish] => 1
+									[title] => Goalie Pete 3
+									[uri_title] => goalie-pete-3
+									[subtitle] => 
+									[keywords] => goalie, Hockey, Peter Hebert, sports
+								)
+											
 					)
 					*/
 
-					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$att['mime_type']);
-//					$img_path = $img_path_orig.$att['file_uri'];
-//					$thumb = view_image($img_path,$img_size_md,array('alt' => $att['title']));
-					//echo $thumb;
-					echo $mime_cat;
 				}
 			}
 

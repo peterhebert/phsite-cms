@@ -5,75 +5,25 @@ class Image extends MY_Controller {
 	function Image()
 	{
 		parent::MY_Controller();	
-		$this->load->helper('file');
+		$this->load->model('File_model');
 	}
 	
 	function index()
 	{
+		//$this->File_model->list_special();
 
-		$this->load->helper('image');
 
-		$uri_raw = $this->uri->uri_string();
-		$url_params =  str_replace( '/image/', '', $uri_raw);
-		$uri = preg_replace('|^/image/(.*)$|','$1',$uri_raw);
-		
-		if($uri != '')
-		{
-			$param_keys = array('src','size','ratio','alt','name','title');
-			
-			$pattern = "/(src|size|ratio|alt|name|title)/";
-			$params = preg_split($pattern, $url_params, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
-			$attr = array();
-			$src = '';
-			$size = '';
-			$ratio = '';
-			
-			foreach($params as $index => $key)
-			{
-				if($index < count($params)-1) {
-					$rawval = $params[$index+1];
-				} else {
-					$rawval = '';
-				}
-				
-				if(in_array($key,$param_keys)) {
-					$myval = trim($rawval,'/');
-					switch($key)  {
-					case 'src':
-						$src = rtrim($rawval,'/');
-						$src_rel = MEDIA_PATH_ORIG.$src;
-						break;
-					case 'size':
-						$size = $myval;
-						break;
-					case 'ratio':
-						$ratio = $myval;
-						break;
-					default:
-						$attr[$key] = $myval;
-						break;
-					}
-				}
+		$this->File_model->list_dir_contents('dirs',TRUE);
+		echo "<p>files</p>\r";
+		echo "<pre>";
+		print_r($this->File_model->file_list);
+		echo "</pre>\r";
+
+		echo "<p>directories</p>\r";
+		echo "<pre>";
+		print_r($this->File_model->dir_list);
+		echo "</pre>\r";
 	
-	
-			}
-			if($size == '')
-			{
-				$size = $this->Site_model->media_;
-			}
-			echo "source image: $src<br />\r";
-
-			$image_html = view_image($src_rel,$size,$ratio,$attr);
-			echo $image_html;
-			$metadata = get_metadata($src_rel);
-			echo "<br />\n<pre>";
-			print_r ($metadata);
-			echo "</pre>";
-
-		} else {
-			return "no image specified";
-		}
-
 	}
 
 }

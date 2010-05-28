@@ -6,7 +6,6 @@ if(isset($html_header))
 {
 echo $html_header;
 }
-
 if(isset($size))
 {
 ?>
@@ -20,7 +19,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 </style>
 <?php } ?>
 </head>
-<body class="gallery">
+<body class="">
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<?php
@@ -43,28 +42,64 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 			echo "</p>\r";
 		}
 
-		if(count($subdirs) > 0)
+		if(isset($subdirs) && count($subdirs) > 0)
 		{
-			echo "<p>Sub-directories:</p>";
+			echo "<p>{$cms_labels['media_subdirs']}</p>";
 			echo ul($subdirs);
 		}
 		
-		if(isset($files) && is_array($files))
+		if(isset($attachments))
 		{
+			echo "<pre>";
+			print_r($attachments);
+			echo "</pre>\r";
+
 			echo "<ul class=\"thumbnails\">";
 			
-			foreach($files as $file)
+			foreach($attachments as $file)
 			{
-				$link = str_replace($media_root,'',$file);
+				if($file['mime_cat'] == 'image')
+				{
+				}
+				/*
+[0] => Array
+        (
+            [a_id] => 3
+            [content_id] => 4
+            [media_id] => 1
+            [file_uri] => /hockey/20030101_Friday-night-hockey_Goalie-Pete-3.JPG
+            [external] => 0
+            [mime_type] => image/jpeg
+            [mime_cat] => image
+            [ext] => jpg
+            [filename] => 20030101_Friday-night-hockey_Goalie-Pete-3.JPG
+            [date_created] => 2003-01-01 12:04:25
+            [publish] => 1
+            [title] => Goalie Pete 3
+            [uri_title] => goalie-pete-3
+            [subtitle] => 
+            [keywords] => goalie, Hockey, Peter Hebert, sports
+        )
+				*/
+$file_link = MEDIA_PATH_ORIG.$file['file_uri'];
+$file_full = ROOT_REL.$file_link;
 				echo "<li>\r";
 				echo "<div class=\"thumb\">";
-				echo "<a href=\"/gallery/media{$link}\">";
-				echo view_image($file,$this->Site_model->img_size_th,array('title' => 'image title goes here'));
+				echo "<a href=\"{$file_link}\">";
+				echo view_image($file_full,$this->Site_model->img_size_th,array('title' => $file['title']));
 				echo "</a></div>\r";
 				echo "</li>\r";
 			}
 			echo "</ul>";
 		}
+
+		if(isset($content['dir_listing']))
+		{
+			echo "<pre>";
+			print_r($content['dir_listing']);
+			echo "</pre>\r";
+		}
+
 ?>
 	</div>
 	<div class="page-wrap block" id="footer">

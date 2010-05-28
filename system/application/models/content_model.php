@@ -622,72 +622,84 @@ class Content_model extends MY_Model {
 
     function generate_uri()
     {
-		$uriArray = array();
-		// get content info
-		$this->count_lang_versions();
-		$this->db->where('content_id', $this->temp_id);
-		$query = $this->db->get('c_content');
-
-
-		$parent = 0;
-
-
-
-		if ($query->num_rows() > 0)
+		if($this->link_mode == 1)
 		{
-			$row = $query->row();
-
-			$cid = $row->content_id;
-			$parent = $row->parent_id;
-			$type_id = $row->type_id;
-			$date_segment = substr($row->date_created, 0, 10);
-		}
-		// get uri title
-		$this->db->where('scope', $this->scope);
-		$this->db->where('rel_id', $this->temp_id);
-		$this->db->where('lang_ISO_639_3', $this->temp_lang);
-		$this->db->limit(1);
-		$query = $this->db->get('c_titles');
-
-		if ($query->num_rows() > 0)
-		{
-			$row = $query->row_array();
-			$uriArray[] = $row['uri_title'];
-			
-			if($type_id == 2)
+			// edit uri
+			$uri = 'cms/content/edit/id/'.$this->temp_id;
+			if($this->temp_lang != '')
 			{
-				$uriArray[] = $date_segment;
+				$uri .= '/lang/'.$this->temp_lang;
 			}
-
+		
 		}
-
-		//now loop through to top level		
-		do
+		else
 		{
-			$this->db->where('content_id', $parent);
-			$this->db->where('lang_ISO_639_3', $this->temp_lang);
-			$this->db->where('scope','content');
-			$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+			$uriArray = array();
+			// get content info
+			$this->count_lang_versions();
+			$this->db->where('content_id', $this->temp_id);
 			$query = $this->db->get('c_content');
+	
+	
+			$parent = 0;
+	
+			if ($query->num_rows() > 0)
+			{
+				$row = $query->row();
+	
+				$cid = $row->content_id;
+				$parent = $row->parent_id;
+				$type_id = $row->type_id;
+				$date_segment = substr($row->date_created, 0, 10);
+			}
+			// get uri title
+			$this->db->where('scope', $this->scope);
+			$this->db->where('rel_id', $this->temp_id);
+			$this->db->where('lang_ISO_639_3', $this->temp_lang);
+			$this->db->limit(1);
+			$query = $this->db->get('c_titles');
+	
 			if ($query->num_rows() > 0)
 			{
 				$row = $query->row_array();
 				$uriArray[] = $row['uri_title'];
-
-				$parent = $row['parent_id'];
+				
+				if($type_id == 2)
+				{
+					$uriArray[] = $date_segment;
+				}
+	
 			}
+	
+			//now loop through to top level		
+			do
+			{
+				$this->db->where('content_id', $parent);
+				$this->db->where('lang_ISO_639_3', $this->temp_lang);
+				$this->db->where('scope','content');
+				$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+				$query = $this->db->get('c_content');
+				if ($query->num_rows() > 0)
+				{
+					$row = $query->row_array();
+					$uriArray[] = $row['uri_title'];
+	
+					$parent = $row['parent_id'];
+				}
+	
+			} while ($parent > 0);
+	
+			$uriArray2 = array_reverse($uriArray);
+	
+			$uri = '';
+	
+			if($this->lang_mode > 1) {
+				$uri .= $this->temp_lang.'/';
+			}
+			$uri .= implode('/',$uriArray2);
 
-		} while ($parent > 0);
-
-		$uriArray2 = array_reverse($uriArray);
-
-		$uri = '';
-
-		if($this->lang_mode > 1) {
-			$uri .= $this->temp_lang.'/';
 		}
-		$uri .= implode('/',$uriArray2);
-
+		
 		return $uri;
 
     }

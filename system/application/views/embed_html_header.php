@@ -11,46 +11,40 @@ echo $site['title'];
 <?php
 if(isset($title))
 {
-echo "<meta name=\"dc.title\" content=\"{$title}\" />\r";
+	echo "<meta name=\"dc.title\" content=\"{$title}\" />\r";
 }
 
 if(isset($content['description']))
 {
-echo "<meta name=\"Description\" content=\"{$content['description']}\" />\r";
-echo "<meta name=\"dc.description\" content=\"{$content['description']}\" />\r";
+	echo "<meta name=\"Description\" content=\"{$content['description']}\" />\r";
+	echo "<meta name=\"dc.description\" content=\"{$content['description']}\" />\r";
 }
 
-if(isset($keywords))
+if(isset($content['keywords']))
 {
-echo "<meta name=\"Keywords\" content=\"{$keywords}\" />\r";
+	echo "<meta name=\"Keywords\" content=\"{$content['keywords']}\" />\r";
 }
 else
 {
 	if(isset($site['keywords']))
 	{
-	echo "<meta name=\"Keywords\" content=\"{$site['keywords']}\" />\r";
+		echo "<meta name=\"Keywords\" content=\"{$site['keywords']}\" />\r";
 	}
 }
 
 if(isset($content['date_created_W3C']))
 {
-echo "<meta name=\"dcterms.issued\" scheme=\"W3CDTF\" content=\"{$content['date_created_W3C']}\" />\r";
+	echo "<meta name=\"dcterms.issued\" scheme=\"W3CDTF\" content=\"{$content['date_created_W3C']}\" />\r";
 }
 if(isset($content['date_updated_W3C']))
 {
-echo "<meta name=\"dcterms.modified\" scheme=\"W3CDTF\" content=\"{$content['date_updated_W3C']}\" />\r";
+	echo "<meta name=\"dcterms.modified\" scheme=\"W3CDTF\" content=\"{$content['date_updated_W3C']}\" />\r";
 }
 if(isset($content['date_expiry_RFC850']))
 {
-echo "<meta http-equiv=\"expires\" content=\"{$content['date_expiry_RFC850']}\">\r";
+	echo "<meta http-equiv=\"expires\" content=\"{$content['date_expiry_RFC850']}\">\r";
 }
 
-/*
-<meta name=\"review_date\" content=\"2010-07-16\" />
-
-<meta name=\"dc.creator\" content=\"\" />
-<meta name=\"dc.contributor\" content=\"\" />
-*/
 
 ?>
 <meta name="generator" content="phSite CMS" />

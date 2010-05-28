@@ -50,6 +50,7 @@ $route['cms/media'] = "cms/media/manage";
 $route['cms/(.*)'] = "cms/$1";
 
 $route['test(.*)'] = "test/index$1";
+$route['image(.*)'] = "image/index$1";
 
 $route['search(/?)(.*)'] = "search$1$2";
 

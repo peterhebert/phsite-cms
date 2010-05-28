@@ -52,6 +52,7 @@ define('URI_SEPARATOR', '-');
 define('SALT_LENGTH', 10);
 
 // document root relative path to media files
+define('ROOT_REL','/'.trim(FCPATH,'/'));
 define('MEDIA_PATH_ORIG', '/media/originals');
 define('MEDIA_PATH_CACHE', '/media/cache');
 define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\">phSite CMS</a></p>\r");

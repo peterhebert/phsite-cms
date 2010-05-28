@@ -9,11 +9,13 @@
 | WITH a trailing slash:
 |
 |	http://example.com/
-|	http://example.com/path/to/codeigniter-root/
-|	http://localhost/path/to/codeigniter-root/
 |
 */
-$config['base_url']	= "http://phsite.local/";
+$protocol = "http" . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == "on") ? "s" : "") . "://";
+$server = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
+$dir = preg_replace('@/+$@','',dirname($_SERVER['SCRIPT_NAME'])).'/';
+$config['base_url'] = $protocol . $server . $dir; 
+unset($protocol,$server,$dir);
 
 /*
 |--------------------------------------------------------------------------
@@ -68,7 +70,7 @@ $config['url_suffix'] = "";
 | than english.
 |
 */
-$config['language']	= "";
+$config['language']	= "english";
 
 /*
 |--------------------------------------------------------------------------
@@ -175,7 +177,7 @@ $config['directory_trigger'] 	= 'd'; // experimental not currently in use
 | your log files will fill up very fast.
 |
 */
-$config['log_threshold'] = 4;
+$config['log_threshold'] = 0;
 
 /*
 |--------------------------------------------------------------------------
@@ -312,6 +314,19 @@ $config['time_reference'] = 'local';
 */
 $config['rewrite_short_tags'] = FALSE;
 
+
+/*
+|--------------------------------------------------------------------------
+| Reverse Proxy IPs
+|--------------------------------------------------------------------------
+|
+| If your server is behind a reverse proxy, you must whitelist the proxy IP
+| addresses from which CodeIgniter should trust the HTTP_X_FORWARDED_FOR
+| header in order to properly identify the visitor's IP address.
+| Comma-delimited, e.g. '10.0.1.200,10.0.1.201'
+|
+*/
+$config['proxy_ips'] = '';
 
 
 /* End of file config.php */

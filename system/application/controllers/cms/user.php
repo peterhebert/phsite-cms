@@ -2,6 +2,8 @@
 class User extends MY_Controller
 {
 
+	var $form_success = 0; // 0 => not submitted, 1 => success, -1 (or other vale) => not successful
+	
 	function User()
 	{
 		parent::MY_Controller();
@@ -22,9 +24,7 @@ class User extends MY_Controller
 
 		if($this->session->userdata('admin') != 1)
 		{
-// if logged in user not an admin, then direct to their user account editor
-
-			echo $this->session->userdata('user_id');
+			// if logged in user not an admin, show link to edit to their user account
 			$user_name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
 			$user_url = "cms/user/edit/id/".$this->session->userdata('user_id');
 			$userlist[] = anchor($user_url, $user_name);
@@ -159,6 +159,7 @@ class User extends MY_Controller
 			$action .= '/id/'.$this->User_model->user_id;
 			$hidden['user_id'] = $this->User_model->user_id;
 		}
+		
 		if($this->User_model->temp_lang != '')
 		{
 			$action .= '/lang/'.$this->User_model->temp_lang;
@@ -175,7 +176,7 @@ class User extends MY_Controller
 		$form .= form_fieldset($this->cms_labels['user_info']);
 		$form .= "<p>".$this->cms_labels['user_info_fields_req']."</p>\r";
 
-		if($this->session->userdata('admin') === 1)
+		if($this->session->userdata('admin') == 1)
 		{
 			$options = array(0 => $this->cms_labels['basic_user'], 1  => $this->cms_labels['admin']);
 
@@ -184,10 +185,14 @@ class User extends MY_Controller
 			$form .= form_dropdown('admin', $options, $this->User_model->admin);		
 			$form .= "</p>\r";
 
-		} else {
+		} else if ($this->User_model->admin != '') {
 			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"{$this->User_model->admin}\" />\r";
 		}
-
+		else
+		{
+			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"0\" />\r";
+		}
+		
 		$params = array(
 		'name'        => 'name_first',
 		'id'          => 'name_first',
@@ -241,8 +246,6 @@ class User extends MY_Controller
 		$form .= form_dropdown('default_lang', $options, $this->User_model->default_lang);		
 		$form .= "</p>\r";
 
-
-
 		$form .= form_fieldset_close("\r"); 
 
 		$form .= form_fieldset($this->cms_labels['password']);
@@ -285,39 +288,53 @@ class User extends MY_Controller
 		$form .= form_dropdown('meta_lang', $options, $this->User_model->temp_lang);		
 		$form .= "</p>\r";
 		
-		$this->User_model->load_user_metadata();
-		
+		if($this->form_success != -1)
+		{
+			$this->User_model->load_user_metadata();
+		}
+
 		foreach($this->User_model->metadata as $index => $fd)
 		{
+			$md =& $fd;
+			
+			if(!array_key_exists('field_needs_lang',$fd) || !array_key_exists('field_input_type',$fd))
+			{
+				// get field info
+				$this->User_model->temp_id = $index;
+				$this->User_model->load_field();
+				$md['field_needs_lang'] = $this->User_model->field_needs_lang;
+				$md['field_input_type'] = $this->User_model->field_input_type;
+
+			}
 
 			// hidden fields
 			$form_options = array(
 			'field_id[]' =>  $index,
-			'field_ref_name[]' =>  $fd['field_ref_name'],
-			'meta_id[]' => $fd['meta_id'],
-			'required[]' =>  $fd['required'],
-			'field_needs_lang[]' => $fd['field_needs_lang']
+			'field_ref_name[]' =>  $md['field_ref_name'],
+			'meta_id[]' => $md['meta_id'],
+			'required[]' =>  $md['required'],
+			'field_needs_lang[]' => $md['field_needs_lang']
 			);
 			$form .= form_hidden($form_options);
 
 			$this->User_model->label_scope = 'field';
 			$this->User_model->temp_id = $index;
 
-			$tmp_label = $fd['field_ref_name'];
+			$tmp_label = $md['field_ref_name'];
 			if($this->User_model->load_label())
 			{
 				$tmp_label = $this->User_model->label;
 			}
 			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $fd['field_ref_name']);
+			$form .= form_label($tmp_label, $md['field_ref_name']);
 			$form_options = array(
-			'id' => $fd['field_ref_name'],
+			'id' => $md['field_ref_name'],
 			'name' => 'value_'.$index,
-			'value' => $fd['value'],
-			'class' => $fd['field_input_type']
+			'value' => $md['value'],
+			'class' => $md['field_input_type']
 			);
 
-			switch($fd['field_input_type']) {
+			switch($md['field_input_type']) {
 
 			case 'directory':
 				$this->load->model('Media_model');
@@ -331,7 +348,7 @@ class User extends MY_Controller
 					$dir_vals[$temp_dir_val] = $temp_dir_val;
 				}
 				
-				$form .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				$form .= form_dropdown($form_options['name'], $dir_vals, $md['value']);
 				break;
 			case 'file':
 				$this->load->model('Media_model');
@@ -352,11 +369,11 @@ class User extends MY_Controller
 					
 				}
 
-				$form .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				$form .= form_dropdown($form_options['name'], $dir_files, $md['value']);
 				break;
 			case 'textarea' || 'richtext':
 				$form_options['cols'] = 38;
-				$html .= ph_form_textarea($form_options);
+				$form .= ph_form_textarea($form_options);
 				break;
 			default:
 				$form .=  form_input($form_options);
@@ -436,6 +453,58 @@ class User extends MY_Controller
 
 			// validate and process if all valid
 			$form_valid = $this->form_validation->run();
+			
+			// get form values for re-population
+			if($this->input->post('site_rel_id') != '')
+			{
+				$this->User_model->site_rel_id = $this->input->post('site_rel_id');
+			}
+			$this->User_model->admin = $this->input->post('admin');
+			
+			$this->User_model->name_first = $this->input->post('name_first');
+			$this->User_model->name_last = $this->input->post('name_last');
+			$this->User_model->username = $this->input->post('username');
+			$this->User_model->timezone = $this->input->post('timezone');
+			$this->User_model->default_lang = $this->input->post('default_lang');
+			$this->User_model->email = $this->input->post('email');
+
+			$this->User_model->temp_lang = $this->input->post('meta_lang');
+
+			$user_meta_ids = $this->input->post('meta_id');
+			$fields = $this->input->post('field_id');
+			$field_names = $this->input->post('field_ref_name');
+			$needs_lang = $this->input->post('field_needs_lang');
+			$required_fds = $this->input->post('required');
+
+			$tmp_meta = array();
+
+			foreach($fields as $index => $fd_id)
+			{
+				$row_key = strval($fd_id);
+				$val_lbl = 'value_'.$fd_id;
+				$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
+				
+				$tmp_lang = '';
+				if($needs_lang[$index] == 1)
+				{
+					$tmp_lang = $this->input->post('meta_lang');
+				}
+				
+				$tmp_meta[$row_key] = array(
+				'meta_id' => $user_meta_ids[$index],
+				'scope' => 'users',
+				'rel_id' => $this->User_model->user_id,
+				'field_id' => $fd_id,
+				'field_ref_name' => $field_names[$index],
+				'value' => $value,
+				'lang_ISO_639_3' => $tmp_lang,
+				'required' => $required_fds[$index]
+				);
+
+			}
+
+			// end re-population
+
 			if ($form_valid)
 			{
 				if($this->input->post('user_id') != '')
@@ -455,53 +524,6 @@ class User extends MY_Controller
 				{
 					$this->User_model->tmp_pwd_conf = $this->input->post('password_confirm');
 				}
-				if($this->input->post('site_rel_id') != '')
-				{
-					$this->User_model->site_rel_id = $this->input->post('site_rel_id');
-				}
-				$this->User_model->admin = $this->input->post('admin');
-				
-				$this->User_model->name_first = $this->input->post('name_first');
-				$this->User_model->name_last = $this->input->post('name_last');
-				$this->User_model->username = $this->input->post('username');
-				$this->User_model->timezone = $this->input->post('timezone');
-				$this->User_model->default_lang = $this->input->post('default_lang');
-				$this->User_model->email = $this->input->post('email');
-
-				$this->User_model->temp_lang = $this->input->post('meta_lang');
-
-				$user_meta_ids = $this->input->post('meta_id');
-				$fields = $this->input->post('field_id');
-				$field_names = $this->input->post('field_ref_name');
-				$needs_lang = $this->input->post('field_needs_lang');
-				$required_fds = $this->input->post('required');
-
-				$tmp_meta = array();
-
-				foreach($fields as $index => $fd_id)
-				{
-					$row_key = strval($fd_id);
-					$val_lbl = 'value_'.$fd_id;
-					$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
-					
-					$tmp_lang = '';
-					if($needs_lang[$index] == 1)
-					{
-						$tmp_lang = $this->input->post('meta_lang');
-					}
-					
-					$tmp_meta[$row_key] = array(
-					'meta_id' => $user_meta_ids[$index],
-					'scope' => 'users',
-					'rel_id' => $this->User_model->user_id,
-					'field_id' => $fd_id,
-					'field_ref_name' => $field_names[$index],
-					'value' => $value,
-					'lang_ISO_639_3' => $tmp_lang,
-					'required' => $required_fds[$index]
-					);
-	
-				}
 
 				if($this->User_model->update_user())
 				{
@@ -516,13 +538,16 @@ class User extends MY_Controller
 				if(count($this->User_model->messages) === 0)
 				{
 					$this->User_model->messages[] = 'User info has been saved successfully';
+					$this->form_success = 1;
 				}
-
 
 			}
 			else
 			{
 				$this->User_model->messages[] = validation_errors();
+				$this->User_model->metadata = $tmp_meta;
+				$this->form_success = -1;
+
 			}		
 
 		} // end from processing
