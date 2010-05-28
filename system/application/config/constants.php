@@ -51,8 +51,12 @@ define('URI_SEPARATOR', '-');
 // salt length for password hashes - DO NOT CHANGE!
 define('SALT_LENGTH', 10);
 
-// document root relative path to media files
+// server path of install without trailing slash
 define('ROOT_REL','/'.trim(FCPATH,'/'));
+// path of install relative to document root
+define('BASE_PATH',preg_replace("#^(.*)/index.php(.*)#", "$1", $_SERVER['PHP_SELF']));
+
+// document root relative path to media files
 define('MEDIA_PATH_ORIG', '/media/originals');
 define('MEDIA_PATH_CACHE', '/media/cache');
 define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\">phSite CMS</a></p>\r");

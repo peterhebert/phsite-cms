@@ -8,8 +8,8 @@ echo $title_tag.' | ';
 }
 ?>phSite CMS</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo $base_path; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo $base_path; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
 <?php if (isset($custom_header)){
 	echo $custom_header;
 }

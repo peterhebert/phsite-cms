@@ -58,20 +58,15 @@ class MY_Controller extends Controller {
 
 	function _load_site_metadata() {
 
-		$base_raw = $_SERVER['PHP_SELF'];
-		$base = preg_replace("#^(.*)/index.php(.*)#", "$1", $base_raw);
-		
 		$site_meta = array();
 		
-		$this->data['base_path'] = $base;
-
 		$this->Site_model->load_site();
 		if($this->Site_model->temp_lang == '')
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
 		$site_meta['lang'] = $this->Site_model->temp_lang;
-		$this->data['theme_path'] = $base.'/system/application/views/themes/'.$this->Site_model->theme.'/';
+		$this->data['theme_path'] = BASE_PATH.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
 		$this->Site_model->temp_id = $this->Site_model->site_id;

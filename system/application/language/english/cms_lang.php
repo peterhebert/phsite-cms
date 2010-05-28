@@ -91,6 +91,12 @@ $lang['cms_labels'] = array(
 'img_size_md' => "Medium image size",
 'img_size_sm' => "Small image size",
 'img_size_th' => "Thumbnail image size",
+
+'img_lg' => "Large",
+'img_md' => "Medium",
+'img_sm' => "Small",
+'img_th' => "Thumbnail",
+
 'input_type' => "Input type",
 'insert_failure' => "Could not insert '%s'",
 'insert_success' => "'%s' inserted successfully",
