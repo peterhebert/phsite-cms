@@ -556,13 +556,14 @@ class Content_model extends MY_Model {
 
 		$this->db->where('parent_id', $parent);
 		$this->db->where('content_id !=', $parent);
-		
+
 		$query = $this->db->get('c_content');
-		
+
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
 			{
+				$this->reset_vars();
 				$info = array(
 				'content_id' => $row->content_id,
 				'user_id' => $row->user_id,
@@ -605,15 +606,15 @@ class Content_model extends MY_Model {
 				$this->scope = 'content';
 				$this->temp_id = $this->content_id;
 				$this->load_metadata();
+				
 				foreach($this->metadata as $field)
 				{
 					$info[$field['field_ref_name']] = encode_entities($field['value']);
 				}
 
-				$this->reset_vars();
 				$info['children'] = $this->get_descendant_content($row->content_id);
 				$descendants[] = $info;
-		   }
+			}
 		}
 		
 		return $descendants;

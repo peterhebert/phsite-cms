@@ -4,8 +4,14 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Jquery File Tree</title>
 
-<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" type="text/css" rel="stylesheet" />	
-<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" type="text/css" rel="stylesheet" />	
+<!-- Yahoo User Interface Reset CSS -->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.1/build/reset/reset-min.css">
+
+<!--
+<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" type="text/css" rel="stylesheet" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" type="text/css" rel="stylesheet" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" type="text/css" rel="stylesheet" />
+-->
 <!-- JQuery File Tree -->
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-ui-min.js"></script>
@@ -18,7 +24,7 @@ function openFile(file)
 {
 	$('input#file').val(file);
 	
-	$.post("./image/ajax_preview", { file: $('#file').val() },
+	$.post("../image/ajax_preview", { file: $('#file').val() },
 		function(data){
 		$('#preview').html(data);
 	});
@@ -26,7 +32,7 @@ function openFile(file)
 
 function doEmbed()
 {
-	$.post("./image/embed", { file: $('#file').val(), size: $('#dimensions').val() },
+	$.post("../image/embed", { file: $('#file').val(), size: $('#dimensions').val() },
 		function(data){
 		$('#embed').html(data);
 	});
@@ -50,8 +56,6 @@ $().ready(function(){
 });
 
 --></script>
-<link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 	<div class="padded" id="page">

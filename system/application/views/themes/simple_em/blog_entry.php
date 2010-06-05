@@ -71,13 +71,10 @@ if(isset($content['keyword_links']))
 			</div>
 			<div class="float w2">
 				<?php
-				if(isset($menu_title))
+				if(isset($menu))
 				{
-					echo "<h3>{$menu_title}</h3>\r";
-				}
-				if(isset($menu) && $menu != '')
-				{
-					echo $menu;
+					echo "<h4>{$menu_title}</h4>\r";
+					echo build_menu($menu,2);
 				}
 				?>
 			</div>

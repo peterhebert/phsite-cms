@@ -657,10 +657,10 @@ class Content extends MY_Controller
 		$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
 		$html .= "</p>\r";
 
-
+		$this->load->config('mime_info');
 		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
 		$mime_labels = $this->lang->line('mime');
-		$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+		$mime_icons = $this->config->item('mime_icons');
 		
 		if(count($this->Content_model->attachments) > 0)
 		{
@@ -697,13 +697,17 @@ class Content extends MY_Controller
 						$html .= "</div>";
 					}
 
-					if(array_key_exists($ext,$mime_icon_exts))
+					if(in_array($ext,$mime_icons))
 					{
-						$html .= "<span class=\"icon ext_{$ext}\">";
+						$html .= "<span class=\"file ext_{$ext}\">";
+					}
+					else if($mime_cat != 'application')
+					{
+						$html .= "<span class=\"icon icon_{$mime_cat}\">";
 					}
 					else
 					{
-						$html .= "<span class=\"icon icon_{$mime_cat}\">";
+						$html .= "<span class=\"file\">";
 					}
 
 					if($this->Media_model->title != '' && $this->Media_model->title != $filename)

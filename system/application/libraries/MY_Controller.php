@@ -138,7 +138,6 @@ class MY_Controller extends Controller {
 			}
 		}
 		
-
 		if($this->Site_model->temp_lang == '')
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;

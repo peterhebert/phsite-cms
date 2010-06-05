@@ -134,18 +134,17 @@ class Cms extends MY_Controller
 	function login()   
 	{  
 
-		$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
-		$this->_load_site_metadata();
-		$this->_load_cms_labels();
-
-		$this->load->library('form_validation');
-
 		// if already logged in, redirect
 		if($this->session->userdata('user_id'))
 		{
 			redirect('cms');
 			exit();
 		}
+
+		$this->_load_cms_labels();
+		$this->_load_site_metadata();
+
+		$this->load->library('form_validation');
 
 		if(!$this->session->userdata('attempts'))
 		{
@@ -232,6 +231,10 @@ class Cms extends MY_Controller
 
 		$this->data['action'] = site_url("cms/login");
 
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['login'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+		
 		$this->load->view('cms/login',$this->data);  
 	} 
 

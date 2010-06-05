@@ -164,6 +164,7 @@ $lang['cms_labels'] = array(
 'password_choose' => "Choisissez un mot de passe",
 'password_confirm_new' => "Confirmez votre nouveau mot de passe",
 'password_confirm' => "Confirmez votre mot de passe",
+'password_forgot' => "Oubli&eacute; ton mot de passe?",
 'password' => "Mot de passe",
 'path_dest' => "Dossier destination",
 'path_or_new' => "ou cr&eacute;er un nouveau dossier",

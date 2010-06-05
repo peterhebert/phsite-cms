@@ -5,7 +5,9 @@ class Parser extends MY_Controller {
 	var $temp_uri;
 	var $view;
 	var $segments = array();
-	var $breadcrumb_links = array();
+	var $segment_count = 0, $result_count = 0;
+
+	var $breadcrumb_links = array(), $matches = array();
 	var $page;
 
 	var $parent_title;
@@ -23,16 +25,73 @@ class Parser extends MY_Controller {
 	
     function index()
     {
+		$this->data['parents'] = array();
 
 		$this->Content_model->link_mode = 0;
 		$this->Content_model->lang_mode = $this->Content_model->lang_count;
 
 		// get all parameters from uri
 		$this->_parse_uri();
-		
-		if(count($this->segments) > 0)
-		{
 
+		switch($this->segment_count)
+		{
+		
+		case 0:
+			// no segments - do home page
+			$this->_home();
+			break;
+		
+		case 1:
+			$this->Content_model->temp_value = $this->segments[0];
+			$this->Content_model->temp_id = '';
+			$results = $this->Content_model->find_by_uri();
+
+			if($results)
+			{
+	
+				$this->Content_model->content_id = $results[0]['content_id'];
+				$this->Content_model->user_id = $results[0]['user_id'];
+				$this->Content_model->parent_id = $results[0]['parent_id'];
+				$this->Content_model->type_id = $results[0]['type_id'];
+				$this->Content_model->type_uri_name = $results[0]['type_uri_name'];
+				$this->Content_model->date_created = $results[0]['date_created'];
+				$this->Content_model->date_end_expiry = $results[0]['date_end_expiry'];
+				$this->Content_model->date_updated = $results[0]['date_updated'];
+				$this->Content_model->publish = $results[0]['publish'];
+				$this->Content_model->title_id = $results[0]['title_id'];
+				$this->Content_model->title = $results[0]['title'];
+				$this->Content_model->subtitle = $results[0]['subtitle'];
+				$this->Content_model->uri_title = $results[0]['uri_title'];
+				$this->Content_model->keywords = $results[0]['keywords'];
+				$this->Content_model->title_updated = $results[0]['title_updated'];
+			
+				// prepare breadcrumbs
+				$this->temp_uri .= '/'.$results[0]['uri_title'];
+				$this->breadcrumb_links[] = anchor('', $this->cms_labels['home']);
+				$this->breadcrumb_links[] = anchor($this->temp_uri, $results[0]['title']);
+
+				// load metadata
+				$this->Content_model->temp_id = $results[0]['type_id'];
+				$this->Content_model->scope = 'types';
+				
+				$this->Content_model->list_fields_related();
+				$this->Content_model->scope = 'content';
+				$this->Content_model->temp_id = $this->Content_model->content_id;
+				$this->Content_model->load_metadata();
+
+				$this->_prepare_view();
+
+			}
+			else
+			{
+				$this->data['header'] = $this->cms_labels['server_error_404_header'];
+				$this->data['message'] = sprintf($this->cms_labels['server_error_404_message'],$this->segments[0]);
+				$this->view = 'error_404';
+			}
+
+			break;
+		
+		default:
 			// if site preferences specify a vaild home page ID, then omit home page from menu
 			if($this->Site_model->home_content_id > 0)
 			{
@@ -46,33 +105,27 @@ class Parser extends MY_Controller {
 
 			}
 
-			$this->_find_content();
-			$this->_prepare_view();
-		}
-		else
-		{
-			// if site preferences specify a vaild home page ID, then redirect and omit home page from menu, otherwise auto-generate home page
-			if($this->Site_model->home_content_id > 0)
+			if($this->_find_content())
 			{
-				$this->Content_model->content_id = $this->Site_model->home_content_id;
-				$this->Content_model->omit_id = $this->Site_model->home_content_id;
-				
-				if($this->Content_model->content_exists() === TRUE)
-				{
-					$this->Content_model->load_content();
-					$this->_prepare_view();
-				}
-				else
-				{
-					$this->_home();
-					
-				}
-				
+				$this->_prepare_view();
 			}
 			else
 			{
-				$this->_home();
+				$this->data['header'] = $this->cms_labels['server_error_404_header'];
+
+				$html = "<p>".sprintf($this->cms_labels['server_error_404_message'],implode('/',$this->segments))."</p>";
+				if(count($this->matches) > 0)
+				{
+					$html .= "<p>Possible matches:</p>\r";
+					$html .= ul($this->matches);
+				}
+				
+				$this->data['message'] = $html;
+
+				$this->view = 'error_404';
 			}
+
+			break;
 		}
 
 		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
@@ -87,8 +140,14 @@ class Parser extends MY_Controller {
 		{
 			$this->data['html_header'] = $this->load->view($header_view,$this->data,TRUE);
 		}
+		$view_full = APPPATH.'views/'.$this->view.'.php';
+		if(!file_exists($view_full))
+		{
+			$this->view = 'display';
+		}
 		
 		$this->load->view($this->view,$this->data);
+
 
     }
 
@@ -113,30 +172,39 @@ class Parser extends MY_Controller {
 			$match = FALSE;
 			foreach($patterns as $key => $pattern)
 			{
-				if(preg_match($pattern,$segment))
+				if(preg_match($pattern,$segment) && $params[$key] == '')
 				{
-					
-					if($params[$key] == '')
+					if($key == 'page')
 					{
-						if($key == 'page')
+						if($segment_current == $segment_count)
 						{
-							if($segment_current == $segment_count)
-							{
-								$params[$key] = str_replace('p','',$segment);
-								$match = TRUE;
-								break;
-							
-							}
+							$params[$key] = str_replace('p','',$segment);
+							$match = TRUE;
+							break;
+						
 						}
-						else
+					}
+					else if($key == 'lang')
+					{
+						$this->Content_model->temp_lang = $segment;
+						if($this->Content_model->lang_load())
 						{
 							$params[$key] = $segment;
 							$match = TRUE;
-							break;
+						}
+						else
+						{
+							$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 						}
 						
 					}
-
+					else
+					{
+						$params[$key] = $segment;
+						$match = TRUE;
+						break;
+					}
+					
 				}
 	
 			}
@@ -150,6 +218,7 @@ class Parser extends MY_Controller {
 		}
 
 		$this->segments = $uri_segments;
+		$this->segment_count = count($this->segments);
 
 		if($params['date'] != '')
 		{
@@ -195,11 +264,12 @@ class Parser extends MY_Controller {
 
 		}
 
-		$result_count = count($tree);
-		$last_index = $result_count - 1;
+		$this->result_count = count($tree);
 
+		$last_index = $this->result_count - 1;
 		$this->temp_uri = '';
-		if($result_count > 0)
+		
+		if($this->result_count > 0 && $this->result_count == $this->segment_count)
 		{
 			
 			// create parent hierarchy
@@ -246,6 +316,30 @@ class Parser extends MY_Controller {
 			}
 
 		}
+		else
+		{
+
+			if($this->result_count > 0 )
+			{
+				// generate possible matches or parent list
+				
+				foreach($tree as $index => $vals)
+				{
+					if(is_array($vals))
+					{
+						$this->Content_model->temp_id = $vals['content_id'];
+						$this->temp_uri = $this->Content_model->generate_uri();
+
+						$this->matches[] = anchor($this->temp_uri, $vals['title']);
+			
+					}
+				}
+
+			}
+			return FALSE;
+
+		}
+
 
 	}
 
@@ -354,6 +448,7 @@ class Parser extends MY_Controller {
 
 		$menu = $this->Content_model->get_descendant_content($menu_parent);
 
+		$this->data['menu_title'] = $menu_title;
 		$this->data['menu'] = $menu;
 		
 		// build descendant array
@@ -371,16 +466,36 @@ class Parser extends MY_Controller {
 
 	function _home()
 	{
-		$this->view = 'themes/'.$this->Site_model->theme.'/home';
 
-		$menu = $this->Content_model->get_descendant_content();
+		$home = TRUE;
+		// if site preferences specify a vaild home page ID, then redirect and omit home page from menu, otherwise auto-generate home page
+		if($this->Site_model->home_content_id > 0)
+		{
+			$this->Content_model->content_id = $this->Site_model->home_content_id;
+			$this->Content_model->omit_id = $this->Site_model->home_content_id;
+			
+			if($this->Content_model->content_exists())
+			{
+				$this->Content_model->load_content();
+				$this->_prepare_view();
+				$home = FALSE;
+			}
+		}
+			
+		if($home)
+		{
+			$this->view = 'themes/'.$this->Site_model->theme.'/home';
+	
+			$menu = $this->Content_model->get_descendant_content();
+	
+			$this->data['menu'] = $menu;
+			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
+			
+			// recently added content
+			$this->Content_model->limit = 5;
+			$this->data['recent'] = $this->_recent();
+		}
 
-		$this->data['menu'] = $menu;
-		$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
-		
-		// recently added content
-		$this->Content_model->limit = 5;
-		$this->data['recent'] = $this->_recent();
 	}
 
 	function _recent($parent=NULL)

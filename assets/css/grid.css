@@ -1,0 +1,94 @@
+@charset "UTF-8";
+/* blocks / clearing */
+.block, .wrap { clear:both;}
+.block:after, .wrap:after {
+	 visibility: hidden;
+	 display: block;
+	 font-size: 0;
+	 content: " ";
+	 clear: both;
+	 height: 0;
+	 }
+.block, .wrap { display: inline-block; }
+/* start commented backslash hack \*/
+* html .block, * html .wrap { height: 1%; }
+.block, .wrap { display: block; }
+/* close commented backslash hack */
+
+/*
+grid columns based upon 'normal' text size of 12px
+1 column width of 60px (5em)
+12px (1em) gutter
+em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
+*/
+
+.block {
+	margin-bottom: 1.5em;
+}
+
+/* page wrap for columns - adds 1em padding on left and right; must be used in conjunction with width declaration */
+.wrap {
+	margin: 0px auto;
+	text-align:left;
+}
+
+
+/* columns / floats */
+.column { float: left; margin-right: 1.5em; }
+.float { float: left; }
+.float-right { float: right; }
+
+.nomargin { margin: 0; }
+.padded { padding: 0.75em }
+.pad-h { padding: 0 0.75em }
+.pad-v { padding: 0.75em 0}
+
+/* alignment */
+
+.align-left { text-align: right; }
+.align-right { text-align: right; }
+.align-center { text-align: center; }
+
+
+/* column widths */
+.w1 { width: 5em; }
+.w2 { width: 11.5em; }
+.w3 { width: 18em; }
+.w4 { width: 24.5em; }
+.w5 { width: 31em; }
+.w6 { width: 37.5em; }
+.w7 { width: 44em; }
+.w8 { width: 50.5em; }
+.w9 { width: 57em; }
+.w10 { width: 63.5em; }
+.w11 { width: 70em; }
+.w12 { width: 76.5em; }
+.w13 { width: 83em; }
+.w14 { width: 89.5em; }
+.w15 { width: 96em; }
+.w16 { width: 102.5em; }
+.w17 { width: 109em; }
+.w18 { width: 115.5em; }
+.w19 { width: 122em; }
+.w20 { width: 128.5em; }
+.w21 { width: 135em; }
+.w22 { width: 141.5em; }
+.w23 { width: 148em; }
+.w24 { width: 154.5em; }
+.w25 { width: 161em; }
+.w26 { width: 167.5em; }
+.w27 { width: 174em; }
+.w28 { width: 180.5em; }
+.w29 { width: 187em; }
+.w30 { width: 193.5em; }
+
+/* indents */
+.i1 { margin-left: 6em; }
+.i2 { margin-left: 12.5em; }
+.i3 { margin-left: 19em; }
+.i4 { margin-left: 25.5em; }
+.i5 { margin-left: 32em; }
+.i6 { margin-left: 38.5em; }
+.i7 { margin-left: 45em; }
+.i8 { margin-left: 51.5em; }
+.i9 { margin-left: 58em; }

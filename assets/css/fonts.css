@@ -1,0 +1,168 @@
+html, body { margin: 0; padding: 0;}
+
+/* base font settings */
+body {
+	font: 12px "Lucida Grande", arial, helvetica, clean, sans-serif;
+	*font-size:small;
+	*font:x-small;
+}
+div { margin: 0; padding: 0; }
+
+select, input, button, textarea, button { font:99% "Lucida Grande", arial, helvetica, clean, sans-serif; }
+
+table {
+	font-size:inherit;
+	font:100%;
+}
+
+pre, code, kbd, samp, tt {
+	font-family: monospace;
+	 *font-size:108%;
+	line-height:100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+}
+
+h1 { font-size:200%; margin-bottom:0.75em; } /* size 24/36 margins 0/18 */
+h2 { font-size:	166.667%; line-height:1.8em; margin-top:0.6em; margin-bottom: 0.3em } /* size 20/36 margins 12/6 */
+h3 { font-size:150.00%; line-height: 2em; margin-top: 0.667em; margin-bottom: 0.333em } /* size 18/36 margins 12/6 */
+h4 { font-size:133.333%; line-height: 2.25em; margin-top: 0.75em; margin-bottom: 0.375em; } /* size 16/36 margins 12/6*/
+h5 { font-size:116.667%; line-height: 1.286em; margin-top: 0.857em; margin-bottom: 0.429em; } /* size 14/18 margins 12/6*/
+p, h6 { font-size:100.00%; line-height: 1.5em; margin: .75em 0; } /* size 12/18 margins 9/9 */
+
+ol, ul {
+	list-style-position:outside;
+}
+
+ol {
+	padding-left:3em;
+}
+ul {
+	padding-left: 1.5em;
+}
+
+li {
+	list-style-position:outside;
+	font-size:100%;
+	margin:.75em 0;
+}
+ol, ol li {
+	list-style-type:decimal;
+}
+ul, ul li {
+	list-style-type: disc;
+}
+
+li ol, li ul {
+	padding-top: .75em;
+}
+
+/* superscript/subscript */
+sup, sub { font-size: .667em }
+sup { vertical-align:text-top }
+sub { vertical-align:text-bottom }
+
+/* bold/italic */
+b, strong {font-weight: bold;}
+em, i { font-style:italic; }
+
+/* various semantic tags */
+abbr, acronym { border-bottom: 1px dotted #cccccc;}
+q { font-style: italic;}
+q q { font-weight: bold; color:#666666; }
+dfn { font-weight: bold; color:#333333; }
+blockquote {
+	margin:1.5em;
+	padding: .75em 1.5em;
+	background-color: #eeeeee;
+}
+
+/* tables */
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0px;
+	empty-cells: show;
+	border-top:1px solid #999999;
+	border-left:1px solid #999999;
+	table-layout: fixed;
+	margin: .75em auto;
+}
+table caption {
+	font-weight: bold;
+	vertical-align:bottom;
+	color: #333333;
+	padding: 0 .5em .5em .5em;
+	text-align: center;
+}
+
+table td,
+table th
+{
+	padding: 0.5em;
+	border-bottom:1px solid #999999;
+	border-right:1px solid #999999;
+	vertical-align: top;
+}
+
+table th
+{
+	text-align: center;
+	font-weight: bold;
+	color: #333333;
+}
+
+table thead th
+{
+	vertical-align:bottom;
+}
+
+/* forms */
+form fieldset
+{
+border: solid 1px #cccccc;
+padding: .5em .75em;
+margin-bottom:1.5em;
+}
+form legend
+{
+padding: 0 .5em;
+}
+form input.text
+{
+	border: 1px inset #cccccc;
+	padding: .125em .25em;
+}
+form textarea
+{
+	border: 1px inset #cccccc;
+	padding: .125em .25em;
+	white-space:normal;
+	letter-spacing:
+}
+
+form .align-labels label
+{
+float:left;
+text-align: right;
+margin-right: 1em;
+}
+
+form .align-labels div { clear:both; }
+form .align-labels div:after {
+	 visibility: hidden;
+	 display: block;
+	 font-size: 0;
+	 content: " ";
+	 clear: both;
+	 height: 0;
+}
+form .align-labels div { display: inline-block; }
+/* start commented backslash hack \*/
+* html form .align-labels div { height: 1%; }
+form .align-labels div { display: block; }
+/* close commented backslash hack */

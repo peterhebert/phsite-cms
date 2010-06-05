@@ -3,38 +3,42 @@
 <head>
 <title>Login | phSite</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
+
+<link href="<?php echo BASE_PATH; ?>/assets/css/reset.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/admin.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/admin-mobile.css" rel="stylesheet" type="text/css" media="mobile" />
+
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
-<div id="page">
-	<div class="page-wrap block" id="breadcrumb"><?php echo anchor("cms","phSite CMS"); ?> : Login</div>
-	<div class="page-wrap block">
-		<h2 class="first">Login</h2>
+	<div class="wrap pad-h">
+		<h2 class="first"><?php echo $cms_labels['login']; ?></h2>
 		<?php
-			if (isset($msg)){
-			echo "<div class=\"msg\">{$msg}</div>\n";
-			}
+		if (isset($msg)){
+		echo "<div class=\"msg\">{$msg}</div>\n";
+		}
 
-			if ($showform)
-			{
-			$attributes = array('id' => 'login');
-			echo form_open($action, $attributes);
-			echo "\n";
-			?>
-			<p><label for="username">Username</label> 
-			<input name="username" id="username" type="text" />
-			</p>
-			<p><label for="password">Password</label> 
-			<input name="password" id="password" type="password" />
-			</p>
-			<p><input name="submit" type="submit" value="Submit" /></p>
-			<p><?php echo anchor("cms/forgot_password","Forgot password?"); ?></p>
+		if ($showform)
+		{
+		$attributes = array('id' => 'login');
+		echo form_open($action, $attributes);
+		echo "\n";
+		?>
+			<div class="align-labels">
+				<p><label for="username"><?php echo $cms_labels['username']; ?></label> 
+				<input name="username" id="username" type="text" />
+				</p>
+				<p><label for="password"><?php echo $cms_labels['password']; ?></label> 
+				<input name="password" id="password" type="password" />
+				</p>
+			</div>
+			<p class="indent-label"><input name="submit" type="submit" value="<?php echo $cms_labels['submit']; ?>" /></p>
+			<p><?php echo anchor("cms/forgot_password",$cms_labels['password_forgot']); ?></p>
 		</form>
 		<?php } ?>
 	</div>
-	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
-</div>
+	<div class="wrap footer"><?php require_once('footer.php'); ?></div>
+
 </body>
 </html>

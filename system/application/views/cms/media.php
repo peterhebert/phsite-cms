@@ -10,6 +10,7 @@ echo $title_tag.' | ';
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div id="dialog" title="Delete the selected items?" class="hide">

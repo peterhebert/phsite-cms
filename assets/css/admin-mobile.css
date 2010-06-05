@@ -1,0 +1,33 @@
+@charset "UTF-8";
+/* html */
+
+a { color:#000099; text-decoration:underline}
+a:visited { color:#006699; text-decoration:underline; }
+a:hover { color:#990000; text-decoration:none; }
+
+#masthead
+{
+	background-color:#333333;
+	color: #cccccc;
+	width: 100%;
+}
+
+
+#masthead a { color:#ffffff; text-decoration:underline}
+#masthead a:visited { color:#ffffff; text-decoration:underline; }
+#masthead a:hover { color: #FFFFCC; text-decoration:none; }
+
+.cp-menu
+{
+border:1px solid #dddddd;
+padding:.75em;
+background-color: #FCFCFC;
+}
+#footer
+{
+	border-top:1px solid #dddddd;
+	padding-top:.75em;
+	margin-top: 1.5em;
+	clear:both;
+	text-align: center;
+}

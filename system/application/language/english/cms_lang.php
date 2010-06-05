@@ -170,6 +170,7 @@ $lang['cms_labels'] = array(
 'password_choose' => "Choose password",
 'password_confirm_new' => "Confirm new password",
 'password_confirm' => "Confirm password",
+'password_forgot' => "Forgot Password?",
 'password' => "Password",
 'path_dest' => "Destination path",
 'path_or_new' => "or enter new path",
@@ -209,6 +210,10 @@ $lang['cms_labels'] = array(
 'select_none' => "Deselect all",
 'select_toggle' => "Toggle selection",
 'select' => "Select",
+'server_error_404_header' => "Server Error 404 - Not Found",
+'server_error_404_message' => "Could not find '%s'",
+
+
 'setup' => "Setup",
 'showing_results' => "Showing results %d-%d of %d",
 'site_date_created' => "Date site created",

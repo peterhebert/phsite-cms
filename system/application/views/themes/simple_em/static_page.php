@@ -55,14 +55,7 @@ if(isset($breadcrumb_links))
 
 					echo "<p>";
 
-					if(array_key_exists($att['ext'],$mime_icons))
-					{
-						echo "<span class=\"icon ext_{$att['ext']}\">";
-					}
-					else
-					{
-						echo "<span class=\"icon icon_{$att['mime_cat']}\">";
-					}
+
 					if($att['title'] != '' && $att['title'] != $att['filename'])
 					{
 						$filename = $att['title'];
@@ -71,6 +64,27 @@ if(isset($breadcrumb_links))
 					{
 						$filename = $att['filename'];
 					}
+
+
+
+					if(in_array($att['ext'],$mime_icons))
+					{
+						echo "<span class=\"file ext_{$att['ext']}\">";
+					}
+					else if($mime_cat != 'application')
+					{
+						echo "<span class=\"icon icon_{$mime_cat}\">";
+					}
+					else
+					{
+						echo "<span class=\"file\">";
+					}
+
+
+
+
+
+
 
 					echo anchor($orig_path, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 					echo "</span><br />\r";
@@ -120,20 +134,11 @@ if(isset($breadcrumb_links))
 		<div class="float w2">
 			<?php
 
-				if(count($parents) == 0)
-				{
-					$menu_title = $this->Site_model->title;
-				}
-				else
-				{
-					$menu_title = $parents[0]['title'];
-				}
 				if(isset($menu))
 				{
 					echo "<h4>{$menu_title}</h4>\r";
 					echo build_menu($menu,2);
 				}
-
 			
 			?>
 		</div>

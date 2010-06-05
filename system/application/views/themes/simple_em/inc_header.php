@@ -10,6 +10,7 @@ $title = implode(' | ',$titleA);
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="<?php echo $theme_path; ?>base.css" rel="stylesheet" type="text/css" />
 <link href="<?php echo $theme_path; ?>simple_em.css" rel="stylesheet" type="text/css" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" rel="stylesheet" type="text/css" />
 <?php
 if(isset($content['title']))
 {

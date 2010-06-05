@@ -17,7 +17,8 @@ class File_model extends MY_Model {
 	var $iptc, $exif;
 
 	// directory / file managment 
-	var $dir_base, $dir_current, $dir_list, $dir_list_rel, $file_current, $file_list, $file_count;
+	var $dir_base, $dir_current, $dir_list = array(), $dir_list_rel, $file_current, $file_list = array(), $file_count;
+	var $new_file_list = array(), $new_file_count;
 
 	// track db entries
 	var $exists = FALSE;
@@ -38,97 +39,32 @@ class File_model extends MY_Model {
 		
 	}
 	
-	// list files in directory (DEFAULT is both files and subdirs; 'files' = only files; 'dirs' = only dirs)
-	function list_dir_contents($mode = 'both',$recursive=FALSE) {
-
-		if($this->dir_current == '')
+	function get_new_files($recursive=FALSE,$unique=TRUE)
+	{
+		$this->list_media();
+		$old_files = $this->file_list;
+		
+		$this->list_files($recursive,$unique);
+		
+		$newfiles = array();
+		foreach($this->file_list as $path => $fileinfo)
 		{
-			$this->dir_current = $this->dir_base;
-		}
-		$filepath = $this->dir_current;
-
-		//using the opendir function
-		$dir_handle = @opendir($filepath) or die("Unable to open $filepath");
-		$files = array();
-		$dirs = array();
-
-		switch($mode)
-		{
-			case 'files': 
-				$do_files = TRUE;
-				$do_dirs = FALSE;
-				break;
-			case 'dirs': 
-				$do_files = FALSE;
-				$do_dirs = TRUE;
-				break;
-			default:
-				$do_files = TRUE;
-				$do_dirs = TRUE;
+			if(!array_key_exists($path,$old_files))
+			{
+				$newfiles[$path] = $fileinfo;
+			}
+			
 		}
 		
-		//running the while loop
-		while ($file = readdir($dir_handle)) {
-			$newpath = str_replace('//','/',$filepath.'/'.$file);
-			
-			// ignore all hidden files and directory navigation (.*)
-			$ignore = preg_match("#^\..*$#",$file);
-			if($ignore <= 0) {
-				
-				$this->reset_media_vars();
-				$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
-				
-				// get file information
-				$fileinfo = array(
-				'name' => substr(strrchr($newpath, DIRECTORY_SEPARATOR), 1),
-				'server_path' => $newpath,
-				'file_uri' => $this->file_uri,
-				'size' => filesize($newpath),
-				'date' => filectime($newpath),
-				'readable' => is_readable($newpath),
-				'writable' => is_writable($newpath),
-				'executable' => is_executable($newpath),
-				'fileperms' => fileperms($newpath),
-				);
+		uksort($newfiles,"cmp_dirs");
 
-				
-				if($do_dirs && is_dir($newpath))
-				{
-					if($recursive)
-					{
-						$this->dir_current = $newpath;
-						$subdirs = $this->list_dir_contents($mode,TRUE);
-						if(count($subdirs) > 0)
-						{
-							$fileinfo['subdirs'] = $subdirs;
-						}
-					}
-					$dirs[$file] = $fileinfo;
-				}
+		$this->new_file_list = $newfiles;
+		$this->new_file_count = count($newfiles);
 
-				if($do_files && !is_dir($newpath))
-				{
-					$fileinfo['server_directory'] = dirname($newpath);
-					$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
-					$files[] = $fileinfo;
-				}
-
-			}
-
-		}
-		//closing the directory
-		closedir($dir_handle);
-
-		$this->file_count = count($files);
-		$this->file_list = $files;
-		$this->dir_list = $dirs;
-		$this->reset_media_vars();
-		return $dirs;
 	}
 
-
-	// list files in directory (0 = both files and subdirs; 1 = only files; 2 = only dirs)
-	function list_files() {
+	// list directory contents, update db if necessary
+	function list_files($recursive=FALSE,$unique=TRUE) {
 
 		if($this->dir_current == '')
 		{
@@ -151,6 +87,7 @@ class File_model extends MY_Model {
 				
 				$this->reset_media_vars();
 				$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
+				$file_index = $this->file_uri;
 				
 				// get file information
 				$fileinfo = array(
@@ -164,43 +101,31 @@ class File_model extends MY_Model {
 				'writable' => is_writable($newpath),
 				'executable' => is_executable($newpath),
 				'fileperms' => fileperms($newpath),
-				'extension' => preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file),
 				);
 				
 				if(!is_dir($newpath))
 				{
-					$this->read_file_info();
-					
-					// now put file info in array
-					$this->file_current = $newpath;
-					
-					// if file in db, then load; otherwise get info from file and insert to db
-					$this->update_file();
-						
-					$fileinfo['mime_type'] = $this->mime_type;
-					$fileinfo['mime_cat'] = $this->mime_cat;
-					$fileinfo['title_id'] = $this->title_id;
-					$fileinfo['title'] = $this->title;
-					$fileinfo['uri_title'] = $this->uri_title;
-					$fileinfo['subtitle'] = $this->subtitle;
-					$fileinfo['keywords'] = $this->keywords;
-					$fileinfo['title_updated'] = $this->title_updated;
-					$fileinfo['date_created'] = $this->date_created;
-	
-					if(is_array($this->metadata) && count($this->metadata) > 0)
-					{
-						foreach($this->metadata as $index => $info)
-						{
-							$fileinfo[$info['field_ref_name']] = $info['value'];
-						}
-			
-					}
-			
-					$files[$file] = $fileinfo;
+
+					$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
+					$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
+
+					$files[$file_index] = $fileinfo;
 				}
 				else
 				{
-					$dirs[] = $newpath;
+
+					if($recursive)
+					{
+						// get subdirectory contents
+						$this->dir_current = $newpath;
+						$subdirs = $this->list_files(TRUE);
+
+						$files = array_merge($files,$subdirs['files']);
+						$dirs = array_merge($dirs,$subdirs['dirs']);
+
+					}
+
+					$dirs[$file_index] = $fileinfo;
 				}
 
 			}
@@ -208,15 +133,115 @@ class File_model extends MY_Model {
 		}
 		//closing the directory
 		closedir($dir_handle);
+		unset($fileinfo);
+
+		// get unique basenames from list
+		// if two files in same directory with same basename, image will be ignored
+		// image will be used only for thumbnail of file
+		// ie. mymovie.mp4 could have thumbnail mymovie.jpg
+		
+		if($unique)
+		{
+			$only_files = array();
+			$fnames = array();
+			$exts = array();
+			$new_list = array();
+			$imageTypes = array("jpg","gif","png");
+	
+			foreach ($files as $fpath => $finfo) {
+				$fnames[] = $finfo['path_basename'];
+				$exts[] = strtolower($finfo['extension']);
+				$paths[] = $fpath;
+			}
+	
+			$unique_names = array_count_values($fnames);
+			
+			$unique_list = array();
+			foreach($unique_names as $uname => $times) {
+	
+				$matching_keys = array_keys( $fnames, $uname);
+				
+				if($times > 1) {
+					foreach($matching_keys as $key) {
+						if(!in_array($exts[$key],$imageTypes)) {
+							$newindex = $paths[$key];
+							$newfile = $files[$newindex];
+						}
+					}
+					if(!isset($newfile)) {
+						$newindex = $paths[$matching_keys[0]];
+						$newfile = $files[$newindex];
+					}
+	
+				} else {
+					$newindex = $paths[$matching_keys[0]];
+					$newfile = $files[$newindex];
+				}
+				$unique_list[$newindex] = $newfile;
+				unset($newfile);
+			}
+			
+			$files = $unique_list;
+			unset($unique_list);
+		}
+		// end filter duplicate basenames
+		
+		$updated_files = array();
+		
+		// now go through list and update db
+		foreach ($files as $fpath => $finfo) {
+			$this->reset_media_vars();
+
+			$fileinfo =& $finfo;
+			
+			$this->file_current = $finfo['server_path'];
+			$this->file_uri = $finfo['file_uri'];
+			$this->read_file_info();
+
+			// if file in db, then load; otherwise get info from file and insert to db
+			$this->update_file();
+
+			$fileinfo['media_id'] = $this->media_id;
+			$fileinfo['mime_type'] = $this->mime_type;
+			$fileinfo['mime_cat'] = $this->mime_cat;
+			$fileinfo['title_id'] = $this->title_id;
+			$fileinfo['title'] = $this->title;
+			$fileinfo['uri_title'] = $this->uri_title;
+			$fileinfo['subtitle'] = $this->subtitle;
+			$fileinfo['keywords'] = $this->keywords;
+			$fileinfo['title_updated'] = $this->title_updated;
+			$fileinfo['date_created'] = $this->date_created;
+
+			if(is_array($this->metadata) && count($this->metadata) > 0)
+			{
+				foreach($this->metadata as $index => $info)
+				{
+					$fileinfo[$info['field_ref_name']] = $info['value'];
+				}
+	
+			}
+
+			$updated_files[$fpath] = $fileinfo;
+
+		}
+		
+		$files = $updated_files;
+		
+		uksort($files,"cmp_dirs");
+		uksort($dirs,"cmp_dirs");
 
 		$this->file_count = count($files);
 		$this->file_list = $files;
 		$this->dir_list = $dirs;
+
 		$this->reset_media_vars();
+
+		return array('files' => $files, 'dirs' => $dirs);
 	}
 
 	function update_file() // if current file in db, load; if not in db, insert
 	{
+		
 		if($this->find_media_by_uri())
 		{
 			$this->scope = 'media';
@@ -240,7 +265,7 @@ class File_model extends MY_Model {
 				
 				if($this->title == '')
 				{
-					$this->title = basename($newpath);
+					$this->title = basename($this->file_current);
 				}
 				
 				if($this->temp_lang == '')
@@ -323,16 +348,26 @@ class File_model extends MY_Model {
 			}
 		}
 		
-		$sql = "SELECT * FROM c_media WHERE ".implode(' AND ',$where);
+		$sql = "SELECT * FROM c_media";
+		if(count($where) > 0)
+		{
+			$sql .= " WHERE ".implode(' AND ',$where);
+		}
 		$sql .= " ORDER BY 'file_uri' ASC".$limit;
 		
 		$query = $this->db->query($sql);
 		
+		$file_list = array();
+		
 		if ($query->num_rows() > 0)
 		{
-			$this->file_list = $query->result_array();
+			foreach ($query->result_array() as $row)
+			{
+			   $file_list[$row['file_uri']] =& $row;
+			}
 
 		}
+		$this->file_list = $file_list;
 
 		$this->file_count = $query->num_rows();
 	}

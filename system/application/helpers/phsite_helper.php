@@ -468,5 +468,37 @@ if ( ! function_exists('build_menu'))
 	}
 }
 
+if ( ! function_exists('cmp_dirs'))
+{	
+	function cmp_dirs($a=NULL,$b=NULL)
+	{
+		// split each path by dir separator
+		$aa = explode(DIRECTORY_SEPARATOR,$a);
+		$bb = explode(DIRECTORY_SEPARATOR,$b);
+		
+		$a_count = count($aa);
+		$b_count = count($bb);
+		
+		if($a_count == $b_count)
+		{
+			// do further comparison
+			foreach($aa as $index => $path)
+			{
+				if($path < $bb[$index])
+				{
+					return -1;
+				}
+				if($path > $bb[$index])
+				{
+					return 1;
+				}
+
+			}
+			return 0;
+		}
+		return ($a_count < $b_count) ? -1 : 1;
+		
+	}
+}
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

@@ -12,8 +12,8 @@ class Image extends MY_Controller {
 	function index()
 	{
 
-/*		$this->File_model->list_dir_contents('dirs',TRUE);
-		echo "<p>files</p>\r";
+		$list = $this->File_model->get_new_files(true);
+/*		echo "<p>files</p>\r";
 		echo "<pre>";
 		print_r($this->File_model->file_list);
 		echo "</pre>\r";
@@ -23,6 +23,14 @@ class Image extends MY_Controller {
 		print_r($this->File_model->dir_list);
 		echo "</pre>\r";
 */
+		echo "<p>new files</p>\r";
+		echo "<pre>";
+		print_r($this->File_model->new_file_list);
+		echo "</pre>\r";
+	}
+
+	function browser()
+	{
 
 		$this->_load_cms_labels();
 
