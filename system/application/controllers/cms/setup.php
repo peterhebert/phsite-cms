@@ -11,6 +11,7 @@ class Setup extends MY_Controller
 		$this->load->library('form_validation');		
 	
 		$this->_authenticate();
+
 	}
 	
 	function index()
@@ -43,12 +44,14 @@ class Setup extends MY_Controller
     {
 		$this->load->helper('image');
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['site'];
 		$breadcrumb[] = $this->cms_labels['site_prefs'];
 
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['site_prefs'];
+		$title_tag[] = $this->cms_labels['site'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -67,8 +70,10 @@ class Setup extends MY_Controller
 		{
 			$this->data['msg'] = $msg;
 		}
-		$this->load->view('cms/cms_form',$this->data);
+		$this->_load_cms_menus();
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
+
 	function _form_site_preferences()
     {
 		$action = 'cms/setup/site_preferences';
@@ -76,6 +81,7 @@ class Setup extends MY_Controller
 		$attributes = array('name' => 'site_prefs','id' => 'site_prefs');
 
 		$html = form_open($action, $attributes);
+		$html .= "<div class=\"align-labels label-wide\">";
 
 		// get list of top level pages for home page
 		$form_options = array();
@@ -110,12 +116,17 @@ class Setup extends MY_Controller
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['home_content_type'], 'home_content_type');
-		$html .= form_dropdown('home_content_type', $form_options, $this->Site_model->home_content_type)."<br />\r";
-		$html .= $this->cms_labels['home_content_type_explain']."</p>\r";
+		$html .= form_dropdown('home_content_type', $form_options, $this->Site_model->home_content_type);
+		$html .= "</p>\r";
+		
+		$html .= "<p class=\"indent-wide\">";
+		$html .= $this->cms_labels['home_content_type_explain'];
+		$html .= "</p>\r";
 
 		// now list themes
 
 		$this->Site_model->list_themes();
+		
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['theme'], 'theme');
 
@@ -136,7 +147,7 @@ class Setup extends MY_Controller
 			$width = $this->Site_model->img_size_sm;
 		
 			$html .= "<label class=\"column\" style=\"width: {width}px\">";
-			$path_thumb = $this->Site_model->install_path.'system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
+			$path_thumb = ROOT_REL.'/system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
 			if(file_exists($path_thumb))
 			{
 				
@@ -259,7 +270,10 @@ class Setup extends MY_Controller
 		$html .= form_label($this->cms_labels['img_size_lg'], 'img_size_lg');
 		$html .= form_input($form_options);
 		$html .= "</p>\n";
-		$html .= "<p>";
+
+		$html .= "</div>\r";
+
+		$html .= "<p class=\"indent-wide\">";
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\n";
 
@@ -335,12 +349,14 @@ class Setup extends MY_Controller
 	function site_metadata()
     {
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['site'];
 		$breadcrumb[] = $this->cms_labels['site_metadata'];
 
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['site_metadata'];
+		$title_tag[] = $this->cms_labels['site'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -356,8 +372,9 @@ class Setup extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 		$this->data['sidebar'] = $this->_site_meta_menu();
+		$this->_load_cms_menus();
 
-		$this->load->view('cms/content_edit',$this->data);
+		$this->load->view('cms/cms_form',$this->data);
 	}
 	
 	function _form_site_metadata()
@@ -379,6 +396,8 @@ class Setup extends MY_Controller
 		$attributes = array('name' => 'site_metadata','id' => 'site_metadata');
 
 		$html = form_open($action, $attributes, $hidden);
+
+		$html .= "<div class=\"align-labels label-normal\">\r";
 
 		$form_options = $this->Site_model->langs_dropdown();
 		$html .= "<p>\r";
@@ -497,8 +516,10 @@ class Setup extends MY_Controller
 		$html .= form_label($this->cms_labels['keywords'],'keywords');
 		$html .=  form_textarea($form_options);
 		$html .= "</p>\r";
+
+		$html .= "</div>\r";
 		
-		$html .= "<p>";
+		$html .= "<p class=\"indent-normal\">";
 		$html .= form_submit('submit', 'Save');
 		$html .= "</p>\n";
 
@@ -706,29 +727,33 @@ class Setup extends MY_Controller
 		
 		}
 
-		$html = "<h3 class=\"first\">".$this->cms_labels['fields']."</h3>\r";
-		$html .= '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
+		$html = '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
 		$html .= ul($fields);		$this->data['form'] = $html;
+
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = $this->cms_labels['fields'];
 		
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['fields'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
 		$this->data['title_h1'] = $this->cms_labels['fields'];
 		
-		$this->load->view('cms/cms_form',$this->data);
+		$this->_load_cms_menus();
 
+		$this->load->view('cms/cms_form',$this->data);
 	}
 
 	function field_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = anchor("cms/setup/fields",$this->cms_labels['fields']);
 		$breadcrumb[] = $this->cms_labels['field_editor'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
@@ -736,6 +761,7 @@ class Setup extends MY_Controller
 		$title_tag = array(
 		$this->cms_labels['field_editor'],
 		$this->cms_labels['fields'],
+		$this->cms_labels['data_structure'],
 		$this->cms_labels['setup']
 		);
 		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
@@ -788,6 +814,9 @@ class Setup extends MY_Controller
 		{
 			$this->data['msg'] = $msg;
 		}
+
+		$this->_load_cms_menus();
+
 		$this->load->view('cms/cms_form',$this->data);
 	}
 
@@ -832,6 +861,8 @@ class Setup extends MY_Controller
 
 		$html = form_open($action,$attributes,$hidden)."\r";
 
+		$html .= "<div class=\"align-labels label-wide\">\r";
+
 		// main data
 		$html .= form_fieldset($this->cms_labels['field_info']);
 		$html .= "\r";
@@ -874,6 +905,7 @@ class Setup extends MY_Controller
 		$html .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
+
 		
 		// metadata
 		$html .= form_fieldset($this->cms_labels['field_metadata']);
@@ -920,6 +952,8 @@ class Setup extends MY_Controller
 		$html .= form_input('validation_max',$this->Content_model->validation_max); 
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
+
+		$html .= "</div>\r";
 
 		$html .= "<p>\r";
 		$submit_data = array(
@@ -1004,12 +1038,14 @@ class Setup extends MY_Controller
 	{
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['site'];
 		$breadcrumb[] = $this->cms_labels['site_meta_fields'];
 
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['site_meta_fields'];
+		$title_tag[] = $this->cms_labels['site'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -1025,8 +1061,6 @@ class Setup extends MY_Controller
 		{
 			$this->data['msg'] = $msg;
 		}
-
-
 		
 		$this->load->view('cms/cms_form',$this->data);
 	}
@@ -1177,7 +1211,7 @@ class Setup extends MY_Controller
 	function languages()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
 		$breadcrumb[] = $this->cms_labels['languages'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
@@ -1196,7 +1230,9 @@ class Setup extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 
-		$this->load->view('cms/cms_form',$this->data);
+		$this->_load_cms_menus();
+
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function _form_languages()
@@ -1209,7 +1245,7 @@ class Setup extends MY_Controller
 		
 		// search for lang matches
 		$html = form_open($action,$attributes)."\r";
-		$html .= "<p>";
+		$html .= "<p class=\"align-labels\">";
 		$html .= form_label($this->cms_labels['lang_find'], 'search');
 		$params = array(
 		'name'        => 'find',
@@ -1241,9 +1277,9 @@ class Setup extends MY_Controller
 		$matches = $this->Site_model->matches;
 		if(is_array($matches) && count($matches) > 0)
 		{
-			$html .= "<p>";
+			$html .= "<p class=\"align-labels\">";
 			$html .= form_label($this->Site_model->label);
-			$html .= "<span class=\"radiogroup w4\">";
+			$html .= "<span class=\"radiogroup\">";
 			
 			foreach($matches as $lang)
 			{
@@ -1266,9 +1302,9 @@ class Setup extends MY_Controller
 		}
 
 		if(count($active) > 0) {
-			$html .= "<p>";
+			$html .= "<p class=\"align-labels\">";
 			$html .= form_label($this->cms_labels['langs_activated']);
-			$html .= "<span class=\"radiogroup w4\">";
+			$html .= "<span class=\"radiogroup\">";
 
 			foreach($enabled as $lang) {
 				$params = array(
@@ -1339,12 +1375,14 @@ class Setup extends MY_Controller
 	function content_types()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = $this->cms_labels['content_types'];
 
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['content_types'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -1382,16 +1420,20 @@ class Setup extends MY_Controller
 		
 		}
 
-		$html = "<h3 class=\"first\">".$this->cms_labels['content_types']."</h3>\r";
-		$html .= '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
-		$html .= ul($types);		$this->data['form'] = $html;
-$this->load->view('cms/cms_form',$this->data);
+		$html = '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
+		$html .= ul($types);
+		$this->data['form'] = $html;
+
+		$this->_load_cms_menus();
+		
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 	
 	function content_type_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = anchor("cms/setup/content_types",$this->cms_labels['content_types']);
 		$breadcrumb[] = $this->cms_labels['content_type_editor'];
 
@@ -1399,6 +1441,7 @@ $this->load->view('cms/cms_form',$this->data);
 
 		$title_tag[] = $this->cms_labels['content_type_editor'];
 		$title_tag[] = $this->cms_labels['content_types'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -1425,8 +1468,8 @@ $this->load->view('cms/cms_form',$this->data);
 		// construct sidebar lang links
 		if($this->Content_model->type_id != '')
 		{
-			$sidebar = "<h2>".$this->cms_labels['edit_by_lang']."</h2>";
-
+			$sidebar = "<h4>".$this->cms_labels['edit_by_lang']."</h4>";
+			$sidebar .= "<div class=\"boxed\">\r";
 			$this->Site_model->list_langs();
 			$enabled = $this->Site_model->lang_list;
 			
@@ -1440,6 +1483,7 @@ $this->load->view('cms/cms_form',$this->data);
 			}
 
 			$sidebar .= ul($lang_links);
+			$sidebar .=  "</div>\r";
 
 			$this->data['sidebar'] = $sidebar;
 		}
@@ -1449,6 +1493,8 @@ $this->load->view('cms/cms_form',$this->data);
 		{
 			$this->data['msg'] = $msg;
 		}
+
+		$this->_load_cms_menus();
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
@@ -1482,7 +1528,7 @@ $this->load->view('cms/cms_form',$this->data);
 			$action .= "/lang/".$this->Content_model->temp_lang;
 		}
 
-		$attributes = array('name' => "type_editor", 'id' => "type_editor");
+		$attributes = array( 'name' => "type_editor", 'id' => "type_editor");
 		$hidden = array(
 		'type_id' => $this->Content_model->type_id,
 		'label_id' => $this->Content_model->label_id
@@ -1490,12 +1536,14 @@ $this->load->view('cms/cms_form',$this->data);
 		
 		$html = form_open($action,$attributes,$hidden)."\r";
 
+		$html .= "<div class=\"align-labels label-normal\">\r";
+
 		// main data
-		$html .= "<p class=\"nomargin\">\r";
+		$html .= "<p>";
 		$html .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
 		$html .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
 		$html .= "</p>\r";
-		$html .= "<p class=\"indent\">".$this->cms_labels['note_type_uri_name'];
+		$html .= "<p class=\"indent-normal\">".$this->cms_labels['note_type_uri_name'];
 		$html .= "</p>\r";
 
 		// metadata
@@ -1512,14 +1560,16 @@ $this->load->view('cms/cms_form',$this->data);
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 
+		$html .= "</div>\r";
+
 		// fields
 		$html .= form_fieldset($this->cms_labels['fields']);
 		$html .= "\r";
 
-		$html .= "<table id=\"properties\">\r";
+		$html .= "<table class=\"properties\">\r";
 		$html .= "<thead>\r";
 		$html .= "<tr>\r";
-		$html .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$html .= "<th id=\"hd_name\" class=\"align-left\">".$this->cms_labels['field']."</th>\r";
 		$html .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
 		$html .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
 		$html .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
@@ -1585,7 +1635,7 @@ $this->load->view('cms/cms_form',$this->data);
 			$input_order = form_input($params);
 			
 			$html .= "<tr>\r";
-			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\" class=\"align-left\">".$row_header."</th>\r";
 			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
 			$html .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
 			$html .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
@@ -1705,12 +1755,14 @@ $this->load->view('cms/cms_form',$this->data);
 	function media_types()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = $this->cms_labels['media_types'];
 
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['media_types'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -1747,15 +1799,18 @@ $this->load->view('cms/cms_form',$this->data);
 		
 		}
 
+		$this->_load_cms_menus();
+
 		$html = '<p>'. $this->cms_labels['media_type_mimes']."</p>\r";
 		$html .= ul($types);		$this->data['form'] = $html;
-$this->load->view('cms/cms_form',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function media_type_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = anchor("cms/setup/media_types",$this->cms_labels['media_types']);
 		$breadcrumb[] = $this->cms_labels['media_type_editor'];
 
@@ -1763,6 +1818,7 @@ $this->load->view('cms/cms_form',$this->data);
 
 		$title_tag[] = $this->cms_labels['media_type_editor'];
 		$title_tag[] = $this->cms_labels['media_types'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -1812,6 +1868,8 @@ $this->load->view('cms/cms_form',$this->data);
 			$this->data['msg'] = $msg;
 		}
 
+		$this->_load_cms_menus();
+
 		$this->load->view('cms/cms_form',$this->data);
 	}
 	
@@ -1858,6 +1916,8 @@ $this->load->view('cms/cms_form',$this->data);
 		$html .= $tmp_editing; 
 		$html .= "</h2>\r";
 
+		$html .= "<div class=\"align-labels label-normal\">\r";
+
 		// metadata
 		$options = $this->Media_model->langs_dropdown();
 		$html .= form_fieldset($this->cms_labels['type_metadata']);
@@ -1879,16 +1939,17 @@ $this->load->view('cms/cms_form',$this->data);
 		$html .= form_input($options); 
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
+		$html .= "</div>\r";
 
 		// fields
 		$html .= form_fieldset($this->cms_labels['fields']);
 		$html .= "\r";
 
 
-		$html .= "<table id=\"properties\">\r";
+		$html .= "<table class=\"properties\">\r";
 		$html .= "<thead>\r";
 		$html .= "<tr>\r";
-		$html .= "<th id=\"hd_name\">".$this->cms_labels['field']."</th>\r";
+		$html .= "<th id=\"hd_name\" class=\"align-left\">".$this->cms_labels['field']."</th>\r";
 		$html .= "<th id=\"hd_exists\">".$this->cms_labels['field_use_for_type']."</th>\r";
 		$html .= "<th id=\"hd_req\">".$this->cms_labels['required']."</th>\r";
 		$html .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
@@ -1963,7 +2024,7 @@ $this->load->view('cms/cms_form',$this->data);
 			$input_order = form_input($params);
 			
 			$html .= "<tr>\r";
-			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\" class=\"align-left\">".$row_header."</th>\r";
 			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
 			$html .= "<td headers=\"hd_req row_{$fieldNo}\">".$chk_req."</td>\r";
 			$html .= "<td headers=\"hd_order row_{$fieldNo}\">".$input_order."</td>\r";
@@ -2070,11 +2131,13 @@ $this->load->view('cms/cms_form',$this->data);
 	function lists()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = $this->cms_labels['lists'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['lists'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -2104,20 +2167,23 @@ $this->load->view('cms/cms_form',$this->data);
 		}
 		
 		$this->data['form'] = $html;
+		$this->_load_cms_menus();
 
-		$this->load->view('cms/cms_form',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function list_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/setup",$this->cms_labels['setup']);
+		$breadcrumb[] = $this->cms_labels['setup'];
+		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = anchor("cms/setup/lists",$this->cms_labels['lists']);
 		$breadcrumb[] = $this->cms_labels['list_edit'];
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['list_edit'];
 		$title_tag[] = $this->cms_labels['lists'];
+		$title_tag[] = $this->cms_labels['data_structure'];
 		$title_tag[] = $this->cms_labels['setup'];
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
@@ -2131,6 +2197,7 @@ $this->load->view('cms/cms_form',$this->data);
 		{
 			$this->data['msg'] = $msg;
 		}
+		$this->_load_cms_menus();
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
@@ -2160,7 +2227,7 @@ $this->load->view('cms/cms_form',$this->data);
 		$html = form_open($action,$attributes,$hidden)."\r";
 		$html .= form_fieldset($this->cms_labels['general_info']);
 
-		$html .= "<p>\r";
+		$html .= "<p class=\"align-labels label-normal\">\r";
 		$html .= form_label($this->cms_labels['ref_name'], 'list_ref_name');
 		$html .= form_input('list_ref_name',$this->Content_model->list_ref_name); 
 		$html .= "</p>\r";
@@ -2169,6 +2236,8 @@ $this->load->view('cms/cms_form',$this->data);
 
 		// metadata
 		$html .= form_fieldset($this->cms_labels['field_metadata'])."\r";
+
+		$html .= "<div class=\"align-labels label-normal\">\r";
 
 		$form_options = $this->Content_model->langs_dropdown();
 		$html .= "<p>\r";
@@ -2181,16 +2250,23 @@ $this->load->view('cms/cms_form',$this->data);
 		$html .= form_input('label',$this->Content_model->label); 
 		$html .= "</p>\r";
 
-		$html .= "<div class=\"block\">\r";
-		$html .= form_label($this->cms_labels['list_values'], NULL, array('class' => 'form_label'));
-		$html .= "<div class=\"column w1\">".$this->cms_labels['values']."</div>\r";
-		$html .= "<div class=\"float\">".$this->cms_labels['labels']."</div>\r";
-		$html .= "</div>\r";
+		$html .= "<div>\r";
+		$html .= form_label($this->cms_labels['list_values'], 'listvals');
 
+		$html .= "<table id=\"listvals\">\r";
+
+		$html .= "<thead>\r";
+		$html .= "<tr>\r";
+		$html .= "<th class=\"align-left\">".$this->cms_labels['values']."</th>\r";
+		$html .= "<th class=\"align-left\">".$this->cms_labels['labels']."</th>\r";
+		$html .= "</tr>\r";
+		$html .= "</thead>\r";
+
+		$html .= "<tbody>\r";
 		// existing values
 		foreach($this->Content_model->value_list as $value)
 		{
-			$html .= "<div class=\"indent block\">\r";
+			$html .= "<tr>\r";
 			$html .= form_hidden('val_ids[]', $value['val_id']);
 			
 			$form_options = array(
@@ -2199,9 +2275,9 @@ $this->load->view('cms/cms_form',$this->data);
 			'id'          => 'list_values[]',
 			'value'       => $value['value'],
 			);
-			$html .= "<div class=\"column w1\">";
+			$html .= "<td>";
 			$html .= form_input($form_options); 
-			$html .= "</div>\r";
+			$html .= "</td>\r";
 
 			$form_options = array(
 			'size'        => '25',
@@ -2209,41 +2285,48 @@ $this->load->view('cms/cms_form',$this->data);
 			'id'          => 'list_labels[]',
 			'value'       => $value['label'],
 			);
-			$html .= "<div class=\"float\">";
+			$html .= "<td>";
 			$html .= form_input($form_options); 
-			$html .= "</div>\r";
+			$html .= "</td>\r";
 
-			$html .= "</div>\r";
+			$html .= "</tr>\r";
 		}
 		// new values (5 rows)
 		$i = 1;
 		while ($i <= 5) {
 			$i++;
 
-			$html .= "<div class=\"indent block\">\r";
+			$html .= "<tr>\r";
 			
 			$form_options = array(
 			'size'        => '13',
 			'name'        => 'new_values[]',
 			'id'          => 'new_values[]',
 			);
-			$html .= "<div class=\"column w1\">";
+			$html .= "<td>";
 			$html .= form_input($form_options); 
-			$html .= "</div>\r";
+			$html .= "</td>\r";
 
 			$form_options = array(
 			'size'        => '25',
 			'name'        => 'new_labels[]',
 			'id'          => 'new_labels[]',
 			);
-			$html .= "<div class=\"float\">";
+			$html .= "<td>";
 			$html .= form_input($form_options); 
-			$html .= "</div>\r";
+			$html .= "</td>\r";
 
-			$html .= "</div>\r";
-
+			$html .= "</tr>\r";
 
 		}
+
+		$html .= "</tbody>\r";
+
+		$html .= "</table>\r";
+
+		$html .= "</div>\r";
+
+		$html .= "</div>\r";
 
 		$html .= form_fieldset_close("\r");
 

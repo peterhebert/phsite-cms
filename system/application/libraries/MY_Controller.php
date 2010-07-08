@@ -124,6 +124,48 @@ class MY_Controller extends Controller {
 		$this->data['site'] = $site_meta;
 	}
 
+	function _load_cms_menus()
+	{
+
+		$html = '';
+
+		// content menu
+		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
+		$this->Content_model->list_types();
+
+		$this->data['type_list'] = $this->Content_model->type_list;
+		$this->data['objects'] = $this->load->view('cms/content_types_list',$this->data, true);
+
+
+		$html .= "<ul>\r";
+		$html .= "<li>".anchor("cms/content",$this->cms_labels['content_find'])."</li>\r";
+		$html .= "<li>".anchor("cms/content/site_map",$this->cms_labels['site_map'])."</li>\r";
+		$form_options = $this->Content_model->new_content_dropdown();
+		$html .= "<li class=\"double-spaced\">".$this->cms_labels['content_new']."<br />\r";
+		$html .= form_dropdown('new_content',$form_options).' ';
+		$form_options = array(
+			'name' => 'new_go',
+			'id' => 'new_go',
+			'content' => 'Go',
+			'type' => 'button',
+		);
+		$html .= form_button($form_options);
+		$html .= "</li>\r";
+		$html .= "</ul>\r";
+		$this->data['menu_content'] = $html;
+
+		// setup menu
+		$this->Content_model->temp_value = 'cms/setup/site_metadata';
+		$site_metadata = $this->Content_model->lang_meta_menu();
+		$html = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
+		$this->data['menu_setup'] = $html;
+
+		// media menu
+		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
+		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
+		$html = ul($media_links)."\r";
+		$this->data['menu_media'] = $html;
+	}
 
 	function _load_cms_labels($user=FALSE)
 	{	

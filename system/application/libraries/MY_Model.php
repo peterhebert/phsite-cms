@@ -8,7 +8,7 @@
 class MY_Model extends Model {
 
 	// general variables
-	var $install_path, $scope, $temp_lang, $temp_id, $temp_value;
+	var $scope, $temp_lang, $temp_id, $temp_value;
 	var $messages = array();
 	var $scope_list = array('content','media','types','users','site');
 	var $label_scope_list = array('field','types');
@@ -57,9 +57,6 @@ class MY_Model extends Model {
 	function MY_Model()
 	{	
 		parent::Model();
-
-		$this->install_path = realpath(getcwd());
-
 	}
 
 	function _output_messages()

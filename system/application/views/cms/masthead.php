@@ -1,10 +1,10 @@
 <div id="masthead" class="float block">
-	<div class="wrap padded w13">
-		<div class="column w3">
+	<div class="wrap padded">
+		<div class="column" id="site-id">
 			<h6><?php echo anchor("cms",$cms_labels['phsite_cms']) ?></h6>
 			<p><?php echo $cms_labels['slogan']; ?></p>
 		</div>
-		<div class="float w10 align-right">
+		<div class="column" id="site-admin">
 			<form action="<?php echo site_url("cms/content/search") ?>" method="post" id="site-search">
 				<input name="search-text" id="search-text" type="text" />
 				<input name="search-submit" type="submit" id="search-submit" value="Search" />
@@ -27,6 +27,6 @@
 </div>
 <?php
 if (isset($breadcrumb)){
-	echo "<div class=\"wrap w13\" id=\"breadcrumb\">{$breadcrumb}</div>\n";
+	echo "<div class=\"wrap\" id=\"breadcrumb\">{$breadcrumb}</div>\n";
 }
 ?>

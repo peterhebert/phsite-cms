@@ -73,7 +73,7 @@ class Content extends MY_Controller
 		}
 		
 	
-		$this->load->view('cms/cms_form_no_sidebar',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function _form_list()
@@ -427,7 +427,6 @@ class Content extends MY_Controller
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
 
-		$this->data['sidebar'] = $this->_content_meta_menu();
 		$this->Content_model->load_content_form();
 		
 		$this->_form_edit();
@@ -445,8 +444,10 @@ class Content extends MY_Controller
 		$this->data['title_tag'] = $this->cms_labels['content_editor'];
 		$this->data['title_h1'] = $this->cms_labels['content_editor'];
 		
+		$this->data['sidebar'] = $this->_content_meta_menu();
+		$this->_load_cms_menus();
 
-		$this->load->view('cms/content_edit',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 
 	}
 	function _form_edit()
@@ -455,9 +456,10 @@ class Content extends MY_Controller
 
 		$action = 'cms/content/edit';
 		$my_url = $action;
-		$attributes = array(
+		$form_options = array(
 		'name' => 'content_editor',
-		'id' => 'content_editor'
+		'id' => 'content_editor',
+		'class' => 'collapsible'
 		);
 
 		if($this->Content_model->content_id != '')
@@ -469,15 +471,16 @@ class Content extends MY_Controller
 			$action .= '/lang/'.$this->Content_model->temp_lang;
 		}
 
-		$html = form_open($action, $attributes);
+		$html = form_open($action, $form_options);
 		$html .= form_hidden('content_id',$this->Content_model->content_id);
 		$html .= form_hidden('title_id',$this->Content_model->title_id);
-		
 		$html .= form_hidden('my_url',site_url($my_url));
+
+		$html .= "<div class=\"align-labels label-normal\">\r";
 		
-		$this->data['form_open'] = $html;
-		
-		$html = form_fieldset('Content');
+		// CONTENT fieldset
+
+		$html .= form_fieldset('Content');
 
 		$form_options = $this->Content_model->langs_dropdown();
 		$html .= "<p>";
@@ -638,112 +641,12 @@ class Content extends MY_Controller
 		$html .= "</p>\r";
 
 		$html .= form_fieldset_close();
+		$html .= "</div>\r";
 
-		// show attachments
-		$this->Content_model->list_attachments();
-		$this->Content_model->lang_load();
+		// general info fieldset
+		$html .= "<div class=\"align-labels label-wide\">\r";
 
-		$html .= form_fieldset($this->cms_labels['attachments']);
-		$html .= "<p>";
-		if(count($this->Content_model->attachments) > 0)
-		{
-			$tmp_txt = $this->cms_labels['attachments_manage'];
-		}
-		else
-		{
-			$tmp_txt = $this->cms_labels['attachments_add'];
-		}
-
-		$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
-		$html .= "</p>\r";
-
-		$this->load->config('mime_info');
-		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
-		$mime_labels = $this->lang->line('mime');
-		$mime_icons = $this->config->item('mime_icons');
-		
-		if(count($this->Content_model->attachments) > 0)
-		{
-			foreach($this->Content_model->attachments as $att)
-			{
-				$this->Media_model->reset_media_vars();
-				$this->Media_model->temp_id = $att['media_id'];
-
-				if($this->Media_model->load_media())
-				{
-					$this->Media_model->load_title();
-					
-					// determine edit uri
-					$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
-					if($this->Media_model->temp_lang != '')
-					{
-						$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
-					}
-
-					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
-					$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
-
-					$filename = basename($this->Media_model->file_uri);
-
-					$html .= "<p>";
-
-					// if local image, do thumbnail
-					if($mime_cat == 'image' && $this->Media_model->external == 0)
-					{
-						$html .= "<div class=\"image-left\">";
-						$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
-						$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
-						$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
-						$html .= "</div>";
-					}
-
-					if(in_array($ext,$mime_icons))
-					{
-						$html .= "<span class=\"file ext_{$ext}\">";
-					}
-					else if($mime_cat != 'application')
-					{
-						$html .= "<span class=\"icon icon_{$mime_cat}\">";
-					}
-					else
-					{
-						$html .= "<span class=\"file\">";
-					}
-
-					if($this->Media_model->title != '' && $this->Media_model->title != $filename)
-					{
-						$filename = $this->Media_model->title;
-					}
-
-					$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
-					$html .= "</span><br />\r";
-
-					if(array_key_exists($ext,$mime_labels))
-					{
-						$html .= $mime_labels[$ext];
-					}
-					else
-					{
-						$html .= $this->Media_model->mime_type;
-					}
-					$html .= "</p>\r";
-
-				}
-
-
-			}
-
-		}
-		else
-		{
-			$html .= "<p>";
-			$html .= $this->cms_labels['attachments_none'];
-			$html .= "</p>\r";
-		}
-		$html .= form_fieldset_close();
-		$this->data['form'] = $html;
-
-		$html = form_fieldset($this->cms_labels['general_info']);
+		$html .= form_fieldset($this->cms_labels['general_info'], array('class' => 'closed'));
 
 		$this->Content_model->scope = 'content';
 		$form_options = $this->Content_model->types_dropdown();
@@ -820,14 +723,119 @@ class Content extends MY_Controller
 		$html .= "</p>\n";
 
 		$html .= form_fieldset_close();
-		$this->data['form_meta'] = $html;
 
-		$html = "<p>";
+		// attachments fieldset
+		$this->Content_model->list_attachments();
+		$this->Content_model->lang_load();
+
+		$html .= form_fieldset($this->cms_labels['attachments']);
+		$html .= "<p>";
+		if(count($this->Content_model->attachments) > 0)
+		{
+			$tmp_txt = $this->cms_labels['attachments_manage'];
+		}
+		else
+		{
+			$tmp_txt = $this->cms_labels['attachments_add'];
+		}
+
+		$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
+		$html .= "</p>\r";
+
+		$this->load->config('mime_info');
+		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
+		$mime_labels = $this->lang->line('mime');
+		$mime_icons = $this->config->item('mime_icons');
+		
+		if(count($this->Content_model->attachments) > 0)
+		{
+			$html .= "<div class=\"block margins\">\r";
+			foreach($this->Content_model->attachments as $att)
+			{
+				$html .= "<div class=\"column\">\r";
+				$this->Media_model->reset_media_vars();
+				$this->Media_model->temp_id = $att['media_id'];
+
+				if($this->Media_model->load_media())
+				{
+					$this->Media_model->load_title();
+					
+					// determine edit uri
+					$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
+					if($this->Media_model->temp_lang != '')
+					{
+						$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+					}
+
+					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
+					$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+
+					$filename = basename($this->Media_model->file_uri);
+
+					// if local image, do thumbnail
+					if($mime_cat == 'image' && $this->Media_model->external == 0)
+					{
+						$html .= "<div class=\"image-left\">";
+						$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+						$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+						$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+						$html .= "</div>";
+					}
+
+					if(in_array($ext,$mime_icons))
+					{
+						$html .= "<span class=\"file ext_{$ext}\">";
+					}
+					else if($mime_cat != 'application')
+					{
+						$html .= "<span class=\"icon icon_{$mime_cat}\">";
+					}
+					else
+					{
+						$html .= "<span class=\"file\">";
+					}
+
+					if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+					{
+						$filename = $this->Media_model->title;
+					}
+
+					$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+					$html .= "</span><br />\r";
+
+					if(array_key_exists($ext,$mime_labels))
+					{
+						$html .= $mime_labels[$ext];
+					}
+					else
+					{
+						$html .= $this->Media_model->mime_type;
+					}
+
+				}
+				$html .= "</div>";
+
+			}
+			$html .= "</div>";
+
+		}
+		else
+		{
+			$html .= "<p>";
+			$html .= $this->cms_labels['attachments_none'];
+			$html .= "</p>\r";
+		}
+
+		$html .= form_fieldset_close();
+
+
+		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\n";
-		$html .= form_close();
+		$html .= "</div>";
 
-		$this->data['form_close'] = $html;
+		$html .= form_close();
+		$this->data['form'] = $html;
 
 	}
 
@@ -1001,7 +1009,13 @@ class Content extends MY_Controller
 			$this->Content_model->list_langs();
 			foreach($this->Content_model->lang_list as $llang)
 			{
+				$this->Content_model->clear_title();
+				$this->Content_model->temp_lang = $llang['ISO_639_3'];
+				$this->Content_model->temp_id = $this->Content_model->content_id;
+				$this->Content_model->load_title();
+
 				$temp_link = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$llang['ISO_639_3'];
+
 				if($llang['Native_Name'] != '')
 				{
 					$temp_txt = $llang['Native_Name'];
@@ -1010,6 +1024,14 @@ class Content extends MY_Controller
 				{
 					$temp_txt = $llang['Ref_Name'];
 				}
+				
+
+				if($this->Content_model->title != '')
+				{
+					$temp_txt = $this->Content_model->title." ($temp_txt)";
+				}
+
+				
 				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
 	
@@ -1018,6 +1040,7 @@ class Content extends MY_Controller
 			$my_uri = $this->Content_model->generate_uri();
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
 			
+			$menu .= '<h3>'.sprintf($this->cms_labels['options'],$this->cms_labels['editor'])."</h3>\r";
 			$menu .=  "<ul>\r";
 			$menu .=  "<li>".$my_link."\r";
 			$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
@@ -1077,7 +1100,7 @@ class Content extends MY_Controller
 		$custom_header .= "\r";
 		$this->data['custom_header'] = $custom_header;
 		
-		$this->load->view('cms/cms_form_no_sidebar',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function _form_attachments()

@@ -20,27 +20,9 @@ class Cms extends MY_Controller
 
 		// load list of content types
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
-		$this->Content_model->list_types();
 
-		$this->data['type_list'] = $this->Content_model->type_list;
-		$this->data['objects'] = $this->load->view('cms/content_types_list',$this->data, true);
+		$html = "";
 
-
-		$html = "<h2>{$this->cms_labels['content']}</h2>\r";
-		$html .= "<ul>\r";
-		$html .= "<li>".anchor("cms/content",$this->cms_labels['content_find'])."</li>\r";
-		$html .= "<li>".anchor("cms/content/site_map",$this->cms_labels['site_map'])."</li>\r";
-		$form_options = $this->Content_model->new_content_dropdown();
-		$html .= "<li>".$this->cms_labels['content_new'].'&nbsp; ';
-		$html .= form_dropdown('new_content',$form_options).' ';
-		$form_options = array(
-			'name' => 'new_go',
-			'id' => 'new_go',
-			'content' => 'Go',
-			'type' => 'button',
-		);
-		$html .= form_button($form_options);
-		$html .= "</li>\r";
 		// get recently added pages
 		
 		$this->Content_model->limit = 5;
@@ -50,9 +32,9 @@ class Cms extends MY_Controller
 		if(count($this->Content_model->content_list) > 0)
 		{
 
-			$html .= "<li><strong>{$this->cms_labels['recent_content']}</strong>\r";
+			$html .= "<h2>{$this->cms_labels['recent_content']}</h2>\r";
 			// generate result table
-			$html .= "<table class=\"borders full\">\r";
+			$html .= "<table class=\"left\">\r";
 			$html .= "\t<thead>\r";
 			$html .= "\t\t<tr>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";
@@ -73,7 +55,7 @@ class Cms extends MY_Controller
 				}
 				$cid = $item['content_id'];
 	
-				$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
+				$html .= "\t\t\t<th class=\"align-left\" id=\"content-{$cid}\" headers=\"content-ids\">";
 				$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
 				$html .= "</th>\r";
 	
@@ -103,23 +85,11 @@ class Cms extends MY_Controller
 	
 			$html .= "\t</tbody>\r";
 			$html .= "</table>\r";
-			$html .= "</li>\r";
 		}
-		$html .= "</ul>\r";
 
-		$html .= "<h2>{$this->cms_labels['media']}</h2>\r";
-		
-		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
-		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
-		$html .= ul($media_links)."\r";
 		$this->data['form'] = $html;
 
-		$this->Content_model->temp_value = 'cms/setup/site_metadata';
-		$site_metadata = $this->Content_model->lang_meta_menu();
-		
-		$html = "<p>{$this->cms_labels['phsite_version']} : ".PHSITE_CMS_VERSION."</p>\r";
-		$html .= $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
-		$this->data['sidebar'] = $html;
+		$this->_load_cms_menus();
 
 		$breadcrumb = anchor("",$this->cms_labels['home'],array('rel' => 'external','title' => $this->cms_labels['site_external_link'])).' : ';
 		$breadcrumb .= anchor("cms",$this->cms_labels['phsite_cms']).' : '.$this->cms_labels['phsite_cms_home'];
@@ -127,7 +97,7 @@ class Cms extends MY_Controller
 
 		$this->data['title_h1'] = $this->cms_labels['phsite_cms_home'];
 		
-		$this->load->view('cms/cms_form',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	

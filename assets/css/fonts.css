@@ -2,13 +2,13 @@ html, body { margin: 0; padding: 0;}
 
 /* base font settings */
 body {
-	font: 12px "Lucida Grande", arial, helvetica, clean, sans-serif;
+	font: 12px "Lucida Grande", Verdana, Arial, Helvetica, clean, sans-serif;
 	*font-size:small;
 	*font:x-small;
 }
 div { margin: 0; padding: 0; }
 
-select, input, button, textarea, button { font:99% "Lucida Grande", arial, helvetica, clean, sans-serif; }
+select, input, button, textarea, button { font:99% "Lucida Grande", Verdana, Arial, Helvetica, clean, sans-serif; }
 
 table {
 	font-size:inherit;
@@ -33,6 +33,10 @@ h3 { font-size:150.00%; line-height: 2em; margin-top: 0.667em; margin-bottom: 0.
 h4 { font-size:133.333%; line-height: 2.25em; margin-top: 0.75em; margin-bottom: 0.375em; } /* size 16/36 margins 12/6*/
 h5 { font-size:116.667%; line-height: 1.286em; margin-top: 0.857em; margin-bottom: 0.429em; } /* size 14/18 margins 12/6*/
 p, h6 { font-size:100.00%; line-height: 1.5em; margin: .75em 0; } /* size 12/18 margins 9/9 */
+
+.double-spaced {
+	line-height: 2em;
+}
 
 ol, ul {
 	list-style-position:outside;
@@ -92,6 +96,10 @@ table {
 	table-layout: fixed;
 	margin: .75em auto;
 }
+table.left {
+	margin: .75em 0;
+}
+
 table caption {
 	font-weight: bold;
 	vertical-align:bottom;
@@ -124,7 +132,7 @@ table thead th
 /* forms */
 form fieldset
 {
-border: solid 1px #cccccc;
+border: solid 1px #DDDDDD;
 padding: .5em .75em;
 margin-bottom:1.5em;
 }
@@ -147,13 +155,13 @@ form textarea
 
 form .align-labels label
 {
-float:left;
-text-align: right;
-margin-right: 1em;
+	float:left;
+	text-align: right;
+	margin-right: 1em;
 }
 
-form .align-labels div { clear:both; }
-form .align-labels div:after {
+form .align-labels p, form .align-labels div { clear:both; }
+form .align-labels p:after, form .align-labels div:after {
 	 visibility: hidden;
 	 display: block;
 	 font-size: 0;
@@ -161,8 +169,9 @@ form .align-labels div:after {
 	 clear: both;
 	 height: 0;
 }
-form .align-labels div { display: inline-block; }
+form .align-labels p, form .align-labels div { display: inline-block; }
 /* start commented backslash hack \*/
-* html form .align-labels div { height: 1%; }
-form .align-labels div { display: block; }
+* html form .align-labels p , * html form .align-labels div { height: 1%; }
+form .align-labels p, form .align-labels div { display: block; }
 /* close commented backslash hack */
+

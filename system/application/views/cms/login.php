@@ -6,6 +6,7 @@
 
 <link href="<?php echo BASE_PATH; ?>/assets/css/reset.css" rel="stylesheet" type="text/css" media="all" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/grid.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/admin.css" rel="stylesheet" type="text/css" media="screen" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/admin-mobile.css" rel="stylesheet" type="text/css" media="mobile" />
 
@@ -25,7 +26,7 @@
 		echo form_open($action, $attributes);
 		echo "\n";
 		?>
-			<div class="align-labels">
+			<div class="align-labels label-normal">
 				<p><label for="username"><?php echo $cms_labels['username']; ?></label> 
 				<input name="username" id="username" type="text" />
 				</p>
@@ -33,12 +34,12 @@
 				<input name="password" id="password" type="password" />
 				</p>
 			</div>
-			<p class="indent-label"><input name="submit" type="submit" value="<?php echo $cms_labels['submit']; ?>" /></p>
+			<p class="indent-normal"><input name="submit" type="submit" value="<?php echo $cms_labels['submit']; ?>" /></p>
 			<p><?php echo anchor("cms/forgot_password",$cms_labels['password_forgot']); ?></p>
 		</form>
 		<?php } ?>
 	</div>
-	<div class="wrap footer"><?php require_once('footer.php'); ?></div>
+	<div class="wrap" id="footer"><?php require_once('footer.php'); ?></div>
 
 </body>
 </html>

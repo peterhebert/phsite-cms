@@ -3,15 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Jquery File Tree</title>
+<link href="<?php echo BASE_PATH; ?>/assets/css/reset.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/grid.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/admin.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" rel="stylesheet" type="text/css" />
 
-<!-- Yahoo User Interface Reset CSS -->
-<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.1/build/reset/reset-min.css">
-
-<!--
-<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" type="text/css" rel="stylesheet" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" type="text/css" rel="stylesheet" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" type="text/css" rel="stylesheet" />
--->
 <!-- JQuery File Tree -->
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-ui-min.js"></script>

@@ -159,6 +159,7 @@ $lang['cms_labels'] = array(
 'none' => "Aucun",
 'note_type_uri_name' => "Nota: en changeant ce nom vous devrez aussi changer le nom de fichier du gabarit correspondant.",
 'order' => "Ordre",
+'options' => "Options %s",
 'parent' => "Parent",
 'password_choose_new' => "Choisissez un nouveau mot de passe",
 'password_choose' => "Choisissez un mot de passe",

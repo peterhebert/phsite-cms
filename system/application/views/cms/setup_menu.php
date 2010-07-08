@@ -1,4 +1,3 @@
-<h2>Setup</h2>
 <ul>
 	<li><?php echo $cms_labels['data_structure']; ?>
 		<ul>

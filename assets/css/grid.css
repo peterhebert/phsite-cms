@@ -8,19 +8,12 @@
 	 content: " ";
 	 clear: both;
 	 height: 0;
-	 }
+}
 .block, .wrap { display: inline-block; }
 /* start commented backslash hack \*/
 * html .block, * html .wrap { height: 1%; }
 .block, .wrap { display: block; }
 /* close commented backslash hack */
-
-/*
-grid columns based upon 'normal' text size of 12px
-1 column width of 60px (5em)
-12px (1em) gutter
-em-based block sizes, entire page and containing blocks will enlarge or shrink with browser text size
-*/
 
 .block {
 	margin-bottom: 1.5em;
@@ -34,7 +27,6 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 
 
 /* columns / floats */
-.column { float: left; margin-right: 1.5em; }
 .float { float: left; }
 .float-right { float: right; }
 
@@ -45,7 +37,7 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 
 /* alignment */
 
-.align-left { text-align: right; }
+.align-left { text-align: left; }
 .align-right { text-align: right; }
 .align-center { text-align: center; }
 
@@ -92,3 +84,5 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 .i7 { margin-left: 45em; }
 .i8 { margin-left: 51.5em; }
 .i9 { margin-left: 58em; }
+
+

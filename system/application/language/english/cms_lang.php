@@ -165,6 +165,7 @@ $lang['cms_labels'] = array(
 'none' => "None",
 'note_type_uri_name' => "Note: changing this URI will mean you need to change the filename of your template file for this content type as well.",
 'order' => "Order",
+'options' => "%s options",
 'parent' => "Parent",
 'password_choose_new' => "Choose new password",
 'password_choose' => "Choose password",

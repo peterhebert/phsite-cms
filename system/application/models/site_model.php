@@ -77,12 +77,12 @@ class Site_model extends MY_Model {
 		}
 		$this->lang_load();
 		
-		$theme_folder = $this->install_path.'system/application/views/themes';
+		$theme_folder = ROOT_REL.'/system/application/views/themes';
 		$filepath = $theme_folder;
 
 		$theme_list = array();
 		$dirs = array();
-
+		
 		$dir_handle = @opendir($filepath);
 		if($dir_handle)
 		{
@@ -95,6 +95,7 @@ class Site_model extends MY_Model {
 					$theme_uri = basename($newpath);
 					$dirs[] = $newpath;
 					$theme_info_file = $newpath.'/_theme_info/'.$this->lang_CI_Name.'.txt';
+
 					if(file_exists($theme_info_file))
 					{
 						$theme_info = array();
