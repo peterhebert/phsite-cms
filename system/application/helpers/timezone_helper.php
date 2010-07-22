@@ -65,6 +65,7 @@ if ( ! function_exists('timezone_dropdown'))
 {
 	function timezone_dropdown()
 	{
+
 		$timezones = timezone_identifiers_list();
 		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
 		$locations = array();
@@ -74,8 +75,12 @@ if ( ! function_exists('timezone_dropdown'))
 			$parts = explode('/', $zone);
 		   
 			// Only use "friendly" continent names
-			if (in_array($parts[0],$continents,true) )
+			/*
+			if ($parts[0] != 'UTC' )
 			{       
+			*/
+			if (in_array($parts[0],$continents,true) )
+			{      
 				$locations[$zone] = str_replace('_',' ',$zone);
 			}
 		}
@@ -84,5 +89,62 @@ if ( ! function_exists('timezone_dropdown'))
 	}
 
 }
+
+if ( ! function_exists('timezone_table'))
+{
+	function timezone_table()
+	{
+
+		$timezones = timezone_identifiers_list();
+		$continents = array('Africa','America','Antarctica','Arctic','Asia','Atlantic','Australia','Europe','Indian','Pacific');
+		$locations = array();
+		
+		foreach ($timezones as $zone)
+		{
+			
+			$dateTimeZone = new DateTimeZone($zone);
+			$dateTime = new DateTime("now", $dateTimeZone);
+
+			$offset = timezone_offset_get ( $dateTimeZone , $dateTime );
+			$locations[$offset][] = $zone;
+
+		}
+		ksort($locations);
+		
+		$html = "<select>";
+		foreach ($locations as $offsetVal => $optgroup)
+		{
+			$seconds = $offsetVal;
+			
+			if($offsetVal < 0)
+			{
+				$seconds = $offsetVal * -1;
+				$hours = intval($offsetVal / 3600) * -1;
+			}
+			
+			$offsetHours = intval($offsetVal / 3600);
+			$offsetMinutes = 60 * (($seconds / 3600) - $hours);
+
+			$offsetFormatted = $offsetHours.":".substr ( $offsetMinutes.'00' , 0, 2 );
+
+			if($offsetVal == 0)
+			{
+				$offsetFormatted = "00:00";
+			}
+			
+			$html .= "<optgroup label=\"$offsetFormatted\">\r";
+			foreach ($optgroup as $zone)
+			{
+				$html .= "<option value=\"".$zone."\">".$zone."</option>\r";
+			}
+			$html .= "</optgroup>\r";
+
+		}
+		$html .= "</select>\r";
+		return $html;
+	}
+
+}
+
 /* End of file timezone_helper.php */
 /* Location: ./system/application/helpers/timezone_helper.php */

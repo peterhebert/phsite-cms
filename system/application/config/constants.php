@@ -62,5 +62,10 @@ define('MEDIA_PATH_CACHE', '/media/cache');
 define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" rel=\"external\">phSite CMS</a></p>\r");
 define('PHSITE_CMS_VERSION', "0.1");
 
+// development mode for CMS admin panel
+// TRUE = use individual uncompressed js and css files
+// FALSE = use concatenated and minified js and css files
+define('DEV_MODE', TRUE);
+
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */

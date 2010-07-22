@@ -34,7 +34,7 @@ class Cms extends MY_Controller
 
 			$html .= "<h2>{$this->cms_labels['recent_content']}</h2>\r";
 			// generate result table
-			$html .= "<table class=\"left\">\r";
+			$html .= "<table class=\"dotted\">\r";
 			$html .= "\t<thead>\r";
 			$html .= "\t\t<tr>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";

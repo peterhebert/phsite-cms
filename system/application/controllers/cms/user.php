@@ -8,12 +8,12 @@ class User extends MY_Controller
 	{
 		parent::MY_Controller();
 
+		$this->load->model('Content_model');
 		$this->load->model('User_model');
 		$this->load->helper('form');
 		$this->load->library('session');
 
 		$this->_authenticate();
-		//$this->_load_cms_labels();
 
 	} // end constructor
 
@@ -48,20 +48,21 @@ class User extends MY_Controller
 		{
 			$this->data['list'] = ul($userlist);
 		} else {
-			$this->data['msg'] = 'no users found';
+			$this->data['msg'] = $this->cms_labels['user_none'];
 		}
 
 		$this->data['form'] = ul($userlist);
 
 		$this->data['sidebar'] = $this->_meta_menu();
 
-		$breadcrumb = anchor("cms","phSite CMS").' : ';
-		$breadcrumb .= 'Users';
-		$this->data['breadcrumb'] = $breadcrumb;
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = $this->cms_labels['users'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
-		$this->data['title_tag'] = 'Users ';
-		$this->data['title_h1'] = 'Users';
+		$this->data['title_tag'] = $this->cms_labels['users'];
+		$this->data['title_h1'] = $this->cms_labels['users'];
 
+		$this->_load_cms_menus();
 		
 		$this->load->view('cms/cms_form',$this->data);
 
@@ -115,7 +116,7 @@ class User extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 
-
+		$this->_load_cms_menus();
 
 		$this->load->view('cms/cms_form',$this->data);
 
@@ -127,24 +128,24 @@ class User extends MY_Controller
 		// list active languages
 		$this->User_model->temp_value = 'cms/user/edit/id/'.$this->User_model->user_id;
 
-		$menu = "<h2>Users</h2>\r";
-		$menu .=  "<ul>\r";
-		$menu .=  "<li>".anchor("cms/user/","Edit Users")."</li>\r";
+		$html = "<h2>".$this->cms_labels['users']."</h2>\r";
+		$html .=  "<ul>\r";
+		$html .=  "<li>".anchor("cms/user/",$this->cms_labels['users_edit'])."</li>\r";
 		if($this->session->userdata('admin') == 1)
 		{
-			$menu .=  "<li>".anchor("cms/user/edit",$this->cms_labels['user_new'])."</li>\r";
-			$menu .=  "<li>".anchor("cms/user/user_meta_fields","Edit user metadata fields")."</li>\r";
+			$html .=  "<li>".anchor("cms/user/edit",$this->cms_labels['user_new'])."</li>\r";
+			$html .=  "<li>".anchor("cms/user/user_meta_fields",$this->cms_labels['users_meta_fields'])."</li>\r";
 		}
 		if($this->User_model->user_id != '')
 		{
-			$menu .= "<li>User Metadata\r";
-			$menu .= $this->User_model->lang_meta_menu();
-			$menu .= "</li>\r";
+			$html .= "<li>".$this->cms_labels['user_profile']."\r";
+			$html .= $this->User_model->lang_meta_menu();
+			$html .= "</li>\r";
 		}
-		$menu .=  "</li>\r";
-		$menu .=  "</ul>\r";
+		$html .=  "</li>\r";
+		$html .=  "</ul>\r";
 
-		return $menu;
+		return $html;
 	}
 
 	function _form_edit()
@@ -171,26 +172,28 @@ class User extends MY_Controller
 		}
 		$attributes = array('id' => 'user_editor', 'name' => 'user_editor');
 
-		$form = form_open($action, $attributes, $hidden)."\r";
+		$html = form_open($action, $attributes, $hidden)."\r";
 
-		$form .= form_fieldset($this->cms_labels['user_info']);
-		$form .= "<p>".$this->cms_labels['user_info_fields_req']."</p>\r";
+
+		$html .= form_fieldset($this->cms_labels['user_info']);
+		$html .= "<div class=\"align-labels label-normal\">\r";
+		$html .= "<p>".$this->cms_labels['user_info_fields_req']."</p>\r";
 
 		if($this->session->userdata('admin') == 1)
 		{
 			$options = array(0 => $this->cms_labels['basic_user'], 1  => $this->cms_labels['admin']);
 
-			$form .= "<p>\r";
-			$form .= form_label($this->cms_labels['user_type'], 'admin');
-			$form .= form_dropdown('admin', $options, $this->User_model->admin);		
-			$form .= "</p>\r";
+			$html .= "<p>\r";
+			$html .= form_label($this->cms_labels['user_type'], 'admin');
+			$html .= form_dropdown('admin', $options, $this->User_model->admin);		
+			$html .= "</p>\r";
 
 		} else if ($this->User_model->admin != '') {
-			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"{$this->User_model->admin}\" />\r";
+			$html .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"{$this->User_model->admin}\" />\r";
 		}
 		else
 		{
-			$form .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"0\" />\r";
+			$html .= "<input type=\"hidden\" name=\"admin\" id=\"admin\" value=\"0\" />\r";
 		}
 		
 		$params = array(
@@ -198,57 +201,62 @@ class User extends MY_Controller
 		'id'          => 'name_first',
 		'value'       => $this->User_model->name_first,
 		);
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['name_first'], 'name_first');
-		$form .= form_input($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['name_first'], 'name_first');
+		$html .= form_input($params);
+		$html .= "</p>\r";
 
 		$params = array(
 		'name'        => 'name_last',
 		'id'          => 'name_last',
 		'value'       => $this->User_model->name_last,
 		);
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['name_last'], 'name_last');
-		$form .= form_input($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['name_last'], 'name_last');
+		$html .= form_input($params);
+		$html .= "</p>\r";
 
 		$params = array(
 		'name'        => 'username',
 		'id'          => 'username',
 		'value'       => $this->User_model->username,
 		);
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['username'], 'username');
-		$form .= form_input($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['username'], 'username');
+		$html .= form_input($params);
+		$html .= "</p>\r";
 
 		$params = array(
 		'name'        => 'email',
 		'id'          => 'email',
 		'value'       => $this->User_model->email,
 		);
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['email'], 'email');
-		$form .= form_input($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['email'], 'email');
+		$html .= form_input($params);
+		$html .= "</p>\r";
 
 		$zones = timezone_dropdown();
 		
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['timezone'], '');
-		$form .= form_dropdown('timezone', $zones, $this->User_model->timezone);		
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['timezone'], '');
+		$html .= form_dropdown('timezone', $zones, $this->User_model->timezone);		
+		$html .= "</p>\r";
+
+		$html .= timezone_table();
 
 		$options = $this->User_model->langs_dropdown();
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['default_lang'], 'default_lang');
-		$form .= form_dropdown('default_lang', $options, $this->User_model->default_lang);		
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['default_lang'], 'default_lang');
+		$html .= form_dropdown('default_lang', $options, $this->User_model->default_lang);		
+		$html .= "</p>\r";
 
-		$form .= form_fieldset_close("\r"); 
+		$html .= "</div>\r";
 
-		$form .= form_fieldset($this->cms_labels['password']);
+		$html .= form_fieldset_close("\r"); 
+
+		$html .= form_fieldset($this->cms_labels['password']);
+		$html .= "<div class=\"align-labels label-wide\">\r";
 
 		if ($this->User_model->user_id != '') {
 			$lbl_pwd = $this->cms_labels['password_choose_new'];
@@ -263,30 +271,32 @@ class User extends MY_Controller
 		'value'          => ''
 		);
 		
-		$form .= "<p>\r";
-		$form .= form_label($lbl_pwd, 'password');
-		$form .= form_password($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($lbl_pwd, 'password');
+		$html .= form_password($params);
+		$html .= "</p>\r";
 		
 		$params = array(
 		'name'        => 'password_confirm',
 		'id'          => 'password_confirm',
 		'value'          => ''
 		);
-		$form .= "<p>\r";
-		$form .= form_label($lbl_conf, 'password_confirm');
-		$form .= form_password($params);
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($lbl_conf, 'password_confirm');
+		$html .= form_password($params);
+		$html .= "</p>\r";
 
-		$form .= form_fieldset_close("\r"); 
+		$html .= "</div>\r";
+		$html .= form_fieldset_close("\r"); 
 
-		$form .= form_fieldset($this->cms_labels['user_metadata']);
+		$html .= form_fieldset($this->cms_labels['user_profile']);
+		$html .= "<div class=\"align-labels label-normal\">\r";
 
 		$options = $this->User_model->langs_dropdown();
-		$form .= "<p>\r";
-		$form .= form_label($this->cms_labels['language'], 'meta_lang');
-		$form .= form_dropdown('meta_lang', $options, $this->User_model->temp_lang);		
-		$form .= "</p>\r";
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['language'], 'meta_lang');
+		$html .= form_dropdown('meta_lang', $options, $this->User_model->temp_lang);		
+		$html .= "</p>\r";
 		
 		if($this->form_success != -1)
 		{
@@ -295,100 +305,131 @@ class User extends MY_Controller
 
 		foreach($this->User_model->metadata as $index => $fd)
 		{
-			$md =& $fd;
-			
-			if(!array_key_exists('field_needs_lang',$fd) || !array_key_exists('field_input_type',$fd))
+			$this->User_model->reset_label();
+
+			// get field data if it does not exist
+			if(array_key_exists('field_id',$fd))
 			{
-				// get field info
+				$tmp_ref_name = $fd['field_ref_name'];
+				$tmp_label = $fd['field_ref_name'];
+				$tmp_needs_lang = $fd['field_needs_lang'];
+				$tmp_meta_id = $fd['meta_id'];
+				$tmp_required = $fd['required'];
+				$tmp_input_type = $fd['field_input_type'];
+				$tmp_validation = $fd['field_validation'];
+				$tmp_list_id = $fd['list_id'];
+			}
+			else
+			{
 				$this->User_model->temp_id = $index;
 				$this->User_model->load_field();
-				$md['field_needs_lang'] = $this->User_model->field_needs_lang;
-				$md['field_input_type'] = $this->User_model->field_input_type;
 
+				$tmp_ref_name = $this->User_model->field_ref_name;
+				$tmp_needs_lang = $this->User_model->field_needs_lang;
+				$tmp_input_type = $this->User_model->field_input_type;
+				$tmp_validation = $this->User_model->field_validation;
+				$tmp_list_id = $this->User_model->list_id;
+				$tmp_label = $tmp_ref_name;
+				$tmp_meta_id = '';
+				$tmp_required = '';
 			}
 
 			// hidden fields
 			$form_options = array(
 			'field_id[]' =>  $index,
-			'field_ref_name[]' =>  $md['field_ref_name'],
-			'meta_id[]' => $md['meta_id'],
-			'required[]' =>  $md['required'],
-			'field_needs_lang[]' => $md['field_needs_lang']
+			'field_ref_name[]' =>  $tmp_ref_name,
+			'meta_id[]' => $tmp_meta_id,
+			'required[]' =>  $tmp_required,
+			'field_validation[]' =>  $tmp_validation,
+			'field_needs_lang[]' => $tmp_needs_lang
 			);
-			$form .= form_hidden($form_options);
+			$html .= form_hidden($form_options);
 
 			$this->User_model->label_scope = 'field';
 			$this->User_model->temp_id = $index;
 
-			$tmp_label = $md['field_ref_name'];
+			$tmp_label = $tmp_ref_name;
 			if($this->User_model->load_label())
 			{
 				$tmp_label = $this->User_model->label;
 			}
-			$form .= "<p>\r";
-			$form .= form_label($tmp_label, $md['field_ref_name']);
+
+			$html .= "<p>\r";
+			$html .= form_label($tmp_label, $tmp_ref_name);
+
 			$form_options = array(
-			'id' => $md['field_ref_name'],
+			'id' => $tmp_ref_name,
 			'name' => 'value_'.$index,
-			'value' => $md['value'],
-			'class' => $md['field_input_type']
+			'value' => $fd['value'],
+			'class' => $tmp_input_type
 			);
 
-			switch($md['field_input_type']) {
+			switch($tmp_input_type) {
 
 			case 'directory':
 				$this->load->model('Media_model');
 				$this->Media_model->list_dirs();
 				$media_root = $this->Media_model->dir_base;
 				$dir_list_temp = $this->Media_model->dir_list;
-				$dir_vals[''] = $this->cms_labels['media_root'];
-				
-				foreach($dir_list_temp as $the_dir) {
-					$temp_dir_val = str_replace($media_root,'',$the_dir);
-					$dir_vals[$temp_dir_val] = $temp_dir_val;
+				$dir_vals['/'] = $this->cms_labels['media_root'];
+				if(count($dir_list_temp) > 0)
+				{
+					foreach($dir_list_temp as $the_dir) {
+						$temp_dir_val = str_replace($media_root,'',$the_dir);
+						$dir_vals[$temp_dir_val] = $temp_dir_val;
+					}
 				}
 				
-				$form .= form_dropdown($form_options['name'], $dir_vals, $md['value']);
+				
+				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_files = array('' => $this->cms_labels['media_no_file']);
-				foreach($this->Media_model->dir_list as $index => $dir)
+				$this->User_model->list_attachments();
+				$this->User_model->lang_load();
+
+				$dir_files = array('' => $this->cms_labels['none']);
+
+				if(count($this->User_model->attachments) > 0)
 				{
-					$this->Media_model->dir_current = $dir;
-					$dest_dir = str_replace($media_root,'',$dir);
-
-					$this->Media_model->list_files();
-					foreach($this->Media_model->file_list as $file_path) {
-						$file_rel = str_replace($media_root,'',$file_path);
-						$pinfo = pathinfo($file_path);
-						$dir_files[$file_rel] = $pinfo['basename'];
+					foreach($this->User_model->attachments as $index => $media)
+					{
+						$this->Media_model->reset_media_vars();
+						$this->Media_model->temp_id = $media['media_id'];
+						$this->Media_model->load_media();
+						$this->Media_model->load_title();
+						$dir_files[$this->Media_model->media_id] = $this->Media_model->title;
 					}
-					
 				}
-
-				$form .= form_dropdown($form_options['name'], $dir_files, $md['value']);
+				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
 			case 'textarea' || 'richtext':
 				$form_options['cols'] = 38;
-				$form .= ph_form_textarea($form_options);
+				$html .= ph_form_textarea($form_options);
+				break;
+			case 'select' || 'multi':
+				$this->User_model->temp_id = $tmp_list_id;
+				$this->User_model->load_value_list();
+				$html .= "<pre>";
+				$html .= print_r($this->User_model->value_list,true);
+				$html .= "</pre>\r";
+
+				//$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
 			default:
-				$form .=  form_input($form_options);
+				$html .=  form_input($form_options);
 			}
 
-			$form .= "</p>\r";
+			$html .= "</p>\r";
 		}
 		
-		$form .= form_fieldset_close("\r"); 
+		$html .= "</div>\r";
+		$html .= form_fieldset_close("\r"); 
 
-		$form .= form_submit('submit', $this->cms_labels['save'])."\r";
+		$html .= form_submit('submit', $this->cms_labels['save'])."\r";
 
-		$form .= form_close("\r");
+		$html .= form_close("\r");
 
-		return $form;		
+		return $html;		
 	}
 	
 			
@@ -600,11 +641,11 @@ class User extends MY_Controller
 		$fieldCount = count($this->User_model->field_list);
 		$fieldNo = 1;
 
-		$form .= "<table id=\"properties\">\r";
+		$form .= "<table id=\"properties\" class=\"dotted\">\r";
 		$form .= "<thead>\r";
 		$form .= "<tr>\r";
-		$form .= "<th id=\"fd_name\">".$this->cms_labels['field']."</th>\r";
-		$form .= "<th id=\"fd_exists\">".$this->cms_labels['field_use_for_metadata']."</th>\r";
+		$form .= "<th id=\"fd_name\" class=\"align-left\">".$this->cms_labels['field']."</th>\r";
+		$form .= "<th id=\"fd_exists\">".$this->cms_labels['field_user_profile']."</th>\r";
 		$form .= "<th id=\"fd_req\">".$this->cms_labels['required']."</th>\r";
 		$form .= "<th id=\"fd_order\">".$this->cms_labels['order']."</th>\r";
 		$form .= "</tr>\r";
@@ -665,7 +706,7 @@ class User extends MY_Controller
 			$input_order = form_input($params);
 			
 			$form .= "<tr>\r";
-			$form .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
+			$form .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\" class=\"align-left\">".$row_header."</th>\r";
 			$form .= "<td headers=\"fd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
 			$form .= "<td headers=\"fd_req row_{$fieldNo}\">".$chk_req."</td>\r";
 			$form .= "<td headers=\"fd_order row_{$fieldNo}\">".$input_order."</td>\r";

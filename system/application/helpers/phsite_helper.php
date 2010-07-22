@@ -294,10 +294,6 @@ if ( ! function_exists('ph_form_textarea'))
 			$options['cols'] = 30;
 		}
 
-		if(!array_key_exists('cols',$options))
-		{
-			$options['cols'] = 30;
-		}
 		if(!array_key_exists('rows',$options))
 		{
 			$options['rows'] = 5;
@@ -317,7 +313,7 @@ if ( ! function_exists('ph_form_textarea'))
 		}
 		$encoded = encode_entities($value,TRUE);
 
-		$textarea = "<textarea{$attributes}>$encoded</textarea>";
+		$textarea = "<textarea".$attributes.">".$encoded."</textarea>";
 		return $textarea;
 	}
 }

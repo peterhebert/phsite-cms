@@ -4,3 +4,7 @@ media/cache/*
 assets/js/tiny_mce/themes/advanced/skins/thebigreason/*
 assets/js/tiny_mce/plugins/mediabrowser
 assets/css/styles.html
+assets/js/tinymce/jscripts/tiny_mce/themes/advanced/skins/thebigreason/content.css
+assets/js/tinymce/jscripts/tiny_mce/themes/advanced/skins/thebigreason/dialog.css
+assets/js/tinymce/jscripts/tiny_mce/themes/advanced/skins/thebigreason/img
+assets/js/tinymce/jscripts/tiny_mce/themes/advanced/skins/thebigreason/ui.css
