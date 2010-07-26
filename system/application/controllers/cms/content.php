@@ -614,14 +614,15 @@ class Content extends MY_Controller
 				$form_options['cols'] = 38;
 				$html .= ph_form_textarea($form_options);
 				break;
-			case 'select' || 'multi':
-				$this->Content_model->temp_id = $tmp_list_id;
-				$this->Content_model->load_value_list();
-				$html .= "<pre>";
-				$html .= print_r($this->Content_model->value_list,true);
-				$html .= "</pre>\r";
 
-				//$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+			case 'list':
+				// load list values
+				$this->Content_model->temp_id = $fd['list_id'];
+				$this->Content_model->load_value_list();
+				$listvals = prepare_list_values($this->Content_model->value_list);
+
+				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+
 				break;
 			default:
 				$html .=  form_input($form_options);

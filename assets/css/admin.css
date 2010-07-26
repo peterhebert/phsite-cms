@@ -150,19 +150,34 @@ table.dotted td
 }
 
 /*forms*/
-form span.radiogroup {
-	line-height:2em;
-}
-form .radiogroup label,
 form label.inline,
 form .form-filter label
 {
+	float: none;
+	display: inline;
+	margin: 0 .5em 0 0;
+	width: auto;
+	white-space:nowrap;
+}
+
+form .radiogroup,
+form .align-labels .radiogroup
+{
+	float: left;
+	text-align:left;
+}
+
+form .radiogroup label,
+form .align-labels .radiogroup label
+{
 float: none;
-display: inline;
-margin: 0 .5em 0 0;
+display: block;
+margin: 0;
 width: auto;
 white-space:nowrap;
+text-align:left;
 }
+
 
 form .label-normal fieldset label
 {

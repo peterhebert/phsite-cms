@@ -26,7 +26,7 @@ class MY_Model extends Model {
 	var $input_types = array();
 	var $data_types = array();
 	var $validation_rules = array();
-	var $field_id, $field_ref_name, $field_input_type, $field_validation, $field_needs_lang;
+	var $field_id, $field_ref_name, $field_input_type, $field_allow_multiple, $field_validation, $field_needs_lang;
 	
 	// type variables
 	var $type_id, $type_uri_name, $type_list = array();
@@ -434,6 +434,7 @@ class MY_Model extends Model {
 				'field_input_type' => $row->field_input_type,
 				'field_validation' => $row->field_validation,
 				'field_needs_lang' => $row->field_needs_lang,
+				'field_allow_multiple' => $row->field_allow_multiple,
 				'list_id' => $row->list_id,
 				'required' => $row->required,
 				'order' => $row->order,
@@ -454,13 +455,21 @@ class MY_Model extends Model {
     {
 		$this->field_merge_validation();
 		
+		if($this->field_input_type != 'list')
+		{
+			$this->list_id = 0;	
+			$this->field_allow_multiple = 0;
+		}
+
 		$field_data = array(
 		'field_ref_name' => $this->field_ref_name,
 		'field_input_type' => $this->field_input_type,
 		'field_validation' => $this->field_validation,
 		'field_needs_lang' => $this->field_needs_lang,
+		'field_allow_multiple' => $this->field_allow_multiple,
 		'list_id' => $this->list_id
 		);
+
 		
 		if( $this->field_id != '' )
 		{

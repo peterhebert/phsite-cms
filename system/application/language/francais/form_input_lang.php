@@ -24,12 +24,7 @@ $lang['input_types'] = array(
 'text' => "champ de texte une ligne",
 'textarea' => "champ de texte de plusieures lignes (textarea)",
 'richtext' => "&eacute;diteur de texte format&eacute;",
-/*
-'select' => "menu d&eacute;roulant (select)",
-'checkbox' => "case &agrave; cocher",
-'radio' => "case d'option",
-'password' => "champ de mot de passe",
-*/
+'list' => "liste d'options",
 'file' => "trajet de fichier",
 'directory' => "trajet de r&eacute;pertoire",
 );

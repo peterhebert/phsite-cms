@@ -105,6 +105,23 @@ class User extends MY_Controller
 			$this->User_model->load_user();
 		}
 
+		if(!is_array($this->User_model->metadata) || count($this->User_model->metadata) < 1)
+		{
+
+			$this->User_model->scope = 'users';
+	
+			if ($this->User_model->temp_lang = '')
+			{
+				$this->User_model->temp_lang = $this->User_model->default_lang;
+			}
+			if ($this->User_model->temp_lang = '')
+			{
+				$this->User_model->temp_lang = $this->Site_model->site_default_lang;
+			}
+
+			$this->User_model->load_metadata();
+		}
+
 		$this->data['sidebar'] = $this->_meta_menu();
 		
 		$this->data['form'] = $this->_form_edit();
@@ -174,7 +191,6 @@ class User extends MY_Controller
 
 		$html = form_open($action, $attributes, $hidden)."\r";
 
-
 		$html .= form_fieldset($this->cms_labels['user_info']);
 		$html .= "<div class=\"align-labels label-normal\">\r";
 		$html .= "<p>".$this->cms_labels['user_info_fields_req']."</p>\r";
@@ -243,8 +259,6 @@ class User extends MY_Controller
 		$html .= form_dropdown('timezone', $zones, $this->User_model->timezone);		
 		$html .= "</p>\r";
 
-		$html .= timezone_table();
-
 		$options = $this->User_model->langs_dropdown();
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['default_lang'], 'default_lang');
@@ -298,73 +312,82 @@ class User extends MY_Controller
 		$html .= form_dropdown('meta_lang', $options, $this->User_model->temp_lang);		
 		$html .= "</p>\r";
 		
-		if($this->form_success != -1)
+		$this->User_model->scope = 'users';
+		$this->User_model->list_fields_related();
+		$meta_fields = $this->User_model->field_list;
+		
+
+		if($this->form_success > -1)
 		{
+			if($this->User_model->temp_lang == '' && $this->input->post('meta_lang') != '')
+			{
+				$this->User_model->temp_lang = $this->input->post('meta_lang');
+			}
+			if($this->User_model->temp_lang == '')
+			{
+				$this->User_model->temp_lang = $this->Site_model->site_default_lang;
+			}
 			$this->User_model->load_user_metadata();
 		}
 
+		$tmp_meta = $this->User_model->metadata;
+
+		foreach($meta_fields as $fd_id => $fd)
+		{
+			if(!array_key_exists($fd_id,$tmp_meta))
+			{
+				$tmp_meta[$fd_id] = $meta_fields[$fd_id];
+			}
+		}
+		$this->User_model->metadata = $tmp_meta;
+
+		// now create fields
 		foreach($this->User_model->metadata as $index => $fd)
 		{
 			$this->User_model->reset_label();
 
-			// get field data if it does not exist
-			if(array_key_exists('field_id',$fd))
-			{
-				$tmp_ref_name = $fd['field_ref_name'];
-				$tmp_label = $fd['field_ref_name'];
-				$tmp_needs_lang = $fd['field_needs_lang'];
-				$tmp_meta_id = $fd['meta_id'];
-				$tmp_required = $fd['required'];
-				$tmp_input_type = $fd['field_input_type'];
-				$tmp_validation = $fd['field_validation'];
-				$tmp_list_id = $fd['list_id'];
-			}
-			else
-			{
-				$this->User_model->temp_id = $index;
-				$this->User_model->load_field();
-
-				$tmp_ref_name = $this->User_model->field_ref_name;
-				$tmp_needs_lang = $this->User_model->field_needs_lang;
-				$tmp_input_type = $this->User_model->field_input_type;
-				$tmp_validation = $this->User_model->field_validation;
-				$tmp_list_id = $this->User_model->list_id;
-				$tmp_label = $tmp_ref_name;
-				$tmp_meta_id = '';
-				$tmp_required = '';
-			}
-
 			// hidden fields
 			$form_options = array(
 			'field_id[]' =>  $index,
-			'field_ref_name[]' =>  $tmp_ref_name,
-			'meta_id[]' => $tmp_meta_id,
-			'required[]' =>  $tmp_required,
-			'field_validation[]' =>  $tmp_validation,
-			'field_needs_lang[]' => $tmp_needs_lang
+			'field_ref_name[]' =>  $fd['field_ref_name'] ,
+			'meta_id[]' => $fd['meta_id'],
+			'required[]' =>  $fd['required'],
+			'field_validation[]' =>  $fd['field_validation'],
+			'field_needs_lang[]' => $fd['field_needs_lang']
 			);
 			$html .= form_hidden($form_options);
 
 			$this->User_model->label_scope = 'field';
 			$this->User_model->temp_id = $index;
 
-			$tmp_label = $tmp_ref_name;
+			$tmp_label = $fd['field_ref_name'];
 			if($this->User_model->load_label())
 			{
 				$tmp_label = $this->User_model->label;
 			}
 
 			$html .= "<p>\r";
-			$html .= form_label($tmp_label, $tmp_ref_name);
+			$html .= form_label($tmp_label,  $fd['field_ref_name']);
 
 			$form_options = array(
-			'id' => $tmp_ref_name,
+			'id' =>  $fd['field_ref_name'],
 			'name' => 'value_'.$index,
 			'value' => $fd['value'],
-			'class' => $tmp_input_type
+			'class' => $fd['field_input_type']
 			);
 
-			switch($tmp_input_type) {
+			switch($fd['field_input_type']) {
+			case 'list':
+
+				// load list values
+
+				$this->User_model->temp_id = $fd['list_id'];
+				$this->User_model->load_value_list();
+				$listvals = prepare_list_values($this->User_model->value_list);
+
+				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+
+				break;
 
 			case 'directory':
 				$this->load->model('Media_model');
@@ -406,15 +429,6 @@ class User extends MY_Controller
 				$form_options['cols'] = 38;
 				$html .= ph_form_textarea($form_options);
 				break;
-			case 'select' || 'multi':
-				$this->User_model->temp_id = $tmp_list_id;
-				$this->User_model->load_value_list();
-				$html .= "<pre>";
-				$html .= print_r($this->User_model->value_list,true);
-				$html .= "</pre>\r";
-
-				//$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
-				break;
 			default:
 				$html .=  form_input($form_options);
 			}
@@ -438,9 +452,11 @@ class User extends MY_Controller
 		// if form submitted, process data
 		if($this->input->post('submit') != '')
 		{
+
 			$this->load->library('form_validation');
 
-			// set validation rules
+			// set validation rules for user
+
 			$this->form_validation->set_rules('name_first', $this->cms_labels['name_first'], 'required');
 			$this->form_validation->set_rules('name_last', $this->cms_labels['name_last'], 'required');
 			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash');
@@ -453,38 +469,41 @@ class User extends MY_Controller
 				$this->form_validation->set_rules('password', $this->cms_labels['password'], 'required|min_length[8]|alpha_dash');
 				$this->form_validation->set_rules('password_confirm', $this->cms_labels['password_confirm'], 'required|min_length[8]|alpha_dash|matches[password]');
 			}
-
-			// load custom field list and add validation rules
+			
+			// set validation rules for user metadata
 			$this->User_model->scope = 'users';
 			$this->User_model->list_fields_related();
 
 			$meta_fields = $this->User_model->field_list;
+			
 			foreach($meta_fields as $fd)
 			{
+				// reset validation array
 				$tmp_valid = array();
 
+				// required?
 				if($fd['required'] == 1)
 				{
 					$tmp_valid[] = 'required';
 				}
 
+				// stored validation rules
 				if($fd['field_validation'] != '')
 				{
 					$tmp_valid[] = $fd['field_validation'];
 				}
 				
+				// get field label
 				$lbl_name = $fd['field_ref_name'];
-	
 				$this->User_model->label_scope = 'field';
 				$this->User_model->temp_id = $fd['field_id'];
-	
 				if($this->User_model->load_label())
 				{
 					$lbl_name = $this->User_model->label;
 				}
 
+				// set rules
 				$concat_valid = implode('|', $tmp_valid);
-
 				if($concat_valid != '')
 				{
 					$this->form_validation->set_rules('value_'.$fd['field_id'], $lbl_name, $concat_valid);
@@ -492,104 +511,72 @@ class User extends MY_Controller
 
 			}
 
-			// validate and process if all valid
+			// run form validation
 			$form_valid = $this->form_validation->run();
 			
-			// get form values for re-population
+			// load user info from validated POST data
 			if($this->input->post('site_rel_id') != '')
 			{
 				$this->User_model->site_rel_id = $this->input->post('site_rel_id');
 			}
+			else
+			{
+				$this->User_model->site_rel_id = $this->Site_model->site_id;
+			}
 			$this->User_model->admin = $this->input->post('admin');
-			
 			$this->User_model->name_first = $this->input->post('name_first');
 			$this->User_model->name_last = $this->input->post('name_last');
 			$this->User_model->username = $this->input->post('username');
 			$this->User_model->timezone = $this->input->post('timezone');
 			$this->User_model->default_lang = $this->input->post('default_lang');
 			$this->User_model->email = $this->input->post('email');
-
 			$this->User_model->temp_lang = $this->input->post('meta_lang');
 
-			$user_meta_ids = $this->input->post('meta_id');
-			$fields = $this->input->post('field_id');
+			// load user metadata from validated POST data
+			$meta_ids = $this->input->post('meta_id');
 			$field_names = $this->input->post('field_ref_name');
 			$needs_lang = $this->input->post('field_needs_lang');
 			$required_fds = $this->input->post('required');
-
-			$tmp_meta = array();
+			$field_validation = $this->input->post('field_validation');
+			
+			$fields = $this->input->post('field_id');
 
 			foreach($fields as $index => $fd_id)
 			{
 				$row_key = strval($fd_id);
-				$val_lbl = 'value_'.$fd_id;
-				$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
 				
+				$meta_fields[$row_key]['rf_rel_ref_name'] = $this->input->post('username');
+				$meta_fields[$row_key]['field_validation'] = $field_validation[$index];
+				$meta_fields[$row_key]['meta_id'] = $meta_ids[$index];
+				$meta_fields[$row_key]['rel_id'] = $this->input->post('user_id');
+
+				$val_lbl = 'value_'.$fd_id;
+				$meta_fields[$row_key]['value'] = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
+
 				$tmp_lang = '';
 				if($needs_lang[$index] == 1)
 				{
 					$tmp_lang = $this->input->post('meta_lang');
 				}
-				
-				$tmp_meta[$row_key] = array(
-				'meta_id' => $user_meta_ids[$index],
-				'scope' => 'users',
-				'rel_id' => $this->User_model->user_id,
-				'field_id' => $fd_id,
-				'field_ref_name' => $field_names[$index],
-				'value' => $value,
-				'lang_ISO_639_3' => $tmp_lang,
-				'required' => $required_fds[$index]
-				);
-
+				$meta_fields[$row_key]['lang_ISO_639_3'] = $tmp_lang;
 			}
 
-			// end re-population
-
+			$this->User_model->metadata = $meta_fields;
+			
 			if ($form_valid)
 			{
-				if($this->input->post('user_id') != '')
-				{
-					$this->User_model->user_id = $this->input->post('user_id');
-				}
-				if($this->input->post('user_rel_id') != '')
-				{
-					$this->User_model->user_rel_id = $this->input->post('user_rel_id');
-				}
-
-				if($this->input->post('password') != '')
-				{
-					$this->User_model->tmp_pwd = $this->input->post('password');
-				}
-				if($this->input->post('password_confirm') != '')
-				{
-					$this->User_model->tmp_pwd_conf = $this->input->post('password_confirm');
-				}
-
-				if($this->User_model->update_user())
-				{
-					$this->User_model->metadata = $tmp_meta;
-					$this->User_model->scope = 'users';
-					$this->User_model->update_metadata();
-	
-					$this->User_model->update_site_user();
-					
-				}
-
-				if(count($this->User_model->messages) === 0)
-				{
-					$this->User_model->messages[] = 'User info has been saved successfully';
-					$this->form_success = 1;
-				}
-
+				$this->User_model->messages[] = 'form valid';
+				// update user
+				// update metadata
+				$this->form_success = 1;
 			}
 			else
 			{
+				$this->User_model->messages[] = 'form NOT valid';
 				$this->User_model->messages[] = validation_errors();
-				$this->User_model->metadata = $tmp_meta;
 				$this->form_success = -1;
+			}
 
-			}		
 
 		} // end from processing
 

@@ -214,6 +214,7 @@ $lang['cms_labels'] = array(
 'select_none' => "Deselect all",
 'select_toggle' => "Toggle selection",
 'select' => "Select",
+'select_allow_multiple' => "Allow multiple selections",
 'server_error_404_header' => "Server Error 404 - Not Found",
 'server_error_404_message' => "Could not find '%s'",
 

@@ -496,5 +496,67 @@ if ( ! function_exists('cmp_dirs'))
 		
 	}
 }
+
+/*
+create a selection list that uses radios or checkboxes,
+as per Jacob Neilson's Usability guidelines.
+
+Drop-Down Menus: Use Sparingly
+http://www.useit.com/alertbox/20001112.html
+
+Checkboxes vs. Radio Buttons
+http://www.useit.com/alertbox/20040927.html
+
+*/
+if ( ! function_exists('ph_form_list'))
+{
+
+	function ph_form_list($name = '', $values = array(), $selected = array(), $multiple = FALSE)
+	{
+		if($multiple)
+		{
+			$control = 'checkbox';
+		}
+		else
+		{
+			$control = 'radio';
+		}
+
+		if ( ! is_array($selected))
+		{
+			$selected = array($selected);
+		}
+		
+		$html = "<span class=\"radiogroup\">\r";
+		foreach($values as $value => $label)
+		{
+			$sl = '';
+			if(in_array($value,$selected))
+			{
+				$sl = 'checked="checked" ';
+			}
+			
+			$html .= "<label><input type=\"{$control}\" name=\"{$name}[]\" value=\"{$value}\" id=\"{$name}_{$value}\" {$sl}/> {$label}</label>";
+		}
+		$html .= "</span>";
+
+		return $html;
+	}
+
+}
+
+if ( ! function_exists('prepare_list_values'))
+{
+	function prepare_list_values($list=array())
+	{
+		$newlist = array();
+		foreach($list as $params)
+		{
+			$newlist[$params['value']] = $params['label'];
+		}
+		return $newlist;
+	}
+}
+
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

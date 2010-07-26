@@ -208,6 +208,7 @@ $lang['cms_labels'] = array(
 'select_none' => "D&eacute;s&eacute;lectionner tous",
 'select_toggle' => "basculer s&eacute;lection",
 'select' => "S&eacute;lectionner",
+'select_allow_multiple' => "Permettre les s&eacute;lections multiples",
 'setup' => "Configuration g&eacute;n&eacute;rale",
 'showing_results' => "R&eacute;sultats %d-%d de %d",
 'site_date_created' => "Date de cr&eacute;ation de site",

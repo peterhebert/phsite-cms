@@ -807,6 +807,9 @@ class Setup extends MY_Controller
 		
 		$sidebar .= $this->Content_model->lang_meta_menu();
 		$this->data['sidebar'] = $sidebar;
+
+		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"".BASE_PATH."/assets/js/admin_ui/field_edit.js\"></script>\r";
+
 		
 		$msg = $this->Content_model->_output_messages();
 		
@@ -879,19 +882,43 @@ class Setup extends MY_Controller
 
 		// get all possible value lists
 		$this->Content_model->reset_label();
-		$form_options = array('' => $this->cms_labels['none']);
+		$form_options = array(0 => $this->cms_labels['none']);
 		$val_list = $this->Content_model->value_lists_all();
 		foreach($val_list as $list)
 		{
 			$form_options[$list['list_id']] = $list['label'];
 		}
+
+		if($this->Content_model->list_id == '')
+		{
+			$list_id = 0;
+		}
+		else
+		{
+			$list_id = $this->Content_model->list_id;
+		}
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['list'], 'list_id');
 		$html .= form_dropdown('list_id', $form_options, $this->Content_model->list_id); 
 		$html .= "</p>\r";
 
-
 		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
+		
+		if($this->Content_model->field_allow_multiple == '')
+		{
+			$allow_multiple = 0;
+		}
+		else
+		{
+			$allow_multiple = $this->Content_model->field_allow_multiple;
+		}
+
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['select_allow_multiple'], 'field_allow_multiple');
+		$html .= ph_form_list('field_allow_multiple', $form_options, $allow_multiple);
+		$html .= "</p>\r";
+
 		if($this->Content_model->field_needs_lang == '')
 		{
 			$needs_lang = 1;
@@ -902,8 +929,9 @@ class Setup extends MY_Controller
 		}
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
-		$html .= form_dropdown('field_needs_lang', $form_options, $needs_lang); 
+		$html .= ph_form_list('field_needs_lang', $form_options, $needs_lang);
 		$html .= "</p>\r";
+
 		$html .= form_fieldset_close("\r");
 
 		
@@ -992,7 +1020,9 @@ class Setup extends MY_Controller
 				$this->Content_model->field_id = $this->input->post('field_id');
 				$this->Content_model->field_ref_name = $this->input->post('field_ref_name');	
 				$this->Content_model->field_input_type = $this->input->post('field_input_type');
-				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang');
+				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang[]');
+				$this->Content_model->field_allow_multiple = $this->input->post('field_allow_multiple[]');
+
 				$this->Content_model->validation_string = $this->input->post('validation_string');	
 				$this->Content_model->validation_exact = $this->input->post('validation_exact');	
 				$this->Content_model->validation_min = $this->input->post('validation_min');	

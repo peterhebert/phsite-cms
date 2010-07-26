@@ -22,15 +22,7 @@ $lang['data_types']['is_uri'] ='URI/URL internet address';
 $lang['input_types']['text'] = 'text';
 $lang['input_types']['textarea'] = 'textarea';
 $lang['input_types']['richtext'] = 'rich text editor';
-/*
-'select' => 'list of values (single-select)',
-'multi' => 'list of values (multi-select)',
-
-$lang['input_types']['select'] = 'drop-down select';
-$lang['input_types']['checkbox'] = 'checkbox';
-$lang['input_types']['radio'] = 'radio';
-$lang['input_types']['password'] = 'password';
-*/
+$lang['input_types']['list'] = 'list of values';
 $lang['input_types']['file'] = 'file path';
 $lang['input_types']['directory'] = 'directory path';
 
