@@ -640,8 +640,7 @@ class Content_model extends MY_Model {
 			$this->count_lang_versions();
 			$this->db->where('content_id', $this->temp_id);
 			$query = $this->db->get('c_content');
-	
-	
+
 			$parent = 0;
 	
 			if ($query->num_rows() > 0)
@@ -683,13 +682,13 @@ class Content_model extends MY_Model {
 				if ($query->num_rows() > 0)
 				{
 					$row = $query->row_array();
-					$uriArray[] = $row['uri_title'];
-	
+					$uriArray[] = $row['uri_title'];	
 					$parent = $row['parent_id'];
 				}
 	
 			} while ($parent > 0);
 	
+
 			$uriArray2 = array_reverse($uriArray);
 	
 			$uri = '';

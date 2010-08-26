@@ -281,3 +281,19 @@ ul.option-list li {
 	list-style-type: none;
 	text-align: center;
 }
+
+/* step list */
+/*ol.steps {
+	list-style: decimal outside;
+	margin: 0;
+	padding: 0;
+}
+ol.steps li { 
+	float: left;
+	list-style: decimal outside;
+	margin: 0 1em 1em 2em;
+	padding: 0;
+}
+*/ol.steps li.current { 
+	font-weight: bold;
+}

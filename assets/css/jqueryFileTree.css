@@ -1,4 +1,6 @@
 @charset "UTF-8";
+#preview { height: 90px; }
+#media-browser { height: 20em; overflow:scroll; border: 1px solid #cccccc; padding: 1ex; }
 /* Jquery File Tree */
 
 	ul.jqueryFileTree {

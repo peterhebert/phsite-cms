@@ -25,13 +25,16 @@
 			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceMediaBrowser');
 			ed.addCommand('mceMediaBrowser', function() {
 				ed.windowManager.open({
-					file : url + '/dialog.htm',
-					width : 320 + parseInt(ed.getLang('mediabrowser.delta_width', 0)),
-					height : 120 + parseInt(ed.getLang('mediabrowser.delta_height', 0)),
+					//file : url + '/dialog.php',
+					file : '/image/browser',
+					width : 600 + parseInt(ed.getLang('mediabrowser.delta_width', 0)),
+					height : 400 + parseInt(ed.getLang('mediabrowser.delta_height', 0)),
+					popup_css : false,
+					resizable : true,
 					inline : 1
 				}, {
 					plugin_url : url, // Plugin absolute URL
-					some_custom_arg : 'custom arg' // Custom argument
+					//some_custom_arg : 'custom arg' // Custom argument
 				});
 			});
 
@@ -42,9 +45,12 @@
 				image : url + '/img/mediabrowser.png'
 			});
 
-			// Add a node change handler, selects the button in the UI when a image is selected
+			// Add a node change handler, selects the button in the UI when a image or other media item is selected
 			ed.onNodeChange.add(function(ed, cm, n) {
 				cm.setActive('mediabrowser', n.nodeName == 'IMG');
+				cm.setActive('mediabrowser', n.nodeName == 'OBJECT');
+				cm.setActive('mediabrowser', n.nodeName == 'VIDEO');
+				cm.setActive('mediabrowser', n.nodeName == 'AUDIO');
 			});
 		},
 
@@ -71,10 +77,10 @@
 		getInfo : function() {
 			return {
 				longname : 'Media Browser plugin',
-				author : 'Some author',
-				authorurl : 'http://tinymce.moxiecode.com',
-				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/mediabrowser',
-				version : "1.0"
+				author : 'Peter Hebert',
+				authorurl : 'http://www.peterhebert.com',
+				infourl : 'http://www.peterhebert.com',
+				version : "0.1"
 			};
 		}
 	});

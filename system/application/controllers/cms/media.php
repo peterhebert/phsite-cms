@@ -100,7 +100,7 @@ class Media extends MY_Controller {
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media_scan'];
 
-		$this->load->view('cms/media', $this->data);
+		$this->load->view('cms/cms_form_2col', $this->data);
 	}
 
 	function manage()
@@ -160,7 +160,7 @@ class Media extends MY_Controller {
 		
 		$this->data['custom_js'] = implode("\r",$this->custom_js);
 
-		$this->load->view('cms/media', $this->data);
+		$this->load->view('cms/cms_form_2col', $this->data);
 	}
 
 	function _form_manage()

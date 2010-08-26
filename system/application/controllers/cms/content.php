@@ -426,6 +426,7 @@ class Content extends MY_Controller
 		{
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
+		$this->Content_model->temp_value = $this->Content_model->temp_lang;
 
 		$this->Content_model->load_content_form();
 		
@@ -1035,10 +1036,12 @@ class Content extends MY_Controller
 				
 				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
-	
+
+			$this->Content_model->scope = 'content';
 			$this->Content_model->temp_id = $this->Content_model->content_id;
-			
+			$this->Content_model->temp_lang = $this->Content_model->temp_value;			
 			$my_uri = $this->Content_model->generate_uri();
+
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
 			
 			$menu .= '<h3>'.sprintf($this->cms_labels['options'],$this->cms_labels['editor'])."</h3>\r";

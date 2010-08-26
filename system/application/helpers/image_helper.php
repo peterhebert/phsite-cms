@@ -4,7 +4,7 @@
 if ( ! function_exists('file_is_image'))
 {
 	function is_image($path) {
-	
+
 		$is_image = FALSE;
 
 		$acceptable_types = array(
@@ -278,172 +278,226 @@ if ( ! function_exists('get_metadata'))
 
 }
 
-if ( ! function_exists('media_player'))
+if ( ! function_exists('media_player_object'))
 {
 	// bakes up various embedded media players using valid xhtml or html5 markup
-	
-	function media_player($src,$width,$height,$controls = true,$loop = false,$autoplay = false,$misc_vars=array())
+	function media_player_object($data)
 	{
-		$code = 'media player';
-		$params_outer = array();
-		$other_outer = '';
+		// convert $data to array if string
+		if(!is_array($data))
+		{
+			$src = $data;
+			$data = array('src' => $src);
+			unset($src);
+		}
+
+		// if source is array, take first source in list to test mime type
+		if(is_array($data['src']))
+		{
+			$src = $data['src'][0];
+		}
+		else
+		{
+			$src = $data['src'];
+		}
+
+		// get file extension
+		if(!preg_match('#^http://.*$#',$src))
+		{
+			$path_full = ROOT_REL.$src;
+			$pinfo = pathinfo($path_full);
+			$ext = $pinfo['extension'];
+		}
+		else
+		{
+			$ext = preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$src);
+		}
+
+		// initialize tag, attribute and param arrays, for outer, inner tags and possible external controller
+		$tag = array('outer' => 'object', 'inner' => 'object','controller' => 'object');
+		$attrib = array('outer' => array(), 'inner' => array(), 'controller' => array());
+		$param = array('outer' => array(), 'inner' => array(), 'controller' => array());
+		$sources = array();
 		$fallback_text = '';
-		$external_controller = '';
 
+		// variables to determine whether to create inner fallback tag, and external controller
 		$inner = true;
-		$params_inner = array();
-		$other_inner = '';
+		$external_controller = false;
 		
-		$pinfo = pathinfo($src);
-		$ext = $pinfo['extension'];
-		$is_IE = false;
+		// list of common boolean paramaters, assume true if in $data array
+		$bool = array('autoplay','autostart','allowFullScreen','controls','loop','showcontrols');
+		foreach ($bool as $att)
+		{
+			// check keys, set to value
+			if(array_key_exists($att,$data))
+			{
+				$param['outer'][$att] = $data[$att];
+				$param['inner'][$att] = $data[$att];
+			}
 
-		$agent = $_SERVER['HTTP_USER_AGENT'];
-		// Platforms and browsers
-		if (strpos($agent, 'Macintosh')) {
-			$platform = 'Macintosh';
-		} elseif (strpos($agent, 'Windows')) {
-			$platform = 'Windows';
-		} elseif (strpos($agent, 'Linux')) {
-			$platform = 'Linux';
-		}
-		if (strpos($agent, 'MSIE')) {
-			$is_IE = true;
+			// check values
+			if(in_array($att,$data))
+			{
+				$param['outer'][$att] = 'true';
+				$param['inner'][$att] = 'true';
+				if($att == 'controls')
+				{
+					$attrib['outer'][$att] = 'controls';
+				}
+
+				if($att == 'showcontrols')
+				{
+					$param['inner']['controller'] = 'true';
+				}
+
+
+			}
 		}
 
+		// set width and height
+		$size_test = getimagesize(ROOT_REL.$data['src']);
+		if($size_test)
+		{
+			$data['width'] = $size_test[0];
+			$data['height'] = $size_test[1];
+		}
+		if(array_key_exists('height',$data))
+		{
+			$attrib['outer']['height'] = $data['height'];
+			$attrib['inner']['height'] = $data['height'];
+		}
+		if(array_key_exists('width',$data))
+		{
+			$attrib['outer']['width'] = $data['width'];
+			$attrib['inner']['width'] = $data['width'];
+		}
+
+		// get language files
+		$CI =& get_instance();
+		$CI->lang->load('mime');
+		$fallbacks = $CI->lang->line('fallbacks');
+	
+		// get list of supported MIME types
+		$CI->config->load('mime_info');
+		$types = $CI->config->item('playable_types');
+		if(array_key_exists($ext,$types))
+		{
+			$attrib['outer']['type'] = $types[$ext];
+		}
+		
+		// set tag, attributes and params by file type
 		switch ($ext)
 		{
-		// Flash video
-		case 'flv':
-		case 'f4v':
-			$height = $height + 40;
-			$type = 'application/x-shockwave-flash';
-			$player = '/assets/osflv_player_v3.swf';
-			$other_outer = " type=\"{$type}\" data=\"{$player}\"";
-
-			$params_outer = array(
-			'movie' => $player,
-			'allowFullScreen' => 'true',
-			);
-
-			if(array_key_exists('allowFullScreen',$misc_vars))
-			{
-				$params_outer['allowFullScreen'] = $misc_vars['allowFullScreen'];
-			}
-
-			$flash_vars[] = 'movie='.$src;
-			if(array_key_exists('FlashVars',$misc_vars))
-			{
-				foreach ($misc_vars['FlashVars'] as $param => $value) {
-					$flash_vars[] = $param.'='.$value;
-				}
-			}
-			$params_outer['FlashVars'] = implode('&',$flash_vars);
-
-
-			$inner = false;
-			break;
-
-		// Ogg video
-		case 'ogv':
-		case 'ogm':
-			$type = 'video/ogg';
-			$inner = false;
-
-			$fallback_text = "\t<p>You need a browser that supports <a href=\"http://en.wikipedia.org/wiki/Theora#Browser_plugins\">Ogg Theora video</a> or a valid <a href=\"http://java.com/en/download/manual.jsp\">Java runtime</a> in order to play this content.</p>\r";
-			
-			$other_outer .= " src=\"{$src}\"";
-			$other_inner .= " type=\"application/x-java-applet\"";
-
-			$params_inner = array(
-			'archive' => '/assets/cortado-ovt-stripped-0.2.2.jar',
-			'code' => 'com.fluendo.player.Cortado.class',
-			'url' => $src,
-			'keepAspect' => 'true'
-			);
-
-			if($controls)
-			{
-				$other_outer .= ' controls';
-			}
-			if($autoplay)
-			{
-				$other_outer .= ' autoplay';
-			}
-			if($loop)
-			{
-				$other_outer .= ' loop';
-			}
-			if(array_key_exists('poster',$misc_vars))
-			{
-				$other_outer .= " poster=\"{$misc_vars['poster']}\"";
-			}
-
-			break;
-		// QuickTime / MP4
+		// QuickTime
 		case 'mov':
-		case 'qt':
-		case 'm4u':
+			$fallback_text = $fallbacks['quicktime'];
+			$attrib['outer']['classid'] = 'clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B';
+			$attrib['outer']['codebase'] = 'http://www.apple.com/qtactivex/qtplugin.cab';
+
+			// set source attributes and params
+			$param['outer']['src'] = $data['src'];
+			$attrib['inner']['data'] = $data['src'];
+
+			if(!array_key_exists('controller',$data) || !array_key_exists('controls',$data))
+			{
+				$param['outer']['controller'] = 'true';
+				$param['inner']['controller'] = 'true';
+			}
+			if(!array_key_exists('autoplay',$data))
+			{
+				$param['outer']['autoplay'] = 'false';
+				$param['inner']['autoplay'] = 'false';
+			}
+			if(array_key_exists('height',$data))
+			{
+				$attrib['outer']['height'] = $data['height'] + 20;
+				$attrib['inner']['height'] = $data['height'] + 20;
+			}
+
+			unset($attrib['outer']['type']);
+			$attrib['inner']['type'] = 'video/quicktime';
+
+
+			$attrib['inner']['class'] = 'mov';
+
+			break;
+		// MPEG-4 video
 		case 'm4v':
 		case 'mp4':
 		case 'mpeg4':
+			$tag['outer'] = 'video';
+			$inner = false;
 
-			switch ($ext)
-			{
-			case 'm4u':
-				$type = 'video/x-mpegurl';
-				break;
-			case 'm4v':
-				$type = 'video/mp4';
-				break;
-			case 'mp4':
-			case 'mpeg4':
-				$type = 'video/mpeg';
-				break;
-			default:
-				$type = 'video/quicktime';
-			}
+			// set source attributes and params
+			$attrib['outer']['src'] = $data['src'];
 
-			$other_outer = " classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\" codebase=\"http://www.apple.com/qtactivex/qtplugin.cab\"";
-			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
-
-			$params_outer = array(
-			'src' => $src,
-			'type' => $type,
-			'controller' => 'false',
-			'autoplay' => 'false',
-			'loop' => 'false',
-			);
-			$params_inner = array(
-			'controller' => 'false',
-			'autoplay' => 'false',
-			'loop' => 'false',
-			);
-
-			if($controls)
+			$fallback_text = $fallbacks['mp4'];
+			if(!array_key_exists('controls',$data))
 			{
-				$params_outer['controller'] = 'true';
-				$params_inner['controller'] = 'true';
+				$attrib['outer']['controls'] = 'controls';
 			}
-			if($autoplay)
-			{
-				$params_outer['autoplay'] = 'true';
-				$params_inner['autoplay'] = 'true';
-			}
-			if($loop)
-			{
-				$params_outer['loop'] = 'true';
-				$params_inner['loop'] = 'true';
-			}
-			$height = $height + 16;
 
 			break;
-		// Windows Media Player
+		// Ogg Theora video
+		case 'ogm':
+		case 'ogv':
+			$tag['outer'] = 'video';
+
+			// set source attributes and params
+			$attrib['outer']['src'] = $data['src'];
+			$attrib['outer']['controls'] = 'controls';
+
+			$fallback_text = $fallbacks['theora'];
+			
+			$attrib['inner']['type'] = 'application/x-java-applet';
+
+			$param['inner']['archive'] = ROOT_REL.'/assets/cortado-ovt-stripped-0.2.2.jar';
+			$param['inner']['code'] = 'com.fluendo.player.Cortado.class';
+			$param['inner']['url'] = $data['src'];
+			$param['inner']['keepAspect'] = 'true';
+			break;
+		// Ogg Vorbis or FLAC audio
+		case 'flac':
+		case 'oga':
+		case 'ogg':
+		case 'spx':
+			$tag['outer'] = 'audio';
+
+			// set source attributes and params
+			$attrib['outer']['src'] = $data['src'];
+			$attrib['outer']['controls'] = 'controls';
+
+			$fallback_text = $fallbacks['ogg'];
+			
+			$attrib['inner']['type'] = 'application/x-java-applet';
+
+			$param['inner']['archive'] = ROOT_REL.'/assets/cortado-ovt-stripped-0.2.2.jar';
+			$param['inner']['code'] = 'com.fluendo.player.Cortado.class';
+			$param['inner']['url'] = $data['src'];
+			$param['inner']['keepAspect'] = 'true';
+			break;
+
+		// Windows Media
 		case 'asf':
 		case 'asx':
+		case 'wm':
+		case 'wma':
 		case 'wmv':
 		case 'wmx':
 		case 'wvx':
+			// Platforms and browsers
+			$agent = $_SERVER['HTTP_USER_AGENT'];
+			if (strpos($agent, 'Macintosh')) {
+				$platform = 'mac';
+			} elseif (strpos($agent, 'Windows')) {
+				$platform = 'win';
+			} elseif (strpos($agent, 'Linux')) {
+				$platform = 'lin';
+			}
+	
+
+			$fallback_text = $fallbacks['wmv_'.$platform];
+
 			if($ext == 'wmv')
 			{
 				$type = 'video/x-ms-wmv';
@@ -452,110 +506,144 @@ if ( ! function_exists('media_player'))
 			{
 				$type = 'video/x-ms-asf';
 			}
-			$other_outer = " classid=\"CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6\"";
-			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
-			//$height = $height + 64;
-			switch ($platform)
+
+			$attrib['outer']['classid'] = 'CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6';
+			if(array_key_exists('height',$data))
 			{
-			case 'Windows':
-				$fallback_text = "\t\t<p>You need <a href=\"http://www.microsoft.com/windows/windowsmedia/player/download/download.aspx\" rel=\"external\">Windows Media Player</a> in order to play this content.</p>\n";
-				break;
-			case 'Macintosh':
-				$fallback_text = "\t\t<p>You need the <a href=\"http://www.telestream.net/flip4mac-wmv/overview.htm\" rel=\"external\">Flip4Mac WMV QuickTime component</a> in order to play this content.</p>\n";
-				break;
-			case 'Linux':
-				$fallback_text = "\t\t<p>You need <a href=\"http://ffmpeg.org\" rel=\"external\">FFmpeg</a> or <a href=\"http://www.mplayerhq.hu/design7/dload.html\" rel=\"external\">Mplayer + Mencoder</a> in order to play this content.</p>\n";
-				break;
+				$attrib['outer']['height'] = $data['height'] + 64;
+				$attrib['inner']['height'] = $data['height'] + 64;
 			}
 
-			$params_outer = array(
-			'url' => $src,
-			'src' => $src,
-			'showcontrols' => 'false',
-			'autostart' => 'false',
-			);
-			$params_inner = array(
-			'src' => $src,
-			'controller' => 'false',
-			'autoplay' => 'false',
-			'loop' => 'false',
-			);
+			$param['outer']['url'] = $data['src'];
+			$param['outer']['src'] = $data['src'];
+			$param['outer']['showcontrols'] = 'true';
+	
+			$attrib['inner']['type'] = $type;
+			$attrib['inner']['data'] = $data['src'];
+			$param['inner']['src'] = $data['src'];
+			$param['inner']['controller'] = 'true';
 
-			if($controls)
+			if(array_key_exists('autostart',$data) || in_array('autostart',$data)
+			|| array_key_exists('autoplay',$data) || in_array('autoplay',$data))
 			{
-				$params_outer['showcontrols'] = 'true';
-				$params_inner['controller'] = 'true';
+				$param['outer']['autostart'] = 'true';
+				$param['inner']['autostart'] = 'true';
 			}
-			if($autoplay)
-			{
-				$params_outer['autostart'] = 'true';
-				$params_inner['autostart'] = 'true';
-			}
-			if($loop)
-			{
-				$params_outer['loop'] = 'true';
-				$params_inner['loop'] = 'true';
-			}
+
 
 			break;
-		// Real Player
-		case 'rv':
-		case 'ra':
-		case 'rm':
-		case 'ram':
-			$type = 'application/vnd.rn-realmedia';
-			$other_outer = " classid=\"clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA\"";
-			$other_inner = "  data=\"{$src}\" type=\"{$type}\"";
 
-			$params_outer = array(
-			'src' => $src,
-			'type' => $type,
-			'controls' => 'All',
-			'autostart' => 'false',
-			'loop' => 'false',
-			'console' => 'video',
-			);
-			$params_inner = array(
-			'src' => $src,
-			'controls' => 'All',
-			'autostart' => 'false',
-			'loop' => 'false',
-			'console' => 'video',
-			);
-			if($loop)
+		// Flash video
+		case 'f4v':
+		case 'flv':
+			$fallback_text = $fallbacks['flash'];
+			$inner = false;
+			$attrib['outer']['type'] = 'application/x-shockwave-flash';
+			if(array_key_exists('height',$data))
 			{
-				$params_outer['loop'] = 'true';
-				$params_inner['loop'] = 'true';
+				$attrib['outer']['height'] = $data['height'] + 25;
 			}
 
-			if($controls)
+			$param['outer']['allowFullScreen'] = 'true';
+			$param['outer']['allowScriptAccess'] = 'always';
+			$vars = array(
+			'movie' => $data['src'],
+			'btncolor' => '0xeeeeee',
+			'accentcolor' => '0xcccccc',
+			'txtcolor' => '0xeeeeee',
+			'volume' => 50,
+			'autoload' => 'on',
+			'autoplay' => 'off',
+			);
+			if(array_key_exists('title',$data))
 			{
-				$external_controller .= "<object classid=\"clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA\" width=\"{$width}\" height=\"30\">\r";
-				$external_controller .= "\t<param name=\"src\" value=\"{$src}\" />\r";
-				$external_controller .= "\t<param name=\"controls\" value=\"ControlPanel\" />\r";
-				$external_controller .= "\t<param name=\"console\" value=\"video\" />\r";
-				if($autoplay)
-				{
-					$external_controller .= "\t<param name=\"autostart\" value=\"true\" />\r";
-				}
-				else
-				{
-					$external_controller .= "\t<param name=\"autostart\" value=\"false\" />\r";
-				}
-				$external_controller .= "</object>\r";
+				$vars['vTitle'] = $data['title'];
+				$vars['showTitle'] = 'yes';
 			}
+			if(array_key_exists('autoplay',$data) || in_array('autoplay',$data))
+			{
+				$vars['autoplay'] = 'on';
+			}
+			$varPairs = array();
+			foreach($vars as $key => $val)
+			{
+				$varPairs[] = $key.'='.$val;
+			}
+			$flashVars = implode('&amp;',$varPairs);
 
-			$fallback_text = "\t\t<p>You need <a href=\"http://www.real.com\" rel=\"external\">RealPlayer</a> in order to play this content.</p>\n";
+			$param['outer']['movie'] = '/assets/OSFlvPlayer_v4.2/OSplayer.swf?'.$flashVars;
+			break;
+		// Flash
+		case 'swf':
+			$fallback_text = $fallbacks['flash'];
+			$inner = false;
+			$attrib['outer']['type'] = 'application/x-shockwave-flash';
+			$attrib['outer']['data'] = $data['src'];
+			$param['outer']['movie'] = $data['src'];
+			if(array_key_exists('FlashVars',$data))
+			{
+				$param['outer']['FlashVars'] = $data['FlashVars'];
+			}
+			break;
+		// WebM (VP8) video
+		case 'webm':
+			$tag['outer'] = 'video';
+			$inner = false;
+			$fallback_text = $fallbacks['webm_VP8'];
 
+			// set source attributes and params
+			$attrib['outer']['src'] = $data['src'];
+			$attrib['outer']['controls'] = 'controls';
+
+			break;
+		// Scaleable Vector Graphics
+		case 'svg':
+			$attrib['outer']['classid'] = 'clsid:78156a80-c6a1-4bbf-8e6a-3cd390eeb4e2';
+			$param['outer']['src'] = $data['src'];
+			$fallback_text = $fallbacks['svg'];
 			break;
 		}
+/*
+
+<object type="image/svg+xml" width="300" height="150" data="http://phsite.dev/media/originals/cineworks-logo.svg"></object>
+
+
+		// Shockwave (Director)
+		case 'dcr':
+			break;
+		// SMIL
+		case 'smi':
+		case 'smil':
+			break;
+		// MPEG audio
+		case 'm4a':
+		case 'm4b':
+		case 'mp3':
+			break;
+		// MIDI
+		case 'mid':
+		case 'midi':
+			break;
+		}
+*/		
 
 		// now begin generating player code
 
-		$code = "<!-- begin media player embed -->\n";
-		$code .= "<object width=\"{$width}\" height=\"{$height}\"{$other_outer}>\r";
+		$code = '<'.$tag['outer'];
+		
+		foreach($attrib['outer'] as $attr => $val)
+		{
+			$code .= " {$attr}=\"{$val}\"";
+		}
+		$code .= ">\r";
 
-		foreach($params_outer as $name => $value)
+		// sources for audio or video tags
+		foreach($sources as $src)
+		{
+			$code .= "\t<source src='{$src['src']}' type='{$src['type']}; codecs=\"{$src['codecs']}\"' />\r";
+		}
+		// params for object tag
+		foreach($param['outer'] as $name => $value)
 		{
 			$code .= "\t<param name=\"{$name}\" value=\"{$value}\" />\r";
 		}
@@ -563,148 +651,158 @@ if ( ! function_exists('media_player'))
 		if($inner)
 		{
 			$code .= "\t<!--[if gte IE 7]>-->\r";
-			$code .= "\t<object width=\"{$width}\" height=\"{$height}\"{$other_inner}>\r";
 
-			foreach($params_inner as $name => $value)
+			$code .= '<'.$tag['inner'];
+			
+			foreach($attrib['inner'] as $attr => $val)
+			{
+				$code .= " {$attr}=\"{$val}\"";
+			}
+			$code .= ">\r";
+
+			foreach($param['inner'] as $name => $value)
 			{
 				$code .= "\t\t<param name=\"{$name}\" value=\"{$value}\" />\r";
 			}
 
-			$code .= "\t".$fallback_text;
-			$code .= "\t</object>\r";
+			$code .= "\t<p>".$fallback_text."</p>\r";
+			$code .= "\t</{$tag['inner']}>\r";
 			$code .= "\t<!--<![endif]-->\r";
 		}
 		else
 		{
 			$code .= $fallback_text;
 		}
-
-		$code .= "</object>\r";
-		$code .= $external_controller;
-		$code .= "<!-- end media player embed -->\n";
+		$code .= "</{$tag['outer']}>\r";
 		
+		// do external controller if requested
+		if($external_controller)
+		{
+
+			$code .= '<'.$tag['controller'];
+			
+			foreach($attrib['controller'] as $attr => $val)
+			{
+				$code .= " {$attr}=\"{$val}\"";
+			}
+			$code .= ">\r";
+
+			foreach($param['controller'] as $name => $value)
+			{
+				$code .= "\t\t<param name=\"{$name}\" value=\"{$value}\" />\r";
+			}
+
+			$code .= "\t<p>".$fallback_text."</p>\r";
+			$code .= "\t</{$tag['controller']}>\r";
+		}
 
 		return $code;
 	}
 }
 
-if ( ! function_exists('video_for_everybody'))
+if ( ! function_exists('html5_media'))
 {
-/*
-based upon : http://camendesign.com/code/video_for_everybody
-note: $src parameter is without a file extension, and would require 
-all versions of the video to have the same basename.
-I have modified the poster so it does not need to be a JPEG but any image type (provide full url with extension)
-*/
-	function video_for_everybody($src,$width,$height,$flv_player='/assets/osflv_player_v3.swf',$poster=false) {
-		$ht_qt = $height + 15;
-		$ht_fl = $height + 20;
-		$code = "<!-- 'Video for Everybody' v0.2 by Kroc Camen <camendesign.com> cc-by -->\r";
-		$code .= "<video width=\"{$width}\" height=\"{$height}\" controls=\"controls\"";
+	function html5_media ($source, $params = NULL)
+	{
+		// get language files
+		$CI =& get_instance();
+		$CI->lang->load('mime');
+		$fallbacks = $CI->lang->line('fallbacks');
+	
+		// get list of supported MIME types
+		$CI->config->load('mime_info');
+		$types = $CI->config->item('html5_types');
 
-		if($poster)
+		$sources = array();
+		$tracks = array();
+		$links = array();
+		
+		// test if source is an array
+		if(!is_array($source))
 		{
-			$code .= " poster=\"{$poster}\"";
+			$source = array('src' => $source);
 		}
-		$code .= ">\r";
-
-		$code .= "<source src=\"{$src}.ogv\" type=\"video/ogg\" />\r";
-		$code .= "<source src=\"{$src}.mp4\" type=\"video/mp4\" />\r";
-		$code .= "<!--[if gt IE 6]>\r";
-		$code .= "<object width=\"{$width}\" height=\"{$ht_qt}\" classid=\"clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B\"><!\r";
-		$code .= "[endif]-->\r";
-		$code .= "<!--[if !IE]><!-->\r";
-		$code .= "<object width=\"{$width}\" height=\"{$ht_qt}\" type=\"video/quicktime\" data=\"{$src}.mp4\">\r";
-		$code .= "<!--<![endif]-->\r";
-		$code .= "<param name=\"src\" value=\"{$src}.mp4\" />\r";
-		$code .= "<param name=\"autoplay\" value=\"false\" />\r";
-		$code .= "<param name=\"showlogo\" value=\"false\" />\r";
-		$code .= "<object width=\"{$width}\" height=\"{$ht_fl}\" type=\"application/x-shockwave-flash\" data=\"{$flv_player}.swf?image={$poster}&amp;file={$src}.mp4\">\r";
-		if($poster)
+		// test if there is a single source, if so add to list
+		if(array_key_exists('src',$source))
 		{
-			$code .= "<param name=\"movie\" value=\"{$flv_player}.swf?image={$poster}&amp;file={$src}.mp4\" />\r";
-			$code .= "<img src=\"{$poster}\" width=\"{$width}\" height=\"{$height}\" />\r";
+			$sources[] = $source;
+		}
+	
+		// determine media type of first source in list, set tag to use
+		if(array_key_exists('type', $sources[0]))
+		{
+			$type = $sources[0]['type'];
 		}
 		else
 		{
-			$code .= "<param name=\"movie\" value=\"{$flv_player}.swf?file={$src}.mp4\" />\r";
+			$ext = preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$sources[0]['src']);
+			$type = $types[$ext];
 		}
-		$code .= "<p><strong>No video playback capabilities detected.</strong> Why not try to download the file instead?<br />\r";
-		$code .= "<a href=\"{$src}.mp4\">MPEG4 / H.264 &quot;.mp4&quot; (Windows / Mac)</a> | <a href=\"{$src}.ogv\">Ogg Theora &amp; Vorbis &quot;.ogv&quot; (Linux)</a></p>\r";
-		$code .= "<p>To play the video here in the webpage, please install one of the following:</p>\r";
-		$code .= "<ul>\r";
-		$code .= "<li>the latest  <a href=\"http://getfirefox.com\">Firefox</a> or <a href=\"http://apple.com/safari\">Safari</a> web browser</li>\r";
-		$code .= "<li><a href=\"http://get.adobe.com/flashplayer/\">Adobe Flash Player</a></li>\r";
-		$code .= "<li><a href=\"http://apple.com/quicktime/download/\">Apple QuickTime</a></li>\r";
-		$code .= "</ul>\r";
-		$code .= "</object><!--[if gt IE 6]><!-->\r";
-		$code .= "</object><!--<![endif]-->\r";
-		$code .= "</video>\r";
-		$code .= "<!-- end 'Video for Everybody' code -->\r";
-
-		return $code;
-
-	}
-}
-
-if ( ! function_exists('embed_media'))
-{
-	function embed_media($path) {
 	
-	$media_types = array(
-	'image' => array(
-		'bmp' => 'image/x-windows-bmp',
-		'gif' => 'image/gif',
-		'ico' => 'image/vnd.microsoft.icon',
-		'j2k' => 'image/jp2',
-		'jp2' => 'image/jp2',
-		'jpe' => 'image/jpeg',
-		'jpeg' => 'image/jpeg',
-		'jpf' => 'image/jpx',
-		'jpg' => 'image/jpeg',
-		'jpm' => 'image/jpm',
-		'jpx' => 'image/jpx',
-		'pct' => 'image/x-pict',
-		'pcx' => 'image/x-pcx',
-		'png' => 'image/png',
-		'svg' => 'image/svg+xml',
-		'tif' => 'image/tiff',
-		'tiff' => 'image/tiff',
-		'wbmp' => 'image/vnd.wap.wbmp',
-		'psd' => 'image/psd',
-		'xbm' => 'image/xbm',
-		),
-	'media' => array(),
-	'file' => '',
-	);
-
-
-		if(file_exists($path))
+		$tag = preg_replace('#^([a-z]+)/(.*)$#','$1',$type);
+		unset($ext,$type);
+	
+		// now begin generating player code
+		// opening tag
+		$code = '<'.$tag;
+		if($params != NULL && is_array($params))
 		{
-			$pathinfo = pathinfo($path);
-			$file_info = getimagesize($path);
-			if(!$file_info)
+			foreach($params as $attr => $val)
 			{
-				if(array_key_exists($pathinfo['extension'],$acceptable_types))
-				{
-					$is_image = TRUE;
-				}
-			
+				$code .= " {$attr}=\"{$val}\"";
+			}
+		}
+		$code .= ">\r";
+	
+		// source list
+		foreach($sources as $src)
+		{
+			$code .= "\t<source src='".$src['src']."' type='";
+			if(array_key_exists('type',$src))
+			{
+				$type = $src['type'];
 			}
 			else
 			{
-				if( in_array($file_info['mime'],$acceptable_types) )
-				{
-					$is_image = TRUE;
-				}
+				$ext = preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$src['src']);
+				$type = $types[$ext];
 			}
+			$code .= $type;
+			if(array_key_exists('codecs',$src))
+			{
+				$code .= "; codecs=\"{$src['codecs']}\"";
+			}
+			$code .= "' />\r";
+		
+			$format = preg_replace('#^([a-z]+)/(.*)$#','$2',$type);
+			$links[] = '<a href="'.$src['src'].'">'.$format.'</a>';
+			unset($ext,$type,$format);
 		}
 		
-		return $is_image;
-
+		// track list if exists
+		if(array_key_exists('track',$params))
+		{
+		
+			// test if there is a single source, if so add to list
+			if(array_key_exists('src',$params['track']))
+			{
+				$tracks[] = $params['track'];
+			}
+		
+			foreach($tracks as $trk)
+			{
+				$code .= "\t<track src='".$trk['src']."' kind='".$trk['kind']."' />\r";
+			}
+		}
+	
+		// fallback text
+		$code .= "\t<p>".sprintf($fallbacks['html5_media'],$tag);
+		$code .= implode(' | ',$links);
+		$code .= "</p>\r";
+		$code .= "</{$tag}>\r";
+		
+		return $code;	
 	}
 }
-
-
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */

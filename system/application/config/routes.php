@@ -47,6 +47,7 @@ $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
 $route['cms/media'] = "cms/media/manage";
+$route['cms/install/([a-z]{3})'] = "cms/install";
 $route['cms/(.*)'] = "cms/$1";
 
 $route['test(.*)'] = "test/index$1";

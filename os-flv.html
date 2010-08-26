@@ -1,40 +1,32 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Open Source FLV player</title>
-<style type="text/css">
-<!--
-/* object stuff here */
-
-/* hides the second object from all versions of IE */
-* html object.mov {
-	display: none;
-}
-
-/* displays the second object in all versions of IE apart from 5 on PC */
-* html object.mov/**/ {
-	display: inline;
-}
-
-/* hides the second object from all versions of IE >= 5.5 */
-* html object.mov {
-	display/**/: none;
-}
-
--->
-</style>
+<title>Demo</title>
 </head>
-<body>
-<h1>Open Source FLV player</h1>
-<!--OS FLV player-->
-<object type="application/x-shockwave-flash" data="/assets/osflv_player_v225/player.swf" width="640" height="360">
-	<param name="movie" value="/assets/osflv_player_v225/player.swf" />
-	<param name="allowFullScreen" value="true">
-	<param name="FlashVars" value="movie=video.flv&bgcolor=0x222222&fgcolor=0x999999&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
-</object>
-<!-- end OS FLV player -->
 
+<body>
+<script type="text/javascript" src="/assets/OSFlvPlayer_v4.2/AC_RunActiveContent.js"></script>
+<script language='javascript'>/* <![CDATA[ */
+AC_AX_RunContent(
+'width','400',
+'height','325',
+'id','flvPlayer',
+'allowfullscreen','true',
+'type','application/x-shockwave-flash',
+'allowscriptaccess','always',
+'src','assets/OSFlvPlayer_v4.2/OSplayer.swf?movie=mario.flv&btncolor=0x333333&accentcolor=0x31b8e9&txtcolor=0xdddddd&volume=30&autoload=on&autoplay=off&vTitle=Super Mario Brothers Lego Edition&showTitle=yes',
+'movie','assets/OSFlvPlayer_v4.2/OSplayer.swf?movie=mario.flv&btncolor=0x333333&accentcolor=0x31b8e9&txtcolor=0xdddddd&volume=30&autoload=on&autoplay=off&vTitle=Super Mario Brothers Lego Edition&showTitle=yes'
+); 
+/* ]]> */</script>
+<noscript>
+<object width="400" height="325" id="flvPlayer">
+<param name="allowFullScreen" value="true">
+<param name="allowScriptAccess" value="always"> 
+<param name="movie" value="assets/OSFlvPlayer_v4.2/OSplayer.swf?movie=mario.flv&amp;btncolor=0x333333&amp;accentcolor=0x31b8e9&amp;txtcolor=0xdddddd&amp;volume=30&amp;autoload=on&amp;autoplay=off&amp;vTitle=Super Mario Brothers Lego Edition&amp;showTitle=yes">
+<embed src="assets/OSFlvPlayer_v4.2/OSplayer.swf?movie=mario.flv&amp;btncolor=0x333333&amp;accentcolor=0x31b8e9&amp;txtcolor=0xdddddd&amp;volume=30&amp;autoload=on&amp;autoplay=off&amp;vTitle=Super Mario Brothers Lego Edition&amp;showTitle=yes" width="400" height="325" allowfullscreen="true" type="application/x-shockwave-flash" allowscriptaccess="always">
+</object>
+</noscript>
 
 </body>
 </html>

@@ -57,10 +57,10 @@ No video? Get the DivX Web Player for <a href="http://download.divx.com/player/D
 <h2>Quicktime</h2>
 <!-- Start XHTML Quicktime -->
 <object classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" codebase="http://www.apple.com/qtactivex/qtplugin.cab" width="320" height="260">
- <param name="src" value="the_leaves.mov" />
+ <param name="src" value="/media/originals/phsite-dev-env.mp4" />
  <param name="controller" value="true" />
  <param name="autoplay" value="false" />
- <object type="video/quicktime" data="the_leaves.mov" width="320" height="260" class="mov">
+ <object type="video/quicktime" data="/media/originals/phsite-dev-env.mp4" width="320" height="260" class="mov">
  <param name="autoplay" value="false" />
   <param name="controller" value="true" />
 		No video? <a href="http://www.apple.com/quicktime/download/">Get quicktime</a>
@@ -85,7 +85,7 @@ No video? Get the DivX Web Player for <a href="http://download.divx.com/player/D
 </script>
 <noscript>
 <object type="application/x-shockwave-flash" data="http://www.youtube.com/v/a0qMe7Z3EYg" width="640" height="360">
-	<param name="movie" value="media/osflv_player_v225/player.swf" />
+	<param name="movie" value="assets/osflv_player_v3.swf" />
 	<param name="allowFullScreen" value="true">
 	<param name="FlashVars" value="movie=osflv_player_v225/video.flv&bgcolor=0x333333&fgcolor=0x13ABEC&volume=50&autoplay=on&autoload=on&mute=on&autorewind=on&loop=on&muteonly=on&clickurl=http://www.peterhebert.com&clicktarget=_blank" />
 </object>
@@ -94,7 +94,12 @@ No video? Get the DivX Web Player for <a href="http://download.divx.com/player/D
 
 <h2>HTML 5 video tag - OGG media</h2>
 <!-- start OGG-->
-<video id="v1" src="http://tinyvid.tv/file/2xs5cukyxc73s.ogg" autobuffer="true" controls="controls">
+<video
+id="v1"
+src="http://tinyvid.tv/file/2xs5cukyxc73s.ogg"
+autobuffer="true"
+controls="controls">
+
 <applet code="com.fluendo.player.Cortado.class" archive="/assets/cortado-ovt-stripped-0.2.2.jar" width="352" height="224">
 	<param name="url" value="http://tinyvid.tv/file/2xs5cukyxc73s.ogg"></param>
 	<param name="keepAspect" value="true"/>

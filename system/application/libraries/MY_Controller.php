@@ -26,6 +26,8 @@ class MY_Controller extends Controller {
 	function MY_Controller()
 	{	
 		parent::Controller();
+		
+		$this->_db_test();
 
 		$this->data['img_size_th'] = $this->Site_model->img_size_th;
 		$this->data['img_size_sm'] = $this->Site_model->img_size_sm;
@@ -54,6 +56,61 @@ class MY_Controller extends Controller {
 			$this->_load_site_metadata();
 			$this->_load_cms_labels();
 		}
+	}
+
+	function _db_test()
+	{
+		$installed = FALSE;
+		$db_file = 'system/application/config/database.php';
+		$db_conf = FCPATH.$db_file;
+		if(file_exists($db_conf)) {
+			require_once($db_file);
+
+			if(isset($db,$active_group) && array_key_exists($active_group,$db))
+			{
+				// test the supplied connection
+				$DB1 = $this->load->database($db[$active_group], TRUE);
+				if($DB1)
+				{
+					// now query the tables to see if they have been created and are in tact
+					$this->config->load('installer');
+					$tables = $this->config->item('tables');
+					if($tables)
+					{
+						$table_errors = 0;
+						$sql_fields = array();
+						foreach($tables as $table => $fields)
+						{
+							$fds = implode(', ',$fields);
+							$DB1->select($fds);
+							$DB1->limit(1);
+	
+							$query = $DB1->get($table);
+							if(!$query || (($table == 's_users' || $table == 's_site_prefs') &&  $query->num_rows() < 1)){
+								$table_errors = $table_errors + 1;
+							}
+
+						}
+						if( $table_errors == 0)
+						{
+							$installed = TRUE;
+							unset($DB1);
+							$this->load->database();
+							$this->load->model('Site_model');
+						}
+					}
+
+				}
+			}
+
+		}
+
+		if(!$installed)
+		{
+			redirect('cms/install');
+			exit();
+		}
+
 	}
 
 	function _load_site_metadata() {
@@ -329,7 +386,7 @@ class MY_Controller extends Controller {
 				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
 			}
 
-			$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\">";
+			$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\" class=\"align-left\">";
 			if($mime_cat == 'image' && $media['external'] == 0)
 			{
 				$html .= "<div class=\"image-left\">";
@@ -342,11 +399,11 @@ class MY_Controller extends Controller {
 
 			if(in_array($ext,$mime_icon_exts))
 			{
-				$html .= "<span class=\"icon ext_{$ext}\">";
+				$html .= '<span class="icon ext_'.$ext.'">';
 			}
 			else
 			{
-				$html .= "<span class=\"icon icon_{$mime_cat}\">";
+				$html .= '<span class="icon icon_'.$mime_cat.'">';
 			}
 			if($media['title'] != '' && $media['title'] != $filename)
 			{

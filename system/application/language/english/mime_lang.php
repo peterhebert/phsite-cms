@@ -166,4 +166,20 @@ $lang['mime'] = array(
 'zip' => 'Zip archive'
 );
 
+$lang['fallbacks'] = array(
+'quicktime' => 'You need to install the <a href="http://www.apple.com/quicktime/download/">QuickTime player</a> in order to view this content.',
+'mp4' => 'You need a browser that supports MPEG-4/H.264 video and the HTML 5 video tag in order to play this content.',
+'wmv_win' => 'You need <a href="http://www.microsoft.com/windows/windowsmedia/player/download/download.aspx" rel="external">Windows Media Player</a> in order to play this content.',
+'wmv_mac' => 'You need the <a href="http://www.telestream.net/flip4mac-wmv/overview.htm" rel="external">Flip4Mac WMV QuickTime component</a> in order to play this content.',
+'wmv_lin' => 'You need <a href="http://ffmpeg.org" rel="external">FFmpeg</a> or <a href="http://www.mplayerhq.hu/design7/dload.html" rel="external">Mplayer + Mencoder</a> in order to play this content.',
+'theora' => 'You need a browser that supports <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">Ogg Theora video</a> or a valid <a href="http://java.com/en/download/manual.jsp">Java runtime</a> in order to play this content.',
+'real' => 'You need <a href="http://www.real.com" rel="external">RealPlayer</a> in order to play this content.',
+'ogg' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> or a valid <a href="http://java.com/en/download/manual.jsp">Java runtime</a> in order to play this content.',
+'webm_VP8' => 'You need a <a href="http://www.webmproject.org/users/" title="Playing WebM video (WebM project)">browser or player that supports WebM/VP8 video</a> in order to play this content.',
+'flash' => 'The <a href="http://www.adobe.com/flashplayer/" title="">Adobe Flash player</a> is required in order to play this content.',
+'html5_media' => "Your browser does not support the HTML5 '%s' tag; ; Download file(s) for off-line viewing: ",
+'svg' => 'Your browser does not appear to support <acronym title="Scaleable Vector Graphics">SVG</acronym>. To view this content, use one of these <a href="http://en.wikipedia.org/wiki/Scalable_Vector_Graphics#Support_for_SVG_in_web_browsers" title="list of browsers with SVG support">supported browsers</a>.',
+);
+
+
 ?>

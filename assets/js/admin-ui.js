@@ -99,12 +99,12 @@ $().ready(function(){
 
 		// General options
 		theme : "advanced",
-		plugins : "safari,xhtmlxtras,table,fullscreen,mediabrowser,embed",
+		plugins : "safari,xhtmlxtras,table,fullscreen,mediabrowser",
 		skin : "morereasons",
 		width : RTEwidth,
 	
 		// Theme options
-		theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,charmap,|,mediabrowser,embed,image",
+		theme_advanced_buttons1 : "formatselect,bold,italic,|,sub,sup,|,hr,charmap,|,mediabrowser,embed",
 		theme_advanced_buttons2 : "blockquote,cite,abbr,acronym,|,bullist,numlist,|,outdent,indent,|,link,unlink,anchor",
 		theme_advanced_buttons3 : "tablecontrols",
 		theme_advanced_buttons4 : "cut,copy,paste,|,undo,redo,|,code,removeformat,cleanup,fullscreen",

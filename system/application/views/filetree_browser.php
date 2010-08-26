@@ -10,6 +10,8 @@
 <link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" rel="stylesheet" type="text/css" />
 
 <!-- JQuery File Tree -->
+<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/tinymce/jscripts/tiny_mce/tiny_mce_popup.js"></script>
+
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-ui-min.js"></script>
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-easing.js"></script>
@@ -17,11 +19,59 @@
 <script type="text/javascript">
 <!--
 
-function openFile(file)
+tinyMCEPopup.requireLangPack();
+
+var MediaBrowserDialog = {
+	init : function() {
+
+	var ed = tinyMCEPopup.editor;
+
+	var f = document.forms[0]
+	var n = ed.selection.getNode();
+
+	var nm = ed.selection.getNode().nodeName;
+	if(nm == 'IMG') {
+		var file = ed.selection.getNode().src;
+		// strip size from filename and convert to originals directory
+
+		// ex. http://phsite.dev/media/cache/goalie_90.jpg	
+		var orig = file.replace(/^http:\/\/([^\/]+)\/media\/cache\/(.*)_([0-9]+)\.([a-z]{2,5})$/gi, '/media/originals/$2.$4');
+		var size = file.replace(/^http:\/\/([^\/]+)\/media\/cache\/(.*)_([0-9]+)\.([a-z]{2,5})$/gi, '$3');
+
+		$('input#file').val(orig);
+		$('#dimensions').val(size);
+		openFile(orig);
+	}
+
+	if(nm == 'OBJECT') {
+		var clsid = ed.selection.getNode().classid;
+	}
+		
+
+/*		var f = document.forms[0];
+
+		// Get the selected contents as text and place it in the input
+		f.someval.value = tinyMCEPopup.editor.selection.getContent({format : 'text'});
+		f.somearg.value = tinyMCEPopup.getWindowArg('some_custom_arg');
+*/
+
+	},
+
+	insert : function(html) {
+		// Insert the contents from the input into the document
+		tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
+		tinyMCEPopup.close();
+	}
+};
+
+tinyMCEPopup.onInit.add(MediaBrowserDialog.init, MediaBrowserDialog);
+
+function openFile(filename)
 {
-	$('input#file').val(file);
+	$('input#file').val(filename);
+	$('#preview').html('');
 	
-	$.post("../image/ajax_preview", { file: $('#file').val() },
+	$.post("../image/ajax_preview", { file: filename },
 		function(data){
 		$('#preview').html(data);
 	});
@@ -30,15 +80,9 @@ function openFile(file)
 function doEmbed()
 {
 
-		tinyMCEPopup.editor.execCommand('mceInsertContent', false, 'inserted code');
-
-		tinyMCEPopup.close();
-
-
-
 	$.post("../image/embed", { file: $('#file').val(), size: $('#dimensions').val() },
 		function(data){
-		$('#embed').html(data);
+		MediaBrowserDialog.insert(data);
 
 	});
 
@@ -47,29 +91,16 @@ function doEmbed()
 $().ready(function(){
 
 
-
-	$('#files').fileTree({
+	$('#media-browser').fileTree({
         root: '<?php echo $filetree_root; ?>',
         script: '/filetree'
     }, function(file) {
         openFile(file);
     });
-
-	$('#media-embed').submit(function() {
-		doEmbed();
-	});
-
-/*
-	$('#calc').click(function() {
-		doEmbed();
-	});
 	
 	$('#insert').click(function() {
-	  alert('you clicked the Insert button');
-	  return false;
+		doEmbed();
 	});
-
-*///onmousedown="$('#content').tinymce().execCommand('mceInsertContent',false,'<b>Hello world!!</b>');"
 
 });
 
@@ -77,14 +108,14 @@ $().ready(function(){
 </head>
 <body>
 <div class="padded" id="page">
-	<div class="block">
+	<div class="block margins">
 		<div class="column w3">
-			<h6>Preview</h6>
-			<div id="preview" class=" block bdr-all"></div>
 			<h6>Files</h6>
-			<div id="files" class="bdr-all"></div>
+			<div id="media-browser"></div>
 		</div>
 		<div class="float w4">
+			<h6>Preview</h6>
+			<div id="preview" class=" block bdr-all"></div>
 			<form id="media-embed" action="<?php echo $this->uri->uri_string(); ?>" method="post">
 				<p>
 					<label for="file">File</label>
@@ -99,7 +130,7 @@ $().ready(function(){
 						<option value="<?php echo $img_size_lg; ?>"><?php echo $cms_labels['img_lg'].' ('.$img_size_lg.' px)'; ?></option>
 					</select>
 				</p>
-				<p><a id="calc" href="#">Generate Embed code</a></p>
+
 			</form>
 			<div id="embed"></div>
 		</div>

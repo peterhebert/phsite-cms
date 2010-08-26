@@ -3,6 +3,9 @@ $lang['cms_labels'] = array(
 'about_this_site' => "About this site",
 'action' => "Action",
 'admin' => "Administrator",
+'align_left' => "Left",
+'align_center' => "Center",
+'align_right' => "Right",
 'all_langs' => "all languages",
 'all_content_types' => "all content types",
 'all' => "All",
@@ -244,8 +247,8 @@ $lang['cms_labels'] = array(
 'type_metadata' => "Type Metadata",
 'type_uri_name' => "URI Name",
 'update_failure' => "'%s' could not be updated",
-'update_success' => "'%s' has been successfully updated",
 'update_success' => "'%s' updated successfully",
+'user' => "User",
 'user_edit' => "Edit User",
 'user_info_fields_req' => "All user info fields are required",
 'user_info' => "User Info",
@@ -265,7 +268,7 @@ $lang['cms_labels'] = array(
 'values' => "Values",
 'webmaster' => "Webmaster",
 'with_selected' => "With selected",
-'yes' => "Yes",
+'yes' => "Yes"
 );
 
 /* End of file phsite_lang.php */

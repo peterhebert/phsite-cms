@@ -2,7 +2,8 @@
 class User extends MY_Controller
 {
 
-	var $form_success = 0; // 0 => not submitted, 1 => success, -1 (or other vale) => not successful
+	var $form_success = 0;
+	// 0 => not submitted, 1 => success, -1 (or other vale) => not successful
 	
 	function User()
 	{
@@ -316,7 +317,6 @@ class User extends MY_Controller
 		$this->User_model->list_fields_related();
 		$meta_fields = $this->User_model->field_list;
 		
-
 		if($this->form_success > -1)
 		{
 			if($this->User_model->temp_lang == '' && $this->input->post('meta_lang') != '')
@@ -425,7 +425,11 @@ class User extends MY_Controller
 				}
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
-			case 'textarea' || 'richtext':
+			case 'textarea':
+				$form_options['cols'] = 38;
+				$html .= ph_form_textarea($form_options);
+				break;
+			case 'richtext':
 				$form_options['cols'] = 38;
 				$html .= ph_form_textarea($form_options);
 				break;
@@ -434,6 +438,8 @@ class User extends MY_Controller
 			}
 
 			$html .= "</p>\r";
+			unset($form_options);
+
 		}
 		
 		$html .= "</div>\r";
@@ -523,6 +529,8 @@ class User extends MY_Controller
 			{
 				$this->User_model->site_rel_id = $this->Site_model->site_id;
 			}
+			
+			$this->User_model->user_id = $this->input->post('user_id');
 			$this->User_model->admin = $this->input->post('admin');
 			$this->User_model->name_first = $this->input->post('name_first');
 			$this->User_model->name_last = $this->input->post('name_last');
@@ -565,14 +573,25 @@ class User extends MY_Controller
 			
 			if ($form_valid)
 			{
-				$this->User_model->messages[] = 'form valid';
 				// update user
-				// update metadata
-				$this->form_success = 1;
+				$updated = $this->User_model->update_user();
+				if($updated)
+				{
+
+					$this->User_model->scope = 'users';
+					$this->User_model->update_metadata();
+					
+					if(count($this->User_model->messages) == 0)
+					{
+						$this->form_success = 1;
+						$this->User_model->messages[] = sprintf($this->cms_labels['update_success'],$this->User_model->username);
+					}
+
+				}
+						
 			}
 			else
 			{
-				$this->User_model->messages[] = 'form NOT valid';
 				$this->User_model->messages[] = validation_errors();
 				$this->form_success = -1;
 			}

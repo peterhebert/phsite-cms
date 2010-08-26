@@ -37,6 +37,7 @@ if(isset($breadcrumb_links))
 
 			if(isset($attachments) && count($attachments) > 0)
 			{
+				echo "<div class=\"block\">";
 				echo "<h3>{$cms_labels['attachments']}</h3>\r";
 
 				foreach($attachments as $att)
@@ -71,19 +72,14 @@ if(isset($breadcrumb_links))
 					{
 						echo "<span class=\"file ext_{$att['ext']}\">";
 					}
-					else if($mime_cat != 'application')
+					else if($att['mime_cat'] != 'application')
 					{
-						echo "<span class=\"icon icon_{$mime_cat}\">";
+						echo "<span class=\"icon icon_{$att['mime_cat']}\">";
 					}
 					else
 					{
 						echo "<span class=\"file\">";
 					}
-
-
-
-
-
 
 
 					echo anchor($orig_path, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
@@ -99,6 +95,7 @@ if(isset($breadcrumb_links))
 					}
 
 					echo "</p>\r";
+					echo "</div>\r";
 /*
 
 

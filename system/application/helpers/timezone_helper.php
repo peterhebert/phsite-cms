@@ -75,10 +75,6 @@ if ( ! function_exists('timezone_dropdown'))
 			$parts = explode('/', $zone);
 		   
 			// Only use "friendly" continent names
-			/*
-			if ($parts[0] != 'UTC' )
-			{       
-			*/
 			if (in_array($parts[0],$continents,true) )
 			{      
 				$locations[$zone] = str_replace('_',' ',$zone);

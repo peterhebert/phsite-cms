@@ -1,3 +1,3 @@
 tinyMCE.addI18n('en.mediabrowser',{
-	desc : 'This is just a template button'
+	desc : 'Embed images and other files from your server'
 });
