@@ -107,8 +107,7 @@ class User_model extends MY_Model {
 			
 			if($this->tmp_pwd === $this->tmp_pwd_conf)
 			{
-				$tmpwd = $this->hash_password($this->tmp_pwd);
-				$data['password'] = $tmpwd[0];
+				$data['password'] = generateHash($this->tmp_pwd);
 			}
 			else
 			{
@@ -143,6 +142,7 @@ class User_model extends MY_Model {
 	{
 		$data = array(
 		'site_id' => $this->site_id,
+		'user_id' => $this->user_id,
 		'admin' => $this->admin
 		);
 
