@@ -9,11 +9,14 @@ class Media extends MY_Controller {
 	{
 		parent::MY_Controller();
 		$this->load->helper(array('form','url','file','image'));
-		$this->load->model('Media_model');
+
+		$this->load->model('File_model');
+
+		$this->load->model('File_model');
 		$this->load->model('Content_model');
 		$this->_authenticate();
 
-		$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
+		$this->File_model->temp_lang = $this->Site_model->site_default_lang;
 		$this->whichform = 'list';
 		$this->selected = array();
 	}
@@ -21,42 +24,43 @@ class Media extends MY_Controller {
 	function scan()
 	{
 		$html = "";
-		$this->Media_model->lang_load();
-		$tmp_files = $this->Media_model->list_media_recursive();
-		
-		if($this->Media_model->file_count > 0)
+		$this->File_model->lang_load();
+		$tmp_files = $this->File_model->get_new_files(TRUE);
+		if($this->File_model->new_file_count > 0)
 		{
 
-			$new_files = $this->Media_model->file_list;
-			$html .= "<p>".sprintf($this->cms_labels['media_scan_x_results'],$this->Media_model->file_count)."</p>\r";
+			$new_files = $this->File_model->new_file_list;
+			$html .= "<p>".sprintf($this->cms_labels['media_scan_x_results'],$this->File_model->file_count)."</p>\r";
 		
 			foreach($new_files as $media)
 			{
-
-				$html .= "<p>";
+				$html .= "<div class=\"block\">\r";
 				// get mime category
 				// get filename and extension
 				$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
-				$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+
 				$filename = basename($media['file_uri']);
 				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
 				$mid = $media['media_id'];
 	
 				// determine edit uri
 				$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
-				if($this->Media_model->temp_lang != '')
+				if($this->File_model->temp_lang != '')
 				{
-					$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+					$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 				}
 
-				if($mime_cat == 'image')
+				if($media['mime_cat'] == 'image')
 				{
-					$html .= "<div class=\"image-left\">";
 					// get thumbnail
-					$img_path = $this->Media_model->dir_base.$media['file_uri'];
+					$img_path = $this->File_model->dir_base.$media['file_uri'];
 					$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
-					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
-					$html .= "</div>";
+					if($thumb)
+					{
+						$html .= "<div class=\"image-left\">";
+						$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+						$html .= "</div>\r";
+					}
 				}
 	
 				if(in_array($ext,$mime_icon_exts))
@@ -65,7 +69,7 @@ class Media extends MY_Controller {
 				}
 				else
 				{
-					$html .= "<span class=\"icon icon_{$mime_cat}\">";
+					$html .= "<span class=\"icon icon_".$media['mime_cat']."\">";
 				}
 				if($media['title'] != '' && $media['title'] != $filename)
 				{
@@ -73,10 +77,9 @@ class Media extends MY_Controller {
 				}
 				$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 				$html .= "</span></p>\r";
-
-				
+				$html .= "</div>\r";
 			}
-
+	
 		}
 		else
 		{
@@ -84,7 +87,6 @@ class Media extends MY_Controller {
 			$html .= $this->cms_labels['media_scan_no_results'];
 			$html .= "</p>\r";
 		}
-
 
 		$this->data['form'] = $html;
 
@@ -105,7 +107,7 @@ class Media extends MY_Controller {
 
 	function manage()
 	{	
-		$this->Media_model->lang_load();
+		$this->File_model->lang_load();
 		
 		$this->_process_manage();
 		if(count($this->selected) > 0 && $this->whichform == 'confirm')
@@ -117,7 +119,7 @@ class Media extends MY_Controller {
 			$this->_form_manage();
 		}
 
-		$msg = $this->Media_model->_output_messages();
+		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -166,7 +168,16 @@ class Media extends MY_Controller {
 	function _form_manage()
 	{
 		// get filter for list
-		$params = $this->uri->uri_to_assoc(3);
+		$params = $this->uri->uri_to_assoc(4);
+		if(array_key_exists('lang',$params) && preg_match('#^([a-z]{3})$#', $params['lang']))
+		{
+			$this->File_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->File_model->temp_lang = $this->Site_model->temp_lang;
+		}
+		$this->File_model->lang_load();
 
 		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$links[] = anchor("cms/media/scan",$this->cms_labels['media_scan']);
@@ -181,7 +192,7 @@ class Media extends MY_Controller {
 		$html = form_open($action, $attributes);
 		$html .= form_hidden('confirm', '')."\r";
 		
-		$base_url = '/cms/media';
+		$base_url = '/cms/media/manage';
 		$html .= $this->_media_form_table($params,$base_url,true,$this->cms_labels['select']);
 
 		$form_options = array(''=>'','delete' => 'delete','publish'=>'publish','unpublish'=>'unpublish');
@@ -246,8 +257,8 @@ class Media extends MY_Controller {
 					$confirm = $this->input->post('confirm');
 					if($confirm == 1)
 					{
-						$this->Media_model->temp_value = $select;
-						$this->Media_model->delete_batch();
+						$this->File_model->temp_value = $select;
+						$this->File_model->delete_batch();
 					}
 					else
 					{
@@ -255,47 +266,47 @@ class Media extends MY_Controller {
 					}
 					break;
 				case 'publish':
-					$this->Media_model->publish = 1;
-					if($this->Media_model->update_publish())
+					$this->File_model->publish = 1;
+					if($this->File_model->update_publish())
 					{
-						$this->Media_model->messages[] = $this->cms_labels['publish_update_success'];
+						$this->File_model->messages[] = $this->cms_labels['publish_update_success'];
 					}
 					else
 					{
-						$this->Media_model->messages[] = $this->cms_labels['publish_update_failure'];
+						$this->File_model->messages[] = $this->cms_labels['publish_update_failure'];
 					}
 					break;
 				case 'unpublish':
-					$this->Media_model->publish = 0;
-					if($this->Media_model->update_publish())
+					$this->File_model->publish = 0;
+					if($this->File_model->update_publish())
 					{
-						$this->Media_model->messages[] = $this->cms_labels['publish_update_success'];
+						$this->File_model->messages[] = $this->cms_labels['publish_update_success'];
 					}
 					else
 					{
-						$this->Media_model->messages[] = $this->cms_labels['publish_update_failure'];
+						$this->File_model->messages[] = $this->cms_labels['publish_update_failure'];
 					}
 					break;
 				default:
 				}
 			}
 		}
-		$this->Media_model->temp_value = '';
+		$this->File_model->temp_value = '';
 
 	}
 
 	function reset_cache()
 	{	
 
-		$this->Media_model->remove_media_cache();
+		$this->File_model->remove_media_cache();
 		
 		$thumbs = array();
 		
-		$files = $this->Media_model->list_flat();
+		$files = $this->File_model->list_flat();
 		foreach($files as $uri => $media)
 		{
 			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
-			$path_full = $this->Media_model->dir_base.$uri;
+			$path_full = $this->File_model->dir_base.$uri;
 			if($mime_cat == 'image')
 			{
 				$thumbs[] = view_image($path_full,$this->Site_model->img_size_th,array('alt' => $media['title']));
@@ -321,7 +332,7 @@ class Media extends MY_Controller {
 		$this->data['form'] = $html;
 
 		
-		$msg = $this->Media_model->_output_messages();
+		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -346,19 +357,19 @@ class Media extends MY_Controller {
 	function edit()
 	{
 		$params = $this->uri->uri_to_assoc(4);
-		if( array_key_exists('id',$params) && $this->Media_model->media_id == '')
+		if( array_key_exists('id',$params) && $this->File_model->media_id == '')
 		{
-			$this->Media_model->media_id = $params['id'];
+			$this->File_model->media_id = $params['id'];
 		}
 		if( array_key_exists('lang',$params) )
 		{
-			$this->Media_model->temp_lang = $params['lang'];
+			$this->File_model->temp_lang = $params['lang'];
 		}
 		
 		$this->_process_edit();
 		$this->_form_edit();
 
-		$msg = $this->Media_model->_output_messages();
+		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -387,53 +398,53 @@ class Media extends MY_Controller {
 	{
 		$this->load->helper('form');
 
-		$action = 'cms/media/edit/id/'.$this->Media_model->media_id;
+		$action = 'cms/media/edit/id/'.$this->File_model->media_id;
 		$attributes = array(
 		'name' => 'media_editor',
 		'id' => 'media_editor'
 		);
 
-		if( $this->Media_model->media_id != '')
+		if( $this->File_model->media_id != '')
 		{
-			$this->Media_model->temp_id = $this->Media_model->media_id;
-			$this->Media_model->load_media();
-			$this->Media_model->load_type_by_mime();
-			$this->Media_model->load_media();
+			$this->File_model->temp_id = $this->File_model->media_id;
+			$this->File_model->load_media();
+			$this->File_model->load_type_by_mime();
+			$this->File_model->load_media();
 
-			$this->Media_model->load_title();
-			$this->Media_model->scope = 'types';
-			$this->Media_model->temp_id = $this->Media_model->type_id;
-			$this->Media_model->list_fields_related();
+			$this->File_model->load_title();
+			$this->File_model->scope = 'types';
+			$this->File_model->temp_id = $this->File_model->type_id;
+			$this->File_model->list_fields_related();
 
-			$this->Media_model->scope = 'media';
-			$this->Media_model->temp_id = $this->Media_model->media_id;
-			$this->Media_model->load_metadata();
+			$this->File_model->scope = 'media';
+			$this->File_model->temp_id = $this->File_model->media_id;
+			$this->File_model->load_metadata();
 
 		}
 
 		$html = form_open($action, $attributes);
-		$html .= form_hidden('media_id',$this->Media_model->media_id);
-		$html .= form_hidden('title_id',$this->Media_model->title_id);
+		$html .= form_hidden('media_id',$this->File_model->media_id);
+		$html .= form_hidden('title_id',$this->File_model->title_id);
 		
 		$html .= form_fieldset($this->cms_labels['general_info']);
 		
-		if($this->Media_model->type_uri_name == 'image')
+		if($this->File_model->type_uri_name == 'image')
 		{
-			if($this->Media_model->external == 0)
+			if($this->File_model->external == 0)
 			{
-				$file_path_full = $this->Media_model->dir_base.$this->Media_model->file_uri;
+				$file_path_full = $this->File_model->dir_base.$this->File_model->file_uri;
 				$html .= "<p>";
-				$html .= view_image($file_path_full,$this->Site_model->img_size_md,array('alt' => $this->Media_model->title));
+				$html .= view_image($file_path_full,$this->Site_model->img_size_md,array('alt' => $this->File_model->title));
 				$html .= "</p>";
 			}
 			else
 			{
 				$em_size = $this->Site_model->img_size_md / 15;
 				$form_options = array(
-				'src' => $this->Media_model->file_uri,
-				'alt' => $this->Media_model->title,
+				'src' => $this->File_model->file_uri,
+				'alt' => $this->File_model->title,
 				'style' => "width: {$em_size}em",
-				'title' => $this->Media_model->title,
+				'title' => $this->File_model->title,
 				);
 
 				$html .= "<p>";
@@ -443,15 +454,15 @@ class Media extends MY_Controller {
 		}
 
 
-		$html .= form_hidden('external',$this->Media_model->external);
-		if($this->Media_model->external == 1)
+		$html .= form_hidden('external',$this->File_model->external);
+		if($this->File_model->external == 1)
 		{
 
 			$form_options = array(
 			'name'        => 'file_uri',
 			'id'          => 'file_uri',
 			'class'	=> 'input',
-			'value' => $this->Media_model->file_uri,
+			'value' => $this->File_model->file_uri,
 			);
 			$html .= "<p>";
 			$html .=  form_label($this->cms_labels['file_external_uri'], 'file_uri');
@@ -461,22 +472,22 @@ class Media extends MY_Controller {
 		}
 		else
 		{
-			$html .= form_hidden('file_uri',$this->Media_model->file_uri);
-			$html .= form_hidden('mime_type',$this->Media_model->mime_type);
+			$html .= form_hidden('file_uri',$this->File_model->file_uri);
+			$html .= form_hidden('mime_type',$this->File_model->mime_type);
 		
 			$html .= "<div class=\"row\">";
 			$html .= form_label($this->cms_labels['file']);
 			$html .= "<div class=\"filename\">";
-			$filename = str_replace('/','/ ',$this->Media_model->file_uri);
+			$filename = str_replace('/','/ ',$this->File_model->file_uri);
 			$filename = str_replace('/ / ','//',$filename);
 			$html .= $filename;
 			$html .= "</div>";
 			$html .= "</div>";
 
-			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+			$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
 			
-			$this->Media_model->lang_load();
-			$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+			$this->File_model->lang_load();
+			$this->lang->load('mime', $this->File_model->lang_CI_Name);
 			$mime_names = $this->lang->line('mime');
 	
 			$html .= "<p>";
@@ -487,7 +498,7 @@ class Media extends MY_Controller {
 			}
 			else
 			{
-				$html .= $this->Media_model->mime_type;
+				$html .= $this->File_model->mime_type;
 			}
 			$html .= "</p>";
 		}
@@ -496,7 +507,7 @@ class Media extends MY_Controller {
 
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['publish'], 'publish');
-		$html .=  form_dropdown('publish', $form_options, $this->Media_model->publish);
+		$html .=  form_dropdown('publish', $form_options, $this->File_model->publish);
 		$html .= "</p>\n";
 
 		// convert dates to user timezone
@@ -505,23 +516,23 @@ class Media extends MY_Controller {
 		
 		if($usr_zone !== FALSE && $usr_zone != $sys_zone)
 		{
-			if($this->Media_model->date_created != '')
+			if($this->File_model->date_created != '')
 			{
-				$this->Media_model->date_created = convert_time($this->Media_model->date_created, $usr_zone);
+				$this->File_model->date_created = convert_time($this->File_model->date_created, $usr_zone);
 			}
 	
 		}
 
-		if($this->Media_model->date_created == '0000-00-00 00:00:00')
+		if($this->File_model->date_created == '0000-00-00 00:00:00')
 		{
-			$this->Media_model->date_created = '';
+			$this->File_model->date_created = '';
 		}
 
 		$form_options = array(
 		'name'        => 'date_created',
 		'id'          => 'date_created',
 		'class'	=> 'med_input',
-		'value' => $this->Media_model->date_created,
+		'value' => $this->File_model->date_created,
 		);
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['date_created'], 'date_created');
@@ -532,17 +543,17 @@ class Media extends MY_Controller {
 		
 		$html .= form_fieldset($this->cms_labels['metadata']);
 
-		$form_options = $this->Media_model->langs_dropdown();
+		$form_options = $this->File_model->langs_dropdown();
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['language'], 'media_lang');
-		$html .=  form_dropdown('media_lang', $form_options, $this->Media_model->temp_lang);
+		$html .=  form_dropdown('media_lang', $form_options, $this->File_model->temp_lang);
 		$html .= "</p>\n";
 
 		$form_options = array(
 		'id' => 'title',
 		'name' => 'title',
 		'class' => 'text',
-		'value' => $this->Media_model->title
+		'value' => $this->File_model->title
 		);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['title'],'title');
@@ -553,7 +564,7 @@ class Media extends MY_Controller {
 		'id' => 'subtitle',
 		'name' => 'subtitle',
 		'class' => 'text',
-		'value' => $this->Media_model->subtitle
+		'value' => $this->File_model->subtitle
 		);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
@@ -561,7 +572,7 @@ class Media extends MY_Controller {
 		$html .= "</p>";
 
 		// start meta fields
-		foreach($this->Media_model->metadata as $index => $fd)
+		foreach($this->File_model->metadata as $index => $fd)
 		{
 			// get field data if it does not exist
 			if(array_key_exists('field_id',$fd) && $fd['field_id'] != '')
@@ -576,14 +587,14 @@ class Media extends MY_Controller {
 			}
 			else
 			{
-				$this->Media_model->temp_id = $index;
-				if($this->Media_model->load_field())
+				$this->File_model->temp_id = $index;
+				if($this->File_model->load_field())
 				{
 	
-					$tmp_ref_name = $this->Media_model->field_ref_name;
-					$tmp_needs_lang = $this->Media_model->field_needs_lang;
-					$tmp_input_type = $this->Media_model->field_input_type;
-					$tmp_validation = $this->Media_model->field_validation;
+					$tmp_ref_name = $this->File_model->field_ref_name;
+					$tmp_needs_lang = $this->File_model->field_needs_lang;
+					$tmp_input_type = $this->File_model->field_input_type;
+					$tmp_validation = $this->File_model->field_validation;
 					$tmp_label = $tmp_ref_name;
 					$tmp_meta_id = '';
 					$tmp_required = '';
@@ -602,14 +613,14 @@ class Media extends MY_Controller {
 			);
 			$html .= form_hidden($form_options);
 
-			$this->Media_model->reset_label();
-			$this->Media_model->temp_id = $index;
-			$this->Media_model->label_scope = 'field';
-			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
+			$this->File_model->reset_label();
+			$this->File_model->temp_id = $index;
+			$this->File_model->label_scope = 'field';
+			$this->File_model->temp_lang = $this->Site_model->temp_lang;
 
-			if($this->Media_model->load_label())
+			if($this->File_model->load_label())
 			{
-				$tmp_label = $this->Media_model->label;
+				$tmp_label = $this->File_model->label;
 			}
 
 			$html .= "<p>\r";
@@ -640,7 +651,7 @@ class Media extends MY_Controller {
 		'id' => 'keywords',
 		'name' => 'keywords',
 		'class' => 'textarea',
-		'value' => $this->Media_model->keywords
+		'value' => $this->File_model->keywords
 		);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['keywords'],'keywords');
@@ -707,12 +718,12 @@ class Media extends MY_Controller {
 				
 				// load label
 	
-				$this->Media_model->label_scope = 'field';
-				$this->Media_model->temp_id = $fd_id;
+				$this->File_model->label_scope = 'field';
+				$this->File_model->temp_id = $fd_id;
 	
-				if($this->Media_model->load_label())
+				if($this->File_model->load_label())
 				{
-					$lbl_name = $this->Media_model->label;
+					$lbl_name = $this->File_model->label;
 				}
 
 				$concat_valid = implode('|', $tmp_valid);
@@ -728,22 +739,22 @@ class Media extends MY_Controller {
 			$form_is_valid = $this->form_validation->run();
 			if ($form_is_valid)
 			{
-				$this->Media_model->media_id = $this->input->post('media_id');
-				$this->Media_model->file_uri = $this->input->post('file_uri');
-				$this->Media_model->external = $this->input->post('external');
-				$this->Media_model->mime_type = $this->input->post('mime_type');
-				$this->Media_model->date_created = $this->input->post('date_created');
-				$this->Media_model->publish = $this->input->post('publish');
+				$this->File_model->media_id = $this->input->post('media_id');
+				$this->File_model->file_uri = $this->input->post('file_uri');
+				$this->File_model->external = $this->input->post('external');
+				$this->File_model->mime_type = $this->input->post('mime_type');
+				$this->File_model->date_created = $this->input->post('date_created');
+				$this->File_model->publish = $this->input->post('publish');
 
-				$this->Media_model->title_id = $this->input->post('title_id');
-				$this->Media_model->temp_lang = $this->input->post('media_lang');
-				$this->Media_model->title = $this->input->post('title');
-				$this->Media_model->subtitle = $this->input->post('subtitle');
-				$this->Media_model->keywords = $this->input->post('keywords');
+				$this->File_model->title_id = $this->input->post('title_id');
+				$this->File_model->temp_lang = $this->input->post('media_lang');
+				$this->File_model->title = $this->input->post('title');
+				$this->File_model->subtitle = $this->input->post('subtitle');
+				$this->File_model->keywords = $this->input->post('keywords');
 
-			//	$this->Media_model->temp_id = $this->input->post('type_id');
-			//	$this->Media_model->scope = 'media';
-			//	$this->Media_model->load_type();
+			//	$this->File_model->temp_id = $this->input->post('type_id');
+			//	$this->File_model->scope = 'media';
+			//	$this->File_model->load_type();
 
 				$tmp_field_id = $this->input->post('field_id');
 				$tmp_field_name = $this->input->post('field_name');
@@ -751,11 +762,11 @@ class Media extends MY_Controller {
 				$tmp_required = $this->input->post('required');
 				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
 
-				$this->Media_model->messages[] = 'form is valid';
+				$this->File_model->messages[] = 'form is valid';
 			}
 			else
 			{
-				$this->Media_model->messages[] = validation_errors();
+				$this->File_model->messages[] = validation_errors();
 			}
 		}		
 	}
@@ -764,15 +775,15 @@ class Media extends MY_Controller {
     {
 		$menu = '';
 		
-		if($this->Media_model->media_id != '')
+		if($this->File_model->media_id != '')
 		{
 		
 			// list active languages
 			$lang_links = array();
-			$this->Media_model->list_langs();
-			foreach($this->Media_model->lang_list as $llang)
+			$this->File_model->list_langs();
+			foreach($this->File_model->lang_list as $llang)
 			{
-				$temp_link = 'cms/media/edit/id/'.$this->Media_model->media_id.'/lang/'.$llang['ISO_639_3'];
+				$temp_link = 'cms/media/edit/id/'.$this->File_model->media_id.'/lang/'.$llang['ISO_639_3'];
 				if($llang['Native_Name'] != '')
 				{
 					$temp_txt = $llang['Native_Name'];
@@ -799,16 +810,16 @@ class Media extends MY_Controller {
 	function upload()
 	{
 		$this->_process_upload();
-		if($this->Media_model->temp_value != '')
+		if($this->File_model->temp_value != '')
 		{
-			$this->data['form'] = $this->Media_model->temp_value;
+			$this->data['form'] = $this->File_model->temp_value;
 		}
 		else
 		{
 			$this->_form_upload();
 		}
 		
-		$msg = $this->Media_model->_output_messages();
+		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -844,7 +855,7 @@ class Media extends MY_Controller {
 		$html .=  form_upload($field_params);
 		$html .= "</p>\r";
 		
-		$this->Media_model->list_dirs_display();
+		$this->File_model->list_dirs_display();
 				
 		$field_params = array(
 		'name'        => 'dest_path',
@@ -852,7 +863,7 @@ class Media extends MY_Controller {
 		);
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['path_dest'], 'dest_path');
-		$html .=  form_dropdown('dest_path',$this->Media_model->dir_list_rel);
+		$html .=  form_dropdown('dest_path',$this->File_model->dir_list_rel);
 		$html .= "</p>\r";
 
 		$field_params = array(
@@ -872,29 +883,29 @@ class Media extends MY_Controller {
 
 		$this->data['form'] = $html;
 
-		$exts = array_keys($this->Media_model->mime_types);
+		$exts = array_keys($this->File_model->mime_types);
 
-		$html = "<p>".$this->cms_labels['max_upload_size'].' : '.$this->Media_model->max_upload_display."</p>\r";
+		$html = "<p>".$this->cms_labels['max_upload_size'].' : '.$this->File_model->max_upload_display."</p>\r";
 		$this->data['sidebar'] = $html;
 
 	}
 
 	function _process_upload()
 	{
-		$this->Media_model->calculate_max_size();
-		$config['max_size'] = $this->Media_model->max_upload_bytes;
+		$this->File_model->calculate_max_size();
+		$config['max_size'] = $this->File_model->max_upload_bytes;
 
-		$exts = array_keys($this->Media_model->mime_types);
+		$exts = array_keys($this->File_model->mime_types);
 		$config['allowed_types'] = implode('|',$exts);
 
 		// process form if submitted
 		if($this->input->post('submit') != '') {
 
 			$new_path = $this->input->post('new_path');
-			$upload_path = $this->Media_model->dir_base.$this->input->post('dest_path');
+			$upload_path = $this->File_model->dir_base.$this->input->post('dest_path');
 			if($new_path != '')
 			{
-				$new_path = $this->Media_model->dir_base.'/'.$new_path;
+				$new_path = $this->File_model->dir_base.'/'.$new_path;
 				$new_path = str_replace('//','/',$upload_path);
 				
 				if(!file_exists($new_path))
@@ -917,22 +928,22 @@ class Media extends MY_Controller {
 			
 			if ($success)
 			{
-				$this->Media_model->messages[] = $this->cms_labels['media_upload_success'];
+				$this->File_model->messages[] = $this->cms_labels['media_upload_success'];
 				$html = '';
 				// get upload data
 				$upload_data = $this->upload->data();
 				
-				$this->Media_model->file_current = $upload_data['full_path'];
-				$this->Media_model->file_uri = str_replace($this->Media_model->dir_base,'',$upload_data['full_path']);
+				$this->File_model->file_current = $upload_data['full_path'];
+				$this->File_model->file_uri = str_replace($this->File_model->dir_base,'',$upload_data['full_path']);
 				
-				$this->Media_model->update_media_from_file();
+				$this->File_model->update_media_from_file();
 
 				echo "<pre>";
-				print_r($this->Media_model->metadata);
+				print_r($this->File_model->metadata);
 				echo "</pre>\r";
 
 				
-				$edit_uri = "cms/media/edit/id/".$this->Media_model->media_id;
+				$edit_uri = "cms/media/edit/id/".$this->File_model->media_id;
 				$edit_text = sprintf($this->cms_labels['edit_this'],$upload_data['file_name']);
 
 				$html .= "<p>";
@@ -942,7 +953,7 @@ class Media extends MY_Controller {
 				if($upload_data['is_image'] == 1)
 				{
 					$html .= "<p>";
-					$html .= view_image($this->Media_model->file_current,$this->Site_model->img_size_md);
+					$html .= view_image($this->File_model->file_current,$this->Site_model->img_size_md);
 					$html .= "</p>\r";
 				}
 
@@ -960,7 +971,7 @@ class Media extends MY_Controller {
 					}
 					else
 					{
-						$type = $this->Media_model->mime_types[$ext];
+						$type = $this->File_model->mime_types[$ext];
 					}
 					
 					$html .= "<p><strong>".$this->cms_labels['media_type']."</strong>: ".$type."</p>\r";
@@ -975,13 +986,13 @@ class Media extends MY_Controller {
 					$html .= "<p><strong>".$this->cms_labels['media_dim_h']."</strong>: ".$upload_data['image_height']."</p>";
 				}
 
-				$this->Media_model->temp_value = $html;
+				$this->File_model->temp_value = $html;
 
 			}	
 			else
 			{
-				$this->Media_model->temp_value = '';
-				$this->Media_model->messages[] = $this->upload->display_errors('<p>', '</p>');
+				$this->File_model->temp_value = '';
+				$this->File_model->messages[] = $this->upload->display_errors('<p>', '</p>');
 			}
 				
 		} // end form processing

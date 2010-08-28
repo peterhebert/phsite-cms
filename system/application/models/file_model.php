@@ -42,7 +42,7 @@ class File_model extends MY_Model {
 	function get_new_files($recursive=FALSE,$unique=TRUE)
 	{
 		$this->list_media();
-		$old_files = $this->file_list;
+		$old_files = $this->media_list;
 		
 		$this->list_files($recursive,$unique);
 		
@@ -281,12 +281,20 @@ class File_model extends MY_Model {
 		
 				if(is_array($this->metadata) && count($this->metadata) > 0)
 				{
-			
+					$tmp_meta = array();
+
 					foreach($this->metadata as $index => $info)
 					{
-						$this->metadata[$index]['rel_id'] = $this->media_id;
+						$zz =& $info;
+						$zz['rel_id'] = $this->media_id;
+						if($info['value'] != '')
+						{
+							$tmp_meta[$index] = $zz;
+						}
+						unset($zz);
 					}
-		
+					$this->metadata = $tmp_meta;
+					unset($tmp_meta);
 					$this->update_metadata();
 				}
 
@@ -321,11 +329,18 @@ class File_model extends MY_Model {
 
 
 		}
+
 		// date filter
 		if ($this->date_filter != '')
 		{
-			$where[] = parse_date_filter($this->date_filter);
+			$filter = parse_date_filter($this->date_filter);
+			if($filter)
+			{
+				$where[] = parse_date_filter($this->date_filter);
+			}
+
 		}
+
 		// mime type restriction
 		if ($this->mime_type != '')
 		{
@@ -356,6 +371,8 @@ class File_model extends MY_Model {
 		$sql .= " ORDER BY 'file_uri' ASC".$limit;
 		
 		$query = $this->db->query($sql);
+
+		$this->messages[] = $this->db->last_query();
 		
 		$file_list = array();
 		
@@ -363,13 +380,31 @@ class File_model extends MY_Model {
 		{
 			foreach ($query->result_array() as $row)
 			{
-			   $file_list[$row['file_uri']] =& $row;
+				$this->reset_media_vars();
+				$tmp_media =& $row;
+
+				$this->scope = 'media';
+				$this->temp_id = $row['media_id'];
+				$this->load_title();
+
+				$tmp_media['title_id'] = $this->title_id;
+				$tmp_media['title'] = $this->title;
+				$tmp_media['uri_title'] = $this->uri_title;
+				$tmp_media['subtitle'] = $this->subtitle;
+				$tmp_media['keywords'] = $this->keywords;
+				$tmp_media['lang_ISO_639_3'] = $this->temp_lang;
+
+				$this->temp_id = $row['media_id'];
+				$tmp_media['attached_to'] = $this->media_attached_to();
+
+				$file_list[$row['file_uri']] = $tmp_media;
+
 			}
 
 		}
-		$this->file_list = $file_list;
+		$this->media_list = $file_list;
 
-		$this->file_count = $query->num_rows();
+		$this->file_count = count($this->media_list);
 	}
 
 	function update_media()
@@ -637,6 +672,199 @@ class File_model extends MY_Model {
 		$this->subtitle = '';
 		$this->keywords = '';
 		$this->title_updated = '';
+	}
+
+	function count_media_all()
+	{
+
+		$where = array();
+
+		// match to directory
+		if ($this->temp_value != '')
+		{
+			switch ($this->db->platform())
+			{
+				case 'mysql': 
+					$where[] = "`file_uri` REGEXP '^{$this->temp_value}([^/]+)$'";
+					break;
+				case 'postgre': 
+					$where[] = "`file_uri` ~ '^{$this->temp_value}([^/]+)$'";
+					break;
+				case 'oci8': 
+					$where[] = "`file_uri` REGEXP_LIKE '^{$this->temp_value}([^/]+)$'";
+					break;
+				default:
+					$where[] = "`file_uri` LIKE '{$this->temp_value}%'";
+			}
+
+
+
+		}
+		// date filter
+		if ($this->date_filter != '')
+		{
+			$filter = parse_date_filter($this->date_filter);
+			if($filter)
+			{
+				$where[] = parse_date_filter($this->date_filter);
+			}
+
+		}
+		// mime type restriction
+		if ($this->mime_type != '')
+		{
+			$where[] = "`mime_type` LIKE '{$this->mime_type}%'";
+		}
+
+		// exclude certain ids if supplied
+		if(is_array($this->media_list) && count($this->media_list) > 0)
+		{
+			foreach($this->media_list as $id)
+			{
+				$where[] = "`media_id` != {$id}";
+			}
+		}
+
+		$sql = "SELECT * FROM c_media";
+		if(count($where) > 0)
+		{
+			$sql .= " WHERE ".implode(' AND ',$where);
+		}
+		$sql .= " ORDER BY 'file_uri' ASC";
+		
+		$query = $this->db->query($sql);
+		if($query)
+		{
+			return $query->num_rows();
+		}
+
+		return 0;
+		
+	}
+
+	function media_attached_to()
+	{
+		$attached_to = array();
+		
+		$this->db->where('media_id',$this->temp_id);
+		$query = $this->db->get('r_attachments');
+		
+		if ($query->num_rows() > 0)
+		{
+			$attached_to = $query->result_array();
+		}
+
+		return $attached_to;
+	}
+
+	function delete_media()
+	{
+		
+		// first load to get file URI
+		$this->load_media();
+		$this->load_title();
+
+		$name = $this->file_uri;
+		if($this->title != '')
+		{
+			$name = $this->title;
+		}
+
+		// if local then delete
+		if($this->external == 0)
+		{
+			$full_path = $this->dir_base.$this->file_uri;
+			if(is_file($full_path))
+			{
+				if(!unlink($full_path))
+				{
+					$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+					return FALSE;
+				}
+			}
+		}
+
+		// delete all titles, metadata
+		$this->db->where('scope', 'media');
+		$this->db->where('rel_id', $this->media_id);
+		$deleted = $this->db->delete('c_titles');
+		if(!$deleted)
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			$this->messages[] = $this->db->last_query();
+			return FALSE;
+		}
+
+		$this->db->where('scope', 'media');
+		$this->db->where('rel_id', $this->media_id);
+		$deleted = $this->db->delete('c_metadata');
+		if(!$deleted)
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			$this->messages[] = $this->db->last_query();
+			return FALSE;
+		}
+		
+		// delete all attached instances of media and media entry
+		$this->db->where('media_id', $this->media_id);
+		$deleted = $this->db->delete('r_attachments');
+		if(!$deleted)
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			$this->messages[] = $this->db->last_query();
+			return FALSE;
+		}
+
+		$this->db->where('media_id', $this->media_id);
+		$deleted = $this->db->delete('c_media');
+		if(!$deleted)
+		{
+			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
+			$this->messages[] = $this->db->last_query();
+			return FALSE;
+		}
+
+		$this->messages[] = sprintf($this->cms_labels['delete_success'],$name);
+		$this->mime_type = '';
+		$this->file_uri = '';
+		$this->title = '';
+		return TRUE;
+	}
+
+	function delete_batch()
+	{
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $mid)
+			{
+				$this->temp_id = $mid;
+				$this->delete_media();
+			}
+
+		}
+	}
+
+
+	function load_media()
+	{
+		$this->db->where('media_id',$this->temp_id);
+		$query = $this->db->get('c_media');
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$this->media_id = $row->media_id;
+			$this->file_uri = $row->file_uri;
+			$this->external = $row->external;
+			$this->mime_type = $row->mime_type;
+			$this->date_created = $row->date_created;
+			$this->publish = $row->publish;
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 
 }

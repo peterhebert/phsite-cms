@@ -248,10 +248,10 @@ if ( ! function_exists('view_image'))
 				$result = img($img_tag_attr);
 			
 			} else {
-				$result = "file is not an image";
+				$result = FALSE;
 			}
 		} else {
-			$result = "no image found";
+			$result = FALSE;
 		}
 
 		return $result;

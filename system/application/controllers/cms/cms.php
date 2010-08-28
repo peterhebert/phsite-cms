@@ -21,8 +21,6 @@ class Cms extends MY_Controller
 		// load list of content types
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 
-		$html = "";
-
 		// get recently added pages
 		
 		$this->Content_model->limit = 5;
@@ -32,8 +30,8 @@ class Cms extends MY_Controller
 		if(count($this->Content_model->content_list) > 0)
 		{
 
-			$html .= "<h2>{$this->cms_labels['recent_content']}</h2>\r";
 			// generate result table
+			$html = "<h2>{$this->cms_labels['recent_content']}</h2>\r";
 			$html .= "<table class=\"dotted\">\r";
 			$html .= "\t<thead>\r";
 			$html .= "\t\t<tr>\r";
@@ -85,6 +83,10 @@ class Cms extends MY_Controller
 	
 			$html .= "\t</tbody>\r";
 			$html .= "</table>\r";
+		}
+		else
+		{
+			$html = $this->cms_labels['no_content'];
 		}
 
 		$this->data['form'] = $html;

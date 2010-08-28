@@ -255,7 +255,7 @@ class MY_Controller extends Controller {
 		// get filters from post data
 		$limit = $this->input->post('limit');
 		$media_type = $this->input->post('media_type');
-		$this->Media_model->page = 1;
+		$this->File_model->page = 1;
 		$html = '';
 
 		// limit
@@ -267,7 +267,7 @@ class MY_Controller extends Controller {
 		{
 			$limit = 10;
 		}
-		$this->Media_model->limit = $limit;
+		$this->File_model->limit = $limit;
 
 		// media type
 		if(array_key_exists('type',$params))
@@ -276,23 +276,23 @@ class MY_Controller extends Controller {
 		}
 		if ($media_type !== FALSE && $media_type != '')
 		{
-			$this->Media_model->temp_value = $media_type;
+			$this->File_model->mime_type = $media_type;
 		}
 
 		if(array_key_exists('page',$params))
 		{
-			$this->Media_model->page = $params['page'];
+			$this->File_model->page = $params['page'];
 		}
 		
-		$total = $this->Media_model->count_media_all();
+		$total = $this->File_model->count_media_all();
 		
-		$this->Media_model->list_media();
-		
-		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$this->File_model->list_media();
+
+		$this->lang->load('mime', $this->File_model->lang_CI_Name);
 		$mime_cat_labels = $this->lang->line('mime_cat');
 		$mime_labels = $this->lang->line('mime');
 
-		$end = $this->Media_model->page * $limit;
+		$end = $this->File_model->page * $limit;
 		$start = $end - $limit + 1;
 		
 		if($end > $total || $end == 0)
@@ -309,7 +309,7 @@ class MY_Controller extends Controller {
 		}
 
 		$form_options[''] = $this->cms_labels['all'];
-		foreach($this->Media_model->mime_categories as $cat)
+		foreach($this->File_model->mime_categories as $cat)
 		{
 			$form_options[$cat] = $mime_cat_labels[$cat];
 		}	
@@ -338,7 +338,7 @@ class MY_Controller extends Controller {
 		$pconfig['base_url'] = $base_url;
 		$pconfig['total_rows'] = $total;
 		$pconfig['per_page'] = $limit;
-		$pconfig['cur_page'] = $this->Media_model->page;
+		$pconfig['cur_page'] = $this->File_model->page;
 		$this->pagination->initialize($pconfig);
 
 		$html .= $this->pagination->create_links_proper();
@@ -367,7 +367,7 @@ class MY_Controller extends Controller {
 		$html .= "\t</thead>\r";
 		$html .= "\t<tbody>\r";
 
-		foreach($this->Media_model->media_list as $media)
+		foreach($this->File_model->media_list as $file => $media)
 		{
 			$html .= "\t\t<tr>\r";
 
@@ -381,20 +381,24 @@ class MY_Controller extends Controller {
 
 			// determine edit uri
 			$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
-			if($this->Media_model->temp_lang != '')
+			if($this->File_model->temp_lang != '')
 			{
-				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+				$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 			}
 
 			$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\" class=\"align-left\">";
 			if($mime_cat == 'image' && $media['external'] == 0)
 			{
-				$html .= "<div class=\"image-left\">";
 				// get thumbnail
-				$img_path = $this->Media_model->dir_base.$media['file_uri'];
+				$img_path = $this->File_model->dir_base.$media['file_uri'];
 				$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
-				$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
-				$html .= "</div>";
+
+				if($thumb)
+				{
+					$html .= "<div class=\"image-left\">";
+					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
+					$html .= "</div>\r";
+				}
 			}
 
 			if(in_array($ext,$mime_icon_exts))
@@ -421,7 +425,7 @@ class MY_Controller extends Controller {
 	
 				if(count($media['attached_to']) > 0)
 				{
-					$this->Content_model->temp_lang = $this->Media_model->temp_lang;
+					$this->Content_model->temp_lang = $this->File_model->temp_lang;
 					$this->Content_model->link_mode = 1;
 					$attachment_links = array();
 					foreach($media['attached_to'] as $page)
@@ -471,7 +475,7 @@ class MY_Controller extends Controller {
 		// get filters from post data
 		$limit = $this->input->post('limit');
 		$media_type = $this->input->post('media_type');
-		$this->Media_model->page = 1;
+		$this->File_model->page = 1;
 		$html = '';
 
 		// limit
@@ -483,7 +487,7 @@ class MY_Controller extends Controller {
 		{
 			$limit = 10;
 		}
-		$this->Media_model->limit = $limit;
+		$this->File_model->limit = $limit;
 
 		// media type
 		if(array_key_exists('type',$params))
@@ -492,23 +496,23 @@ class MY_Controller extends Controller {
 		}
 		if ($media_type !== FALSE && $media_type != '')
 		{
-			$this->Media_model->temp_value = $media_type;
+			$this->File_model->temp_value = $media_type;
 		}
 
 		if(array_key_exists('page',$params))
 		{
-			$this->Media_model->page = $params['page'];
+			$this->File_model->page = $params['page'];
 		}
 		
-		$total = $this->Media_model->count_media_all();
+		$total = $this->File_model->count_media_all();
 		
-		$this->Media_model->list_media();
+		$this->File_model->list_media();
 		
-		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$this->lang->load('mime', $this->File_model->lang_CI_Name);
 		$mime_cat_labels = $this->lang->line('mime_cat');
 		$mime_labels = $this->lang->line('mime');
 
-		$end = $this->Media_model->page * $limit;
+		$end = $this->File_model->page * $limit;
 		$start = $end - $limit + 1;
 		
 		if($end > $total || $end == 0)
@@ -525,7 +529,7 @@ class MY_Controller extends Controller {
 		}
 
 		$form_options[''] = $this->cms_labels['all'];
-		foreach($this->Media_model->mime_categories as $cat)
+		foreach($this->File_model->mime_categories as $cat)
 		{
 			$form_options[$cat] = $mime_cat_labels[$cat];
 		}
@@ -547,7 +551,7 @@ class MY_Controller extends Controller {
 		$pconfig['base_url'] = $base_url;
 		$pconfig['total_rows'] = $total;
 		$pconfig['per_page'] = $limit;
-		$pconfig['cur_page'] = $this->Media_model->page;
+		$pconfig['cur_page'] = $this->File_model->page;
 		$this->pagination->initialize($pconfig);
 
 		$pagination = $this->pagination->create_links_proper();
@@ -561,7 +565,7 @@ class MY_Controller extends Controller {
 		$form_data['action_label'] = $action_label;	
 
 		$media_array = array();
-		foreach($this->Media_model->media_list as $media)
+		foreach($this->File_model->media_list as $media)
 		{
 			$tmp_array = $media;
 
@@ -575,15 +579,15 @@ class MY_Controller extends Controller {
 
 			// determine edit uri
 			$edit_uri = 'cms/media/edit/id/'.$media['media_id'];
-			if($this->Media_model->temp_lang != '')
+			if($this->File_model->temp_lang != '')
 			{
-				$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+				$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 			}
 
 			if($mime_cat == 'image' && $media['external'] == 0)
 			{
 				// get thumbnail
-				$img_path = $this->Media_model->dir_base.$media['file_uri'];
+				$img_path = $this->File_model->dir_base.$media['file_uri'];
 				$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
 				$tmp_array['thumbnail'] = anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
 
@@ -607,7 +611,7 @@ class MY_Controller extends Controller {
 	
 				if(count($media['attached_to']) > 0)
 				{
-					$this->Content_model->temp_lang = $this->Media_model->temp_lang;
+					$this->Content_model->temp_lang = $this->File_model->temp_lang;
 					$this->Content_model->link_mode = 1;
 					$attachment_links = array();
 					foreach($media['attached_to'] as $page)
