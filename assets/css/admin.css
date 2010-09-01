@@ -200,6 +200,7 @@ form .label-wide label
 {
 	width: 16em;
 }
+
 form .indent-wide
 {
 	padding-left: 17em;
@@ -228,7 +229,7 @@ form .label-wide textarea.textarea,
 #container.wide form .text,
 #container.wide form textarea.textarea,
 #container.wide form textarea.richtext,
-#container.wide form .large_input { width: 52em; }
+#container.wide form .large_input { width: 51em; }
 
 #container.wide form .label-wide fieldset .text,
 #container.wide form .label-wide fieldset textarea.textarea,

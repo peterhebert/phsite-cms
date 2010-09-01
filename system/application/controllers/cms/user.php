@@ -31,6 +31,7 @@ class User extends MY_Controller
 			$userlist[] = anchor($user_url, $user_name);
 		} else {
 
+			$this->User_model->clear_user_data();
 			$this->User_model->get_list();
 
 			if(count($this->User_model->user_list) > 0)
@@ -85,10 +86,20 @@ class User extends MY_Controller
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['user_edit'];
 
+		$this->User_model->clear_user_data();
+
 		$params = $this->uri->uri_to_assoc(4);
 		if(array_key_exists('id',$params)) {
 			$this->User_model->temp_id = $params['id'];
 		}
+		else if($this->input->post('user_id'))
+		{
+			$this->User_model->temp_id = $this->input->post('user_id');
+		}
+		else
+		{
+		}
+		
 		if(array_key_exists('lang',$params))
 		{
 			$this->User_model->temp_lang = $params['lang'];
@@ -465,7 +476,7 @@ class User extends MY_Controller
 
 			$this->form_validation->set_rules('name_first', $this->cms_labels['name_first'], 'required');
 			$this->form_validation->set_rules('name_last', $this->cms_labels['name_last'], 'required');
-			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash');
+			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash|callback_username_unique');
 			$this->form_validation->set_rules('timezone', $this->cms_labels['timezone'], 'required|is_timezone');
 			$this->form_validation->set_rules('admin', $this->cms_labels['user_type'], 'required|is_natural');
 			$this->form_validation->set_rules('default_lang', $this->cms_labels['default_lang'], 'required|alpha|exact_length[3]');
@@ -531,6 +542,7 @@ class User extends MY_Controller
 			}
 			
 			$this->User_model->user_id = $this->input->post('user_id');
+			$this->User_model->user_rel_id = $this->input->post('user_rel_id');
 			$this->User_model->admin = $this->input->post('admin');
 			$this->User_model->name_first = $this->input->post('name_first');
 			$this->User_model->name_last = $this->input->post('name_last');
@@ -577,6 +589,7 @@ class User extends MY_Controller
 				$updated = $this->User_model->update_user();
 				if($updated)
 				{
+					$this->User_model->update_site_user();
 
 					$this->User_model->scope = 'users';
 					$this->User_model->update_metadata();
@@ -775,48 +788,25 @@ class User extends MY_Controller
 		
 	}// end _process_meta_fields()
 
+	function username_unique($str)
+	{
+		$this->User_model->temp_value = $str;
+		$this->User_model->temp_id = $this->input->post('user_id');
+		$unique = $this->User_model->username_unique();
+		if ($unique)
+		{
+			return TRUE;
+		}
+		else
+		{
+			$msg = sprintf($this->cms_labels['username_taken'],$str);
+			$this->form_validation->set_message('username_unique', $msg);
+			return FALSE;
+		}
+	}
 
 /*
 
-	function forgot_password()
-	{
-		$this->load->helper('form');
-		$this->load->library('form_validation');
-		$this->data['username'] = '';
-		$this->data['email'] = '';
-		$this->data['showform'] = TRUE;
-
-		// if form submitted, process data
-		if($this->input->post('submit') != '')
-		{
-			$this->data['username'] = $this->input->post('username');
-			$this->data['email'] = $this->input->post('email');
-			
-			// set validation rules
-			$this->form_validation->set_rules('username', 'Username', 'required|min_length[8]|alpha_dash');
-			$this->form_validation->set_rules('email', 'Email address', 'required|valid_email');
-
-			// validate and process if all valid
-			if ($this->form_validation->run() == FALSE)
-			{
-				$this->data['msg'] = validation_errors();
-			} else {
-
-				$this->User_model->username = $this->input->post('username');
-				$this->User_model->email = $this->input->post('email');
-				if($this->User_model->reset_password()) {
-					$this->data['msg'] = "Your reset password has been emailed to you";
-					$this->data['showform'] = FALSE;
-				} else {
-					$this->data['msg'] = "Could not find a user matching the info provided";
-				}
-			}
-
-		}
-
-		$this->load->view('cms/user_forgot_pwd',$this->data);
-
-	} // end forgot_password()
 
     function email_user_info($pwd,$action='') {
 		$this->load->library('email');

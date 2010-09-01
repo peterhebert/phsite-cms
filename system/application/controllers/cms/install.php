@@ -27,6 +27,7 @@ class Install extends Controller
 		$this->load->helper('form');
 		$this->config->load('installer');
 		$this->config->load('lang-import');
+		$this->load->model('User_model');
 		
 		$this->site_timezone = date_default_timezone_get();
 	}
@@ -107,8 +108,6 @@ class Install extends Controller
 
 	function index()
 	{
-
-		$this->load->model('User_model');
 
 		$this->installer_langs = $this->config->item('installer_langs');
 		$langs = $this->config->item('lang_import');
@@ -323,7 +322,6 @@ class Install extends Controller
 					{
 						$this->installer_step = 2;
 						$this->messages[] = "database config file successfully created";
-						//$this->_create_tables();
 					}
 				}
 
@@ -407,7 +405,7 @@ class Install extends Controller
 	
 			$this->form_validation->set_rules('name_first', $this->cms_labels['name_first'], 'required');
 			$this->form_validation->set_rules('name_last', $this->cms_labels['name_last'], 'required');
-			$this->form_validation->set_rules('username', $this->cms_labels['username'], '');
+			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required');
 			$this->form_validation->set_rules('email', $this->cms_labels['email'], 'required|valid_email');
 			$this->form_validation->set_rules('timezone', $this->cms_labels['timezone'], 'required|is_timezone');
 			$this->form_validation->set_rules('admin', $this->cms_labels['user_type'], 'required|is_natural');
@@ -415,13 +413,15 @@ class Install extends Controller
 			$this->form_validation->set_rules('password', $this->cms_labels['password'], 'required|min_length[8]|alpha_dash');
 			$this->form_validation->set_rules('password_confirm', $this->cms_labels['password_confirm'], 'required|min_length[8]|alpha_dash|matches[password]');
 
+			$this->load->database();
 			// run form validation
 			$form_valid = $this->form_validation->run();
 			
 			$this->User_model->name_first = $this->input->post('name_first');
 			$this->User_model->name_last = $this->input->post('name_last');
 			$this->User_model->username = $this->input->post('username');
-			$this->User_model->password = $this->input->post('password');
+			$this->User_model->tmp_pwd = $this->input->post('password');
+			$this->User_model->tmp_pwd_conf = $this->input->post('password_confirm');
 			$this->User_model->timezone = $this->input->post('timezone');
 			$this->User_model->default_lang = $this->input->post('default_lang');
 			$this->User_model->email = $this->input->post('email');
@@ -431,9 +431,9 @@ class Install extends Controller
 			
 			if ($form_valid)
 			{
-				$this->load->database();
 				// update user
 				$updated = $this->User_model->update_user();
+
 				if($updated)
 				{
 					$this->User_model->admin = 1;
@@ -442,7 +442,6 @@ class Install extends Controller
 					if($this->User_model->update_site_user()) {
 						$this->installer_step = 5;
 					}
-					$this->messages[] = $this->db->last_query();
 
 				}
 				else
@@ -674,7 +673,7 @@ class Install extends Controller
 
 		$action = 'cms/install';
 		$attributes = array(
-		'id' => 'install-form'
+		'id' => 'install-user'
 		);
 		$hidden = array(
 		'lang' => $this->form_lang
@@ -877,6 +876,7 @@ class Install extends Controller
 			$errors = 0;
 			foreach($data as $table => $sql)
 			{
+				//$sql = ;
 				$query = $this->db->query($sql);
 				if(!$query)
 				{

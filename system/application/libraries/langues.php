@@ -10,7 +10,7 @@
  * @subpackage	Libraries
  * @category	Language
  * @author		Peter Hebert
- * @link		http://codeigniter.com/user_guide/libraries/language.html
+ * @link		http://www.peterhebert.com/
  */
 class Langues {
 

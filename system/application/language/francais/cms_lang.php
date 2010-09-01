@@ -144,6 +144,10 @@ $lang['cms_labels'] = array(
 'media_type_update_success' => "Le type de m&eacute;dia a &eacute;t&eacute; mise &agrave; jour",
 'media_type' => "Type de m&eacute;dia",
 'media_types' => "Types de m&eacute;dia",
+
+'media_update_failure' => "Le fichier ne pouvait pas &ecirc;tre mise &agrave; jour",
+'media_update_success' => "Le fichier '%s' a &eacute;t&eacute; mise &agrave; jour",
+
 'media_upload_success' => "Fichier t&eacute;l&eacute;charg&eacute; avec succ&egrave;s",
 'media_upload' => "t&eacute;l&eacute;chargez m&eacute;dias",
 'media' => "M&eacute;dias",
@@ -217,10 +221,10 @@ $lang['cms_labels'] = array(
 'site_date_created' => "Date de cr&eacute;ation de site",
 'site_external_link' => "Visitez le site dans une nouvelle fen&ecirc;tre",
 'site_map' => "Carte de site",
-'site_meta_fields' => "Champs de metadonn&eacute;es de site",
+'site_meta_fields' => "Champs des metadonn&eacute;es de site",
 'site_meta_update_success' => "Mise &agrave; jour des metadonn&eacute;es de site compl&egrave;te",
 'site_metadata_edit' => "&Eacute;diter des metadonn&eacute;es de site",
-'site_metadata' => "Site metadata",
+'site_metadata' => "Metadonn&eacute;es de site",
 'site_prefs_update_success' => "Configuration de site sauvegard&eacute;",
 'site_prefs' => "Configuration de site",
 'site' => "Site",
@@ -249,8 +253,9 @@ $lang['cms_labels'] = array(
 'user_profile' => "Profil d'utilisateur",
 'user_type' => "Type d'utilisateur",
 'username' => "Nom d'utilisateur",
+'username_taken' => "Nom d'utilisateur '%s' existe. SVP choisir un autre.",
 'users_edit' => "&Eacute;diter utilisateurs",
-'users_meta_fields' => "Champs pour profils de l'utilisateur",
+'users_meta_fields' => "Champs des profils d'utilisateur",
 'users' => "Utilisateurs",
 'UTC' => "UTC",
 'UTC_offset' => "UTC %s",
@@ -263,6 +268,17 @@ $lang['cms_labels'] = array(
 'with_selected' => "Avec les items s&eacute;lectionn&eacute;s",
 'yes' => "Oui",
 'list_values' => "Valeurs de la liste",
+
+'user_email' => "%s pour phSite CMS &agrave; l'adresse suivante:\r\n%s\r\nVotre relev&eacute; utilisateur :\r\nNom d'utilisateur: %s\r\nMot de passe : %s\r\n",
+
+'user_email_subject_new' => "Voici les d&eacute;tails de votre relev&eacute; utilisateur pour '%s'",
+'user_email_subject_reset' => "R&eacute;initialisation de votre mot de passe pour '%s'",
+'user_email_subject_change' => "Votre relev&eacute; utilisateur pour '%s' a &eacute;t&eacute; mise &agrave; jour",
+
+'user_email_new' => "Vous avez cr&eacute;e un nouveau relev&eacute; utilisateur",
+'user_email_reset' => "Votre votre mot de passe a &eacute;t&eacute; r&eacute;initialis&eacute;",
+'user_email_change' => "Vous avez chang&eacute; votre mot de passe",
+
 );
 
 /* End of file phsite_lang.php */

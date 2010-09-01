@@ -70,7 +70,7 @@ $().ready(function(){
 	});
 
 	
-	$("#container form fieldset:gt(0)").addClass('closed');
+	//$("#container form fieldset:gt(0)").addClass('closed');
 
 	$("#container form fieldset legend").click(function() {
 		$(this).parent().toggleClass('closed', 100);

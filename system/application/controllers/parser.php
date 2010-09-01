@@ -15,8 +15,9 @@ class Parser extends MY_Controller {
 	function Parser()
 	{
 		parent::MY_Controller();
+
 		$this->load->model('Content_model');
-		$this->load->model('Media_model');
+		$this->load->model('File_model');
 		$this->load->model('User_model');
 		$this->load->helper(array('url', 'image'));
 
@@ -413,9 +414,9 @@ class Parser extends MY_Controller {
 				
 				$dir = ROOT_REL.MEDIA_PATH_ORIG.$field['value'];
 
-				$this->Media_model->temp_lang = $this->Content_model->temp_lang;
-				$this->Media_model->lang_load();
-				$content_vars['dir_listing'] = $this->Media_model->list_media_recursive();
+				$this->File_model->temp_lang = $this->Content_model->temp_lang;
+				$this->File_model->lang_load();
+				$content_vars['dir_listing'] = $this->File_model->list_files(TRUE);
 
 //				$this->Media_model->dir_current = ROOT_REL.MEDIA_PATH_ORIG.$field['value'];
 //				$this->Media_model->list_files_unique();

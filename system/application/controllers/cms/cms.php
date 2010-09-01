@@ -1,7 +1,8 @@
 <?php
 class Cms extends MY_Controller
 {
-
+	var $show = TRUE;
+	
 	function Cms()
 	{
 		parent::MY_Controller();
@@ -222,6 +223,97 @@ class Cms extends MY_Controller
 		redirect('');
 		exit();
 	} 
+
+	function forgot_password()
+	{
+		// if already logged in, redirect
+		if($this->session->userdata('user_id'))
+		{
+			redirect('cms');
+			exit();
+		}
+
+		$this->_load_cms_labels();
+		$this->_load_site_metadata();
+
+		$this->load->helper('form');
+
+		$this->_process_forgot();
+		if($this->show)
+		{
+			$this->_form_forgot();
+		}
+
+		$title_tag[] = $this->cms_labels['password_request_new'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['password_request_new'];
+
+		$msg = $this->User_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$this->load->view('cms/cms_form_2col',$this->data);
+
+	} // end forgot_password()
+
+	function _form_forgot()
+	{
+		$attributes = array('id' => 'forgot_pwd');
+		$html = form_open('cms/forgot_password', $attributes);
+
+		$html .= "<div class=\"align-labels label-normal\">\r";
+		$form_options = array(
+		'name'        => 'username',
+		'id'          => 'username',
+		'value'       => $this->User_model->username,
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['username'], 'username');
+		$html .= form_input($form_options);
+		$html .= "</p>\r";
+		
+		$form_options = array(
+		'name'        => 'email',
+		'id'          => 'email',
+		'value'       => $this->User_model->email,
+		);
+
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['email'], 'email');
+		$html .= form_input($form_options);
+		$html .= "</p>\r";
+
+		$html .= "</div>\r";
+
+		$html .= "<p class=\"indent-normal\">";
+		$html .= form_submit('submit', $this->cms_labels['password_reset']);
+		$html .= "</p>\r";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+
+	function _process_forgot()
+	{
+		$this->load->library('form_validation');
+
+		// set validation rules
+		$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash');
+		$this->form_validation->set_rules('email', $this->cms_labels['password'], 'required|is_email');
+		
+		$valid = $this->form_validation->run();
+
+		// validate and process if all valid
+		if ($valid)
+		{
+			$this->User_model->messages[] = 'form is valid';
+		} else {
+			$this->User_model->messages[] = validation_errors();
+		}
+	}
 
 }
 ?>

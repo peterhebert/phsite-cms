@@ -53,7 +53,7 @@ class Content_model extends MY_Model {
 		$query = $this->db->get('c_content');
 		$this->content_count = $query->num_rows();	
 		
-		//then get content with limits
+		// then get content with limits
 		$query->free_result();
 
 		$list = array();

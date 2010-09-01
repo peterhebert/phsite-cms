@@ -133,6 +133,8 @@ $lang['cms_labels'] = array(
 'media_dim_h' => "Height",
 'media_dim_w' => "Width",
 'media_edit' => "Edit Media",
+'media_update_success' => "Media information for '%s' has been successfully updated",
+'media_update_failure' => "Media information could not be updated",
 'media_manage' => "Manage media",
 'media_no_file' => "no file",
 'media_results' => 'Media Results',
@@ -178,6 +180,8 @@ $lang['cms_labels'] = array(
 'password_confirm_new' => "Confirm new password",
 'password_confirm' => "Confirm password",
 'password_forgot' => "Forgot Password?",
+'password_reset' => "Reset password",
+'password_request_new' => "Request new password",
 'password' => "Password",
 'path_dest' => "Destination path",
 'path_or_new' => "or enter new path",
@@ -258,6 +262,7 @@ $lang['cms_labels'] = array(
 'user_none' => "no users found",
 'user_type' => "User type",
 'username' => "Username",
+'username_taken' => "Username '%s' already exists. Please choose another.",
 'users_edit' => "Edit Users",
 'users_meta_fields' => "User profile fields",
 'users' => "Users",
@@ -266,9 +271,20 @@ $lang['cms_labels'] = array(
 'view_content_title' => "View content page in a new window",
 'view_content' => "View content page",
 'values' => "Values",
+'value_not_unique' => "%s is not unique",
 'webmaster' => "Webmaster",
 'with_selected' => "With selected",
-'yes' => "Yes"
+'yes' => "Yes",
+
+'user_email' => "%s for phSite CMS at the following address:\r\n%s\r\nYour login details:\r\nUsername: %s\r\nPassword: %s\r\n",
+
+'user_email_subject_new' => "Your new user account info for '%s'",
+'user_email_subject_reset' => "Your password has been reset for '%s'",
+'user_email_subject_change' => "Your updated user account info for '%s'",
+
+'user_email_new' => "You have created a new account",
+'user_email_reset' => "Your password has been reset ",
+'user_email_change' => "You have changed your login password",
 );
 
 /* End of file phsite_lang.php */

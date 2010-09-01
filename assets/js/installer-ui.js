@@ -18,7 +18,22 @@ $().ready(function(){
 		$(this).parent().toggleClass('closed', 100);
 		return false;
 	});
-	
+
+	$('#container #install-user #name_first').change(function() {
+		var name_first = $('#container #install-user #name_first').val();
+		var name_last = $('#container #install-user #name_last').val();
+		var username = name_first + name_last;
+		$('#container #install-user #username').val(username.toLowerCase());
+		
+	});
+
+	$('#container #install-user #name_last').change(function() {
+		var name_first = $('#container #install-user #name_first').val();
+		var name_last = $('#container #install-user #name_last').val();
+		var username = name_first + name_last;
+		$('#container #install-user #username').val(username.toLowerCase());
+		
+	});
 });
 
 

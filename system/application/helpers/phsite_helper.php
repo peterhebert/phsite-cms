@@ -322,8 +322,12 @@ if ( ! function_exists('decode_html_entities'))
 {
 	function decode_html_entities($str)
 	{
+		$text = $str;
 		// decode all html entities
-		$text = html_entity_decode($str);
+		if(is_string($str))
+		{
+			$text = html_entity_decode($str);
+		}
 	
 		return $text;
 	
@@ -558,5 +562,61 @@ if ( ! function_exists('prepare_list_values'))
 	}
 }
 
+/*if ( ! function_exists('email_user_info'))
+{
+    function email_user_info($pwd,$action='') {
+
+		// Get the CodeIgniter super object
+		$CI =& get_instance();
+		
+		// load email library
+		$CI->load->library('email');
+		$CI->load->model('User_model');
+		
+		$base_url = $CI->config->item('base_url');
+		$host = str_replace('http://','',$this->config->item('base_url'));
+		$username = $CI->User_model->username;
+		$text = '';
+		
+		$CI->_load_cms_labels();
+
+		switch ($action) {
+		case 'new':
+			$subject = sprintf($CI->cms_labels['user_email_subject_new'],$host);
+			$text = $CI->cms_labels['user_email_new'];
+			break;
+		case 'reset':
+			$subject = sprintf($CI->cms_labels['user_email_subject_reset'],$host);
+			$text = $CI->cms_labels['user_email_reset'];
+			break;
+		default:
+			$subject = sprintf($CI->cms_labels['user_email_subject_change'],$host);
+			$text = $CI->cms_labels['user_email_change'];
+			break;
+		}
+
+		$message = sprintf($CI->cms_labels['user_email'],$text,$base_url,$username,$pwd);
+
+		$mail_config = array(
+		'wordwrap' => FALSE;
+		);
+		
+		$CI->email->initialize($mail_config);
+
+		$CI->email->from("phsite-cms@{$host}", $CI->cms_labels['phsite_cms']);
+		$CI->email->to($CI->User_model->email); 
+		$CI->email->subject($subject);
+		$CI->email->message($message);	
+				
+		if($CI->email->send()) {
+			return TRUE;
+		} else {
+			echo $CI->email->print_debugger();
+			return FALSE;
+		}
+
+	} // end email_user_info()
+}
+*/
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

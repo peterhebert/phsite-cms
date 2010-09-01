@@ -5,7 +5,7 @@ class User_model extends MY_Model {
 	var $user_id, $name_first, $name_last, $username, $password, $timezone, $default_lang, $email;
 
 	// r_sites_users - relate users to sites
-	var $user_rel_id, $site_id, $admin;
+	var $user_rel_id, $admin;
 	
 	// temp password fields
 	var $tmp_pwd, $tmp_pwd_conf;
@@ -18,8 +18,6 @@ class User_model extends MY_Model {
         // Call the Model constructor
         parent::MY_Model();
 
-		$this->config->load('phsite_prefs');
-		$this->site_id = $this->config->item('site_id');
     }
 
     // list users for the current site

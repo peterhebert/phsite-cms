@@ -21,6 +21,9 @@ class MY_Model extends Model {
 	// one value means on that date, month or year
 	// two values means range
 
+	// site variables
+	var $site_id;
+
 	// field variables
 	var $field_list = array();
 	var $input_types = array();
@@ -41,8 +44,6 @@ class MY_Model extends Model {
 	var $lang_ISO_639_3, $lang_ISO_639_2B, $lang_ISO_639_2T, $lang_ISO_639_1, $lang_Scope, $lang_Type, $lang_Ref_Name, $lang_Inverted_Name, $lang_Native_Name, $lang_CI_Name, $lang_activated;
 	var $lang_count, $lang_list = array(), $matches = array();
 
-	// content_types
-
 	// metadata variables
 	var $metadata = array();
 	var $meta_id, $rel_id, $value;
@@ -57,6 +58,9 @@ class MY_Model extends Model {
 	function MY_Model()
 	{	
 		parent::Model();
+
+		//$this->config->load('phsite_prefs');
+		$this->site_id = $this->config->item('site_id');
 	}
 
 	function _output_messages()

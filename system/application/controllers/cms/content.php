@@ -7,6 +7,9 @@ class Content extends MY_Controller
 	function Content()
 	{
 		parent::Controller();
+
+		$this->load->database();
+		$this->load->model('Site_model');
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
 		$this->load->model('Media_model');
@@ -426,6 +429,8 @@ class Content extends MY_Controller
 		{
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
+
+
 		$this->Content_model->temp_value = $this->Content_model->temp_lang;
 
 		$this->Content_model->load_content_form();
@@ -482,7 +487,7 @@ class Content extends MY_Controller
 		// CONTENT fieldset
 
 		$html .= form_fieldset('Content');
-
+		
 		$form_options = $this->Content_model->langs_dropdown();
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['language'], 'content_lang');
@@ -611,7 +616,8 @@ class Content extends MY_Controller
 				}
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
 				break;
-			case 'textarea' || 'richtext':
+			case 'textarea':
+			case 'richtext':
 				$form_options['cols'] = 38;
 				$html .= ph_form_textarea($form_options);
 				break;

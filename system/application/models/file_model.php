@@ -845,7 +845,6 @@ class File_model extends MY_Model {
 		}
 	}
 
-
 	function load_media()
 	{
 		$this->db->where('media_id',$this->temp_id);
@@ -861,6 +860,27 @@ class File_model extends MY_Model {
 			$this->mime_type = $row->mime_type;
 			$this->date_created = $row->date_created;
 			$this->publish = $row->publish;
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	function load_type_by_mime()
+	{
+		$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->mime_type);
+
+		$this->db->where('scope','media');
+		$this->db->where('type_uri_name',$mime_cat);
+		$query = $this->db->get('s_types');
+		
+		if ($query->num_rows() > 0)
+		{
+			$row = $query->row();
+			
+			$this->type_id = $row->type_id;
+			$this->scope = $row->scope;
+			$this->type_uri_name = $row->type_uri_name;
 			return TRUE;
 		}
 

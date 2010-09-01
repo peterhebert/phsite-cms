@@ -4,7 +4,8 @@ class Site_model extends MY_Model {
 	// list variables
 	var $site_themes, $theme_info;
 	
-	var $site_id, $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id, $home_content_type;
+	// site variables
+	var $site_timezone, $theme, $site_default_lang, $site_date_created, $site_date_updated, $home_content_id, $home_content_type;
 	var $default_content_type;
 	var $site_admin_id, $site_editor_id;
 	var $img_size_th, $img_size_sm, $img_size_md, $img_size_lg;
