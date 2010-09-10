@@ -299,6 +299,7 @@ class Cms extends MY_Controller
 	function _process_forgot()
 	{
 		$this->load->library('form_validation');
+		$this->load->helper('phsite');
 
 		// set validation rules
 		$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash');
@@ -306,10 +307,35 @@ class Cms extends MY_Controller
 		
 		$valid = $this->form_validation->run();
 
+		$this->User_model->clear_user_data();
+		$this->User_model->username = $this->input->post('username');
+		$this->User_model->email = $this->input->post('email');
+
 		// validate and process if all valid
 		if ($valid)
 		{
-			$this->User_model->messages[] = 'form is valid';
+			$pwd = $this->User_model->reset_password();
+			if($pwd)
+			{
+				$email_params = array(
+				'action' => 'reset',
+				'username' => $this->User_model->username,
+				'password' => $pwd,
+				'email' => $this->User_model->email,
+				);
+				
+				$sent = email_user_info($email_params);
+				if($sent)
+				{
+					$this->User_model->messages[] = sprintf($this->cms_labels['password_reset_success'],$this->User_model->email);
+				}
+				else
+				{
+					$this->User_model->messages[] = sprintf($this->cms_labels['password_new_is'],$pwd);
+				}
+				$this->show = FALSE;
+			}
+			
 		} else {
 			$this->User_model->messages[] = validation_errors();
 		}

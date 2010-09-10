@@ -70,7 +70,7 @@ class MY_Controller extends Controller {
 			{
 				// test the supplied connection
 				$DB1 = $this->load->database($db[$active_group], TRUE);
-				if($DB1)
+				if($DB1 !== FALSE)
 				{
 					// now query the tables to see if they have been created and are in tact
 					$this->config->load('installer');

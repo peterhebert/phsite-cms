@@ -85,9 +85,14 @@ class Parser extends MY_Controller {
 			}
 			else
 			{
+				$this->output->set_status_header('404');
 				$this->data['header'] = $this->cms_labels['server_error_404_header'];
-				$this->data['message'] = sprintf($this->cms_labels['server_error_404_message'],$this->segments[0]);
-				$this->view = 'error_404';
+				$html = "<p>".sprintf($this->cms_labels['server_error_404_message'],implode('/',$this->segments))."</p>";
+				$html .= "<p>".$this->cms_labels['server_error_404_suggest']."</p>";
+				$html .= '<p>'.anchor('',$this->cms_labels['home'])."</p>";
+
+				$this->data['message'] = $html;
+				$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
 			}
 
 			break;
@@ -112,18 +117,21 @@ class Parser extends MY_Controller {
 			}
 			else
 			{
+				$this->output->set_status_header('404');
 				$this->data['header'] = $this->cms_labels['server_error_404_header'];
 
 				$html = "<p>".sprintf($this->cms_labels['server_error_404_message'],implode('/',$this->segments))."</p>";
 				if(count($this->matches) > 0)
 				{
-					$html .= "<p>Possible matches:</p>\r";
+					$html .= "<p>{$this->cms_labels['server_error_404_matches']}</p>\r";
 					$html .= ul($this->matches);
 				}
+				$html .= "<p>".$this->cms_labels['server_error_404_suggest']."</p>";
+				$html .= '<p>'.anchor('',$this->cms_labels['home'])."</p>";
 				
 				$this->data['message'] = $html;
 
-				$this->view = 'error_404';
+				$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
 			}
 
 			break;
@@ -148,7 +156,6 @@ class Parser extends MY_Controller {
 		}
 		
 		$this->load->view($this->view,$this->data);
-
 
     }
 
@@ -232,10 +239,8 @@ class Parser extends MY_Controller {
 		}
 		$this->Site_model->temp_lang = $params['lang'];
 		$this->Content_model->temp_lang = $params['lang'];
-
-		$this->Site_model->lang_load();
-		$this->_load_site_metadata();
 		$this->_load_cms_labels();
+		$this->_load_site_metadata();
 
 		if($params['page'] != '')
 		{
@@ -251,9 +256,10 @@ class Parser extends MY_Controller {
 		
 		$tree = array();
 
+
 		foreach($this->segments as $index => $uri_segment)
 		{
-
+			$this->Content_model->reset_vars();
 			$this->Content_model->temp_value = $uri_segment;
 			$info = $this->Content_model->find_by_uri();
 			
@@ -272,7 +278,6 @@ class Parser extends MY_Controller {
 		
 		if($this->result_count > 0 && $this->result_count == $this->segment_count)
 		{
-			
 			// create parent hierarchy
 			$parents = $tree;
 			array_pop($parents);
@@ -337,10 +342,12 @@ class Parser extends MY_Controller {
 				}
 
 			}
+			
 			return FALSE;
 
 		}
 
+			return true;
 
 	}
 
@@ -416,11 +423,8 @@ class Parser extends MY_Controller {
 
 				$this->File_model->temp_lang = $this->Content_model->temp_lang;
 				$this->File_model->lang_load();
+				$this->File_model->dir_current = $dir;
 				$content_vars['dir_listing'] = $this->File_model->list_files(TRUE);
-
-//				$this->Media_model->dir_current = ROOT_REL.MEDIA_PATH_ORIG.$field['value'];
-//				$this->Media_model->list_files_unique();
-//				$content_vars['dir_listing'] = $this->Media_model->file_list;
 			}
 
 		}
@@ -501,11 +505,8 @@ class Parser extends MY_Controller {
 
 	function _recent($parent=NULL)
 	{
-
-		if($this->Site_model->home_content_type > 0)
-		{
-			$this->Content_model->type_id = $this->Site_model->home_content_type;
-		}
+		$this->Content_model->list_types();
+		$this->Content_model->omit_types = $this->Content_model->omit_types_home;
 
 		if(isset($parent))
 		{
@@ -616,27 +617,49 @@ class Parser extends MY_Controller {
 
 			foreach($this->Content_model->attachments as $media)
 			{
-				$this->Media_model->reset_media_vars();
+				$this->File_model->reset_media_vars();
 				$tmp_array = $media;
-				$this->Media_model->temp_id = $media['media_id'];
-				$this->Media_model->load_media();
-				$tmp_array['file_uri'] = $this->Media_model->file_uri;
-				$tmp_array['external'] = $this->Media_model->external;
-				$tmp_array['mime_type'] = $this->Media_model->mime_type;
-				$tmp_array['mime_cat'] = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
-				$tmp_array['ext'] = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
-				$tmp_array['filename'] = basename($this->Media_model->file_uri);
+				$this->File_model->temp_id = $media['media_id'];
+				$this->File_model->load_media();
+				$tmp_array['file_uri'] = $this->File_model->file_uri;
+				$tmp_array['external'] = $this->File_model->external;
+				$tmp_array['mime_type'] = $this->File_model->mime_type;
+				$tmp_array['mime_cat'] = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
+				$tmp_array['extension'] = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
+				$tmp_array['filename'] = basename($this->File_model->file_uri);
 
-				$tmp_array['date_created'] = $this->Media_model->date_created;
-				$tmp_array['publish'] = $this->Media_model->publish;
-				$this->Media_model->temp_lang = $this->Content_model->temp_lang;
-				$this->Media_model->load_title();
-				$tmp_array['title'] = $this->Media_model->title;
-				$tmp_array['uri_title'] = $this->Media_model->uri_title;
-				$tmp_array['subtitle'] = $this->Media_model->subtitle;
-				$tmp_array['keywords'] = $this->Media_model->keywords;
+				$tmp_array['date_created'] = $this->File_model->date_created;
+				$tmp_array['publish'] = $this->File_model->publish;
+				$this->File_model->temp_lang = $this->Content_model->temp_lang;
+				$this->File_model->load_title();
+				$tmp_array['title'] = $this->File_model->title;
+				$tmp_array['uri_title'] = $this->File_model->uri_title;
+				$tmp_array['subtitle'] = $this->File_model->subtitle;
+				$tmp_array['keywords'] = $this->File_model->keywords;
 
-				$attachments[] = $tmp_array;
+				if($this->File_model->external == 0)
+				{
+					$tmp_array['server_path'] = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
+					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($this->File_model->file_uri);
+				}
+
+				$this->File_model->scope = 'media';
+				$this->File_model->temp_lang = $this->Content_model->temp_lang;
+				$this->File_model->temp_id = $media['media_id'];
+				$this->File_model->load_metadata();
+				$file_meta = $this->File_model->metadata;
+				if(count($file_meta) > 0)
+				{
+					foreach($file_meta as $file_info)
+					{
+						if($file_info['value'] != '')
+						{
+							$tmp_array[$file_info['field_ref_name']] = $file_info['value'];
+						}
+					}
+				}
+
+				$attachments[$this->File_model->file_uri] = $tmp_array;
 				unset($tmp_array);
 			}
 			$this->data['attachments'] = $attachments;

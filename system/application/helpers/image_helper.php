@@ -74,7 +74,7 @@ if ( ! function_exists('url_exists'))
 if ( ! function_exists('view_image'))
 {
 
-	function view_image($path,$size,$img_tag_attr = array(),$square=FALSE ) {
+	function view_image($path,$size,$img_tag_attr = array(),$square=FALSE,$linkonly=FALSE) {
 
 		/* 
 		parameters for function
@@ -82,7 +82,8 @@ if ( ! function_exists('view_image'))
 		path			path to image
 		size			size to fit image to by largest dimension
 		img_tag_attr	array of attributes for image tag : ('alt' => 'image alt text', 'id' => 'image tag id')
-		ratio			force ratio of resized image to square
+		square			force ratio of resized image to square
+		linkonly		return only link to scaled file and not img tag
 		
 		NOTE: USES CONSTANTS 'MEDIA_PATH_ORIG','MEDIA_PATH_CACHE' for determining where to store image
 		*/
@@ -252,6 +253,10 @@ if ( ! function_exists('view_image'))
 			}
 		} else {
 			$result = FALSE;
+		}
+		if($linkonly)
+		{
+			$result = $img_tag_attr['src'];
 		}
 
 		return $result;

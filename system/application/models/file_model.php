@@ -92,8 +92,10 @@ class File_model extends MY_Model {
 				// get file information
 				$fileinfo = array(
 				'name' => substr(strrchr($newpath, DIRECTORY_SEPARATOR), 1),
+				'filename' => basename($this->file_uri),
 				'server_path' => $newpath,
 				'server_directory' => dirname($newpath),
+				'external' => 0,
 				'file_uri' => $this->file_uri,
 				'size' => filesize($newpath),
 				'date' => filectime($newpath),
@@ -626,10 +628,13 @@ class File_model extends MY_Model {
 
 	// existing functions
 
-
-	function find_media_by_uri()
+	function find_media_by_uri($published=FALSE)
 	{
 		$this->db->where('file_uri',$this->file_uri);
+		if ($published)
+		{
+			$this->db->where('publish',1);
+		}
 		$this->db->limit(1);
 		$query = $this->db->get('c_media');
 		
@@ -643,11 +648,13 @@ class File_model extends MY_Model {
 			$this->mime_type = $row->mime_type;
 			$this->date_created = $row->date_created;
 			$this->publish = $row->publish;
+
 			
 			$this->temp_id = $row->media_id;
 			$this->load_title();
 		
 			return TRUE;
+			exit();
 		}
 
 		return FALSE;
@@ -848,6 +855,7 @@ class File_model extends MY_Model {
 	function load_media()
 	{
 		$this->db->where('media_id',$this->temp_id);
+		$this->db->where('site_id',$this->site_id);
 		$query = $this->db->get('c_media');
 		
 		if ($query->num_rows() > 0)

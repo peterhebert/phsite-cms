@@ -562,25 +562,27 @@ if ( ! function_exists('prepare_list_values'))
 	}
 }
 
-/*if ( ! function_exists('email_user_info'))
+if ( ! function_exists('email_user_info'))
 {
-    function email_user_info($pwd,$action='') {
+    function email_user_info($info) {
+		if(!is_array($info) || !array_key_exists('username',$info) || !array_key_exists('password',$info) || !array_key_exists('email',$info) || !array_key_exists('action',$info))
+		{
+			return FALSE;
+		}
 
 		// Get the CodeIgniter super object
 		$CI =& get_instance();
 		
 		// load email library
 		$CI->load->library('email');
-		$CI->load->model('User_model');
 		
 		$base_url = $CI->config->item('base_url');
-		$host = str_replace('http://','',$this->config->item('base_url'));
-		$username = $CI->User_model->username;
+		$host = str_replace('http://','',$CI->config->item('base_url'));
 		$text = '';
 		
 		$CI->_load_cms_labels();
 
-		switch ($action) {
+		switch ($info['action']) {
 		case 'new':
 			$subject = sprintf($CI->cms_labels['user_email_subject_new'],$host);
 			$text = $CI->cms_labels['user_email_new'];
@@ -595,19 +597,26 @@ if ( ! function_exists('prepare_list_values'))
 			break;
 		}
 
-		$message = sprintf($CI->cms_labels['user_email'],$text,$base_url,$username,$pwd);
+		$message = sprintf($CI->cms_labels['user_email'],$text,$base_url,$info['username'],$info['password']);
 
-		$mail_config = array(
-		'wordwrap' => FALSE;
-		);
-		
-		$CI->email->initialize($mail_config);
+		// see if email config file exists, if not then set config
+		$mail_config_filename = ROOT_REL.'/system/application/config/email.php';
+		if(!file_exists($mail_config_filename))
+		{
+			$mail_config = array(
+			'wordwrap' => FALSE,
+			'newline' => "\r\n",
+			);
+			
+			$CI->email->initialize($mail_config);
+		}
 
 		$CI->email->from("phsite-cms@{$host}", $CI->cms_labels['phsite_cms']);
-		$CI->email->to($CI->User_model->email); 
+		$CI->email->to($info['email']); 
 		$CI->email->subject($subject);
 		$CI->email->message($message);	
-				
+
+
 		if($CI->email->send()) {
 			return TRUE;
 		} else {
@@ -617,6 +626,6 @@ if ( ! function_exists('prepare_list_values'))
 
 	} // end email_user_info()
 }
-*/
+
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

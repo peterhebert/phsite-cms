@@ -33,18 +33,8 @@ echo $title_tag.' | ';
 		<div id="content" class="column">
 			<h1><?php echo $title_h1; ?></h1>
 			<?php 
-			if (isset($steps) && $installer_step > 0){
-				echo "<ol class=\"steps block\">\r";
-				foreach($steps as $index => $step)
-				{
-					echo "\t<li";
-					if($installer_step == ($index + 1))
-					{
-						echo " class=\"current\"";
-					}
-					echo ">{$step}</li>\r";
-				}
-				echo "</ol>\r";
+			if (isset($step)){
+				echo "<h2>{$step}</h2>\r";
 			}
 			if (isset($msg)){
 				echo "<div class=\"msg\">{$msg}</div>\r";

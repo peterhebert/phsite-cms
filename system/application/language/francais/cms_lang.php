@@ -217,6 +217,13 @@ $lang['cms_labels'] = array(
 'select' => "S&eacute;lectionner",
 'select_allow_multiple' => "Permettre les s&eacute;lections multiples",
 'setup' => "Configuration g&eacute;n&eacute;rale",
+
+'server_error_404_header' => "Erreur 404 - ressource non trouv&eacute;",
+'server_error_404_message' => "La ressource '%s' n'a pas &eacute;t&eacute; trouv&eacute;",
+'server_error_404_matches' => "Ressources corrrespondants possibles : ",
+'server_error_404_suggest' => "S'il vous plait, essayez le formulaire de recherche pour trouver autres r&eacute;sultats",
+'server_error_404_media' => "Le fichier '%s' n'a pas &eacute;t&eacute; trouv&eacute;",
+
 'showing_results' => "R&eacute;sultats %d-%d de %d",
 'site_date_created' => "Date de cr&eacute;ation de site",
 'site_external_link' => "Visitez le site dans une nouvelle fen&ecirc;tre",

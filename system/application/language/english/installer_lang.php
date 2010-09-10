@@ -14,16 +14,12 @@ $lang['installer'] = array(
 'db_config' => 'Database connection information',
 'create_admin_user' => "Create administrator account",
 'install_step' => "Step %s",
+'install_success' => "phSite CMS has been installed successfully.",
 'installer_languages' => 'Installer languages',
-'install_success' => 'Installation completed successfully',
-);
-
-$lang['status_labels'] = array(
-0 => "The CMS has already been installed; you cannot run this script.",
-1 => "Database config missing or invalid",
-2 => "Database connection exists, but no tables",
-3 => "Tables exist, but no user accounts or site preferences found",
-4 => "Tables exist, but no user accounts found",
+'install_write_tables' => 'Write tables to database',
+'confirm_install' => 'Yes, please proceed with writing the tables to the database.',
+'confirm_install_explain' => 'The database connection has been established. Please confirm that you would like to proceed in writing the tables to the database.',
+'confirm_install' => 'Yes, please proceed with writing the tables to the database.',
 );
 
 $lang['db_drivers'] = array(

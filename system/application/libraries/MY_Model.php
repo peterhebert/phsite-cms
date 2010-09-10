@@ -32,7 +32,8 @@ class MY_Model extends Model {
 	var $field_id, $field_ref_name, $field_input_type, $field_allow_multiple, $field_validation, $field_needs_lang;
 	
 	// type variables
-	var $type_id, $type_uri_name, $type_list = array();
+	var $type_id, $type_uri_name, $type_list = array(), $index_home, $index_rss;
+	var $omit_types_home = array(), $omit_types_rss = array();
 
 	// labels for fields, types 
 	var $label_id, $label_scope, $label_rel_id, $label_rel_name, $label;
@@ -59,7 +60,6 @@ class MY_Model extends Model {
 	{	
 		parent::Model();
 
-		//$this->config->load('phsite_prefs');
 		$this->site_id = $this->config->item('site_id');
 	}
 
@@ -240,7 +240,10 @@ class MY_Model extends Model {
 		{
 			$row = $query->row_array();
 			$this->type_id = $row['type_id'];
+			$this->scope = $row['scope'];
 			$this->type_uri_name = $row['type_uri_name'];
+			$this->index_home = $row['index_home'];
+			$this->index_rss = $row['index_rss'];
 			
 			return TRUE;
 		}
@@ -253,7 +256,9 @@ class MY_Model extends Model {
 		
 		$type_data = array(
 		'scope' => $this->scope,
-		'type_uri_name' => $this->type_uri_name
+		'type_uri_name' => $this->type_uri_name,
+		'index_home' => $this->index_home,
+		'index_rss' => $this->index_rss,
 		);
 
 		if( $this->type_id != '' )
@@ -282,15 +287,28 @@ class MY_Model extends Model {
     {
 
 		$list = array();
+		$home = array();
+		$rss = array();
+		
 		$this->db->where('scope',$this->scope);
 		$query = $this->db->get('s_types');
 
 		foreach ($query->result() as $row)
 		{
-
+			if($row->index_home == 0)
+			{
+				$home[] = $row->type_id;
+			}
+			if($row->index_rss == 0)
+			{
+				$rss[] = $row->type_id;
+			}
+			
 			$temp =  array(
 			'type_id' => $row->type_id,
 			'type_uri_name' => $row->type_uri_name,
+			'index_home' => $row->index_home,
+			'index_rss' => $row->index_rss,
 			);
 
 			if($this->scope != 'media')
@@ -315,6 +333,8 @@ class MY_Model extends Model {
 		}
 
 		$this->type_list = $list;
+		$this->omit_types_home = $home;
+		$this->omit_types_rss = $rss;
 
 	}
 

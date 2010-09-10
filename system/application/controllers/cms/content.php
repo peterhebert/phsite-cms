@@ -12,7 +12,7 @@ class Content extends MY_Controller
 		$this->load->model('Site_model');
 		$this->load->model('Content_model');
 		$this->load->model('User_model');
-		$this->load->model('Media_model');
+		$this->load->model('File_model');
 		$this->load->helper('image');
 		$this->load->helper('form');
 		$this->load->helper('timezone');
@@ -417,10 +417,6 @@ class Content extends MY_Controller
 		{
 			$this->Content_model->content_id = $params['id'];
 		}
-		if( array_key_exists('type',$params) )
-		{
-			$this->Content_model->temp_value = $params['type'];
-		}
 		if( array_key_exists('lang',$params) )
 		{
 			$this->Content_model->temp_lang = $params['lang'];
@@ -429,7 +425,10 @@ class Content extends MY_Controller
 		{
 			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-
+		if( array_key_exists('type',$params) )
+		{
+			$this->Content_model->type_id = $params['type'];
+		}
 
 		$this->Content_model->temp_value = $this->Content_model->temp_lang;
 
@@ -581,21 +580,22 @@ class Content extends MY_Controller
 			switch($tmp_input_type) {
 
 			case 'directory':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_list_temp = $this->Media_model->dir_list;
+				$this->File_model->list_files(TRUE);
+
+				$media_root = $this->File_model->dir_base;
+				$dir_list_temp = $this->File_model->dir_list;
+
 				$dir_vals['/'] = $this->cms_labels['media_root'];
+
 				if(count($dir_list_temp) > 0)
 				{
 					foreach($dir_list_temp as $the_dir) {
-						$temp_dir_val = str_replace($media_root,'',$the_dir);
-						$dir_vals[$temp_dir_val] = $temp_dir_val;
+						$dir_vals[$the_dir['file_uri']] = $the_dir['file_uri'];
 					}
 				}
 				
-				
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				unset($dir_vals);
 				break;
 			case 'file':
 				$this->Content_model->list_attachments();
@@ -607,14 +607,15 @@ class Content extends MY_Controller
 				{
 					foreach($this->Content_model->attachments as $index => $media)
 					{
-						$this->Media_model->reset_media_vars();
-						$this->Media_model->temp_id = $media['media_id'];
-						$this->Media_model->load_media();
-						$this->Media_model->load_title();
-						$dir_files[$this->Media_model->media_id] = $this->Media_model->title;
+						$this->File_model->reset_media_vars();
+						$this->File_model->temp_id = $media['media_id'];
+						$this->File_model->load_media();
+						$this->File_model->load_title();
+						$dir_files[$this->File_model->media_id] = $this->File_model->title;
 					}
 				}
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				unset($dir_files);
 				break;
 			case 'textarea':
 			case 'richtext':
@@ -654,7 +655,7 @@ class Content extends MY_Controller
 		// general info fieldset
 		$html .= "<div class=\"align-labels label-wide\">\r";
 
-		$html .= form_fieldset($this->cms_labels['general_info'], array('class' => 'closed'));
+		$html .= form_fieldset($this->cms_labels['general_info']);
 
 		$this->Content_model->scope = 'content';
 		$form_options = $this->Content_model->types_dropdown();
@@ -732,111 +733,116 @@ class Content extends MY_Controller
 
 		$html .= form_fieldset_close();
 
-		// attachments fieldset
-		$this->Content_model->list_attachments();
-		$this->Content_model->lang_load();
-
-		$html .= form_fieldset($this->cms_labels['attachments']);
-		$html .= "<p>";
-		if(count($this->Content_model->attachments) > 0)
+		// attachments fieldset (only display if content ID exists)
+		if($this->Content_model->content_id != '')
 		{
-			$tmp_txt = $this->cms_labels['attachments_manage'];
-		}
-		else
-		{
-			$tmp_txt = $this->cms_labels['attachments_add'];
-		}
 
-		$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
-		$html .= "</p>\r";
-
-		$this->load->config('mime_info');
-		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
-		$mime_labels = $this->lang->line('mime');
-		$mime_icons = $this->config->item('mime_icons');
-		
-		if(count($this->Content_model->attachments) > 0)
-		{
-			$html .= "<div class=\"block margins\">\r";
-			foreach($this->Content_model->attachments as $att)
+			$this->Content_model->list_attachments();
+			$this->Content_model->lang_load();
+	
+			$html .= form_fieldset($this->cms_labels['attachments']);
+			if(count($this->Content_model->attachments) > 0)
 			{
-				$html .= "<div class=\"column\">\r";
-				$this->Media_model->reset_media_vars();
-				$this->Media_model->temp_id = $att['media_id'];
-
-				if($this->Media_model->load_media())
+				$tmp_txt = $this->cms_labels['attachments_manage'];
+			}
+			else
+			{
+				$tmp_txt = $this->cms_labels['attachments_add'];
+			}
+	
+			$html .= "<p>";
+			$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
+			$html .= "</p>\r";
+	
+			$this->load->config('mime_info');
+			$this->lang->load('mime', $this->Content_model->lang_CI_Name);
+			$mime_labels = $this->lang->line('mime');
+			$mime_icons = $this->config->item('mime_icons');
+			
+			if(count($this->Content_model->attachments) > 0)
+			{
+				$html .= "<div class=\"block margins\">\r";
+				foreach($this->Content_model->attachments as $att)
 				{
-					$this->Media_model->load_title();
-					
-					// determine edit uri
-					$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
-					if($this->Media_model->temp_lang != '')
+					$html .= "<div class=\"column\">\r";
+					$this->Media_model->reset_media_vars();
+					$this->Media_model->temp_id = $att['media_id'];
+	
+					if($this->Media_model->load_media())
 					{
-						$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+						$this->Media_model->load_title();
+						
+						// determine edit uri
+						$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
+						if($this->Media_model->temp_lang != '')
+						{
+							$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+						}
+	
+						$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
+						$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+	
+						$filename = basename($this->Media_model->file_uri);
+	
+						// if local image, do thumbnail
+						if($mime_cat == 'image' && $this->Media_model->external == 0)
+						{
+							$html .= "<div class=\"image-left\">";
+							$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+							$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
+							$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+							$html .= "</div>";
+						}
+	
+						if(in_array($ext,$mime_icons))
+						{
+							$html .= "<span class=\"file ext_{$ext}\">";
+						}
+						else if($mime_cat != 'application')
+						{
+							$html .= "<span class=\"icon icon_{$mime_cat}\">";
+						}
+						else
+						{
+							$html .= "<span class=\"file\">";
+						}
+	
+						if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+						{
+							$filename = $this->Media_model->title;
+						}
+	
+						$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+						$html .= "</span><br />\r";
+	
+						if(array_key_exists($ext,$mime_labels))
+						{
+							$html .= $mime_labels[$ext];
+						}
+						else
+						{
+							$html .= $this->Media_model->mime_type;
+						}
+	
 					}
-
-					$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
-					$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
-
-					$filename = basename($this->Media_model->file_uri);
-
-					// if local image, do thumbnail
-					if($mime_cat == 'image' && $this->Media_model->external == 0)
-					{
-						$html .= "<div class=\"image-left\">";
-						$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
-						$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
-						$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
-						$html .= "</div>";
-					}
-
-					if(in_array($ext,$mime_icons))
-					{
-						$html .= "<span class=\"file ext_{$ext}\">";
-					}
-					else if($mime_cat != 'application')
-					{
-						$html .= "<span class=\"icon icon_{$mime_cat}\">";
-					}
-					else
-					{
-						$html .= "<span class=\"file\">";
-					}
-
-					if($this->Media_model->title != '' && $this->Media_model->title != $filename)
-					{
-						$filename = $this->Media_model->title;
-					}
-
-					$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
-					$html .= "</span><br />\r";
-
-					if(array_key_exists($ext,$mime_labels))
-					{
-						$html .= $mime_labels[$ext];
-					}
-					else
-					{
-						$html .= $this->Media_model->mime_type;
-					}
-
+					$html .= "</div>";
+	
 				}
 				$html .= "</div>";
-
+	
 			}
-			$html .= "</div>";
+			else
+			{
+				$html .= "<p>";
+				$html .= $this->cms_labels['attachments_none'];
+				$html .= "</p>\r";
+			}
+	
+			$html .= form_fieldset_close();
+
 
 		}
-		else
-		{
-			$html .= "<p>";
-			$html .= $this->cms_labels['attachments_none'];
-			$html .= "</p>\r";
-		}
-
-		$html .= form_fieldset_close();
-
-
+		
 		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\n";

@@ -93,6 +93,8 @@ body.gallery h1,body.gallery h2,body.gallery h3,body.gallery h4,body.gallery h5,
 		overflow: visible;
 		position: relative;
 		display: table;
+		font-size: 0.733em;
+		white-space:normal;
 	}
 	ul.thumbnails li .thumb a {
 		display:table-cell;
@@ -132,7 +134,9 @@ blockquote { border:1px solid #CCCCCC; margin:1em; padding:0 1ex; }
 .image { margin-bottom: 1em;}
 .image-left { float: left; margin-right: 1em; }
 .image-right { float: right; margin-left: 1em; }
+.image-center { margin:0 auto 1em auto; }
 .image img { border: 1px solid #000000; }
+body.gallery .image-center img { border:1px solid #eeeeee; }
 
 /* masthead styles */
 #masthead a, #masthead a:visited { color: #eeeeee; text-decoration:underline; }
@@ -377,3 +381,79 @@ border: 1px solid #cccccc;
 background-color:#eeeeee;
 overflow:scroll;
 }
+
+/* filetype icons */
+	.file, .icon {
+		padding: 0 0 0 2em;
+	}
+	
+	/* Jquery File Tree Core Styles */
+	.file { background: url(../images/icons/other/file.png) left top no-repeat; }
+	.directory { background: url(../images/icons/other/directory.png) left top no-repeat; }
+	.expanded { background: url(../images/icons/other/folder_open.png) left top no-repeat; }
+	.wait { background: url(../images/icons/other/spinner.gif) left top no-repeat; }
+	
+	/* category types */
+	
+	.icon_image { background: url(../images/icons/fugue/image.png) left top no-repeat; }
+	.icon_audio { background: url(../images/icons/fugue/music.png) left top no-repeat; }
+	.icon_video { background: url(../images/icons/fugue/film.png) left top no-repeat; }
+	.icon_text { background: url(../images/icons/fugue/document-text.png) left top no-repeat; }
+	
+	/* Text Document formats */
+	.ext_odt,
+	.ext_doc,
+	.ext_docx,
+	.ext_wp,
+	.ext_wp5,
+	.ext_wp5,
+	.ext_wp6,
+	.ext_wpd,
+	.ext_wpd,
+	.ext_wpl
+	{ background: url(../images/icons/fugue/document-text.png) left top no-repeat; }
+	
+	/* OpenDocument formats */
+	.ext_odb { background: url(../images/icons/odf/database_16x16.png) left top no-repeat; }
+	.ext_odf { background: url(../images/icons/odf/formula_16x16.png) left top no-repeat; }
+	.ext_odg { background: url(../images/icons/tango/mimetypes/x-office-drawing.png) left top no-repeat; }
+	.ext_odm { background: url(../images/icons/odf/master_16x16.png) left top no-repeat; }
+	
+	/* Presentation formats */
+	.ext_pps,
+	.ext_ppsx,
+	.ext_ppt,
+	.ext_pptx,
+	.ext_sldx,
+	.ext_odp { background: url(../images/icons/tango/mimetypes/x-office-presentation.png) left top no-repeat; }
+	
+	/* Spreadsheet formats */
+	.ext_xls,
+	.ext_xlsx,
+	.ext_ods { background: url(../images/icons/tango/mimetypes/x-office-spreadsheet.png) left top no-repeat; }
+	
+	
+	/* archive formats */
+	.ext_gzip,
+	.ext_sit,
+	.ext_zip,
+	.ext_tar,
+	.ext_tgz,
+	.ext_gz
+	{ background: url(../images/icons/fugue/folder-zipper.png) left top no-repeat; }
+	
+	/* RealMedia formats */
+	.ext_ram,
+	.ext_rm { background: url(../images/icons/other/RealPlayer.png) left top no-repeat; }
+	
+	/* misc formats */
+	.ext_pdf { background: url(../images/icons/fugue/document-pdf-text.png) left top no-repeat; }
+	.ext_ai,
+	.ext_eps,
+	.ext_ps
+	{ background: url(../images/icons/fugue/layer-vector.png) left top no-repeat; }
+
+	.ext_swf
+	{ background: url(../images/icons/fugue/document-flash-movie.png) left top no-repeat; }
+
+/* end filetype icons */

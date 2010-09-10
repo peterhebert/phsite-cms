@@ -186,8 +186,7 @@ class User_model extends MY_Model {
 			$data = array('password' => $pwdArray[0]);
 			$this->db->where('user_id', $this->user_id);
 			if($this->db->update('s_users', $data)) {
-				$this->email_user_info($pwdArray[0],'reset');
-				return TRUE;
+				return $pwdArray[1];
 			}
 		}
 		
@@ -332,6 +331,47 @@ class User_model extends MY_Model {
 		$this->temp_id = $this->user_id;
 		$this->load_metadata();
 
+	}
+
+	function username_unique()
+	{
+
+		$this->db->where('username', $this->temp_value);
+		$query = $this->db->get('s_users');
+
+		if ($query)
+		{
+			if ($query->num_rows() > 0)
+			{
+				$row = $query->row(); 
+				if($this->temp_id && $this->temp_id == $row->user_id)
+				{
+					return TRUE;
+				}
+				return FALSE;
+			}
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	function clear_user_data()
+	{
+		$this->temp_id = '';
+		$this->user_id = '';
+		$this->name_first = '';
+		$this->name_last = '';
+		$this->username = '';
+		$this->password = '';
+		$this->timezone = '';
+		$this->default_lang = '';
+		$this->email = '';
+		$this->user_rel_id = '';
+		$this->site_id = '';
+		$this->admin = 0;
+		$this->tmp_pwd = '';
+		$this->tmp_pwd_conf = '';
+		$this->user_list = array();
 	}
 
 }

@@ -15,10 +15,11 @@ class Install extends Controller
 	var $db_hostname = 'localhost', $db_username, $db_password, $db_database, $db_driver = 'mysql', $db_prefix = 'phsite_';
 
 	// site variables
+	var $title, $subtitle, $keywords;
 	var $site_id = 1, $site_admin_id = 1, $site_editor_id = 1;
 	var $site_timezone = '', $theme = 'simple_em';
 	var $site_default_lang = 'eng', $site_date_created, $site_date_updated;
-	var $home_content_id = 0, $home_content_type = 1, $default_content_type = 1;
+	var $home_content_id = 0, $home_content_type = 0, $default_content_type = 1;
 	var $img_size_th = 90, $img_size_sm = 180, $img_size_md = 320, $img_size_lg = 640, $limit_posts = 10, $limit_thumbs = 30;
 
 	function Install()
@@ -92,7 +93,7 @@ class Install extends Controller
 								$this->installer_step = 4;
 								if($this->data_status['s_users'] == TRUE)
 								{
-									$this->installer_step = 0;
+									$this->installer_step = 5;
 								}
 							}
 						}
@@ -153,7 +154,6 @@ class Install extends Controller
 		$this->lang->load('cms', $this->form_lang);
 
 		$this->cms_labels = array_merge($this->lang->line('cms_labels'), $this->lang->line('installer'));
-		$this->status_labels = $this->lang->line('status_labels');
 
 		$this->data['cms_labels'] = $this->cms_labels;
 
@@ -162,7 +162,7 @@ class Install extends Controller
 		
 		$this->_db_test();
 
-		if($this->installer_step > 0)
+		if($this->installer_step < 5)
 		{
 			$this->_process_install();
 		}
@@ -173,10 +173,10 @@ class Install extends Controller
 			$this->_form_install_db();
 		}
 		
-		// db config exists but no tables - create tables
+		// db config exists but no tables - confirm creation of tables
 		if($this->installer_step == 2)
 		{
-			$this->_create_tables();
+			$this->_form_confirm_install();
 		}
 
 		// tables exist, but no users or site prefs
@@ -191,10 +191,14 @@ class Install extends Controller
 			$this->_form_install_user();
 		}
 
-		// fully installed, do nothing
-		if($this->installer_step == 5)
+		if(!$this->input->post('submit-user') && $this->installer_step == 5)
 		{
-			$this->messages = array($this->cms_labels['install_success']);
+			$this->installer_step = 0;
+		}
+
+		// fully installed, do nothing
+		if($this->installer_step == 5 || $this->installer_step == 0)
+		{
 			$this->debugging = array();
 			$this->load->helper('html');
 			$this->load->helper('url');
@@ -206,32 +210,27 @@ class Install extends Controller
 
 		//prepare steps list for view
 		$steps = array(
-			$this->cms_labels['db_config'],
-			$this->cms_labels['site_prefs'],
-			$this->cms_labels['create_admin_user']
+		$this->cms_labels['db_exists'],
+		$this->cms_labels['db_config'],
+		$this->cms_labels['install_write_tables'],
+		$this->cms_labels['site_prefs'],
+		$this->cms_labels['create_admin_user'],
+		$this->cms_labels['install_success']
 		);
 
 		switch($this->installer_step)
 		{
 		case 1:
-			$current_step = 1;
-			break;
+		case 2:
 		case 3:
-			$current_step = 2;
-			break;
 		case 4:
-			$current_step = 3;
-			break;
-		case 5:
-			$current_step = 0;
+			$this->data['step'] = sprintf($this->cms_labels['install_step'],$this->installer_step).' - '.$steps[$this->installer_step];
 			break;
 		default:
-			$current_step = 1;
+			$this->messages[] = $steps[$this->installer_step];
 			break;
 		}
-
-		$this->data['steps'] = $steps;
-		$this->data['installer_step'] = $current_step;
+		
 
 		// prepare list of installer languages
 		$this->load->helper('url');
@@ -258,7 +257,6 @@ class Install extends Controller
 
 		if(DEV_MODE)
 		{
-			$this->messages[] = $this->status_labels[$this->installer_step];
 			$this->messages = array_merge($this->messages,$this->debugging);
 		}
 		
@@ -336,7 +334,7 @@ class Install extends Controller
 		{
 			$this->messages[] = "site preferences form submitted";
 			// set validation rules
-	
+			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 			$this->form_validation->set_rules('home_content_id', $this->cms_labels['home_page'], 'required|is_natural');
 			$this->form_validation->set_rules('home_content_type', $this->cms_labels['home_content_type'], 'required|is_natural');
 			$this->form_validation->set_rules('site_admin_id', $this->cms_labels['webmaster'], 'required|is_natural_no_zero');
@@ -355,6 +353,10 @@ class Install extends Controller
 			// run form validation
 			$form_valid = $this->form_validation->run();
 			
+			$this->title = $this->input->post('title');
+			$this->subtitle = $this->input->post('subtitle');
+			$this->keywords = csv_normalize($this->input->post('keywords'));
+
 			$this->home_content_id = $this->input->post('home_content_id');
 			$this->home_content_type = $this->input->post('home_content_type');
 			$this->site_timezone = $this->input->post('site_timezone');
@@ -397,10 +399,20 @@ class Install extends Controller
 
 		}
 
+		// confirm table creation
+		if($this->input->post('submit-confirm-install'))
+		{
+			if($this->input->post('confirm-install') === 1)
+			{
+				$this->_create_tables();
+			}
+			
+		}
+
+
 		// user form
 		if($this->input->post('submit-user'))
 		{
-			$this->messages[] = "admin user setup form submitted";
 			// set validation rules
 	
 			$this->form_validation->set_rules('name_first', $this->cms_labels['name_first'], 'required');
@@ -440,6 +452,7 @@ class Install extends Controller
 					$this->User_model->site_id = $this->site_id;
 
 					if($this->User_model->update_site_user()) {
+						$this->messages[] = "admin user created";
 						$this->installer_step = 5;
 					}
 
@@ -567,17 +580,50 @@ class Install extends Controller
 		);
 		$html = form_open($action, $attributes, $hidden);
 
-		$html .= "<div class=\"align-labels label-wide\">";
+		$html .= "<div class=\"align-labels label-normal\">";
 
-		$form_options = timezone_dropdown();
+		$form_options = array(
+		'class'        => 'text',
+		'name'        => 'title',
+		'id'          => 'title',
+		'value'       => $this->title
+		);
 		$html .= "<p>";
-		$html .= form_label($this->cms_labels['timezone'], 'site_timezone');
-		$html .= form_dropdown('site_timezone', $form_options, $this->site_timezone);		
+		$html .= form_label($this->cms_labels['title'], 'title');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
+
+		$form_options = array(
+		'class'        => 'text',
+		'name'        => 'subtitle',
+		'id'          => 'subtitle',
+		'value'       => $this->subtitle
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['subtitle'], 'subtitle');
+		$html .= form_input($form_options);
+		$html .= "</p>\n";
+
+		$form_options = array(
+		'id' => 'keywords',
+		'name' => 'keywords',
+		'class' => 'textarea',
+		'value' => $this->keywords
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
 		$html .= "</p>\r";
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['default_lang'], 'site_default_lang');
 		$html .= form_dropdown('site_default_lang', $this->all_langs, $this->site_default_lang);		
+		$html .= "</p>\r";
+
+		$form_options = timezone_dropdown();
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['timezone'], 'site_timezone');
+		$html .= form_dropdown('site_timezone', $form_options, $this->site_timezone);		
 		$html .= "</p>\r";
 
 		$form_options = array(
@@ -668,6 +714,40 @@ class Install extends Controller
 		$this->data['form'] = $html;
 	}
 
+	function _form_confirm_install()
+	{
+
+		$action = 'cms/install';
+		$attributes = array(
+		'id' => 'install-confirm-install'
+		);
+		$hidden = array(
+		'lang' => $this->form_lang
+		);
+		$html = form_open($action, $attributes, $hidden);
+		$html .= "<p>".$this->cms_labels['confirm_install_explain']."</p>\r";
+		$html .= "<div class=\"label-margins\">\n";
+
+		$form_options = array(
+		'name'        => 'confirm',
+		'id'          => 'confirm',
+		'value'          => 1,
+		);
+		$html .= "<p>";
+		$html .= form_checkbox($form_options);
+		$html .= form_label($this->cms_labels['confirm_install'], 'confirm');
+		$html .= "</p>\r";
+		$html .= "</div>\r";
+
+		$html .= "<p>";
+		$html .= form_submit('submit-confirm-install', $this->cms_labels['submit']);
+		$html .= "</p>\n";
+
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+
 	function _form_install_user()
 	{
 
@@ -676,16 +756,12 @@ class Install extends Controller
 		'id' => 'install-user'
 		);
 		$hidden = array(
-		'lang' => $this->form_lang
-		);
-		$html = form_open($action, $attributes, $hidden);
-
-		$hidden = array(
 		'lang' => $this->form_lang,
 		'db_installed' => 1,
 		'admin' => 1
 		);
-		$html .= form_hidden($hidden);
+		$html = form_open($action, $attributes, $hidden);
+
 		$html .= "<div class=\"align-labels label-wide\">\n";
 		$html .= "<p>".$this->cms_labels['user_info_fields_req']."</p>\r";
 		
@@ -843,7 +919,8 @@ class Install extends Controller
 	{
 		$this->load->database();
 		$this->load->dbforge();
-		$tables = $this->config->item('table_sql');
+		$table_def = 'tables_'.$this->db->dbdriver;
+		$tables = $this->config->item($table_def);
 		$table_count = 0;
 		
 		foreach($tables as $table => $sql)
@@ -862,7 +939,7 @@ class Install extends Controller
 			}
 			else
 			{
-				$this->debugging[] = "could not create table '{$table_name}'";
+				$this->debugging[] = "could not create table '{$table}'";
 				$this->debugging[] = $this->db->last_query();
 			}
 

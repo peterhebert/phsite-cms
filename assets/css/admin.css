@@ -205,6 +205,10 @@ form .indent-wide
 {
 	padding-left: 17em;
 }
+form fieldset .indent-wide
+{
+	padding-left: 16em;
+}
 
 /*
 form input types 
@@ -258,6 +262,10 @@ form .form-filter select,
 form .form-filter input
 {
 margin-right: 1em;
+}
+form .label-margins label
+{
+margin-left: 1em;
 }
 
 /* image containers */

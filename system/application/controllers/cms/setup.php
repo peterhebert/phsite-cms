@@ -427,6 +427,17 @@ class Setup extends MY_Controller
 		$html .= form_input($form_options);
 		$html .= "</p>\n";
 
+		$form_options = array(
+		'id' => 'keywords',
+		'name' => 'keywords',
+		'class' => 'textarea',
+		'value' => $this->Site_model->keywords
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
+		$html .= "</p>\r";
+
 		$fd_meta = $this->Site_model->metadata;
 
 		foreach($fd_meta as $index => $fd)
@@ -505,17 +516,6 @@ class Setup extends MY_Controller
 
 			$html .= "</p>\r";
 		}
-
-		$form_options = array(
-		'id' => 'keywords',
-		'name' => 'keywords',
-		'class' => 'textarea',
-		'value' => $this->Site_model->keywords
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['keywords'],'keywords');
-		$html .=  form_textarea($form_options);
-		$html .= "</p>\r";
 
 		$html .= "</div>\r";
 		
@@ -1566,16 +1566,42 @@ class Setup extends MY_Controller
 		
 		$html = form_open($action,$attributes,$hidden)."\r";
 
-		$html .= "<div class=\"align-labels label-normal\">\r";
+		$html .= "<div class=\"align-labels label-wide\">\r";
 
 		// main data
+		$html .= form_fieldset($this->cms_labels['general_info']);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
 		$html .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
 		$html .= "</p>\r";
-		$html .= "<p class=\"indent-normal\">".$this->cms_labels['note_type_uri_name'];
+		$html .= "<p class=\"indent-wide\">".$this->cms_labels['note_type_uri_name']."</p>\r";
+
+		$form_options = array(
+		'name'        => 'index_home',
+		'id'          => 'index_home',
+		'value'       => 1,
+		'checked'     => $this->Content_model->index_home,
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['content_type_home'], 'index_home');
+		$html .= form_checkbox($form_options);
 		$html .= "</p>\r";
 
+		$form_options = array(
+		'name'        => 'index_rss',
+		'id'          => 'index_rss',
+		'value'       => 1,
+		'checked'     => $this->Content_model->index_rss,
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['content_type_rss'], 'index_rss');
+		$html .= form_checkbox($form_options);
+		$html .= "</p>\r";
+
+		$html .= form_fieldset_close("\r");
+		$html .= "</div>\r";
+
+		$html .= "<div class=\"align-labels label-normal\">\r";
 		// metadata
 		$html .= form_fieldset($this->cms_labels['type_metadata']);
 		$html .= "\r";

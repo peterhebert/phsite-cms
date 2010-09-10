@@ -16,6 +16,7 @@ class Content_model extends MY_Model {
 	var $levels = 0;
 	var $content_count = 0;
 	var $omit_id = NULL;
+	var $omit_types = array();
 
     function Content_model()
     {
@@ -33,6 +34,14 @@ class Content_model extends MY_Model {
 	function list_content($include_meta = FALSE)
     {
 		// first get total matching results
+		if(count($this->omit_types) > 0)
+		{
+			foreach($this->omit_types as $omit)
+			{
+				$this->db->where('type_id !=', $omit);
+			}
+		}
+
 		if($this->parent_id != '')
 		{
 			$this->db->where('parent_id', $this->parent_id);
@@ -52,12 +61,19 @@ class Content_model extends MY_Model {
 		
 		$query = $this->db->get('c_content');
 		$this->content_count = $query->num_rows();	
-		
+
 		// then get content with limits
 		$query->free_result();
 
 		$list = array();
 
+		if(count($this->omit_types) > 0)
+		{
+			foreach($this->omit_types as $omit)
+			{
+				$this->db->where('type_id !=', $omit);
+			}
+		}
 		if($this->parent_id != '')
 		{
 			$this->db->where('parent_id', $this->parent_id);
@@ -208,11 +224,6 @@ class Content_model extends MY_Model {
 			$this->load_content_object();
 			$this->temp_id = $this->content_id;
 			$this->load_title();
-		}
-
-		if($this->temp_value != '')
-		{
-			$this->type_id = $this->temp_value;
 		}
 		
 		if($this->type_id != '')
@@ -690,13 +701,13 @@ class Content_model extends MY_Model {
 	
 
 			$uriArray2 = array_reverse($uriArray);
-	
 			$uri = '';
 	
 			if($this->lang_mode > 1) {
 				$uri .= $this->temp_lang.'/';
 			}
 			$uri .= implode('/',$uriArray2);
+			unset($uriArray,$uriArray2);
 
 		}
 		

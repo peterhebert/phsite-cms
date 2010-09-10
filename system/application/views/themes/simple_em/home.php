@@ -54,9 +54,11 @@ if(isset($breadcrumb_links))
 		<div class="block five">
 			<div class="column w3">
 				<?php
+				
 				if(isset($recent) && is_array($recent) && count($recent) > 0)
 				{
 					echo "<h2 class=\"first\">".$cms_labels['recent_content']."</h2>\r";
+
 					foreach($recent as $entry)
 					{
 					

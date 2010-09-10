@@ -1,1 +1,1 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');// phSite Global Preferences// date: 2010-08-26 17:20:34// ID of the site to display$config['site_id'] = 1;// End of file phsite_prefs.php // Location: ./system/application/config/phsite_prefs.php 
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');// phSite Global Preferences// date: 2010-09-06 21:06:42// ID of the site to display$config['site_id'] = 1;// End of file phsite_prefs.php // Location: ./system/application/config/phsite_prefs.php 

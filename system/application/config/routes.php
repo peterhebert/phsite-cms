@@ -44,19 +44,17 @@ $route['default_controller'] = "parser";
 $route['scaffolding_trigger'] = "";
 
 $route['cms'] = "cms/cms/index";
-$route['cms/media'] = "cms/media/manage";
-$route['cms/install/([a-z]{3})'] = "cms/install";
-$route['cms/([^/]*)'] = "cms/cms/$1";
-$route['cms/(.*)'] = "cms/$1";
+$route['cms/login'] = "cms/cms/login";
+$route['cms/logout'] = "cms/cms/logout";
+$route['cms/forgot_password'] = "cms/cms/forgot_password";
+$route['cms/([content|install|media|setup|upload|user]{1})(.*)'] = "cms/$1$2";
 
-$route['test(.*)'] = "test/index$1";
-$route['image(/?)(.*)'] = "image$1$2";
-$route['filetree(/?)(.*)'] = "filetree$1$2";
+$route['image/(root|browser|embed|ajax_preview)'] = "image/$1";
+$route['image(/?)(.*)'] = "image/index$1$2";
 
 $route['search(/?)(.*)'] = "search$1$2";
-
-// now route anything else to main uri parser
 $route['(.*)'] = "parser/index/$1";
+
 
 /* End of file routes.php */
 /* Location: ./system/application/config/routes.php */
