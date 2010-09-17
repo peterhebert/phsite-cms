@@ -21,6 +21,10 @@ class Parser extends MY_Controller {
 		$this->load->model('User_model');
 		$this->load->helper(array('url', 'image'));
 
+		$this->data['mime_types'] = $this->File_model->mime_types;
+		$this->data['image_types'] = $this->File_model->image_types;
+		$this->data['playable_types'] = $this->File_model->playable_types;
+
 		$this->Content_model->list_langs();
 	}
 	
@@ -424,7 +428,7 @@ class Parser extends MY_Controller {
 				$this->File_model->temp_lang = $this->Content_model->temp_lang;
 				$this->File_model->lang_load();
 				$this->File_model->dir_current = $dir;
-				$content_vars['dir_listing'] = $this->File_model->list_files(TRUE);
+				$content_vars['dir_listing'] = $this->File_model->list_files();
 			}
 
 		}

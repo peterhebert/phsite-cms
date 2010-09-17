@@ -1082,6 +1082,7 @@ class MY_Model extends Model {
 
 		$sql = "SELECT * FROM c_titles WHERE keywords REGEXP '[[:<:]]{$match}[[:>:]]' AND scope = '{$this->scope}'";
 
+
 		$query = $this->db->query($sql);
 		
 		if ($query->num_rows() > 0)

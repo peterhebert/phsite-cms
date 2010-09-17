@@ -94,6 +94,8 @@ if ( ! function_exists('view_image'))
 		$path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$path);
 		$orig_image_path_rel = trim($path,'/');
 		
+		$img_tag_attr = array('src' => '');
+		
 		if(file_exists($orig_image_path)) {
 			
 			$orig_size = getimagesize($orig_image_path);

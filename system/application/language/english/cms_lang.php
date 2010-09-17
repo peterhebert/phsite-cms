@@ -132,6 +132,7 @@ $lang['cms_labels'] = array(
 'max_length' => "Maximum Length",
 'max_upload_size' => "Maximum file size",
 'media_attached_to' => "Attached to",
+'media_credit' => "Credit: %s",
 'media_dim_h' => "Height",
 'media_dim_w' => "Width",
 'media_edit' => "Edit Media",

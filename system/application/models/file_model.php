@@ -9,6 +9,7 @@ class File_model extends MY_Model {
 	// misc utility variables
 	var $media_list = array(), $media_metadata = array(), $media_meta_fields = array();
 	var $mime_categories = array('image','audio','video','text','application'), $mime_cat;
+	var $mime_types = array(), $image_types = array(), $playable_types = array();
 	var $cms_labels;
 	var $max_upload_bytes;
 	var $max_upload_display;
@@ -35,6 +36,9 @@ class File_model extends MY_Model {
 
 		$this->config->load('mime_info');
 		$this->mime_types = $this->config->item('mime_types');
+		$this->image_types = $this->config->item('image_types');
+		$this->playable_types = $this->config->item('playable_types');
+
 		$this->scope = 'media';
 		
 	}
@@ -893,6 +897,35 @@ class File_model extends MY_Model {
 		}
 
 		return FALSE;
+	}
+
+	function media_search_keywords()
+	{
+		$results = $this->keyword_search();
+
+		$media = array();
+		
+		if (count($results) > 0)
+		{
+			foreach ($results as $row)
+			{
+				$info =& $row;
+				
+				$this->temp_id = $row['rel_id'];
+				$this->load_media();
+				
+				$info['media_id'] = $this->media_id;
+				$info['file_uri'] = $this->file_uri;
+				$info['external'] = $this->external;
+				$info['mime_type'] = $this->mime_type;
+				$info['date_created'] = $this->date_created;
+				$info['publish'] = $this->publish;
+				
+				$media[] = $info;
+			}
+		} 		
+
+		return $media;		
 	}
 
 }

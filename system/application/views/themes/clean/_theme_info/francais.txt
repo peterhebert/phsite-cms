@@ -1,0 +1,7 @@
+title:			Simple Em
+description:	Un thème utilisant des unités de mesure 'Em', qui rend une mise à l'échelle élégante dans le navigateur.
+author:			Peter Hebert
+email:			mail@peterhebert.com
+website:		http://www.peterhebert.com
+version:		0.1
+release_date:	2009-11-30

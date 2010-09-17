@@ -1,0 +1,7 @@
+title:			Clean
+description:	A simple theme with em-based sizes, which is easily scaleable in the browser. Based upon the phSite default admin theme.
+author:			Peter Hebert
+email:			mail@peterhebert.com
+website:		http://www.peterhebert.com
+version:		0.1
+release_date:	2010-09-13

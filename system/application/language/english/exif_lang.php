@@ -38,7 +38,4 @@ $lang['exif_labels'] = array(
 'Sharpness' => 'Sharpness',
 );
 
-/*
-
-*/
 ?>

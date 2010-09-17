@@ -1580,8 +1580,14 @@ class Setup extends MY_Controller
 		'name'        => 'index_home',
 		'id'          => 'index_home',
 		'value'       => 1,
-		'checked'     => $this->Content_model->index_home,
+		'checked'     => FALSE,
 		);
+
+		if($this->Content_model->index_home == 1)
+		{
+			$form_options['checked'] = TRUE;
+		}
+		
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['content_type_home'], 'index_home');
 		$html .= form_checkbox($form_options);
@@ -1591,8 +1597,14 @@ class Setup extends MY_Controller
 		'name'        => 'index_rss',
 		'id'          => 'index_rss',
 		'value'       => 1,
-		'checked'     => $this->Content_model->index_rss,
+		'checked'     => FALSE,
 		);
+		
+		if($this->Content_model->index_rss == 1)
+		{
+			$form_options['checked'] = TRUE;
+		}
+		
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['content_type_rss'], 'index_rss');
 		$html .= form_checkbox($form_options);
@@ -1728,6 +1740,8 @@ class Setup extends MY_Controller
 			// get values from form post data
 			$this->Content_model->type_id = $this->input->post('type_id');
 			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
+			$this->Content_model->index_home = $this->input->post('index_home');
+			$this->Content_model->index_rss = $this->input->post('index_rss');
 
 			if ($form_is_valid)
 			{

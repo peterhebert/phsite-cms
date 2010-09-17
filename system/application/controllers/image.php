@@ -12,6 +12,7 @@ class Image extends MY_Controller {
 		$this->load->config('mime_info');
 
 		$this->types = $this->config->item('playable_types');
+		$this->data['playable_types'] = $this->config->item('playable_types');
 	}
 	
 	function index()
@@ -22,8 +23,8 @@ class Image extends MY_Controller {
 		$langs = $this->Site_model->langs_dropdown();
 		$segments = $this->uri->segment_array();
 		array_shift($segments);
-
-		if(preg_match('#^([a-z]{3})$#',$segments[0]) && array_key_exists($segments[0],$langs))
+		
+		if(count($segments) > 0 && preg_match('#^([a-z]{3})$#',$segments[0]) && array_key_exists($segments[0],$langs))
 		{
 			$this->File_model->temp_lang = array_shift($segments);
 		}
@@ -31,14 +32,15 @@ class Image extends MY_Controller {
 		{
 			$this->File_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		$this->Site_model->temp_lang = $this->File_model->temp_lang;
 		
+		$this->Site_model->temp_lang = $this->File_model->temp_lang;
 		// get site metadata
 		$this->_load_site_metadata();
 		$this->_load_cms_labels();
 		
 		$this->File_model->file_uri = '/'.implode('/',$segments);
 		$exists = $this->File_model->find_media_by_uri(TRUE);
+
 		if($exists)
 		{
 			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
@@ -61,6 +63,20 @@ class Image extends MY_Controller {
 			{
 				$media_info['rel_path'] = BASE_PATH.MEDIA_PATH_ORIG.$this->File_model->file_uri;
 				$media_info['server_path'] = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
+			}
+
+			if($this->File_model->keywords != '')
+			{
+				$kwds = explode(',',$this->File_model->keywords);
+				$links = array();
+				foreach ($kwds as $tag)
+				{
+					$keyword = trim($tag);
+					$url = 'search/k/'.$keyword;
+					$links[] = anchor($url,$keyword);
+					
+				}
+				$media_info['keyword_links'] = implode(', ',$links);
 			}
 
 			$updated = $this->File_model->title_updated;
@@ -87,6 +103,8 @@ class Image extends MY_Controller {
 			$media_info['date_updated'] = convert_time($updated, $this->Site_model->site_timezone);
 			$media_info['date_updated_W3C'] = convert_time($updated, $this->Site_model->site_timezone, "Y-m-d");
 			$this->data['title'] = $this->File_model->title;
+
+	
 
 			$this->data['content'] = $media_info;
 			$this->view = 'themes/'.$this->Site_model->theme.'/media';
