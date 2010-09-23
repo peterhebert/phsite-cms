@@ -46,7 +46,7 @@ class Install extends Controller
 		if(file_exists($db_conf)) {
 			require_once($db_file);
 
-			if(isset($db,$active_group) && array_key_exists($active_group,$db))
+			if(isset($db,$active_group) && array_key_exists($active_group,$db) && $active_group !='' && $db[$active_group]['hostname'] != "" && $db[$active_group]['username'] != "" && $db[$active_group]['password'] != "" && $db[$active_group]['database'] != "" && $db[$active_group]['dbdriver'] != "")
 			{
 				// test the supplied connection
 				$DB1 = $this->_db_test_connection($db[$active_group]);

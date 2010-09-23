@@ -63,7 +63,7 @@ define('POWERED_BY', "<p>Powered by <a href=\"http://phsite.peterhebert.com\" re
 define('PHSITE_CMS_VERSION', "0.1");
 
 // development mode for CMS admin panel
-// TRUE = use individual uncompressed js and css files
+// TRUE = use individual uncompressed js and css files, show debugging messages
 // FALSE = use concatenated and minified js and css files
 define('DEV_MODE', TRUE);
 
