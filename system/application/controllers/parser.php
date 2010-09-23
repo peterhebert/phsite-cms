@@ -533,7 +533,9 @@ class Parser extends MY_Controller {
 				$this->File_model->temp_lang = $this->Content_model->temp_lang;
 				$this->File_model->lang_load();
 				$this->File_model->dir_current = $dir;
-				$content_vars['dir_listing'] = $this->File_model->list_files();
+				$this->File_model->list_files(FALSE,TRUE,TRUE);
+				$content_vars['dir_listing'] = $this->File_model->file_list;
+				$content_vars['subdirs'] = $this->File_model->dir_list;
 			}
 
 		}
@@ -791,6 +793,7 @@ class Parser extends MY_Controller {
 
 				if($this->File_model->external == 0)
 				{
+					$tmp_array['path_basename'] = ROOT_REL.MEDIA_PATH_ORIG.basename($this->File_model->file_uri);
 					$tmp_array['server_path'] = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
 					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($this->File_model->file_uri);
 				}

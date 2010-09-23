@@ -12,13 +12,6 @@ if (isset($html_header)) {
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-<?php
-if(isset($breadcrumb_links))
-{
-	$breadcrumb = implode(' : ', $breadcrumb_links);
-	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
-}
-?>
 	<div class="page-wrap block five">
 		<div class="column w3">
 			<?php

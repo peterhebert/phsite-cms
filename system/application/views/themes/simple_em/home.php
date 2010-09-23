@@ -43,18 +43,10 @@ echo "<link href=\"{$theme_path}simple_em.css\" rel=\"stylesheet\" type=\"text/c
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-<?php
-if(isset($breadcrumb_links))
-{
-	$breadcrumb = implode(' : ', $breadcrumb_links);
-	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
-}
-?>
 	<div class="page-wrap">
 		<div class="block five">
 			<div class="column w3">
 				<?php
-				
 				if(isset($recent) && is_array($recent) && count($recent) > 0)
 				{
 					echo "<h2 class=\"first\">".$cms_labels['recent_content']."</h2>\r";

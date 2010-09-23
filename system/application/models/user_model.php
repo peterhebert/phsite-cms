@@ -367,7 +367,6 @@ class User_model extends MY_Model {
 		$this->default_lang = '';
 		$this->email = '';
 		$this->user_rel_id = '';
-		$this->site_id = '';
 		$this->admin = 0;
 		$this->tmp_pwd = '';
 		$this->tmp_pwd_conf = '';

@@ -1,18 +1,37 @@
-AddType video/ogg .ogv
+AddType audio/flac .flac
+AddType audio/mp4 .m4a
+AddType audio/mp4 .m4b
+AddType audio/mpeg3 .mp3
+AddType audio/ogg .oga
+AddType audio/ogg .ogg
+AddType audio/ogg .spx
+AddType video/x-flv .f4v
+AddType video/x-flv .flv
+AddType video/x-mpegurl .m4u
+AddType video/mp4 .m4v
+AddType video/x-matroska .mkv
+AddType video/quicktime .mov
 AddType video/mp4 .mp4
- 
+AddType video/mp4 .mpeg4
+AddType video/ogg .ogm
+AddType video/ogg .ogv
+AddType video/x-webm .webm
+
 RewriteEngine On
 
 # Removes access to the system folder by users.
 # Additionally this will allow you to create a System.php controller,
 # previously this would not have been possible.
 # 'system' can be replaced if you have renamed your system folder.
+
 RewriteCond %{REQUEST_URI} ^system.*
 RewriteRule ^(.*)$ /index.php/$1 [L]
 
 # Checks to see if the user is attempting to access a valid file,
 # such as an image or css document, if this isn't true it sends the
 # request to index.php
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ ./index.php/$1 [L]
+

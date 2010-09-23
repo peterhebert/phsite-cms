@@ -16,6 +16,16 @@ $lang['installer'] = array(
 'install_step' => "&Eacute;tape %s",
 'installer_languages' => "Langues de l'installateur",
 'install_success' => 'Installation compl&egrave;te',
+'install_write_tables' => '&Eacute;crire tables &agrave; la base de donn&eacute;es',
+'confirm_install' => 'Oui, &eacute;crire les tables &agrave; la base de donn&eacute;es.',
+'confirm_install_explain' => 'La connection &agrave; la base de donn&eacute;es a &eacute;t&eacute; &eacute;tabli. SVP confirmer si vous voulez proc&eacute;der avec la cr&eacute;ation des tables &agrave; la base de donn&eacute;es.',
+'htaccess_exists' => 'Le fichier .htaccess existe d&eacute;j&agrave;',
+'htaccess_success' => 'Le fichier .htaccess a &eacute;t&eacute; &eacute;crit',
+'htaccess_failure' => 'Le fichier .htaccess ne pouvait pas &eacute;t&eacute; &eacute;crit',
+'db_config_success' => 'Le fichier configuration de la connection &agrave; la base de donn&eacute;es a &eacute;t&eacute; &eacute;crit',
+'db_config_failure' => 'Le fichier configuration de la connection &agrave; la base de donn&eacute;es ne pouvait pas &eacute;t&eacute; &eacute;crit',
+'admin_user_success' => 'Le compte d\'utilisateur administratif a &eacute;t&eacute; cr&eacute;e',
+'admin_user_failure' => 'Le compte d\'utilisateur administratif ne pouvait pas &eacute;t&eacute; cr&eacute;e',
 );
 
 $lang['status_labels'] = array(

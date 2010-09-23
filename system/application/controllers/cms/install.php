@@ -315,11 +315,13 @@ class Install extends Controller
 				$DB1 = $this->_db_test_connection($config);
 				if($DB1)
 				{
-					$this->messages[] = "attempt writing to database config file";
+					// write .htaccess file
+					$this->_write_htaccess();
+					// write config file
 					if($this->_write_db_config())
 					{
 						$this->installer_step = 2;
-						$this->messages[] = "database config file successfully created";
+						$this->messages[] = $this->cms_labels['db_config_success'];
 					}
 				}
 
@@ -332,7 +334,6 @@ class Install extends Controller
 
 		if($this->input->post('submit-prefs'))
 		{
-			$this->messages[] = "site preferences form submitted";
 			// set validation rules
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 			$this->form_validation->set_rules('home_content_id', $this->cms_labels['home_page'], 'required|is_natural');
@@ -452,7 +453,7 @@ class Install extends Controller
 					$this->User_model->site_id = $this->site_id;
 
 					if($this->User_model->update_site_user()) {
-						$this->messages[] = "admin user created";
+						$this->messages[] = $this->cms_labels['admin_user_success'];
 						$this->installer_step = 5;
 					}
 
@@ -1030,6 +1031,59 @@ class Install extends Controller
 		
 		$written = write_file($db_config_filename, $config);
 		return $written;
+	}
+
+	function _write_htaccess()
+	{
+
+		// intialize htaccess variable
+		$txt = '';
+
+		// first add HTML 5 mime type definitions
+		$this->config->load('mime_info');
+		$html5_types = $this->config->item('html5_types');
+
+		foreach($html5_types as $ext => $type)
+		{
+			$txt .= "AddType {$type} .{$ext}\r";
+		}
+
+		// now add routing directives
+		$txt  .= "\rRewriteEngine On\r\r";
+		$txt  .= "# Removes access to the system folder by users.\r";
+		$txt  .= "# Additionally this will allow you to create a System.php controller,\r";
+		$txt  .= "# previously this would not have been possible.\r";
+		$txt  .= "# 'system' can be replaced if you have renamed your system folder.\r\r";
+		$txt  .= 'RewriteCond %{REQUEST_URI} ^system.*'."\r";
+		$txt  .= 'RewriteRule ^(.*)$ /index.php/$1 [L]'."\r\r";
+		$txt  .= "# Checks to see if the user is attempting to access a valid file,\r";
+		$txt  .= "# such as an image or css document, if this isn't true it sends the\r";
+		$txt  .= "# request to index.php\r\r";
+		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-f'."\r";
+		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-d'."\r";
+		$txt  .= 'RewriteRule ^(.*)$ ./index.php/$1 [L]'."\r\r";
+
+		$this->load->helper('file');
+		$filename = ROOT_REL.'/.htaccess';
+
+		if(!file_exists($filename))
+		{
+			$written = write_file($filename, $txt);
+			if($written)
+			{
+				$this->debugging[] = $this->cms_labels['htaccess_success'];
+			}
+			else
+			{
+				$this->debugging[] = $this->cms_labels['htaccess_failure'];
+			}
+			return $written;
+		}
+		else
+		{
+			$this->debugging[] = $this->cms_labels['htaccess_exists'];
+			return FALSE;
+		}
 	}
 
 }

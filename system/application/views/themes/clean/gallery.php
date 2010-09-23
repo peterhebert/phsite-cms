@@ -32,11 +32,6 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 			echo "</p>\r";
 		}
 
-		if(isset($subdirs) && count($subdirs) > 0)
-		{
-			echo "<p>{$cms_labels['media_subdirs']}</p>";
-			echo ul($subdirs);
-		}
 		
 		$files = array();
 		if(isset($attachments))
@@ -46,7 +41,15 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 
 		if(isset($content['dir_listing']))
 		{
-			$files = array_merge($files,$content['dir_listing']['files']);
+			$files = array_merge($files,$content['dir_listing']);
+		}
+		if(isset($content['subdirs']) && count($content['subdirs']) > 0)
+		{
+			echo "<p>{$cms_labels['media_subdirs']}</p>";
+			//echo ul($subdirs);
+			echo "<pre>";
+			print_r($subdirs);
+			echo "</pre>\r";
 		}
 
 		$this->lang->load('mime',$this->Content_model->lang_CI_Name);

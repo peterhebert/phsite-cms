@@ -7,7 +7,7 @@ class Setup extends MY_Controller
 		parent::MY_Controller();
 		$this->load->helper('form');
 		$this->load->model('Content_model');
-		$this->load->model('Media_model');
+		$this->load->model('File_model');
 		$this->load->library('form_validation');		
 	
 		$this->_authenticate();
@@ -437,7 +437,7 @@ class Setup extends MY_Controller
 		$html .=  form_textarea($form_options);
 		$html .= "</p>\r";
 
-		$fd_meta = $this->Site_model->metadata;
+/*		$fd_meta = $this->Site_model->metadata;
 
 		foreach($fd_meta as $index => $fd)
 		{
@@ -513,6 +513,126 @@ class Setup extends MY_Controller
 				$html .=  form_input($form_options);
 			}
 
+			$html .= "</p>\r";
+		}
+*/
+
+		// fields
+		foreach($this->Site_model->metadata as $index => $fd)
+		{
+			$this->Site_model->reset_label();
+			// get field data if it does not exist
+			if(array_key_exists('field_id',$fd))
+			{
+				$tmp_ref_name = $fd['field_ref_name'];
+				$tmp_label = $fd['field_ref_name'];
+				$tmp_needs_lang = $fd['field_needs_lang'];
+				$tmp_meta_id = $fd['meta_id'];
+				$tmp_required = $fd['required'];
+				$tmp_input_type = $fd['field_input_type'];
+				$tmp_validation = $fd['field_validation'];
+				$tmp_list_id = $fd['list_id'];
+			}
+			else
+			{
+				$this->Site_model->temp_id = $index;
+				$this->Site_model->load_field();
+
+				$tmp_ref_name = $this->Site_model->field_ref_name;
+				$tmp_needs_lang = $this->Site_model->field_needs_lang;
+				$tmp_input_type = $this->Site_model->field_input_type;
+				$tmp_validation = $this->Site_model->field_validation;
+				$tmp_list_id = $this->Site_model->list_id;
+				$tmp_label = $tmp_ref_name;
+				$tmp_meta_id = '';
+				$tmp_required = '';
+			}
+
+			// hidden fields
+			$form_options = array(
+			'field_id[]' =>  $index,
+			'field_ref_name[]' =>  $tmp_ref_name,
+			'meta_id[]' => $tmp_meta_id,
+			'required[]' =>  $tmp_required,
+			'field_validation[]' =>  $tmp_validation,
+			'field_needs_lang[]' => $tmp_needs_lang
+			);
+			$html .= form_hidden($form_options);
+
+			$this->Site_model->reset_label();
+			$this->Site_model->label_scope = 'field';
+			$this->Site_model->temp_id = $index;
+			$this->Site_model->temp_lang = $this->Site_model->temp_lang;
+
+			if($this->Site_model->load_label())
+			{
+				$tmp_label = $this->Site_model->label;
+			}
+
+			$html .= "<p>\r";
+			$html .= form_label($tmp_label, $tmp_ref_name);
+
+			$form_options = array(
+			'id' => $tmp_ref_name,
+			'name' => 'value_'.$index,
+			'value' => $fd['value'],
+			'class' => $tmp_input_type
+			);
+
+			switch($tmp_input_type) {
+
+			case 'directory':
+				$this->File_model->list_files(TRUE,TRUE,TRUE);
+
+				$media_root = $this->File_model->dir_base;
+				$dir_list_temp = $this->File_model->dir_list;
+
+				$dir_vals['/'] = $this->cms_labels['media_root'];
+
+				if(count($dir_list_temp) > 0)
+				{
+					foreach($dir_list_temp as $the_dir) {
+						$dir_vals[$the_dir['file_uri']] = $the_dir['file_uri'];
+					}
+				}
+				
+				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				unset($dir_vals);
+				break;
+			case 'file':
+
+				$this->File_model->temp_value = '';
+				$this->File_model->list_media();
+
+				$media_root = $this->File_model->dir_base;
+				$dir_files = array('' => 'no file');
+
+				foreach($this->File_model->media_list as $path => $info)
+				{
+					$dir_files[$path] = $info['title'];
+				}
+				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				unset($dir_files);
+
+				break;
+			case 'textarea':
+			case 'richtext':
+				$form_options['cols'] = 38;
+				$html .= ph_form_textarea($form_options);
+				break;
+
+			case 'list':
+				// load list values
+				$this->Site_model->temp_id = $fd['list_id'];
+				$this->Site_model->load_value_list();
+				$listvals = prepare_list_values($this->Site_model->value_list);
+
+				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+
+				break;
+			default:
+				$html .=  form_input($form_options);
+			}
 			$html .= "</p>\r";
 		}
 

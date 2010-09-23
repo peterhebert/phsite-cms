@@ -21,7 +21,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 <?php require_once('masthead.php'); ?>
 <div id="page">
 	<div class="page-wrap block">
-	<?php
+		<?php
 		if (isset($content['title'])) {
 			echo "<h1>{$content['title']}</h1>\r";
 		}
@@ -31,11 +31,6 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 			echo "</p>\r";
 		}
 
-		if(isset($subdirs) && count($subdirs) > 0)
-		{
-			echo "<p>{$cms_labels['media_subdirs']}</p>";
-			echo ul($subdirs);
-		}
 		
 		$files = array();
 		if(isset($attachments))
@@ -45,7 +40,15 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 
 		if(isset($content['dir_listing']))
 		{
-			$files = array_merge($files,$content['dir_listing']['files']);
+			$files = array_merge($files,$content['dir_listing']);
+		}
+		if(isset($content['subdirs']) && count($content['subdirs']) > 0)
+		{
+			echo "<p>{$cms_labels['media_subdirs']}</p>";
+			//echo ul($subdirs);
+			echo "<pre>";
+			print_r($subdirs);
+			echo "</pre>\r";
 		}
 
 		$this->lang->load('mime',$this->Content_model->lang_CI_Name);
@@ -110,6 +113,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 			}
 			echo "</ul>\r";
 		}
+
 	?>
 	</div>
 	<div class="page-wrap block" id="footer">
@@ -121,15 +125,5 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 	?>
 	</div>
 </div>
-<!-- init jQuery lightBox plugin -->
-<script type="text/javascript">
-/* <![CDATA[ */
-
-$(function() {
-	$("ul.thumbnails a").lightBox();
-});
-
-/* ]]> */</script>
-<!-- / end jQuery lightBox plugin -->
 </body>
 </html>

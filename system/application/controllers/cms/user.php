@@ -15,23 +15,29 @@ class User extends MY_Controller
 		$this->load->library('session');
 
 		$this->_authenticate();
-
+/*		$this->config->load('phsite_prefs');
+		$this->User_model->site_id = $this->config->line('site_id');
+*/
 	} // end constructor
 
 	function index()
 	{
 
 		$userlist = array();
+		
+		$this->User_model->clear_user_data();
+		$this->User_model->temp_id = $this->session->userdata('user_id');
+		$this->User_model->load_user();
 
-		if($this->session->userdata('admin') != 1)
+		if($this->User_model->admin != 1)
 		{
+			echo "not admin";
 			// if logged in user not an admin, show link to edit to their user account
 			$user_name = $this->session->userdata('name_last').", ".$this->session->userdata('name_first');
 			$user_url = "cms/user/edit/id/".$this->session->userdata('user_id');
 			$userlist[] = anchor($user_url, $user_name);
 		} else {
 
-			$this->User_model->clear_user_data();
 			$this->User_model->get_list();
 
 			if(count($this->User_model->user_list) > 0)
@@ -401,40 +407,38 @@ class User extends MY_Controller
 				break;
 
 			case 'directory':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_list_temp = $this->Media_model->dir_list;
+				$this->load->model('File_model');
+				$this->File_model->list_files(TRUE,TRUE,TRUE);
+
+				$media_root = $this->File_model->dir_base;
+				$dir_list_temp = $this->File_model->dir_list;
+
 				$dir_vals['/'] = $this->cms_labels['media_root'];
+
 				if(count($dir_list_temp) > 0)
 				{
 					foreach($dir_list_temp as $the_dir) {
-						$temp_dir_val = str_replace($media_root,'',$the_dir);
-						$dir_vals[$temp_dir_val] = $temp_dir_val;
+						$dir_vals[$the_dir['file_uri']] = $the_dir['file_uri'];
 					}
 				}
-				
 				
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
+				unset($dir_vals);
 				break;
 			case 'file':
-				$this->User_model->list_attachments();
-				$this->User_model->lang_load();
+				$this->load->model('File_model');
+				$this->File_model->temp_value = '';
+				$this->File_model->list_media();
 
-				$dir_files = array('' => $this->cms_labels['none']);
+				$media_root = $this->File_model->dir_base;
+				$dir_files = array('' => 'no file');
 
-				if(count($this->User_model->attachments) > 0)
+				foreach($this->File_model->media_list as $path => $info)
 				{
-					foreach($this->User_model->attachments as $index => $media)
-					{
-						$this->Media_model->reset_media_vars();
-						$this->Media_model->temp_id = $media['media_id'];
-						$this->Media_model->load_media();
-						$this->Media_model->load_title();
-						$dir_files[$this->Media_model->media_id] = $this->Media_model->title;
-					}
+					$dir_files[$path] = $info['title'];
 				}
 				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
+				unset($dir_files);
 				break;
 			case 'textarea':
 				$form_options['cols'] = 38;

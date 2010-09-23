@@ -369,7 +369,7 @@ class Content extends MY_Controller
 				}
 			}
 		}
-		$this->Media_model->temp_value = '';
+		$this->File_model->temp_value = '';
 
 	}
 
@@ -766,30 +766,30 @@ class Content extends MY_Controller
 				foreach($this->Content_model->attachments as $att)
 				{
 					$html .= "<div class=\"column\">\r";
-					$this->Media_model->reset_media_vars();
-					$this->Media_model->temp_id = $att['media_id'];
+					$this->File_model->reset_media_vars();
+					$this->File_model->temp_id = $att['media_id'];
 	
-					if($this->Media_model->load_media())
+					if($this->File_model->load_media())
 					{
-						$this->Media_model->load_title();
+						$this->File_model->load_title();
 						
 						// determine edit uri
-						$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
-						if($this->Media_model->temp_lang != '')
+						$edit_uri = 'cms/media/edit/id/'.$this->File_model->media_id;
+						if($this->File_model->temp_lang != '')
 						{
-							$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+							$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 						}
 	
-						$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
-						$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
+						$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
+						$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
 	
-						$filename = basename($this->Media_model->file_uri);
+						$filename = basename($this->File_model->file_uri);
 	
 						// if local image, do thumbnail
-						if($mime_cat == 'image' && $this->Media_model->external == 0)
+						if($mime_cat == 'image' && $this->File_model->external == 0)
 						{
 							$html .= "<div class=\"image-left\">";
-							$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+							$img_path = $this->File_model->dir_base.$this->File_model->file_uri;
 							$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
 							$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 							$html .= "</div>";
@@ -808,9 +808,9 @@ class Content extends MY_Controller
 							$html .= "<span class=\"file\">";
 						}
 	
-						if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+						if($this->File_model->title != '' && $this->File_model->title != $filename)
 						{
-							$filename = $this->Media_model->title;
+							$filename = $this->File_model->title;
 						}
 	
 						$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
@@ -822,7 +822,7 @@ class Content extends MY_Controller
 						}
 						else
 						{
-							$html .= $this->Media_model->mime_type;
+							$html .= $this->File_model->mime_type;
 						}
 	
 					}
@@ -1126,9 +1126,9 @@ class Content extends MY_Controller
 
 		$this->Content_model->content_id = $this->uri->segment(4);
 		$this->Content_model->load_content();
-		$this->Media_model->temp_lang = $this->Content_model->temp_lang;
-		$this->Media_model->lang_load();
-		$this->lang->load('mime', $this->Media_model->lang_CI_Name);
+		$this->File_model->temp_lang = $this->Content_model->temp_lang;
+		$this->File_model->lang_load();
+		$this->lang->load('mime', $this->File_model->lang_CI_Name);
 		$mime_cat_labels = $this->lang->line('mime_cat');
 		$mime_labels = $this->lang->line('mime');
 		
@@ -1144,7 +1144,7 @@ class Content extends MY_Controller
 		$html .=  anchor($return_uri,sprintf($this->cms_labels['return_to'],$this->Content_model->title));
 		$html .= "</p>\r";
 		
-		$scan = $this->Media_model->list_media_recursive();
+		$this->File_model->list_files(TRUE,TRUE,TRUE);
 
 		$this->Content_model->list_attachments();
 
@@ -1173,35 +1173,35 @@ class Content extends MY_Controller
 			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
 			foreach ($this->Content_model->attachments as $file)
 			{
-				$this->Media_model->reset_media_vars();
+				$this->File_model->reset_media_vars();
 
 				$now_attached[] = $file['media_id'];
-				$this->Media_model->temp_id = $file['media_id'];
-				$this->Media_model->load_media();
-				$this->Media_model->load_title();
+				$this->File_model->temp_id = $file['media_id'];
+				$this->File_model->load_media();
+				$this->File_model->load_title();
 
 				$html .= "\t\t<tr>\r";
 
 				// get mime category
 				// get filename and extension
-				$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->Media_model->mime_type);
-				$filename = basename($this->Media_model->file_uri);
-				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->Media_model->file_uri));
-				$mid = $this->Media_model->media_id;
+				$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
+				$filename = basename($this->File_model->file_uri);
+				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
+				$mid = $this->File_model->media_id;
 	
 				// determine edit uri
-				$edit_uri = 'cms/media/edit/id/'.$this->Media_model->media_id;
-				if($this->Media_model->temp_lang != '')
+				$edit_uri = 'cms/media/edit/id/'.$this->File_model->media_id;
+				if($this->File_model->temp_lang != '')
 				{
-					$edit_uri .= '/lang/'.$this->Media_model->temp_lang;
+					$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 				}
 	
 				$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\">";
-				if($mime_cat == 'image' && $this->Media_model->external == 0)
+				if($mime_cat == 'image' && $this->File_model->external == 0)
 				{
 					$html .= "<div class=\"image-left\">";
 					// get thumbnail
-					$img_path = $this->Media_model->dir_base.$this->Media_model->file_uri;
+					$img_path = $this->File_model->dir_base.$this->File_model->file_uri;
 					$thumb = view_image($img_path,$this->Site_model->img_size_th,array('alt' => sprintf($this->cms_labels['edit_this'],$filename)));
 					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
 					$html .= "</div>";
@@ -1215,9 +1215,9 @@ class Content extends MY_Controller
 				{
 					$html .= "<span class=\"icon icon_{$mime_cat}\">";
 				}
-				if($this->Media_model->title != '' && $this->Media_model->title != $filename)
+				if($this->File_model->title != '' && $this->File_model->title != $filename)
 				{
-					$html .= $this->Media_model->title."<br />\r";
+					$html .= $this->File_model->title."<br />\r";
 				}
 				$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 				$html .= "</span><br />\r".$mime_labels[$ext];
@@ -1239,7 +1239,7 @@ class Content extends MY_Controller
 			$html .= "</table>\r";
 		}
 		$html .= form_fieldset_close();
-		$this->Media_model->media_list = $now_attached;
+		$this->File_model->media_list = $now_attached;
 		// media browser
 		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);

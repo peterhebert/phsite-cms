@@ -22,64 +22,10 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 <div id="page">
 	<div class="page-wrap block">
 		<?php
+
 			if(isset($msg))
 			{
 				echo "<div class=\"msg\">{$msg}</div>\r";
-			}
-
-			if(isset($media['title']))
-			{
-				echo "<h1 class=\"align-center\">{$media['title']}</h1>\r";
-			}
-			if(isset($media['subtitle']) && $media['subtitle'] != '')
-			{
-				echo "<h2>{$media['subtitle']}</h2>\r";
-			}
-
-			if($media['external'] == 1)
-			{
-				$src = $media['file_uri'];
-			}
-			else
-			{
-				$src = $media['rel_path'];
-			}
-			
-			if(in_array($media['mime_type'],$image_types))
-			{
-				echo "<div class=\"image image-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
-				echo view_image($media['server_path'],$this->Site_model->img_size_lg);
-				echo "</div>\r";
-			}
-			
-			if (in_array($media['mime_type'],$playable_types))
-			{
-				$params = array(
-				'src' => $src
-				);
-				echo "<div class=\"image image-center\">";
-				echo media_player_object($params);
-				echo "</div>\r";
-			}
-
-			if(isset($media['description']))
-			{
-				echo "<div class=\"block\">{$media['description']}</div>\r";
-			}
-			if(isset($media['creator'])) 
-			{
-				echo "<p>".sprintf($cms_labels['media_credit'],$media['creator'])."</p>\r";
-			}
-			if(isset($media['keyword_links'])) 
-			{
-				echo "<p>{$cms_labels['keywords']} : {$media['keyword_links']}</p>\r";
-			}
-			// download link
-			if(isset($media['external']) && $media['external'] == 0) 
-			{
-				$dl = '<a href="'.$src.'">'.$media['title'].'</a> ('.$media['size_formatted'].')';
-				$dl_text = sprintf($cms_labels['download_file'],$dl);
-				echo "<p>{$dl_text}</p>\r";
 			}
 
 			// start file nav links
@@ -92,7 +38,7 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 	
 			if(isset($content['dir_listing']))
 			{
-				$files = array_merge($files,$content['dir_listing']['files']);
+				$files = array_merge($files,$content['dir_listing']);
 			}
 			
 			if(count($files) > 0)
@@ -120,8 +66,65 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 				
 			}
 			$nav = implode(' | ',$navlinks);
-			echo "<div class=\"block align-center\">{$nav}</p>\r"
+			echo "<div class=\"block align-center\">{$nav}</div>\r";
 			// end file nav links
+
+			if(isset($media['title']))
+			{
+				echo "<h1 class=\"align-center\">{$media['title']}</h1>\r";
+			}
+			if(isset($media['subtitle']) && $media['subtitle'] != '')
+			{
+				echo "<h2 class=\"align-center\">{$media['subtitle']}</h2>\r";
+			}
+
+			if($media['external'] == 1)
+			{
+				$src = $media['file_uri'];
+			}
+			else
+			{
+				$src = $media['rel_path'];
+			}
+			
+			if(in_array($media['mime_type'],$image_types))
+			{
+				echo "<div class=\"image image-center align-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
+				echo view_image($media['server_path'],$this->Site_model->img_size_lg);
+				echo "</div>\r";
+			}
+			
+			if (in_array($media['mime_type'],$playable_types))
+			{
+				$params = array(
+				'src' => $src
+				);
+				echo "<div class=\"image image-center align-center\">";
+				echo media_player_object($params);
+				echo "</div>\r";
+			}
+
+			if(isset($media['description']))
+			{
+				echo "<div class=\"block\">{$media['description']}</div>\r";
+			}
+			if(isset($media['creator'])) 
+			{
+				echo "<p>".sprintf($cms_labels['media_credit'],$media['creator'])."</p>\r";
+			}
+			if(isset($media['keyword_links'])) 
+			{
+				echo "<p>{$cms_labels['keywords']} : {$media['keyword_links']}</p>\r";
+			}
+			// download link
+			if(isset($media['external']) && $media['external'] == 0) 
+			{
+				$dl = '<a href="'.$src.'">'.$media['filename'].'</a> ('.$media['size_formatted'].')';
+				$dl_text = sprintf($cms_labels['download_file'],$dl);
+				echo "<p>{$dl_text}</p>\r";
+			}
+
+			echo "<div class=\"block align-center\">{$nav}</div>\r";
 		?>
 	</div>
 	<div class="page-wrap block" id="footer">

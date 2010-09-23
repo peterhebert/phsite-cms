@@ -20,6 +20,13 @@ $lang['installer'] = array(
 'confirm_install' => 'Yes, please proceed with writing the tables to the database.',
 'confirm_install_explain' => 'The database connection has been established. Please confirm that you would like to proceed in writing the tables to the database.',
 'confirm_install' => 'Yes, please proceed with writing the tables to the database.',
+'htaccess_exists' => 'The .htaccess file already exists',
+'htaccess_success' => 'The .htaccess file was written successfully',
+'htaccess_failure' => 'The .htaccess file could not be written',
+'db_config_success' => 'The database configuration file was written successfully',
+'db_config_failure' => 'The database configuration file could not be written',
+'admin_user_success' => 'The admin user was created successfully',
+'admin_user_failure' => 'The admin user could not be created',
 );
 
 $lang['db_drivers'] = array(

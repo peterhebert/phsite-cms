@@ -30,7 +30,7 @@ if(isset($html_header))
 	
 			if(isset($content['dir_listing']))
 			{
-				$files = array_merge($files,$content['dir_listing']['files']);
+				$files = array_merge($files,$content['dir_listing']);
 			}
 			
 			if(count($files) > 0)
@@ -61,15 +61,13 @@ if(isset($html_header))
 			echo "<div class=\"block align-center\">{$nav}</div>\r";
 			// end file nav links
 
-
-
 			if(isset($media['title']))
 			{
 				echo "<h1 class=\"align-center\">{$media['title']}</h1>\r";
 			}
 			if(isset($media['subtitle']) && $media['subtitle'] != '')
 			{
-				echo "<h2>{$media['subtitle']}</h2>\r";
+				echo "<h2 class=\"align-center\">{$media['subtitle']}</h2>\r";
 			}
 
 			if($media['external'] == 1)
