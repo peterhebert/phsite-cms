@@ -644,3 +644,19 @@ body *:first-child {margin-top: 0;}
 		font-size:0.8em;
 		white-space:normal;
 	}
+/* nested objects - twice baked multimedia */
+
+/* hides the second object from all versions of IE */
+* html object object {
+	display: none;
+}
+
+/* displays the second object in all versions of IE apart from 5 on PC */
+* html object object/**/ {
+	display: inline;
+}
+
+/* hides the second object from all versions of IE >= 5.5 */
+* html object object {
+	display/**/: none;
+}

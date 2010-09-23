@@ -11,8 +11,10 @@ class Image extends MY_Controller {
 		$this->load->helper('image');
 		$this->load->config('mime_info');
 
-		$this->types = $this->config->item('playable_types');
-		$this->data['playable_types'] = $this->config->item('playable_types');
+		$this->data['mime_types'] = $this->File_model->mime_types;
+		$this->data['image_types'] = $this->File_model->image_types;
+		$this->data['playable_types'] = $this->File_model->playable_types;
+		$this->types = $this->File_model->playable_types;
 	}
 	
 	function index()
@@ -41,12 +43,15 @@ class Image extends MY_Controller {
 		$this->File_model->file_uri = '/'.implode('/',$segments);
 		$exists = $this->File_model->find_media_by_uri(TRUE);
 
+		$this->File_model->lang_load();
+
 		if($exists)
 		{
 			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
 			$media_info = array(
-			'file_uri' => $this->File_model->file_uri,
 			'media_id' => $this->File_model->media_id,
+			'file_uri' => $this->File_model->file_uri,
+			'filename' => basename($this->File_model->file_uri),
 			'external' => $this->File_model->external,
 			'mime_type' => $this->File_model->mime_type,
 			'mime_cat' => $mime_cat,
@@ -63,6 +68,16 @@ class Image extends MY_Controller {
 			{
 				$media_info['rel_path'] = BASE_PATH.MEDIA_PATH_ORIG.$this->File_model->file_uri;
 				$media_info['server_path'] = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
+
+				$size = filesize($media_info['server_path']);
+
+				$this->lang->load('mime', $this->File_model->lang_CI_Name);
+				$byte_labels = $this->lang->line('file_size_abbr');
+				$size_formatted = resize_bytes_lang($size,$byte_labels);
+				
+				$media_info['size_bytes'] = $size;
+				$media_info['size_formatted'] = $size_formatted;
+
 			}
 
 			if($this->File_model->keywords != '')
@@ -104,9 +119,7 @@ class Image extends MY_Controller {
 			$media_info['date_updated_W3C'] = convert_time($updated, $this->Site_model->site_timezone, "Y-m-d");
 			$this->data['title'] = $this->File_model->title;
 
-	
-
-			$this->data['content'] = $media_info;
+			$this->data['media'] = $media_info;
 			$this->view = 'themes/'.$this->Site_model->theme.'/media';
 		}
 		else
@@ -117,7 +130,7 @@ class Image extends MY_Controller {
 			$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
 		}
 
-		$header_view = 'themes/'.$this->Site_model->theme.'/inc_header';
+		$header_view = 'themes/'.$this->Site_model->theme.'/inc_header_media';
 		$header_view_full = APPPATH.'views/'.$header_view.'.php';
 		if(file_exists($header_view_full))
 		{
@@ -135,15 +148,14 @@ class Image extends MY_Controller {
 	{
 		$this->_load_cms_labels();
 		
-		$this->data['filetree_root'] = BASE_PATH.MEDIA_PATH_ORIG;
+		$this->data['filetree_root'] = $this->File_model->dir_base;
 
 		$this->load->view('filetree_browser',$this->data);
 	}
 
 	function embed()
 	{
-		//$file = urldecode($this->input->post('file'));
-		$file = '/media/originals/RV8_28.ram';
+		$file = urldecode($this->input->post('file'));
 		
 		$fullpath = ROOT_REL.$file;
 		$code = '';

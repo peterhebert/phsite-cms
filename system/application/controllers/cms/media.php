@@ -20,6 +20,11 @@ class Media extends MY_Controller {
 		
 	}
 	
+	function index()
+	{
+		redirect('/cms/media/manage/', 'refresh');
+	}
+	
 	function scan()
 	{
 		$html = "";
@@ -90,7 +95,7 @@ class Media extends MY_Controller {
 		$this->data['form'] = $html;
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/media",$this->cms_labels['media']);
+		$breadcrumb[] = anchor("cms/media/manage",$this->cms_labels['media']);
 		$breadcrumb[] = $this->cms_labels['media_scan'];
 		
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
@@ -109,6 +114,7 @@ class Media extends MY_Controller {
 		$this->File_model->lang_load();
 		
 		$this->_process_manage();
+
 		if(count($this->selected) > 0 && $this->whichform == 'confirm')
 		{
 			$this->_form_delete();
@@ -117,6 +123,7 @@ class Media extends MY_Controller {
 		{
 			$this->_form_manage();
 		}
+
 
 		$msg = $this->File_model->_output_messages();
 		if($msg)
@@ -132,10 +139,14 @@ class Media extends MY_Controller {
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media'];
+
+		$this->menu_order = array('media','content','setup');
+		$this->_load_cms_menus();
 		
 		$this->custom_js[] = "<script type=\"text/javascript\" src=\"/assets/js/admin_ui/select_checkboxes.js\"></script>";
 		
 		$confirm_delete = "<script type=\"text/javascript\">\r";
+
 		$confirm_delete .= "/* <![CDATA[ */\r";
 		$confirm_delete .= "$().ready(function(){\r";
 		$confirm_delete .= "\tvar deleteText = '".$this->cms_labels['delete_confirm_multiple']."';\r";
@@ -177,12 +188,6 @@ class Media extends MY_Controller {
 			$this->File_model->temp_lang = $this->Site_model->temp_lang;
 		}
 		$this->File_model->lang_load();
-
-		$links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
-		$links[] = anchor("cms/media/scan",$this->cms_labels['media_scan']);
-		$links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
-		$html = ul($links);
-		$this->data['sidebar'] = $html;
 
 		$action = 'cms/media/manage';
 		$attributes = array(
@@ -888,6 +893,7 @@ class Media extends MY_Controller {
 	function upload()
 	{
 		$this->_process_upload();
+
 		if($this->File_model->temp_value != '')
 		{
 			$this->data['form'] = $this->File_model->temp_value;
@@ -897,6 +903,7 @@ class Media extends MY_Controller {
 			$this->_form_upload();
 		}
 		
+		
 		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
@@ -904,10 +911,13 @@ class Media extends MY_Controller {
 		}
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = anchor("cms/media",$this->cms_labels['media']);
+		$breadcrumb[] = anchor("cms/media/manage",$this->cms_labels['media']);
 		$breadcrumb[] = $this->cms_labels['media_upload'];
 		
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$this->menu_order = array('media','content','setup');
+		$this->_load_cms_menus();
 
 		$title_tag[] = $this->cms_labels['media_upload'];
 		$title_tag[] = $this->cms_labels['media'];
@@ -921,18 +931,21 @@ class Media extends MY_Controller {
 	function _form_upload()
 	{
 		$html = '';
+
 		$attributes = array('name' => "file_uploader", 'id' => "file_uploader");
 		$html .= form_open_multipart('cms/media/upload',$attributes)."\r";
+		$html .= "<div class=\"align-labels label-normal\">\r";
 		$field_params = array(
 		'name'        => 'userfile',
 		'id'          => 'userfile',
+		'alt'          => $this->cms_labels['file'],
 		);
 
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['file'], 'userfile');
 		$html .=  form_upload($field_params);
 		$html .= "</p>\r";
-		
+				
 		$this->File_model->list_dirs_display();
 				
 		$field_params = array(
@@ -945,9 +958,10 @@ class Media extends MY_Controller {
 		$html .= "</p>\r";
 
 		$field_params = array(
-		'name'        => 'new_path',
-		'id'          => 'new_path',
-		'class'          => 'text',
+		'name'      => 'new_path',
+		'id'        => 'new_path',
+		'class'     => 'text',
+		'value'		=> '',
 		);
 
 		$html .= "<p>";
@@ -957,88 +971,144 @@ class Media extends MY_Controller {
 		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\r";
+		$html .= "</div>\r";
 		$html .= form_close();
 
 		$this->data['form'] = $html;
 
-		$exts = array_keys($this->File_model->mime_types);
+		$html = "<p>".sprintf($this->cms_labels['max_upload_size'],$this->File_model->max_upload_display)."</p>\r";
+		$exts = implode(', ',array_keys($this->File_model->mime_types));
+		$html .= "<p>".sprintf($this->cms_labels['media_allowed_types'],$exts)."</p>\r";
 
-		$html = "<p>".$this->cms_labels['max_upload_size'].' : '.$this->File_model->max_upload_display."</p>\r";
 		$this->data['sidebar'] = $html;
+		$this->data['sidebar_panel'] = FALSE;
 
 	}
 
 	function _process_upload()
 	{
 		$this->File_model->calculate_max_size();
-		$config['max_size'] = $this->File_model->max_upload_bytes;
+		$exts = array_unique(array_keys($this->File_model->mime_types));
+		sort($exts);
 
-		$exts = array_keys($this->File_model->mime_types);
-		$config['allowed_types'] = implode('|',$exts);
+		$upload_config = array();
+		$upload_config['max_size'] = $this->File_model->max_upload_bytes;
+		$upload_config['allowed_types'] = implode('|',$exts);
 
 		// process form if submitted
-		if($this->input->post('submit') != '') {
+		if($this->input->post('submit')) {
 
-			$new_path = $this->input->post('new_path');
-			$upload_path = $this->File_model->dir_base.$this->input->post('dest_path');
+			$base = '';
+			if(!chdir($this->File_model->dir_base))
+			{
+				$base = $this->File_model->dir_base;
+			}
+			
+			$new_path = $base.'/'.$this->input->post('new_path');
+			$upload_path = $base.'/'.$this->input->post('dest_path');
+
+			$new_path = trim(str_replace('//','/',$new_path),'/');
+			$upload_path = trim(str_replace('//','/',$upload_path),'/');
+
 			if($new_path != '')
 			{
-				$new_path = $this->File_model->dir_base.'/'.$new_path;
-				$new_path = str_replace('//','/',$upload_path);
+
+				$this->File_model->debugging[] = "verifying path '{$new_path}'";
 				
-				if(!file_exists($new_path))
+				if(file_exists($new_path))
 				{
-					if(mkdir($new_path))
-					{
-						$upload_path = $new_path;
-					}
+					$this->File_model->debugging[] = "path'{$new_path}' exists";
+					$upload_path = $new_path;
 				}
 				else
 				{
-					$upload_path = $new_path;
+					$created_dir = mkdir($new_path, 0777, true);
+
+					if($created_dir)
+					{
+						$this->File_model->debugging[] = "created path '{$new_path}'";
+						$upload_path = $new_path;
+						
+						// now change permissions of new path
+						$paths = explode('/',$new_path);
+						$tmp_path = '';
+						if(is_array($paths))
+						{
+							foreach($paths as $lvl)
+							{
+								$tmp_path .= '/'.$lvl;
+								$tmp_path = trim($tmp_path);
+								if($tmp_path == '')
+								{
+									@chmod('./', 0777);
+								} 
+								if($tmp_path != '' && is_dir($tmp_path))
+								{
+									@chmod($tmp_path, 0777);
+								}
+							}
+							
+						}
+						
+					}
+					else
+					{
+						$this->File_model->debugging[] = "cannot create'{$new_path}'";
+						exit();
+					}
 				}
 			}
-
-			$config['upload_path'] = $upload_path;
-			$this->load->library('upload', $config);
-			
-			$success = $this->upload->do_upload();
-			
-			if ($success)
+			$this->File_model->debugging[] = "upload path '{$upload_path}'";
+			$perms = octal_permissions(fileperms($upload_path));
+			if($upload_path == '')
 			{
-				$this->File_model->messages[] = $this->cms_labels['media_upload_success'];
-				$html = '';
-				// get upload data
+				$perms = octal_permissions(fileperms('./'));
+			}
+			$this->File_model->debugging[] = "permissions: ".$perms;
+
+			$upload_config['upload_path'] = $upload_path;
+
+			$this->load->library('upload', $upload_config);
+
+			$success = $this->upload->do_upload();
+
+			$html = '';
+			if (!$success)
+			{
+				$this->File_model->messages[] = $this->upload->display_errors();
+			}	
+			else
+			{
 				$upload_data = $this->upload->data();
-				
+				$this->File_model->reset_media_vars(); 
 				$this->File_model->file_current = $upload_data['full_path'];
 				$this->File_model->file_uri = str_replace($this->File_model->dir_base,'',$upload_data['full_path']);
-				
-				$this->File_model->update_media_from_file();
+				$this->File_model->read_file_info();
 
-				echo "<pre>";
-				print_r($this->File_model->metadata);
-				echo "</pre>\r";
+				// if file in db, then load; otherwise get info from file and insert to db
+				$this->File_model->update_file();
 
+				// set link to edit file
+				if($this->File_model->media_id != '')
+				{
+					$edit_uri = "cms/media/edit/id/".$this->File_model->media_id;
+					$edit_text = sprintf($this->cms_labels['edit_this'],$upload_data['file_name']);
+					$html .= "<p>".anchor($edit_uri,$edit_text)."</p>\r";
+				}
 				
-				$edit_uri = "cms/media/edit/id/".$this->File_model->media_id;
-				$edit_text = sprintf($this->cms_labels['edit_this'],$upload_data['file_name']);
-
-				$html .= "<p>";
-				$html .= anchor($edit_uri,$edit_text);
-				$html .= "</p>\r";
-				
+				// if image show thumbnail
 				if($upload_data['is_image'] == 1)
 				{
-					$html .= "<p>";
-					$html .= view_image($this->File_model->file_current,$this->Site_model->img_size_md);
-					$html .= "</p>\r";
+					$html .= "<p>".view_image($this->File_model->file_current,$this->Site_model->img_size_md)."</p>\r";
 				}
 
+				// file name
 				$html .= "<p><strong>";
 				$html .= $this->cms_labels['file_name'];
 				$html .= "</strong>: ".$upload_data['file_name']."</p>\r";
 	
+				// mime type
+				// $ext = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
 				if(array_key_exists('file_ext',$upload_data))
 				{
 					$ext = strtolower(trim($upload_data['file_ext'],'.'));
@@ -1052,27 +1122,26 @@ class Media extends MY_Controller {
 						$type = $this->File_model->mime_types[$ext];
 					}
 					
-					$html .= "<p><strong>".$this->cms_labels['media_type']."</strong>: ".$type."</p>\r";
 				}
-				
+				else
+				{
+					$type = $upload_data['file_type'];
+				}
+				$html .= "<p><strong>".$this->cms_labels['media_type']."</strong>: ".$type."</p>\r";
+
+				// show image dimensions				
 				if(array_key_exists('image_width',$upload_data))
 				{
-					$html .= "<p><strong>".$this->cms_labels['media_dim_w']."</strong>: ".$upload_data['image_width']."</p>";
+					$html .= "<p><strong>{$this->cms_labels['media_dim_w']}</strong>: {$upload_data['image_width']}</p>";
 				}
 				if(array_key_exists('image_height',$upload_data))
 				{
-					$html .= "<p><strong>".$this->cms_labels['media_dim_h']."</strong>: ".$upload_data['image_height']."</p>";
+					$html .= "<p><strong>{$this->cms_labels['media_dim_h']}</strong>: {$upload_data['image_height']}</p>";
 				}
 
-				$this->File_model->temp_value = $html;
-
-			}	
-			else
-			{
-				$this->File_model->temp_value = '';
-				$this->File_model->messages[] = $this->upload->display_errors('<p>', '</p>');
 			}
-				
+			$this->File_model->temp_value = $html;
+			
 		} // end form processing
 	}
 

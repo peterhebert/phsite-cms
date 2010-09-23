@@ -9,11 +9,13 @@ class MY_Model extends Model {
 
 	// general variables
 	var $scope, $temp_lang, $temp_id, $temp_value;
-	var $messages = array();
+	var $messages = array(), $debugging = array();
 	var $scope_list = array('content','media','types','users','site');
 	var $label_scope_list = array('field','types');
 	var $limit; // limit number for query
 	var $page; // page number number for query limit
+	var $link_mode; // display links for site (0) or cms (1)
+	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
 	
 	var $date_filter;
 	// add < or > for before or after at beginning of string
@@ -32,7 +34,7 @@ class MY_Model extends Model {
 	var $field_id, $field_ref_name, $field_input_type, $field_allow_multiple, $field_validation, $field_needs_lang;
 	
 	// type variables
-	var $type_id, $type_uri_name, $type_list = array(), $index_home, $index_rss;
+	var $type_id, $type_uri_name, $type_list = array(), $index_home, $index_rss, $menu_children;
 	var $omit_types_home = array(), $omit_types_rss = array();
 
 	// labels for fields, types 
@@ -61,10 +63,17 @@ class MY_Model extends Model {
 		parent::Model();
 
 		$this->site_id = $this->config->item('site_id');
+		$this->link_mode = 0;
+		$this->lang_mode = 0;
 	}
 
 	function _output_messages()
 	{
+
+		if(DEV_MODE === TRUE && count($this->debugging) > 0)
+		{
+			$this->messages = array_merge($this->debugging,$this->messages);
+		}
 		if(count($this->messages) > 0)
 		{
 			$tmp_msg = "<p>";
@@ -244,6 +253,7 @@ class MY_Model extends Model {
 			$this->type_uri_name = $row['type_uri_name'];
 			$this->index_home = $row['index_home'];
 			$this->index_rss = $row['index_rss'];
+			$this->menu_children = $row['menu_children'];
 			
 			return TRUE;
 		}
@@ -259,6 +269,7 @@ class MY_Model extends Model {
 		'type_uri_name' => $this->type_uri_name,
 		'index_home' => $this->index_home,
 		'index_rss' => $this->index_rss,
+		'menu_children' => $this->menu_children,
 		);
 
 		if( $this->type_id != '' )
@@ -309,6 +320,7 @@ class MY_Model extends Model {
 			'type_uri_name' => $row->type_uri_name,
 			'index_home' => $row->index_home,
 			'index_rss' => $row->index_rss,
+			'menu_children' => $row->menu_children,
 			);
 
 			if($this->scope != 'media')
@@ -1244,6 +1256,37 @@ class MY_Model extends Model {
 				
 			}
 		}
+
+	}
+
+	// generate keyword links
+	function keyword_links()
+	{
+		if($this->keywords != '')
+		{
+			if($this->link_mode == 1)
+			{
+				$base_url = "cms/search/";
+			}
+			else
+			{
+				$base_url = "search/k/";
+			}
+	
+			$kwds = explode(',',$this->keywords);
+			$links = array();
+			foreach ($kwds as $tag)
+			{
+				$keyword = trim($tag);
+				$url = $base_url.$keyword;
+				$links[] = anchor($url,$keyword);
+				
+			}
+			$keyword_links = implode(', ',$links);
+			
+			return $keyword_links;
+		}
+		return FALSE;
 
 	}
 	

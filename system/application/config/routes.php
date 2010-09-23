@@ -47,10 +47,11 @@ $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
 $route['cms/forgot_password'] = "cms/cms/forgot_password";
-$route['cms/([content|install|media|setup|upload|user]{1})(.*)'] = "cms/$1$2";
+$route['cms/([content|install|media|setup|user]{1})(.*)'] = "cms/$1$2";
 
 $route['image/(root|browser|embed|ajax_preview)'] = "image/$1";
 $route['image(/?)(.*)'] = "image/index$1$2";
+$route['filetree(/?)(.*)'] = "filetree/index$1$2";
 
 $route['search(/?)(.*)'] = "search$1$2";
 $route['(.*)'] = "parser/index/$1";

@@ -3,22 +3,38 @@ tinyMCEPopup.requireLangPack();
 var MediaBrowserDialog = {
 	init : function() {
 
-
-//var f = document.forms[0];
-
-		// Get the selected contents as text and place it in the input
-		//f.someval.value = tinyMCEPopup.editor.selection.getContent({format : 'text'});
-		//f.somearg.value = tinyMCEPopup.getWindowArg('some_custom_arg');
-
+		var ed = tinyMCEPopup.editor;
+	
+		var f = document.forms[0]
+		var n = ed.selection.getNode();
+	
+		var nm = ed.selection.getNode().nodeName;
+		if(nm == 'IMG') {
+			var file = ed.selection.getNode().src;
+			 strip size from filename and convert to originals directory
+	
+			// ex. http://phsite.dev/media/cache/goalie_90.jpg	
+			var orig = file.replace(/^http:\/\/([^\/]+)\/media\/cache\/(.*)_([0-9]+)\.([a-z]{2,5})$/gi, '/media/originals/$2.$4');
+			var size = file.replace(/^http:\/\/([^\/]+)\/media\/cache\/(.*)_([0-9]+)\.([a-z]{2,5})$/gi, '$3');
+	
+			$('input#file').val(orig);
+			$('#dimensions').val(size);
+			openFile(orig);
+		}
+		else
+		{
+			var rel = file.replace(/^http:\/\/([^\/]+)\/media\/cache\/(.*)\.([a-z]{2,5})$/gi, '/media/originals/$2.$3');
+			$('input#file').val(rel);
+		}
+	
 
 	},
 
-	insert : function() {
+	insert : function(html) {
 		// Insert the contents from the input into the document
-		tinyMCEPopup.editor.execCommand('mceInsertContent', false, document.forms[0].someval.value);
+		tinyMCEPopup.editor.execCommand('mceInsertContent', false, html);
 		tinyMCEPopup.close();
 	}
 };
 
 tinyMCEPopup.onInit.add(MediaBrowserDialog.init, MediaBrowserDialog);
-

@@ -14,6 +14,49 @@ echo $html_header;
 <div class="wrap pad-h">
 	<div id="container" class="wide margins">
 		<div id="content" class="column"><?php
+		
+		// determine previous and next links
+		$count = count($menu);
+		
+		if($count > 0)
+		{
+			foreach($menu as $index => $entry)
+			{
+				if(trim($entry['uri'],'/') == $resource_uri)
+				{
+					$myindex = $index;
+				}
+			}
+			
+			$navlinks = array();
+
+			if(isset($myindex))
+			{
+
+				$prev_index = $myindex - 1;
+				if(array_key_exists($prev_index,$menu))
+				{
+					$navlinks[] = anchor($menu[$prev_index]['uri'],$cms_labels['result_prev'],array('title' => $menu[$prev_index]['title']));
+				}
+
+				if(isset($parents))
+				{
+					$navlinks[] = anchor($parents[0]['uri'],$cms_labels['result_index'],array('title' => $parents[0]['title']));
+				}
+
+				$next_index = $myindex + 1;
+				if(array_key_exists($next_index,$menu))
+				{
+					$navlinks[] = anchor($menu[$next_index]['uri'],$cms_labels['result_next'],array('title' => $menu[$next_index]['title']));
+				}
+
+				
+			}
+			$nav = implode(' | ',$navlinks);
+			echo "<p class=\"align-center\">{$nav}</p>\r";
+			
+
+		}
 
 		if(isset($content['title'])) 
 		{
@@ -44,10 +87,25 @@ echo $html_header;
 		</div>
 		<div id="menu" class="float">
 		<?php
-		if(isset($menu))
+		if(isset($recent) && count($recent) > 0)
+		{			
+			echo "<h4>{$cms_labels['recent_content']}</h4>\r";
+			echo build_menu($recent);
+		}
+		if(isset($menu) && count($menu) > 0)
 		{
-			echo "<h4>{$menu_title}</h4>\r";
-			echo build_menu($menu,2);
+			$skip = NULL;
+			if($content['parent_id'] > 0)
+			{
+				$skip = $content['content_id'];
+			}
+			$menutxt = trim(build_menu($menu,2,$skip));
+			
+			if($menutxt != '')
+			{
+				echo "<h4>{$menu_title}</h4>\r";
+				echo $menutxt;
+			}
 		}
 		?>
 		</div>

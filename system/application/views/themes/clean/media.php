@@ -6,21 +6,7 @@ if(isset($html_header))
 {
 	echo $html_header;
 }
-$size = $this->Site_model->img_size_th;
 ?>
-<style type="text/css">
-<!--
-ul.thumbnails li {
-min-height: <?php echo round(($size/15)+2.5,3); ?>em;
-}
-ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
--->
-</style>
-
-<!-- jQuery lightBox plugin -->
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery.lightbox-0.5.min.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo BASE_PATH; ?>/assets/css/jquery.lightbox-0.5.css" media="screen" />
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
@@ -28,68 +14,111 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 <div class="wrap pad-h">
 	<div id="container">
 		<?php
-			//echo "<pre>";
-//			print_r($content);
-//			echo "</pre>\r";
 
 			if(isset($msg))
 			{
 				echo "<div class=\"msg\">{$msg}</div>\r";
 			}
 
-			if(isset($content['title']))
+			// start file nav links
+			$files = array();
+			$navlinks = array();
+			if(isset($attachments))
 			{
-				echo "<h1 class=\"align-center\">{$content['title']}</h1>\r";
+				$files = array_merge($files,$attachments);
 			}
-			if(isset($content['subtitle']) && $content['subtitle'] != '')
+	
+			if(isset($content['dir_listing']))
 			{
-				echo "<h2>{$content['subtitle']}</h2>\r";
-			}
-
-			if(isset($content['mime_cat']))
-			{
-				switch($content['mime_cat'])
-				{
-				case 'image':
-					echo "<div class=\"image image-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
-					echo view_image($content['server_path'],$this->Site_model->img_size_lg);
-					echo "</div>\r";
-					break;
-				case 'audio':
-				case 'video':
-					$params = array(
-					'src' => $content['rel_path']
-					);
-					if($content['external'] == 1)
-					{
-						$params['src'] = $content['file_uri'];
-					}
-					if(in_array($content['mime_type'],$playable_types))
-					{
-						$media = media_player_object($params);
-						echo "<div class=\"image image-center\">";
-						echo $media;
-						echo "</div>\r";
-					}
-					break;
-				default:
-					echo "link to file";
-					break;
-				}
+				$files = array_merge($files,$content['dir_listing']['files']);
 			}
 			
-			if(isset($content['description']))
+			if(count($files) > 0)
 			{
-				echo "<div class=\"block\">{$content['description']}</div>\r";
+				$indexes = array_keys($files);
+				$myindex = array_search($media['file_uri'],$indexes);
+
+				$prev_index = $myindex - 1;
+				if(array_key_exists($prev_index,$indexes))
+				{
+					$key_prev = $indexes[$prev_index];
+					$prev_uri = $resource_uri.'/view'.$files[$key_prev]['file_uri'];
+					$navlinks[] = anchor($prev_uri,$cms_labels['result_prev'],array('title' => $files[$key_prev]['title']));
+				}
+
+				$navlinks[] = anchor($resource_uri,$cms_labels['result_index'],array('title' => $content['title']));
+
+				$next_index = $myindex + 1;
+				if(array_key_exists($next_index,$indexes))
+				{
+					$key_next = $indexes[$next_index];
+					$next_uri = $resource_uri.'/view'.$files[$key_next]['file_uri'];
+					$navlinks[] = anchor($next_uri,$cms_labels['result_next'],array('title' => $files[$key_next]['title']));
+				}
+				
 			}
-			if(isset($content['creator'])) 
+			$nav = implode(' | ',$navlinks);
+			echo "<div class=\"block align-center\">{$nav}</div>\r";
+			// end file nav links
+
+
+
+			if(isset($media['title']))
 			{
-				echo '<p>'.sprintf($cms_labels['media_credit'],$content['creator'])."</p>\r";
+				echo "<h1 class=\"align-center\">{$media['title']}</h1>\r";
 			}
-			if(isset($content['keyword_links'])) 
+			if(isset($media['subtitle']) && $media['subtitle'] != '')
 			{
-				echo "<p>{$cms_labels['keywords']} : {$content['keyword_links']}</p>\r";
+				echo "<h2>{$media['subtitle']}</h2>\r";
 			}
+
+			if($media['external'] == 1)
+			{
+				$src = $media['file_uri'];
+			}
+			else
+			{
+				$src = $media['rel_path'];
+			}
+			
+			if(in_array($media['mime_type'],$image_types))
+			{
+				echo "<div class=\"image image-center align-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
+				echo view_image($media['server_path'],$this->Site_model->img_size_lg);
+				echo "</div>\r";
+			}
+			
+			if (in_array($media['mime_type'],$playable_types))
+			{
+				$params = array(
+				'src' => $src
+				);
+				echo "<div class=\"image image-center align-center\">";
+				echo media_player_object($params);
+				echo "</div>\r";
+			}
+
+			if(isset($media['description']))
+			{
+				echo "<div class=\"block\">{$media['description']}</div>\r";
+			}
+			if(isset($media['creator'])) 
+			{
+				echo "<p>".sprintf($cms_labels['media_credit'],$media['creator'])."</p>\r";
+			}
+			if(isset($media['keyword_links'])) 
+			{
+				echo "<p>{$cms_labels['keywords']} : {$media['keyword_links']}</p>\r";
+			}
+			// download link
+			if(isset($media['external']) && $media['external'] == 0) 
+			{
+				$dl = '<a href="'.$src.'">'.$media['filename'].'</a> ('.$media['size_formatted'].')';
+				$dl_text = sprintf($cms_labels['download_file'],$dl);
+				echo "<p>{$dl_text}</p>\r";
+			}
+
+			echo "<div class=\"block align-center\">{$nav}</div>\r";
 		?>
 	</div>
 </div>

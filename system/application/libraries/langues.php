@@ -79,7 +79,7 @@ class Langues {
 
 
 }
-// END Language Class
+// END Langues Class
 
-/* End of file Language.php */
-/* Location: ./system/libraries/Language.php */
+/* End of file langues.php */
+/* Location: ./system/libraries/langues.php */

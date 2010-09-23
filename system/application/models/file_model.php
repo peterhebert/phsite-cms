@@ -68,7 +68,7 @@ class File_model extends MY_Model {
 	}
 
 	// list directory contents, update db if necessary
-	function list_files($recursive=FALSE,$unique=TRUE) {
+	function list_files($recursive=FALSE,$unique=TRUE,$dirs=FALSE) {
 
 		if($this->dir_current == '')
 		{
@@ -112,10 +112,13 @@ class File_model extends MY_Model {
 				if(!is_dir($newpath))
 				{
 
-					$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
-					$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
-
-					$files[$file_index] = $fileinfo;
+					if($dirs === FALSE)
+					{
+						$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
+						$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
+	
+						$files[$file_index] = $fileinfo;
+					}
 				}
 				else
 				{
@@ -378,7 +381,7 @@ class File_model extends MY_Model {
 		
 		$query = $this->db->query($sql);
 
-		$this->messages[] = $this->db->last_query();
+		$this->debugging[] = $this->db->last_query();
 		
 		$file_list = array();
 		
@@ -802,7 +805,7 @@ class File_model extends MY_Model {
 		if(!$deleted)
 		{
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
-			$this->messages[] = $this->db->last_query();
+			$this->debugging[] = $this->db->last_query();
 			return FALSE;
 		}
 
@@ -812,7 +815,7 @@ class File_model extends MY_Model {
 		if(!$deleted)
 		{
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
-			$this->messages[] = $this->db->last_query();
+			$this->debugging[] = $this->db->last_query();
 			return FALSE;
 		}
 		
@@ -822,7 +825,7 @@ class File_model extends MY_Model {
 		if(!$deleted)
 		{
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
-			$this->messages[] = $this->db->last_query();
+			$this->debugging[] = $this->db->last_query();
 			return FALSE;
 		}
 
@@ -831,7 +834,7 @@ class File_model extends MY_Model {
 		if(!$deleted)
 		{
 			$this->messages[] = sprintf($this->cms_labels['delete_failure'],$name);
-			$this->messages[] = $this->db->last_query();
+			$this->debugging[] = $this->db->last_query();
 			return FALSE;
 		}
 
@@ -928,6 +931,80 @@ class File_model extends MY_Model {
 		return $media;		
 	}
 
+	function list_dirs_display()
+	{
+
+		$this->list_files(TRUE,TRUE,TRUE);
+		
+		$dirs = $this->dir_list;
+		$dirs_rel = array();
+		
+		$media_root = $this->dir_base;
+		
+		$dirs_rel['/'] = $this->cms_labels['media_root'];
+		if(count($dirs) > 0)
+		{
+			// get relative paths for each directory
+			foreach($dirs as $path_rel => $dir) {
+				$dirs_rel[$path_rel] = $path_rel;
+			}
+
+		}
+
+		$this->dir_list_rel = $dirs_rel;
+
+	}
+
+	function calculate_max_size()
+	{
+		$this->lang->load('mime', $this->lang_CI_Name);
+		$abbr = $this->lang->line('file_size_abbr');
+
+		$max = ini_get('upload_max_filesize');
+		$max = preg_replace("/^([0-9]+)([KMGTPEZY]*)/", "$1/$2", $max);
+		$max_size_array = explode('/',$max);
+		
+		switch($max_size_array[1]) {
+		case 'K':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ki'];
+			$this->max_upload_bytes = $max_size_array[0];
+			break;
+		case 'M':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Mi'];
+			$this->max_upload_bytes = $max_size_array[0] * 1024;
+			break;
+		case 'G':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Gi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 2);
+			break;
+		case 'T':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ti'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 3);
+			break;
+		case 'P':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Pi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 4);
+			break;
+		case 'E':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Ei'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 5);
+			break;
+		case 'Z':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Zi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 6);
+			break;
+		case 'Y':
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['Yi'];
+			$this->max_upload_bytes = $max_size_array[0] * pow(1024, 7);
+			break;
+		default:
+			$this->max_upload_display = $max_size_array[0].' '.$abbr['bytes'];
+			$this->max_upload_bytes = $max_size_array[0] / 1024;
+			break;
+		}
+
+	}
+	
 }
 
 ?>

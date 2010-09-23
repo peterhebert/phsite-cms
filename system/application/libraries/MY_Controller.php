@@ -17,6 +17,7 @@ class MY_Controller extends Controller {
 	var $data = array();
 	var $cms_labels = array();
 	var $custom_js = array();
+	var $menu_order = array('content','media','setup');
 
 	/**
 	 * Constructor
@@ -34,6 +35,7 @@ class MY_Controller extends Controller {
 		$this->data['img_size_md'] = $this->Site_model->img_size_md;
 		$this->data['img_size_lg'] = $this->Site_model->img_size_lg;
 		$this->data['img_path_orig'] = realpath(getcwd()).MEDIA_PATH_ORIG;
+		$this->data['sidebar_panel'] = TRUE;
 
 		// load mime icon extensions
 		$this->config->load('mime_info');
@@ -183,6 +185,37 @@ class MY_Controller extends Controller {
 
 	function _load_cms_menus()
 	{
+		$this->_load_cms_menu_content();
+		$this->_load_cms_menu_media();
+		$this->_load_cms_menu_setup();
+		$this->data['menu_order'] = $this->menu_order;
+	}
+	
+	function _load_cms_menu_setup()
+	{
+		$html = '';
+
+		// setup menu
+		$this->Content_model->temp_value = 'cms/setup/site_metadata';
+		$site_metadata = $this->Content_model->lang_meta_menu();
+		$html = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
+		$this->data['menu']['setup'] = $html;
+	}
+	
+	function _load_cms_menu_media()
+	{
+		$html = '';
+
+		// media menu
+		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
+		$media_links[] = anchor("cms/media/scan",$this->cms_labels['media_scan']);
+		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
+		$html = ul($media_links)."\r";
+		$this->data['menu']['media'] = $html;
+	}
+
+	function _load_cms_menu_content()
+	{
 
 		$html = '';
 
@@ -209,19 +242,8 @@ class MY_Controller extends Controller {
 		$html .= form_button($form_options);
 		$html .= "</li>\r";
 		$html .= "</ul>\r";
-		$this->data['menu_content'] = $html;
+		$this->data['menu']['content'] = $html;
 
-		// setup menu
-		$this->Content_model->temp_value = 'cms/setup/site_metadata';
-		$site_metadata = $this->Content_model->lang_meta_menu();
-		$html = $this->load->view('cms/setup_menu',array('site_metadata' => $site_metadata,'cms_labels' => $this->cms_labels),true);
-		$this->data['menu_setup'] = $html;
-
-		// media menu
-		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
-		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
-		$html = ul($media_links)."\r";
-		$this->data['menu_media'] = $html;
 	}
 
 	function _load_cms_labels($user=FALSE)
@@ -409,11 +431,12 @@ class MY_Controller extends Controller {
 			{
 				$html .= '<span class="icon icon_'.$mime_cat.'">';
 			}
+			$txt = $filename;
 			if($media['title'] != '' && $media['title'] != $filename)
 			{
-				$html .= $media['title']."<br />\r";
+				$txt = $media['title'];
 			}
-			$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+			$html .= anchor($edit_uri, $txt, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 			$html .= "</span>";
 			$html .= "<br />\r".$mime_labels[$ext];
 

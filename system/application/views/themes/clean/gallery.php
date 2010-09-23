@@ -16,11 +16,6 @@ min-height: <?php echo round(($size/15)+2.5,3); ?>em;
 ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
 -->
 </style>
-
-<!-- jQuery lightBox plugin -->
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery.lightbox-0.5.min.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo BASE_PATH; ?>/assets/css/jquery.lightbox-0.5.css" media="screen" />
 </head>
 <body>
 <?php require_once('masthead.php'); ?>
@@ -54,10 +49,6 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 			$files = array_merge($files,$content['dir_listing']['files']);
 		}
 
-//echo "<pre>";
-//print_r($files);
-//echo "</pre>\r";
-
 		$this->lang->load('mime',$this->Content_model->lang_CI_Name);
 		$mime_lang = $this->lang->line('mime');
 		
@@ -76,8 +67,8 @@ ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo
 				}
 				else
 				{
-					$file_link = MEDIA_PATH_ORIG.$file['file_uri'];
-					$file_full = ROOT_REL.$file_link;
+					$file_link = $resource_uri.'/view'.$file['file_uri'];
+					$file_full = ROOT_REL.MEDIA_PATH_ORIG.$file['file_uri'];
 				}
 
 				if($file['title'] != '')
@@ -132,17 +123,5 @@ if (isset($site['copyright']) ) {
 }
 echo $cms_labels['powered_by'];
 ?></div>
-
-
-<!-- init jQuery lightBox plugin -->
-<script type="text/javascript">
-/* <![CDATA[ */
-
-$(function() {
-	$("ul.thumbnails a").lightBox();
-});
-
-/* ]]> */</script>
-<!-- / end jQuery lightBox plugin -->
 </body>
 </html>

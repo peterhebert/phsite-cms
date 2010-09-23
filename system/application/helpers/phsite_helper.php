@@ -380,6 +380,22 @@ if ( ! function_exists('resize_bytes'))
 	   return $formatted;
 	}
 }
+if ( ! function_exists('resize_bytes_lang'))
+{
+	function resize_bytes_lang($size,$labels)
+	{
+	   $count = 0;
+	   $indexes = array_keys($labels);
+	   while(($size/1024)>1 && $count<8)
+	   {
+		   $size=$size/1024;
+		   $count++;
+	   }
+	   $index = $indexes[$count];
+	   $formatted = number_format($size,0,'','.')." ".$labels[$index];
+	   return $formatted;
+	}
+}
 
 if ( ! function_exists('parse_date_filter'))
 {
@@ -442,17 +458,17 @@ if ( ! function_exists('uri_exists'))
 
 if ( ! function_exists('build_menu'))
 {	
-	function build_menu($content_array,$levels=2,$skip_id=NULL,$current_level=0)
+	function build_menu($content_array,$levels=2,$skip_id=NULL,$current_level=1)
 	{
 		$menu = '';
 
 		foreach($content_array as $item)
 		{
-			if($skip_id != $item['content_id'])
+			if(!isset($skip_id) || $skip_id != $item['content_id'])
 			{
 				$menu .= "<li><a href=\"{$item['uri']}\">{$item['title']}</a>";
 				$tmp_level = $current_level;
-				if(count($item['children']) > 0 && $current_level < $levels)
+				if($item['menu_children'] == 1 && isset($item['children']) && count($item['children']) > 0 && $current_level < $levels)
 				{
 					$menu .= build_menu($item['children'],$levels,$skip_id,$current_level+1);
 				}

@@ -1,29 +1,49 @@
-<div id="masthead">
-	<div class="page-wrap block">
-		<div class="column w1">
-			<h2><?php echo $site['title']; ?></h2>
-		</div>
-		<?php
-		if ($site['subtitle'] != '') {
-		echo "<div class=\"column w2 lh\">{$site['subtitle']}</div>\n";
-		} ?>
-		<div class="float-right w2 lh align-right">
-			<form action="search" method="post" id="site-search">
-				<input name="search-text" id="search-text" type="text" />
-				<input name="search-submit" type="submit" id="search-submit" value="<?php echo $cms_labels['search']; ?>" />
-			</form>
-		</div>
+<div id="masthead" class="page-wrap block">
+	<div class="column w1">
+		<h2><?php echo $site['title']; ?></h2>
 	</div>
-	
 	<?php
-	if(isset($userdata)) {
-		echo "<div class=\"page-wrap block\">\n";
-		echo "<p>Logged in as: ";
-		echo anchor("cms/user/edit/id/".$userdata['user_id'],$userdata['username']);
-		echo " | ";
-		echo anchor("cms/logout",'Logout');
-		echo "</p>\n";
-		echo "</div>\n";
-	}
-	?>
+	if ($site['subtitle'] != '') {
+	echo "<div class=\"column w2 lh\">{$site['subtitle']}</div>\n";
+	} ?>
+	<div class="float-right w2 lh align-right">
+		<form action="search" method="post" id="site-search">
+			<input name="search-text" id="search-text" type="text" />
+			<input name="search-submit" type="submit" id="search-submit" value="<?php echo $cms_labels['search']; ?>" />
+		</form>
+	</div>
 </div>
+	
+<?php
+if(isset($userdata)) {
+	echo "<div class=\"page-wrap block\">\n";
+	echo "<p>Logged in as: ";
+	echo anchor("cms/user/edit/id/".$userdata['user_id'],$userdata['username']);
+	echo " | ";
+	echo anchor("cms/logout",'Logout');
+	echo "</p>\n";
+	echo "</div>\n";
+}
+if(isset($other_langs) && count($other_langs) > 0)
+{
+	foreach ($other_langs as $lang)
+	{
+		if($lang['lang_Native_Name'] != '')
+		{
+			$langlinks[] = anchor($lang['uri'], $lang['lang_Native_Name']);
+		}
+		else
+		{
+			$langlinks[] = anchor($lang['uri'], $lang['lang_Ref_Name']);
+		}
+	}
+	$languages = implode(' | ', $langlinks);
+	echo "\t<div class=\"wrap\" id=\"languages\">{$cms_labels['languages_other']} : {$languages}</div>\r";
+}
+
+if(isset($breadcrumb_links))
+{
+$breadcrumb = implode(' : ', $breadcrumb_links);
+echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
+}
+?>

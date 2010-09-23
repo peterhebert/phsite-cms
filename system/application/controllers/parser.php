@@ -8,7 +8,10 @@ class Parser extends MY_Controller {
 	var $segment_count = 0, $result_count = 0;
 
 	var $breadcrumb_links = array(), $matches = array();
-	var $page;
+	var $ancestry = array();
+	var $page = 1;
+	var $media_view = FALSE;
+	var $home = FALSE;
 
 	var $parent_title;
 	
@@ -141,25 +144,36 @@ class Parser extends MY_Controller {
 			break;
 		}
 
+		$this->data['resource_uri'] = $this->temp_uri;
+		$zz = explode('/',trim($this->temp_uri,'/'));
+		array_pop($zz);
+		array_pop($zz);
+		$this->data['parent_uri'] = implode('/',$zz);
+
 		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
 		{
 			$this->data['breadcrumb_links'] = $this->breadcrumb_links;
 		}
 		
 		$header_view = 'themes/'.$this->Site_model->theme.'/inc_header';
+		if($this->media_view)
+		{
+			$header_view .= '_media';
+		}
 
 		$header_view_full = APPPATH.'views/'.$header_view.'.php';
 		if(file_exists($header_view_full))
 		{
 			$this->data['html_header'] = $this->load->view($header_view,$this->data,TRUE);
 		}
+
 		$view_full = APPPATH.'views/'.$this->view.'.php';
 		if(!file_exists($view_full))
 		{
 			$this->view = 'display';
 		}
-		
-		$this->load->view($this->view,$this->data);
+				
+		$this->load->view($this->view,$this->data);		
 
     }
 
@@ -169,17 +183,19 @@ class Parser extends MY_Controller {
 		$uri_segments = array();
 		$uri_array = $this->uri->segment_array();
 
-		$params = array('page' => '','lang' => '','date' => '');
+		$params = array('page' => '','lang' => '','date' => '','media'  => '');
 		$patterns = array(
 		'lang' => '#^([a-z]{3})$#',
 		'date' => '#^([0-9]{4}-[0-9]{2}-[0-9]{2}|[0-9]{4}-[0-9]{2}|[0-9]{4})$#',
 		'page' => '#^p([0-9]+)$#',
+		'media' => '#^view$#',
 		);
 
 		$segment_count = count($uri_array);
 		$segment_current = 1;
+		$tmp_segments = $uri_array;
 		
-		foreach($uri_array as $segment)
+		foreach($uri_array as $index => $segment)
 		{
 			$match = FALSE;
 			foreach($patterns as $key => $pattern)
@@ -195,6 +211,14 @@ class Parser extends MY_Controller {
 							break;
 						
 						}
+					}
+					else if($key == 'media')
+					{
+						$media_segments = array_slice($tmp_segments, $index);
+						$params[$key] = '/'.implode('/',$media_segments);
+						$match = TRUE;
+						break;
+						
 					}
 					else if($key == 'lang')
 					{
@@ -221,7 +245,7 @@ class Parser extends MY_Controller {
 	
 			}
 
-			if(!$match)
+			if(!$match && $params['media'] == '')
 			{
 				$uri_segments[] = $segment;
 			}
@@ -251,6 +275,14 @@ class Parser extends MY_Controller {
 			$this->page = $params['page'];
 			$this->Content_model->page = $params['page'];
 		}
+		
+		if($params['media'] != '')
+		{
+			$this->File_model->temp_lang = $this->Content_model->temp_lang;
+			$this->File_model->file_uri = $params['media'];
+			$this->media_view = $this->File_model->find_media_by_uri(TRUE);
+		}
+		
 	}
 	
 	function _find_content()
@@ -284,9 +316,6 @@ class Parser extends MY_Controller {
 		{
 			// create parent hierarchy
 			$parents = $tree;
-			array_pop($parents);
-			array_reverse($parents);
-			$this->data['parents'] = $parents;
 
 			// create breadcrumb links
 			$this->breadcrumb_links = array(anchor($this->temp_uri,$this->cms_labels['home']));
@@ -295,17 +324,6 @@ class Parser extends MY_Controller {
 			{
 				if(is_array($vals))
 				{
-					$this->temp_uri .= '/'.$vals['uri_title'];
-					if($index < $last_index)
-					{
-						$this->breadcrumb_links[] = anchor($this->temp_uri, $vals['title']);
-						$this->parent_title = $vals['title'];
-					}
-					else
-					{
-						$this->breadcrumb_links[] = $vals['title'];
-					}
-										
 					$this->Content_model->content_id = $vals['content_id'];
 					$this->Content_model->user_id = $vals['user_id'];
 					$this->Content_model->parent_id = $vals['parent_id'];
@@ -322,8 +340,26 @@ class Parser extends MY_Controller {
 					$this->Content_model->keywords = $vals['keywords'];
 					$this->Content_model->title_updated = $vals['title_updated'];
 		
+					$this->Content_model->temp_id = $vals['content_id'];
+					$this->temp_uri = $this->Content_model->generate_uri();
+					$parents[$index]['uri'] = $this->temp_uri;
+					
+					if($index < $last_index)
+					{
+						$this->breadcrumb_links[] = anchor($this->temp_uri, $vals['title']);
+						$this->parent_title = $vals['title'];
+					}
+					else
+					{
+						$this->breadcrumb_links[] = $vals['title'];
+					}
+
 				}
 			}
+
+			array_pop($parents);
+			$parents = array_reverse($parents);
+			$this->data['parents'] = $parents;
 
 		}
 		else
@@ -381,8 +417,77 @@ class Parser extends MY_Controller {
 		$this->Content_model->load_type();
 		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
+		// see if we are viewing attached media, and if so, load media info and switch to 'media' view
+		if($this->media_view)
+		{
+			$this->view = 'themes/'.$this->Site_model->theme.'/media';
+			$this->breadcrumb_links[] = $this->File_model->title;
+
+			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
+			$media_vars = array(
+			'media_id' => $this->File_model->media_id,
+			'file_uri' => $this->File_model->file_uri,
+			'filename' => basename($this->File_model->file_uri),
+			'external' => $this->File_model->external,
+			'mime_type' => $this->File_model->mime_type,
+			'mime_cat' => $mime_cat,
+			'date_created' => $this->File_model->date_created,
+			'publish' => $this->File_model->publish,
+			'title_id' => $this->File_model->title_id,
+			'title_rel_id' => $this->File_model->title_rel_id,
+			'title' => $this->File_model->title,
+			'uri_title' => $this->File_model->uri_title,
+			'title_updated' => $this->File_model->title_updated,
+			);
+			if($this->File_model->keywords != '') {
+				$media_vars['keywords'] = $this->File_model->keywords;
+				$media_vars['keyword_links'] = $this->File_model->keyword_links();
+			}
+			if($this->File_model->external == 0) {
+				$media_vars['rel_path'] = MEDIA_PATH_ORIG.$this->File_model->file_uri;
+				$fp = ROOT_REL.$media_vars['rel_path'];
+				$media_vars['server_path'] = $fp;
+
+				$size = filesize($fp);
+				$this->File_model->lang_load();
+				$this->lang->load('mime', $this->File_model->lang_CI_Name);
+				$byte_labels = $this->lang->line('file_size_abbr');
+				$size_formatted = resize_bytes_lang($size,$byte_labels);
+				
+				$media_vars['size_bytes'] = $size;
+				$media_vars['size_formatted'] = $size_formatted;
+			}
+			if($this->File_model->subtitle != '') {
+				$media_vars['subtitle'] = $this->File_model->subtitle;
+			}
+
+			$this->File_model->load_metadata();
+
+			$m_meta = $this->File_model->metadata;
+			
+			foreach($m_meta as $id => $field) {
+				$media_vars[$field['field_ref_name']] = $field['value'];
+				
+				if($field['date_updated'] > $this->File_model->date_updated) {
+					$this->File_model->date_updated = $field['date_updated'];
+				}
+	
+			}
+
+			$media_vars['date_updated'] = convert_time($this->File_model->date_updated, $this->Site_model->site_timezone);
+			$media_vars['date_updated_W3C'] = convert_time($this->File_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
+
+			$this->data['media'] = $media_vars;
+			// end media view setup
+		}
+
+		// get this resource's URI
+		$this->Content_model->temp_id = $this->Content_model->content_id;
+		$this->temp_uri = $this->Content_model->generate_uri();
 
 		$content_vars['content_id'] = $this->Content_model->content_id;
+		$content_vars['parent_id'] = $this->Content_model->parent_id;
+		$content_vars['type_id'] = $this->Content_model->type_id;
 
 		$content_vars['type_uri_name'] = $this->Content_model->type_uri_name;
 		$content_vars['title'] = $this->Content_model->title;
@@ -436,47 +541,88 @@ class Parser extends MY_Controller {
 		$content_vars['date_updated'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone);
 		$content_vars['date_updated_W3C'] = convert_time($this->Content_model->date_updated, $this->Site_model->site_timezone, "Y-m-d");
 
-		$this->data['content'] = $content_vars;
+		$this->Content_model->lang_load();
+		$content_vars['lang_ISO_639_3'] = $this->Content_model->lang_ISO_639_3;
 
+		$this->data['content'] = $content_vars;
 
 		// list attachments
 		$this->_attachment_info();
 
 		// build menu array
-
 		if($this->Content_model->parent_id == 0)
 		{
 			$menu_title = $this->Site_model->title;
-			$menu_parent = 0;
 		}
 		else
 		{
 			$menu_title = $this->parent_title;
-			$menu_parent = $this->Content_model->parent_id;
 		}
 
-		$menu = $this->Content_model->get_descendant_content($menu_parent);
-
 		$this->data['menu_title'] = $menu_title;
+
+		$this->Content_model->temp_lang = $this->Content_model->lang_ISO_639_3;
+		$this->Content_model->type_id = '';
+		$this->Content_model->limit = '';
+
+		$menu = $this->Content_model->get_children(true,true);
 		$this->data['menu'] = $menu;
+
+		// children
+		$this->Content_model->parent_id = $content_vars['content_id'];
+		$this->Content_model->page = $this->page;
+		$this->Content_model->limit = $this->Site_model->limit_posts;
+		$children = $this->Content_model->get_children(false,true);
+
+		foreach($children as $index => $entry)
+		{
+			// load author user data
+			$this->User_model->temp_id = $entry['user_id'];
+			$this->User_model->load_user();
+			if($this->User_model->name_first != '')
+			{
+				$children[$index]['author'] = array(
+				'name_first' => $this->User_model->name_first,
+				'name_last' => $this->User_model->name_last,
+				'username' => $this->User_model->username,
+				'email' => $this->User_model->email
+				);
+			}
+		}
+		$this->data['children'] = $children;
+		$this->data['total_children'] = $this->Content_model->content_count;
+		$this->data['page'] = $this->Content_model->page;
+		$this->data['limit'] = $this->Content_model->limit;
 		
-		// build descendant array
-		$this->data['children'] = $this->Content_model->get_descendant_content($content_vars['content_id']);
+		// number of pages
+		$this->data['pages'] = ceil($this->Content_model->content_count / $this->Content_model->limit);
+		$this->load->library('pagination');
+		
+		// recently added children
+		if($this->page > 1)
+		{
+			$this->Content_model->page = 1;
+			$recent = $this->Content_model->get_children(false,true);
+		}
+		else
+		{
+			$recent = $children;
+		}
+		$this->data['recent'] = $recent;
 
 		// see if there are other languages for this content
-
 		$other_langs = $this->Content_model->get_other_lang_ids();
 		if($other_langs)
 		{
 			$this->data['other_langs'] = $other_langs;
 		}
+		
 
 	}
 
 	function _home()
 	{
-
-		$home = TRUE;
+		$this->home = TRUE;
 		// if site preferences specify a vaild home page ID, then redirect and omit home page from menu, otherwise auto-generate home page
 		if($this->Site_model->home_content_id > 0)
 		{
@@ -487,21 +633,21 @@ class Parser extends MY_Controller {
 			{
 				$this->Content_model->load_content();
 				$this->_prepare_view();
-				$home = FALSE;
+				$this->home = FALSE;
 			}
 		}
 			
-		if($home)
+		if($this->home)
 		{
 			$this->view = 'themes/'.$this->Site_model->theme.'/home';
-	
 			$menu = $this->Content_model->get_descendant_content();
-	
 			$this->data['menu'] = $menu;
+	
 			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 			
 			// recently added content
-			$this->Content_model->limit = 5;
+			$this->Content_model->reset_vars();
+			$this->Content_model->limit = $this->Site_model->limit_posts;
 			$this->data['recent'] = $this->_recent();
 		}
 
@@ -510,8 +656,10 @@ class Parser extends MY_Controller {
 	function _recent($parent=NULL)
 	{
 		$this->Content_model->list_types();
-		$this->Content_model->omit_types = $this->Content_model->omit_types_home;
-
+		if($this->home)
+		{
+			$this->Content_model->omit_types = $this->Content_model->omit_types_home;
+		}
 		if(isset($parent))
 		{
 			$this->Content_model->parent_id = $parent;

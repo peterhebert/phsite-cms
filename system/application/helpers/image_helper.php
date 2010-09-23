@@ -405,11 +405,9 @@ if ( ! function_exists('media_player_object'))
 			$param['outer']['src'] = $data['src'];
 			$attrib['inner']['data'] = $data['src'];
 
-			if(!array_key_exists('controller',$data) || !array_key_exists('controls',$data))
-			{
-				$param['outer']['controller'] = 'true';
-				$param['inner']['controller'] = 'true';
-			}
+			$param['outer']['controller'] = 'true';
+			$param['inner']['controller'] = 'true';
+			
 			if(!array_key_exists('autoplay',$data))
 			{
 				$param['outer']['autoplay'] = 'false';
@@ -421,11 +419,8 @@ if ( ! function_exists('media_player_object'))
 				$attrib['inner']['height'] = $data['height'] + 20;
 			}
 
-			unset($attrib['outer']['type']);
 			$attrib['inner']['type'] = 'video/quicktime';
-
-
-			$attrib['inner']['class'] = 'mov';
+			$attrib['inner']['class'] = 'nested';
 
 			break;
 		// MPEG-4 video
@@ -609,30 +604,20 @@ if ( ! function_exists('media_player_object'))
 			$param['outer']['src'] = $data['src'];
 			$fallback_text = $fallbacks['svg'];
 			break;
-		}
-/*
-
-<object type="image/svg+xml" width="300" height="150" data="http://phsite.dev/media/originals/cineworks-logo.svg"></object>
-
-
-		// Shockwave (Director)
-		case 'dcr':
-			break;
-		// SMIL
-		case 'smi':
-		case 'smil':
-			break;
 		// MPEG audio
 		case 'm4a':
 		case 'm4b':
 		case 'mp3':
-			break;
-		// MIDI
-		case 'mid':
-		case 'midi':
+			$tag['outer'] = 'audio';
+
+			// set source attributes and params
+			$attrib['outer']['src'] = $data['src'];
+			$attrib['outer']['controls'] = 'controls';
+
+			$inner = false;
+			$fallback_text = $fallbacks[$ext];
 			break;
 		}
-*/		
 
 		// now begin generating player code
 

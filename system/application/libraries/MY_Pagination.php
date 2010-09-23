@@ -14,6 +14,13 @@ class MY_Pagination extends CI_Pagination {
 	var $prev_text			= 'previous';
 	var $next_text			= 'next';
 	var $last_text			= 'last';
+	var $page_prefix		= '';
+	var $show_numbers		= TRUE;
+	var $show_first_last	= TRUE;
+	var $show_prev_next		= TRUE;
+	var $parts				= array();
+	var $part_separator		= ' &nbsp;|&nbsp; ';
+	var $digit_separator		= ' &nbsp;';
 
 	function MY_Pagination($params = array())
 	{
@@ -23,11 +30,9 @@ class MY_Pagination extends CI_Pagination {
 		$this->next_link = '&gt;';
 		$this->prev_link = '&lt;';
 		$this->last_link = '&raquo;';
-
-		//echo "custom pagination class";
+		$this->cur_tag_open	= '<strong>';
+		$this->cur_tag_close = '</strong>';
 	}
-
-
 
 	function create_links_proper()
 	{
@@ -97,56 +102,62 @@ class MY_Pagination extends CI_Pagination {
 		}
 
   		// And here we go...
-		$output = '';
 
 		// Render the "First" link
-		if  ($this->cur_page > ($this->num_links + 1)  && $num_pages > $total_links)
+		if  ($this->show_first_last && $this->cur_page > ($this->num_links + 1)  && $num_pages > $total_links)
 		{
 			$txt = trim($this->first_link.' '.$this->first_text);
-			$output .= $this->first_tag_open.'<a href="'.$this->base_url.'">'.$txt.'</a>'.$this->first_tag_close;
+			$this->parts[] = '<a href="'.$this->base_url.'">'.$txt.'</a>';
 		}
 
 		// Render the "previous" link
-		if  ($this->cur_page > 1  && $num_pages > $total_links)
+		if  ($this->show_prev_next && $this->cur_page > 1  && $num_pages > $total_links)
 		{
 			$i = $this->cur_page - 1;
 			$txt = trim($this->prev_link.' '.$this->prev_text);
-			$output .= $this->prev_tag_open.'<a href="'.$this->base_url.$i.'">'.$txt.'</a>'.$this->prev_tag_close;
+			$this->parts[] = '<a href="'.$this->base_url.$this->page_prefix.$i.'">'.$txt.'</a>';
 		}
 
 		// Write the digit links
-		for ($loop = $start; $loop <= $end; $loop++)
+		$digits = array();
+		if($this->show_numbers)
 		{
-			$i = $loop;
-
-			if ($i >= 0)
+			for ($loop = $start; $loop <= $end; $loop++)
 			{
-				if ($this->cur_page == $loop)
+				$i = $loop;
+	
+				if ($i >= 0)
 				{
-					$output .= $this->cur_tag_open.$loop.$this->cur_tag_close; // Current page
-				}
-				else
-				{
-					$n = ($i == 0) ? '' : $i;
-					$output .= $this->num_tag_open.'<a href="'.$this->base_url.$n.'">'.$loop.'</a>'.$this->num_tag_close;
+					if ($this->cur_page == $loop)
+					{
+						$digits[] = $this->cur_tag_open.$loop.$this->cur_tag_close; // Current page
+					}
+					else
+					{
+						$n = ($i == 0) ? '' : $i;
+						$digits[] = '<a href="'.$this->base_url.$this->page_prefix.$n.'">'.$loop.'</a>';
+					}
 				}
 			}
+			$this->parts[] = implode($this->digit_separator,$digits);
 		}
 
 		// Render the "next" link
-		if ($this->cur_page < $num_pages && $num_pages > $total_links)
+		if ($this->show_prev_next && $this->cur_page < $num_pages && $num_pages > $total_links)
 		{
 			$i = $this->cur_page + 1;
 			$txt = trim($this->next_text.' '.$this->next_link);
-			$output .= $this->next_tag_open.'<a href="'.$this->base_url.$i.'">'.$txt.'</a>'.$this->next_tag_close;
+			$this->parts[] = '<a href="'.$this->base_url.$this->page_prefix.$i.'">'.$txt.'</a>';
 		}
 
 		// Render the "Last" link
-		if (($this->cur_page + $this->num_links) < $num_pages && $num_pages > $total_links)
+		if ($this->show_first_last && ($this->cur_page + $this->num_links) < $num_pages && $num_pages > $total_links)
 		{
 			$txt = trim($this->last_text.' '.$this->last_link);
-			$output .= $this->last_tag_open.'<a href="'.$this->base_url.$num_pages.'">'.$txt.'</a>'.$this->last_tag_close;
+			$this->parts[] = '<a href="'.$this->base_url.$this->page_prefix.$num_pages.'">'.$txt.'</a>';
 		}
+
+		$output = implode($this->part_separator,$this->parts);
 
 		// Kill double slashes.  Note: Sometimes we can end up with a double slash
 		// in the penultimate link so we'll kill all double slashes.

@@ -179,6 +179,9 @@ $lang['fallbacks'] = array(
 'flash' => 'The <a href="http://www.adobe.com/flashplayer/" title="">Adobe Flash player</a> is required in order to play this content.',
 'html5_media' => "Your browser does not support the HTML5 '%s' tag; ; Download file(s) for off-line viewing: ",
 'svg' => 'Your browser does not appear to support <acronym title="Scaleable Vector Graphics">SVG</acronym>. To view this content, use one of these <a href="http://en.wikipedia.org/wiki/Scalable_Vector_Graphics#Support_for_SVG_in_web_browsers" title="list of browsers with SVG support">supported browsers</a>.',
+'mp3' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and mp3 playback in order to play this content.',
+'m4a' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and AAC playback in order to play this content.',
+'m4b' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and AAC playback in order to play this content.',
 );
 
 

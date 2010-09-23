@@ -16,28 +16,14 @@ min-height: <?php echo round(($size/15)+2.5,3); ?>em;
 ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
 -->
 </style>
-
-<!-- jQuery lightBox plugin -->
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
-<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery.lightbox-0.5.min.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo BASE_PATH; ?>/assets/css/jquery.lightbox-0.5.css" media="screen" />
 </head>
 <body class="">
 <?php require_once('masthead.php'); ?>
 <div id="page">
-	<?php
-if(isset($breadcrumb_links))
-{
-$breadcrumb = implode(' : ', $breadcrumb_links);
-echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
-}
-?>
 	<div class="page-wrap block">
-		<?php
-		if (isset($title)) {
-			echo "<h1 class=\"first\">";
-			echo $title;
-			echo "</h1>\r";
+	<?php
+		if (isset($content['title'])) {
+			echo "<h1>{$content['title']}</h1>\r";
 		}
 		if (isset($content['description'])) {
 			echo "<p>";
@@ -61,6 +47,7 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 		{
 			$files = array_merge($files,$content['dir_listing']['files']);
 		}
+
 		$this->lang->load('mime',$this->Content_model->lang_CI_Name);
 		$mime_lang = $this->lang->line('mime');
 		
@@ -69,17 +56,18 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 		
 			echo "<ul class=\"thumbnails\">";
 
+
 			foreach($files as $file)
 			{
-				if($file['external'] == 0)
+				if($file['external'] == 1)
 				{
-					$file_full = ROOT_REL.MEDIA_PATH_ORIG.$file['file_uri'];
-					$file_link = view_image($file_full,$this->Site_model->img_size_lg,array('title' => $title),FALSE,TRUE);
+					$file_link = $file['file_uri'];
+					$file_full = $file['file_uri'];
 				}
 				else
 				{
-					$file_link = $file['file_uri'];
-					$file_full = $file_link;
+					$file_link = $resource_uri.'/view'.$file['file_uri'];
+					$file_full = ROOT_REL.MEDIA_PATH_ORIG.$file['file_uri'];
 				}
 
 				if($file['title'] != '')
@@ -90,32 +78,39 @@ echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
 				{
 					$title = $file['filename'];
 				}
+				$text = $title;
 
-				echo "<li>";
 				if($file['external'] == 0)
 				{
-					echo "<div class=\"thumb\"><a href=\"{$file_link}\" title=\"{$file['title']}\" rel=\"{$file['mime_cat']}\">";
-					if($file['mime_cat'] == 'image')
+					$poster_filename = $file['path_basename'].'.jpg';
+					if(in_array($file['mime_type'],$image_types))
 					{
-						echo view_image($file_full,$this->Site_model->img_size_th,array('title' => $title));
+						$text = "<div class=\"thumb\"><a href=\"{$file_link}\" title=\"{$title}\" rel=\"{$file['mime_cat']}\">";
+						$text .= view_image($file_full,$this->Site_model->img_size_th,array('title' => $title));
+						$text .= "</a></div>\r";
+					}
+					elseif(file_exists($poster_filename))
+					{
+						$text = "<div class=\"thumb\"><a href=\"{$file_link}\" title=\"{$title}\" rel=\"{$file['mime_cat']}\">";
+						$text .= view_image($poster_filename,$this->Site_model->img_size_th,array('title' => $title));
+						$text .= "</a></div>\r";
 					}
 					else
 					{
-						echo $title;
+						$text = "<a href=\"{$file_link}\" title=\"{$title}\" rel=\"{$file['mime_cat']}\">{$title}</a>";
 					}
-
-					echo "</a></div>\r";
+					
 				}
 				else
 				{
-					echo "<a href=\"{$file_link}\">{$title}</a> ({$mime_lang[$file['extension']]})";
+						$text = "<a href=\"{$file_link}\" title=\"{$title}\" rel=\"{$file['mime_cat']}\">{$title}</a>";
 				}
-				echo "</li>\r";
+
+				echo "<li>{$text}</li>\r";
 			}
 			echo "</ul>\r";
 		}
-
-?>
+	?>
 	</div>
 	<div class="page-wrap block" id="footer">
 	<?php

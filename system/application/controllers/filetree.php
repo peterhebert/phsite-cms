@@ -9,14 +9,12 @@ class Filetree extends Controller {
 	
 	function index()
 	{
-		
 
 		$root = '/'.trim(FCPATH,'/');
 
 		$dir = urldecode($this->input->post('dir'));
 
 		$filepath = $root . $dir;
-		
 		
 		$filetree = '';
 		

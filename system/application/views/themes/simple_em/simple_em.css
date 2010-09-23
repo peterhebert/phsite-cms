@@ -25,12 +25,11 @@ em-based block sizes, entire page and containing blocks will enlarge or shrink w
 */
 
 #masthead {
-padding:1ex 2em;
-margin-bottom:1.5em;
-background-color:#222222;
-color:#eeeeee;
-border-bottom:1px solid #666666;
-text-align:center;
+	margin: 1.5em auto;
+	border-bottom: 1px solid #999999;
+	text-align:center;
+	width:54em;
+	padding-bottom: 1em;
 }
 
 #page {
@@ -149,7 +148,7 @@ body.gallery .image-center img { border:1px solid #eeeeee; }
 .first {margin-top: 0;}
 
 p img { vertical-align: baseline; }
-#footer { text-align: center; border-top:1px solid #999; padding-top:1em; margin-top: 1em}
+#footer { text-align: center; border-top:1px solid #999999; padding-top:1em; margin-top: 1em}
 
 /* borders */
 .bdr-top { border-top:1px solid #999; padding-top:1em; margin-top: 1.5em}

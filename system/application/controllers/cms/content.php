@@ -22,6 +22,7 @@ class Content extends MY_Controller
 
 		$this->whichform = 'list';
 		$this->selected = array();
+		$this->data['sidebar_panel'] = TRUE;
 	}
 
 	function index()

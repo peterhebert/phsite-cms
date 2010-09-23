@@ -11,7 +11,7 @@ class Setup extends MY_Controller
 		$this->load->library('form_validation');		
 	
 		$this->_authenticate();
-
+		$this->menu_order = array('setup','content','media');
 	}
 	
 	function index()
@@ -129,11 +129,11 @@ class Setup extends MY_Controller
 		
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['theme'], 'theme');
-
+		
 		foreach($this->Site_model->site_themes as $uri => $theme_info)
 		{
 			$checked = FALSE;
-			if($this->Site_model->theme == $uri)
+			if($uri == $this->Site_model->theme)
 			{
 				$checked = TRUE;
 			}
@@ -142,11 +142,10 @@ class Setup extends MY_Controller
 			$form_options = array(
 			'name'        => 'theme',
 			'value'       => $uri,
-			'checked'     => TRUE,
+			'checked'     => $checked,
 			);
-			$width = $this->Site_model->img_size_sm;
 		
-			$html .= "<label class=\"column\" style=\"width: {width}px\">";
+			$html .= "<label class=\"column\" style=\"width: ".$this->Site_model->img_size_sm."px; text-align: left\">";
 			$path_thumb = ROOT_REL.'/system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
 			if(file_exists($path_thumb))
 			{
@@ -746,7 +745,7 @@ class Setup extends MY_Controller
 		
 		$this->_load_cms_menus();
 
-		$this->load->view('cms/cms_form',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function field_edit()
@@ -1610,6 +1609,22 @@ class Setup extends MY_Controller
 		$html .= form_checkbox($form_options);
 		$html .= "</p>\r";
 
+		$form_options = array(
+		'name'        => 'menu_children',
+		'id'          => 'menu_children',
+		'value'       => 1,
+		'checked'     => FALSE,
+		);
+		
+		if($this->Content_model->menu_children == 1)
+		{
+			$form_options['checked'] = TRUE;
+		}
+		
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['menu_children'], 'menu_children');
+		$html .= form_checkbox($form_options);
+		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 		$html .= "</div>\r";
 
@@ -1742,6 +1757,7 @@ class Setup extends MY_Controller
 			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
 			$this->Content_model->index_home = $this->input->post('index_home');
 			$this->Content_model->index_rss = $this->input->post('index_rss');
+			$this->Content_model->menu_children = $this->input->post('menu_children');
 
 			if ($form_is_valid)
 			{

@@ -11,30 +11,6 @@ echo $html_header;
 <body>
 <?php require_once('masthead.php'); ?>
 <div id="page">
-<?php
-if(isset($breadcrumb_links))
-{
-	$breadcrumb = implode(' : ', $breadcrumb_links);
-	echo "\t<div class=\"page-wrap block\" id=\"breadcrumb\">{$breadcrumb}</div>\r";
-}
-if(isset($other_langs) && count($other_langs) > 0)
-{
-	foreach ($other_langs as $lang)
-	{
-		if($lang['lang_Native_Name'] != '')
-		{
-			$langlinks[] = anchor($lang['uri'], $lang['lang_Native_Name']);
-		}
-		else
-		{
-			$langlinks[] = anchor($lang['uri'], $lang['lang_Ref_Name']);
-		}
-	}
-	$languages = implode(' | ', $langlinks);
-	echo "\t<div class=\"page-wrap block\" id=\"languages\">{$cms_labels['languages_other']} : {$languages}</div>\r";
-}
-
-?>
 	<div class="page-wrap">
 		<div class="block five">
 			<div class="column w3">

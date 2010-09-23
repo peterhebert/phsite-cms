@@ -36,11 +36,12 @@ $lang['fallbacks'] = array(
 'real' => 'You need <a href="http://www.real.com" rel="external">RealPlayer</a> in order to play this content.',
 'ogg' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> or a valid <a href="http://java.com/en/download/manual.jsp">Java runtime</a> in order to play this content.',
 'webm_VP8' => 'You need a <a href="http://www.webmproject.org/users/" title="Playing WebM video (WebM project)">browser or player that supports WebM/VP8 video</a> in order to play this content.',
+'mp3' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and mp3 playback in order to play this content.',
+'m4a' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and AAC playback in order to play this content.',
+'m4b' => 'You need a browser that supports the <a href="http://en.wikipedia.org/wiki/Theora#Browser_plugins">HTML 5 audio tag</a> and AAC playback in order to play this content.',
 );
 
 $lang['mime'] = array(
-
-
 'ai' => "image Adobe Illustrator",
 'aif' => "audio <acronym title=\"Audio Interchange Format\">AIFF</acronym>",
 'aifc' => "audio <acronym title=\"Audio Interchange Format\">AIFF</acronym>",

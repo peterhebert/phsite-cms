@@ -7,10 +7,6 @@ class Content_model extends MY_Model {
 	// list variables
 	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array(), $attachments = array();
 
-	// misc utility variables
-	var $link_mode; // display links for site (0) or cms (1)
-	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
-
 	// variables for site map
 	var $current_level = 1;
 	var $levels = 0;
@@ -23,8 +19,6 @@ class Content_model extends MY_Model {
         // Call the Model constructor
         parent::MY_Model();
 		
-		$this->link_mode = 0;
-		$this->lang_mode = 0;
 		$this->scope = 'content';
 		$this->page = 1;
 		$this->limit = 10;
@@ -136,6 +130,7 @@ class Content_model extends MY_Model {
 				'lang_ISO_639_3' => '',
 				);
 
+				// get titles
 				$this->db->where('scope', 'content');
 				$this->db->where('rel_id', $row->content_id);
 				$this->db->where('lang_ISO_639_3', $this->temp_lang);
@@ -173,6 +168,7 @@ class Content_model extends MY_Model {
 				{
 				   $r2 = $q2->row();
 				   $tmp['type_label'] = $r2->label;
+				   $tmp['menu_children'] = $r2->menu_children;
 				}
 				
 				// if metadata included, get it
@@ -561,15 +557,126 @@ class Content_model extends MY_Model {
 
 	}
 
-	function get_descendant_content($parent = 0)
+	function get_children($recursive=TRUE,$meta = FALSE)
 	{
+		$children = array();
+		$this->list_content($meta);
+		if($this->content_count > 0)
+		{
+			foreach ($this->content_list as $index => $row)
+			{
+				$tmp_child =& $row;
+				
+				// get uri of content
+				$this->scope = 'content';
+				$this->temp_id = $row['content_id'];
+				$this->temp_lang = $row['lang_ISO_639_3'];
+				$tmp_child['uri'] = $this->generate_uri();
+
+				if($meta)
+				{
+					foreach($row['metadata'] as $field)
+					{
+						$tmp_child[$field['field_ref_name']] = $field['value'];
+					}
+					unset($tmp_child['metadata']);
+				}
+				
+				if($recursive)
+				{
+					$this->parent_id = $row['content_id'];
+					$tmp_child['children'] = $this->get_children($recursive,$meta);
+				}
+				
+				
+				$children[] = $tmp_child;
+		   }
+		}
+		return $children;
+	}
+	
+	function get_descendant_content($parent = 0,$recursive=TRUE)
+	{
+		if(!$recursive)
+		{
+			// if not recursive, first get total matching results
+			if(count($this->omit_types) > 0)
+			{
+				foreach($this->omit_types as $omit)
+				{
+					$this->db->where('type_id !=', $omit);
+				}
+			}
+	
+			if($this->content_id != '')
+			{
+				$this->db->where('content_id !=', $this->content_id);
+			}
+			if($this->type_id != '')
+			{
+				$this->db->where('type_id', $this->type_id);
+			}
+			if($this->link_mode == 0)
+			{
+				$this->db->where('publish', 1);
+			}
+			if($this->date_filter != '')
+			{
+				$this->db->like('date_created', $this->date_filter, 'after'); 
+			}
+			
+			$query = $this->db->get('c_content');
+			$this->content_count = $query->num_rows();	
+	
+			// then get content with limits
+			$query->free_result();
+		}
+
 		$descendants = array();
 
+		if(count($this->omit_types) > 0)
+		{
+			foreach($this->omit_types as $omit)
+			{
+				$this->db->where('type_id !=', $omit);
+			}
+		}
 		$this->db->where('parent_id', $parent);
-		$this->db->where('content_id !=', $parent);
+		if($this->content_id != '')
+		{
+			$this->db->where('content_id !=', $this->content_id);
+		}
+
+		if($this->type_id != '')
+		{
+			$this->db->where('type_id', $this->type_id);
+		}
+
+		if($this->limit != '')
+		{
+			$this->db->order_by("date_created", "desc");
+			$this->db->limit($this->limit);
+
+			if($this->page > 1)
+			{
+				$offset = ($this->page - 1) * $this->limit;
+				
+				$this->db->limit($this->limit, $offset);
+			}
+
+		}
+
+		if($this->link_mode == 0)
+		{
+			$this->db->where('publish', 1);
+		}
+		if($this->date_filter != '')
+		{
+			$this->db->like('date_created', $this->date_filter, 'after'); 
+		}
 
 		$query = $this->db->get('c_content');
-
+		
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
@@ -609,21 +716,32 @@ class Content_model extends MY_Model {
 				$info['subtitle'] = $this->subtitle;
 				$info['keywords'] = $this->keywords;
 				$info['title_updated'] = $this->title_updated;
+				if($this->keywords != '')
+				{
+					$info['keyword_links'] = $this->keyword_links();
+				}
 				
 				$this->temp_id = $row->type_id;
-				$this->scope = 'types';
+				$this->scope = 'content';
+				$this->load_type();
+				$info['menu_children'] = $this->menu_children;
 				
+				$this->scope = 'types';
 				$this->list_fields_related();
 				$this->scope = 'content';
-				$this->temp_id = $this->content_id;
+				$this->temp_id = $row->content_id;
 				$this->load_metadata();
 				
 				foreach($this->metadata as $field)
 				{
-					$info[$field['field_ref_name']] = encode_entities($field['value']);
+					$info[$field['field_ref_name']] = $field['value'];
 				}
 
-				$info['children'] = $this->get_descendant_content($row->content_id);
+				if($recursive)
+				{
+					$info['children'] = $this->get_descendant_content($row->content_id,$recursive);
+				}
+
 				$descendants[] = $info;
 			}
 		}
@@ -714,37 +832,6 @@ class Content_model extends MY_Model {
 		return $uri;
 
     }
-
-	// generate keyword links
-	function keyword_links()
-	{
-		if($this->keywords != '')
-		{
-			if($this->link_mode == 1)
-			{
-				$base_url = "cms/search/";
-			}
-			else
-			{
-				$base_url = "search/k/";
-			}
-	
-			$kwds = explode(',',$this->keywords);
-			$links = array();
-			foreach ($kwds as $tag)
-			{
-				$keyword = trim($tag);
-				$url = $base_url.$keyword;
-				$links[] = anchor($url,$keyword);
-				
-			}
-			$keyword_links = implode(', ',$links);
-			
-			return $keyword_links;
-		}
-		return FALSE;
-
-	}
 
     // search for content
 	function search_content()

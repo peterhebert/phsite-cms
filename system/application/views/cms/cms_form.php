@@ -34,32 +34,29 @@ echo $title_tag.' | ';
 		<div id="menu-secondary" class="column">
 			<?php 
 			if (isset($sidebar) && $sidebar != '') {
-				echo "<div class=\"panel\">\r";
+				if (isset($sidebar_panel) && $sidebar_panel == true) {
+					echo "<div class=\"panel\">\r";
+				}
 				echo $sidebar;
-				echo "</div>\r";
+				if (isset($sidebar_panel) && $sidebar_panel == true) {
+					echo "</div>\r";
+				}
 			}
 			?>
 		</div>
 		<div id="menu" class="float">
 			<?php 
-			if (isset($menu_content) && $menu_content != '') {
-				echo "<div class=\"panel\">\r";
-				echo '<h3>'.$cms_labels['content']."</h3>\r";
-				echo $menu_content;
-				echo "</div>\r";
-			}
-
-			if (isset($menu_media) && $menu_media != '') {
-				echo "<div class=\"panel\">\r";
-				echo '<h3>'.$cms_labels['media']."</h3>\r";
-				echo $menu_media;
-				echo "</div>\r";
-			}
-			if (isset($menu_setup) && $menu_setup != '') {
-				echo "<div class=\"panel\">\r";
-				echo '<h3>'.$cms_labels['setup']."</h3>\r";
-				echo $menu_setup;
-				echo "</div>\r";
+			if (isset($menu_order))
+			{
+				foreach($menu_order as $menu_label)
+				{
+					if (isset($menu[$menu_label]) && $menu[$menu_label] != '') {
+						echo "<div class=\"panel\">\r";
+						echo '<h3>'.$cms_labels[$menu_label]."</h3>\r";
+						echo $menu[$menu_label];
+						echo "</div>\r";
+					}
+				}
 			}
 			?>
 		</div>
