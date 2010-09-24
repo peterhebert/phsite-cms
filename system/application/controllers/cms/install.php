@@ -418,7 +418,7 @@ class Install extends Controller
 	
 			$this->form_validation->set_rules('name_first', $this->cms_labels['name_first'], 'required');
 			$this->form_validation->set_rules('name_last', $this->cms_labels['name_last'], 'required');
-			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required');
+			$this->form_validation->set_rules('username', $this->cms_labels['username'], 'required|min_length[8]|alpha_dash');
 			$this->form_validation->set_rules('email', $this->cms_labels['email'], 'required|valid_email');
 			$this->form_validation->set_rules('timezone', $this->cms_labels['timezone'], 'required|is_timezone');
 			$this->form_validation->set_rules('admin', $this->cms_labels['user_type'], 'required|is_natural');

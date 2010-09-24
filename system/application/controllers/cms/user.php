@@ -15,9 +15,6 @@ class User extends MY_Controller
 		$this->load->library('session');
 
 		$this->_authenticate();
-/*		$this->config->load('phsite_prefs');
-		$this->User_model->site_id = $this->config->line('site_id');
-*/
 	} // end constructor
 
 	function index()
