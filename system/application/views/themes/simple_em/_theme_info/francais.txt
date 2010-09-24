@@ -3,5 +3,5 @@ description:	Un thème utilisant des unités de mesure 'Em', qui rend une mise à l
 author:			Peter Hebert
 email:			mail@peterhebert.com
 website:		http://www.peterhebert.com
-version:		0.1
-release_date:	2009-11-30
+version:		0.2
+release_date:	2010-09-23

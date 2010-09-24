@@ -1,7 +1,7 @@
-title:			Simple Em
-description:	Un thème utilisant des unités de mesure 'Em', qui rend une mise à l'échelle élégante dans le navigateur.
+title:			Clean
+description:	Un thème utilisant des unités de mesure 'Em', qui rend une mise à l'échelle élégante dans le navigateur. Basé sur la thème du panneau de contrôle.
 author:			Peter Hebert
 email:			mail@peterhebert.com
 website:		http://www.peterhebert.com
 version:		0.1
-release_date:	2009-11-30
+release_date:	2010-09-13
