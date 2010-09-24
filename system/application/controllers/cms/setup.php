@@ -146,10 +146,10 @@ class Setup extends MY_Controller
 			);
 		
 			$html .= "<label class=\"column\" style=\"width: ".$this->Site_model->img_size_sm."px; text-align: left\">";
-			$path_thumb = ROOT_REL.'/system/application/views/themes/'.$uri.'/_theme_info/screenshot.jpg';
+			$path_thumb = ROOT_REL.'/system/application/views/themes/'.$uri.'/_theme_info/'.$uri.'.jpg';
+			
 			if(file_exists($path_thumb))
 			{
-				
 				$alt = sprintf($this->cms_labels['theme_screenshot'],$theme_info['title']);
 				$html .= "<span class=\"image\">";
 				$html .= view_image($path_thumb,$this->Site_model->img_size_sm,array('alt' => $alt));

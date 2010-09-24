@@ -173,6 +173,10 @@ if ( ! function_exists('view_image'))
 				{
 					$dest_dir = str_replace(MEDIA_PATH_ORIG,MEDIA_PATH_CACHE,$pi['dirname']);
 				}
+				else if(strstr($orig_image_path,'/system/application/views/themes/'))
+				{
+					$dest_dir = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_CACHE.'/theme_screenshots';
+				}
 				else
 				{
 					$dest_dir = realpath($_SERVER["DOCUMENT_ROOT"]).MEDIA_PATH_CACHE.'/system';
