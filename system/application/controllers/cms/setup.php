@@ -127,9 +127,10 @@ class Setup extends MY_Controller
 
 		$this->Site_model->list_themes();
 		
-		$html .= "<p>";
+		$html .= "<div class=\"row\">";
 		$html .= form_label($this->cms_labels['theme'], 'theme');
 		
+		$html .= "<span class=\"float w7\">";
 		foreach($this->Site_model->site_themes as $uri => $theme_info)
 		{
 			$checked = FALSE;
@@ -137,7 +138,6 @@ class Setup extends MY_Controller
 			{
 				$checked = TRUE;
 			}
-			
 					
 			$form_options = array(
 			'name'        => 'theme',
@@ -161,7 +161,8 @@ class Setup extends MY_Controller
 			$html .= $theme_info['description']."</label> ";
 			
 		}
-		$html .= "</p>\r";
+		$html .= "</span>\r";
+		$html .= "</div>\r";
 
 		$form_options = timezone_dropdown();
 		$html .= "<p>";
