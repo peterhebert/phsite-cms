@@ -124,6 +124,7 @@ tinyMCEPopup.onInit.add(MediaBrowserDialog.init, MediaBrowserDialog);
 						<option value="<?php echo $img_size_sm; ?>"><?php echo $cms_labels['img_sm'].' ('.$img_size_sm.' px)'; ?></option>
 						<option value="<?php echo $img_size_md; ?>"><?php echo $cms_labels['img_md'].' ('.$img_size_md.' px)'; ?></option>
 						<option value="<?php echo $img_size_lg; ?>"><?php echo $cms_labels['img_lg'].' ('.$img_size_lg.' px)'; ?></option>
+						<option value="0"><?php echo $cms_labels['img_full']; ?></option>
 					</select>
 				</p>
 

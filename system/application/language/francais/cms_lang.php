@@ -97,11 +97,13 @@ $lang['cms_labels'] = array(
 'img_size_md' => "dimensions de l'image de grandeur moyen",
 'img_size_sm' => "dimensions de l'image de grandeur petit",
 'img_size_th' => "dimensions de l'image vignette",
+'img_size_full' => "dimensions de l'image originale",
 
 'img_lg' => "large",
 'img_md' => "moyen",
 'img_sm' => "petit",
 'img_th' => "vignette",
+'img_full' => "originale",
 
 'input_type' => "Type de zone d'entr&eacute;e",
 'insert' => "Ins&eacute;rer",

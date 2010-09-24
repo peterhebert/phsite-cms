@@ -192,7 +192,24 @@ class Image extends MY_Controller {
 			if($this->File_model->mime_cat == 'image')
 			{
 				$size = $this->input->post('size');
-				$code = view_image($fullpath,$size,$params);
+				if(!$size || $size == 0 || $size == '')
+				{
+					$params['src'] = $file;
+					// get image dimensions from original
+					$imginfo = getimagesize($fullpath);
+					if($imginfo && is_array($imginfo))
+					{
+						$params['width'] = $imginfo[0];
+						$params['height'] = $imginfo[1];
+					}
+					// img tag with original
+					$code = img($params);
+				}
+				else
+				{
+					// img tag with scaled version
+					$code = view_image($fullpath,$size,$params);
+				}
 			}
 			else if(in_array($this->File_model->mime_type,$this->types))
 			{
@@ -215,9 +232,6 @@ class Image extends MY_Controller {
 
 	function ajax_preview ()
 	{
-		$this->config->load('mime_info');
-		$types = $this->config->item('playable_types');
-
 		$file = urldecode($this->input->post('file'));
 
 		$fullpath = ROOT_REL.$file;

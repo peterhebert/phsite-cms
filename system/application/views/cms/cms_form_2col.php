@@ -1,12 +1,18 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title><?php
+<head><head><?php
+$header_titles = array();
 if(isset($title_tag))
 {
-echo $title_tag.' | '; 
+	$header_titles[] = $title_tag;
 }
-?>phSite CMS</title>
+$header_titles[] = $cms_labels['phsite_cms'];
+if (isset($site['title'])) {
+	$header_titles[] = $site['title'];
+}
+$title_tag = implode(' | ',$header_titles); 
+?>
+<title><?php echo $title_tag; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/reset.css" rel="stylesheet" type="text/css" media="all" />
 <link href="<?php echo BASE_PATH; ?>/assets/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
