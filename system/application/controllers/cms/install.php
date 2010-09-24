@@ -403,7 +403,7 @@ class Install extends Controller
 		// confirm table creation
 		if($this->input->post('submit-confirm-install'))
 		{
-			if($this->input->post('confirm-install') === 1)
+			if($this->input->post('confirm') == 1)
 			{
 				$this->_create_tables();
 			}
@@ -954,7 +954,10 @@ class Install extends Controller
 			$errors = 0;
 			foreach($data as $table => $sql)
 			{
-				//$sql = ;
+				if(function_exists('utf8_encode'))
+				{
+					$sql = utf8_encode($sql);
+				}
 				$query = $this->db->query($sql);
 				if(!$query)
 				{
