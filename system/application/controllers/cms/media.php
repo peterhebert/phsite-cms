@@ -1145,5 +1145,75 @@ class Media extends MY_Controller {
 		} // end form processing
 	}
 
+	function cache()
+	{
+		$emptied = FALSE;
+		if($this->input->post('confirm') == 1)
+		{
+			$emptied = $this->File_model->cache_empty();
+		}
+		
+		if($emptied)
+		{
+			$this->File_model->messages[] = $this->cms_labels['media_cache_delete_success'];
+		}
+		else
+		{
+			$this->_form_cache();
+		}
+
+		$msg = $this->File_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/media/manage",$this->cms_labels['media']);
+		$breadcrumb[] = $this->cms_labels['media_cache_delete'];
+		
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		$this->menu_order = array('media','content','setup');
+		$this->_load_cms_menus();
+
+		$title_tag[] = $this->cms_labels['media_cache_delete'];
+		$title_tag[] = $this->cms_labels['media'];
+		$title_tag[] = $this->cms_labels['phsite_cms'];
+		$this->data['title_tag'] = implode(' | ',$title_tag);
+		$this->data['title_h1'] = $this->cms_labels['media_cache_delete'];
+
+		$this->load->view('cms/cms_form_2col', $this->data);
+	}
+	
+	function _form_cache()
+	{
+		$action = 'cms/media/cache';
+		$attributes = array(
+		'id' => 'cache'
+		);
+		$html = form_open($action, $attributes);
+
+		$params = array(
+		'name'        => "confirm",
+		'value'       => 1,
+		'class'	=> ''
+		);
+		
+		$html .= "<p>".$this->cms_labels['media_cache_delete_confirm']."</p>\r";
+		
+		$html .= "<p class=\"label-margins\">";
+		$html .= form_checkbox($params);
+		$html .= form_label($this->cms_labels['yes'], 'confirm',array('class'=>'inline'));
+		$html .= "</p>\r";
+
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['submit']);
+		$html .= "</p>\r";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+
 }
 ?>

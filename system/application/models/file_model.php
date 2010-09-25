@@ -1005,6 +1005,73 @@ class File_model extends MY_Model {
 
 	}
 	
+	function cache_empty($recursive=TRUE)
+	{
+		if($this->dir_current == '')
+		{
+			$this->dir_current = realpath(ROOT_REL).MEDIA_PATH_CACHE;
+		}
+		$filepath = $this->dir_current;
+
+		//using the opendir function
+		$err = sprintf($this->cms_labels['path_open_error'],$filepath);
+		$dir_handle = @opendir($filepath) or die($err);
+		
+		// loop through files and directories
+		while ($file = readdir($dir_handle)) {
+			$newpath = str_replace('//','/',$filepath.'/'.$file);
+			
+			// ignore all hidden files and directory navigation (.*)
+			$ignore = preg_match("#^\..*$#",$file);
+			if($ignore <= 0) {
+				
+				if(!is_dir($newpath))
+				{
+					// attempt to delete file
+					if(!unlink($newpath))
+					{
+						$this->messages[] = sprintf($this->cms_labels['path_delete_error'],$newpath);
+						return FALSE;
+					}
+				}
+				else
+				{
+
+					if($recursive)
+					{
+						$mypath = $newpath;
+						// get subdirectory contents
+						$this->dir_current = $newpath;
+						$empty = $this->cache_empty(TRUE);
+						// if directory empty, delete it
+						if($empty)
+						{
+							if(!rmdir($mypath))
+							{
+								$this->messages[] = sprintf($this->cms_labels['path_delete_error'],$mypath);
+								return FALSE;
+							}
+							
+						}
+						else
+						{
+							return FALSE;
+						}
+
+
+					}
+
+				}
+
+			}
+
+		}
+		//closing the directory
+		closedir($dir_handle);
+		
+		return TRUE;
+	}
+	
 }
 
 ?>

@@ -210,6 +210,7 @@ class MY_Controller extends Controller {
 		$media_links[] = anchor("cms/media/manage",$this->cms_labels['media_manage']);
 		$media_links[] = anchor("cms/media/scan",$this->cms_labels['media_scan']);
 		$media_links[] = anchor("cms/media/upload",$this->cms_labels['media_upload']);
+		$media_links[] = anchor("cms/media/cache",$this->cms_labels['media_cache_delete']);
 		$html = ul($media_links)."\r";
 		$this->data['menu']['media'] = $html;
 	}
