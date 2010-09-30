@@ -1072,6 +1072,32 @@ class File_model extends MY_Model {
 		return TRUE;
 	}
 	
+	function update_publish()
+	{
+
+		$data = array(
+		'publish' => $this->publish,
+		);
+
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $mid)
+			{
+				$this->db->or_where('media_id', $mid);
+			}
+			// update
+			if($this->db->update('c_media', $data))
+			{
+				return TRUE;
+			}
+
+		}
+
+		return FALSE;
+
+	}
+	
 }
 
 ?>

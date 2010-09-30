@@ -255,13 +255,13 @@ class Media extends MY_Controller {
 			$action = $this->input->post('action');
 			if($action)
 			{
+				$this->File_model->temp_value = $select;
 				switch($action)
 				{
 				case 'delete':
 					$confirm = $this->input->post('confirm');
 					if($confirm == 1)
 					{
-						$this->File_model->temp_value = $select;
 						$this->File_model->delete_batch();
 					}
 					else
@@ -278,7 +278,9 @@ class Media extends MY_Controller {
 					else
 					{
 						$this->File_model->messages[] = $this->cms_labels['publish_update_failure'];
+						$this->File_model->debugging[] = $this->db->last_query();
 					}
+
 					break;
 				case 'unpublish':
 					$this->File_model->publish = 0;
@@ -289,6 +291,7 @@ class Media extends MY_Controller {
 					else
 					{
 						$this->File_model->messages[] = $this->cms_labels['publish_update_failure'];
+						$this->File_model->debugging[] = $this->db->last_query();
 					}
 					break;
 				default:

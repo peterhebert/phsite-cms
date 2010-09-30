@@ -92,7 +92,7 @@ if ( ! function_exists('view_image'))
 		$orig_image_path = $path;
 
 		$path_rel = str_replace(realpath($_SERVER["DOCUMENT_ROOT"]),'',$path);
-		$orig_image_path_rel = trim($path,'/');
+		$orig_image_path_rel = trim($path_rel,'/');
 		
 		$img_tag_attr = array('src' => '');
 		
@@ -163,7 +163,7 @@ if ( ! function_exists('view_image'))
 				// determine maximum side length of original
 				if ($orig_ratio > 1) { // landscape
 					$max_orig = $orig_width;
-				} else if ($orig_ratio < 1) { // portrait or square
+				} else { // portrait or square
 					$max_orig = $orig_height;
 				}
 	
