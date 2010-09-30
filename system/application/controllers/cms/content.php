@@ -202,6 +202,7 @@ class Content extends MY_Controller
 		$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
 		$html .= "\t\t\t<th scope=\"col\" id=\"created\">{$this->cms_labels['date_created']}</th>\r";
 		$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
+		$html .= "\t\t\t<th scope=\"col\" id=\"navved\">{$this->cms_labels['show_in_nav']}</th>\r";
 		$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
 		$html .= "<ul class=\"option-list\">\r";
 		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
@@ -255,6 +256,9 @@ class Content extends MY_Controller
 			$html .= $options[$item['publish']];
 			$html .= "</td>\r";
 
+			$html .= "\t\t\t<td headers=\"content-{$cid} navved\">";
+			$html .= $options[$item['show_in_nav']];
+			$html .= "</td>\r";
 
 			$html .= "\t\t\t<td headers=\"content-{$cid} actions\">";
 
@@ -271,7 +275,14 @@ class Content extends MY_Controller
 		$html .= "\t</tbody>\r";
 		$html .= "</table>\r";
 
-		$form_options = array(''=>'','delete' => 'delete','publish'=>'publish','unpublish'=>'unpublish');
+		$form_options = array(
+		''=>'',
+		'delete' => $this->cms_labels['delete'],
+		'publish'=> $this->cms_labels['publish'],
+		'unpublish'=> $this->cms_labels['unpublish'],
+		'show'=> $this->cms_labels['show_in_nav'],
+		'hide'=> $this->cms_labels['hide_from_nav']
+		);
 		$html .= "<p class=\"align-right\">";
 		$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
 		$html .=  form_dropdown('action', $form_options);
@@ -365,6 +376,30 @@ class Content extends MY_Controller
 						$this->Content_model->messages[] = $this->cms_labels['publish_update_failure'];
 					}
 					break;
+
+				case 'show':
+					$this->Content_model->show_in_nav = 1;
+					if($this->Content_model->update_navigation())
+					{
+						$this->Content_model->messages[] = $this->cms_labels['nav_update_success'];
+					}
+					else
+					{
+						$this->Content_model->messages[] = $this->cms_labels['nav_update_failure'];
+					}
+					break;
+				case 'hide':
+					$this->Content_model->show_in_nav = 0;
+					if($this->Content_model->update_navigation())
+					{
+						$this->Content_model->messages[] = $this->cms_labels['nav_update_success'];
+					}
+					else
+					{
+						$this->Content_model->messages[] = $this->cms_labels['nav_update_failure'];
+					}
+					break;
+
 				default:
 				}
 			}
@@ -678,6 +713,11 @@ class Content extends MY_Controller
 		$html .=  form_dropdown('publish', $form_options, $this->Content_model->publish);
 		$html .= "</p>\n";
 
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['show_in_nav'], 'show_in_nav');
+		$html .=  form_dropdown('show_in_nav', $form_options, $this->Content_model->show_in_nav);
+		$html .= "</p>\n";
+
 		$form_options = $this->User_model->get_list_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['author'], 'user_id');
@@ -924,6 +964,7 @@ class Content extends MY_Controller
 				$this->Content_model->date_created = $this->input->post('date_created');
 				$this->Content_model->date_end_expiry = $this->input->post('date_end_expiry');
 				$this->Content_model->publish = $this->input->post('publish');
+				$this->Content_model->show_in_nav = $this->input->post('show_in_nav');
 
 				$this->Content_model->title_id = $this->input->post('title_id');
 				$this->Content_model->temp_lang = $this->input->post('content_lang');

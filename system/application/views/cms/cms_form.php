@@ -49,6 +49,7 @@ $title_tag = implode(' | ',$header_titles);
 				}
 			}
 			?>
+			&nbsp;
 		</div>
 		<div id="menu" class="float">
 			<?php 

@@ -472,10 +472,10 @@ class Setup extends MY_Controller
 			switch($fd['field_input_type']) {
 
 			case 'directory':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
-				$dir_list_temp = $this->Media_model->dir_list;
+				$this->load->model('File_model');
+				$this->File_model->list_dirs();
+				$media_root = $this->File_model->dir_base;
+				$dir_list_temp = $this->File_model->dir_list;
 				$dir_vals[''] = 'media root';
 				
 				foreach($dir_list_temp as $the_dir) {
@@ -486,17 +486,17 @@ class Setup extends MY_Controller
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				break;
 			case 'file':
-				$this->load->model('Media_model');
-				$this->Media_model->list_dirs();
-				$media_root = $this->Media_model->dir_base;
+				$this->load->model('File_model');
+				$this->File_model->list_dirs();
+				$media_root = $this->File_model->dir_base;
 				$dir_files = array('' => 'no file');
-				foreach($this->Media_model->dir_list as $index => $dir)
+				foreach($this->File_model->dir_list as $index => $dir)
 				{
-					$this->Media_model->dir_current = $dir;
+					$this->File_model->dir_current = $dir;
 					$dest_dir = str_replace($media_root,'',$dir);
 
-					$this->Media_model->list_files();
-					foreach($this->Media_model->file_list as $file_path) {
+					$this->File_model->list_files();
+					foreach($this->File_model->file_list as $file_path) {
 						$file_rel = str_replace($media_root,'',$file_path);
 						$pinfo = pathinfo($file_path);
 						$dir_files[$file_rel] = $pinfo['basename'];
@@ -1618,8 +1618,7 @@ class Setup extends MY_Controller
 		// construct sidebar lang links
 		if($this->Content_model->type_id != '')
 		{
-			$sidebar = "<h4>".$this->cms_labels['edit_by_lang']."</h4>";
-			$sidebar .= "<div class=\"boxed\">\r";
+			$sidebar = "<h3>".$this->cms_labels['edit_by_lang']."</h3>";
 			$this->Site_model->list_langs();
 			$enabled = $this->Site_model->lang_list;
 			
@@ -1633,7 +1632,7 @@ class Setup extends MY_Controller
 			}
 
 			$sidebar .= ul($lang_links);
-			$sidebar .=  "</div>\r";
+			$sidebar .=  "\r";
 
 			$this->data['sidebar'] = $sidebar;
 		}
@@ -1975,28 +1974,28 @@ class Setup extends MY_Controller
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media_types'];
 
-		$this->Media_model->list_types();
-		$temp_list = $this->Media_model->type_list;
+		$this->File_model->list_types();
+		$temp_list = $this->File_model->type_list;
 
 		$types = array();
 		
 		foreach($temp_list as $type)
 		{
-			$this->Media_model->label_id = '';
-			$this->Media_model->label_scope = 'types';
-			$this->Media_model->label_rel_id = '';
-			$this->Media_model->label_rel_name = '';
-			$this->Media_model->label = '';
+			$this->File_model->label_id = '';
+			$this->File_model->label_scope = 'types';
+			$this->File_model->label_rel_id = '';
+			$this->File_model->label_rel_name = '';
+			$this->File_model->label = '';
 
-			$this->Media_model->temp_id = $type['type_id'];
-			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
-			$lbl = $this->Media_model->load_label();
+			$this->File_model->temp_id = $type['type_id'];
+			$this->File_model->temp_lang = $this->Site_model->temp_lang;
+			$lbl = $this->File_model->load_label();
 
 			$uri = "cms/setup/media_type_edit/id/".$type['type_id'];
 		
 			if($lbl) {
-				$uri .= "/lang/".$this->Media_model->temp_lang;
-				$text = $this->Media_model->label;
+				$uri .= "/lang/".$this->File_model->temp_lang;
+				$text = $this->File_model->label;
 			} else {
 				$text = $type['type_uri_name'];
 			}
@@ -2035,20 +2034,20 @@ class Setup extends MY_Controller
 
 		$params = $this->uri->uri_to_assoc(4);
 		if(array_key_exists('id',$params)) {
-			$this->Media_model->temp_id = $params['id'];
+			$this->File_model->temp_id = $params['id'];
 		}
 		if(array_key_exists('lang',$params)) {
-			$this->Media_model->temp_lang = $params['lang'];
+			$this->File_model->temp_lang = $params['lang'];
 		}
 		else
 		{
-			$this->Media_model->temp_lang = $this->Site_model->temp_lang;
+			$this->File_model->temp_lang = $this->Site_model->temp_lang;
 		}
 
 		$this->data['form'] = $this->_form_media_type();
 
 		// construct sidebar lang links
-		if($this->Media_model->type_id != '')
+		if($this->File_model->type_id != '')
 		{
 			$sidebar = "<h2>".$this->cms_labels['edit_by_lang']."</h2>";
 
@@ -2059,7 +2058,7 @@ class Setup extends MY_Controller
 			foreach($enabled as $tmp_lang)
 			{
 	
-				$action = "/cms/setup/media_type_edit/id/".$this->Media_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
+				$action = "/cms/setup/media_type_edit/id/".$this->File_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
 	
 				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
 			}
@@ -2069,7 +2068,7 @@ class Setup extends MY_Controller
 			$this->data['sidebar'] = $sidebar;
 		}
 
-		$msg = $this->Media_model->_output_messages();
+		$msg = $this->File_model->_output_messages();
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -2082,62 +2081,62 @@ class Setup extends MY_Controller
 	
 	function _form_media_type()
 	{
-		if($this->Media_model->type_id != '')
+		if($this->File_model->type_id != '')
 		{
-			$this->Media_model->temp_id = $this->Media_model->type_id;
+			$this->File_model->temp_id = $this->File_model->type_id;
 		}
-		$this->Media_model->load_type();
+		$this->File_model->load_type();
 
-		if($this->Media_model->type_id != '') {
+		if($this->File_model->type_id != '') {
 
-			$this->Media_model->list_type_meta_fields();
+			$this->File_model->list_type_meta_fields();
 
-			$this->Media_model->reset_label();
-			$this->Media_model->label_scope = "types";
-			$this->Media_model->temp_id = $this->Media_model->type_id;
-			$this->Media_model->load_label();
+			$this->File_model->reset_label();
+			$this->File_model->label_scope = "types";
+			$this->File_model->temp_id = $this->File_model->type_id;
+			$this->File_model->load_label();
 		}
 
 		$action = "/cms/setup/media_type_edit";
-		if($this->Media_model->type_id != '')
+		if($this->File_model->type_id != '')
 		{
-			$action .= "/id/".$this->Media_model->type_id;
+			$action .= "/id/".$this->File_model->type_id;
 		}
-		if($this->Media_model->temp_lang != '')
+		if($this->File_model->temp_lang != '')
 		{
-			$action .= "/lang/".$this->Media_model->temp_lang;
+			$action .= "/lang/".$this->File_model->temp_lang;
 		}
 
 		$attributes = array('name' => "type_editor", 'id' => "type_editor");
 		$hidden = array(
-		'type_id' => $this->Media_model->type_id,
-		'type_uri_name' => $this->Media_model->type_uri_name,
-		'label_id' => $this->Media_model->label_id,
+		'type_id' => $this->File_model->type_id,
+		'type_uri_name' => $this->File_model->type_uri_name,
+		'label_id' => $this->File_model->label_id,
 		);
 		
 		$html = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
 		$html .= "<h2>\r";
-		$tmp_editing = sprintf($this->cms_labels['media_type_editing'],$this->Media_model->type_uri_name);
+		$tmp_editing = sprintf($this->cms_labels['media_type_editing'],$this->File_model->type_uri_name);
 		$html .= $tmp_editing; 
 		$html .= "</h2>\r";
 
 		$html .= "<div class=\"align-labels label-normal\">\r";
 
 		// metadata
-		$options = $this->Media_model->langs_dropdown();
+		$options = $this->File_model->langs_dropdown();
 		$html .= form_fieldset($this->cms_labels['type_metadata']);
 		$html .= "\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['language'], 'type_lang');
-		$html .= form_dropdown('type_lang', $options, $this->Media_model->temp_lang); 
+		$html .= form_dropdown('type_lang', $options, $this->File_model->temp_lang); 
 		$html .= "</p>\r";
 		
 		$options = array(
 		'name'        => 'label',
 		'id'          => 'label',
-		'value'       => $this->Media_model->label,
+		'value'       => $this->File_model->label,
 		'class'   => 'text',
 		);
 		
@@ -2163,7 +2162,7 @@ class Setup extends MY_Controller
 		$html .= "</tr>\r";
 		$html .= "</thead>\r";
 
-		$field_list = $this->Media_model->field_list;
+		$field_list = $this->File_model->field_list;
 		$fieldCount = count($field_list);
 		$fieldNo = 1;
 
@@ -2173,7 +2172,7 @@ class Setup extends MY_Controller
 		$chk_req = "&nbsp;";
 		$input_order = "&nbsp;";
 
-		foreach($this->Media_model->field_list as $field)
+		foreach($this->File_model->field_list as $field)
 		{
 
 			$row_header = form_hidden('field_id[]', $field['field_id']);
@@ -2182,15 +2181,15 @@ class Setup extends MY_Controller
 			$tmp_label = $field['field_ref_name'];
 			
 			// get label for field
-			$this->Media_model->reset_label();
-			$this->Media_model->label_scope = 'field';
+			$this->File_model->reset_label();
+			$this->File_model->label_scope = 'field';
 
-			$this->Media_model->temp_id = $field['field_id'];
-			$this->Media_model->temp_lang = $this->Site_model->site_default_lang;
-			$this->Media_model->load_label();
+			$this->File_model->temp_id = $field['field_id'];
+			$this->File_model->temp_lang = $this->Site_model->site_default_lang;
+			$this->File_model->load_label();
 
-			if($this->Media_model->label_id != '') {
-				$tmp_label = $this->Media_model->label;
+			if($this->File_model->label_id != '') {
+				$tmp_label = $this->File_model->label;
 			}
 			$row_header .= $tmp_label;
 
@@ -2266,8 +2265,8 @@ class Setup extends MY_Controller
 			$form_is_valid = $this->form_validation->run();
 			
 			// get values from form post data
-			$this->Media_model->type_id = $this->input->post('type_id');
-			$this->Media_model->type_uri_name = $this->input->post('type_uri_name');
+			$this->File_model->type_id = $this->input->post('type_id');
+			$this->File_model->type_uri_name = $this->input->post('type_uri_name');
 
 			if ($form_is_valid)
 			{
@@ -2284,8 +2283,8 @@ class Setup extends MY_Controller
 					$temp_field = array(
 					'field_id' => $id,
 					'rf_id' => $temp_rels[$index],
-					'rf_rel_id' => $this->Media_model->type_id,
-					'rf_rel_ref_name' => $this->Media_model->type_uri_name,
+					'rf_rel_id' => $this->File_model->type_id,
+					'rf_rel_ref_name' => $this->File_model->type_uri_name,
 					'exists' => FALSE,
 					'required' => 0,
 					'order' => $temp_order[$index],
@@ -2302,33 +2301,33 @@ class Setup extends MY_Controller
 					$field_updates[] = $temp_field;
 				}
 
-				$this->Media_model->field_list = $field_updates;
-				$this->Media_model->scope = 'types';
-				$this->Media_model->update_fields_related();
+				$this->File_model->field_list = $field_updates;
+				$this->File_model->scope = 'types';
+				$this->File_model->update_fields_related();
 				
 				// update type label
-				$this->Media_model->label_scope = 'types';
-				$this->Media_model->label_rel_id = $this->Media_model->type_id;
-				$this->Media_model->label_rel_name = $this->Media_model->type_uri_name;
-				$this->Media_model->label_id = $this->input->post('label_id');
-				$this->Media_model->label = $this->input->post('label');
-				$this->Media_model->temp_lang = $this->input->post('type_lang');
+				$this->File_model->label_scope = 'types';
+				$this->File_model->label_rel_id = $this->File_model->type_id;
+				$this->File_model->label_rel_name = $this->File_model->type_uri_name;
+				$this->File_model->label_id = $this->input->post('label_id');
+				$this->File_model->label = $this->input->post('label');
+				$this->File_model->temp_lang = $this->input->post('type_lang');
 				
-				if(!$this->Media_model->update_label())
+				if(!$this->File_model->update_label())
 				{
-					$this->Media_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['type_label']);
+					$this->File_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['type_label']);
 				}
 
 
 			}
 			else
 			{
-				$this->Media_model->messages[] = validation_errors();
+				$this->File_model->messages[] = validation_errors();
 			}
 			
-			if(count($this->Media_model->messages) == 0)
+			if(count($this->File_model->messages) == 0)
 			{
-				$this->Media_model->messages[] = $this->cms_labels['media_type_update_success'];
+				$this->File_model->messages[] = $this->cms_labels['media_type_update_success'];
 			}
 			
 		}

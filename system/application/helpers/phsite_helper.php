@@ -311,7 +311,7 @@ if ( ! function_exists('ph_form_textarea'))
 		{
 			$value = $options['value'];
 		}
-		$encoded = encode_entities($value,TRUE);
+		$encoded = encode_entities($value);
 
 		$textarea = "<textarea".$attributes.">".$encoded."</textarea>";
 		return $textarea;
@@ -464,7 +464,7 @@ if ( ! function_exists('build_menu'))
 
 		foreach($content_array as $item)
 		{
-			if(!isset($skip_id) || $skip_id != $item['content_id'])
+			if($item['show_in_nav'] == 1 && (!isset($skip_id) || $skip_id != $item['content_id']))
 			{
 				$menu .= "<li><a href=\"{$item['uri']}\">{$item['title']}</a>";
 				$tmp_level = $current_level;
@@ -641,6 +641,32 @@ if ( ! function_exists('email_user_info'))
 		}
 
 	} // end email_user_info()
+}
+
+if ( ! function_exists('sort_array_titles'))
+{
+	function sort_array_titles($a,$b)
+	{
+
+		if ($a['title'] == $b['title']) {
+			return 0;
+		}
+		return ($a['title'] < $b['title']) ? -1 : 1;
+
+	}
+}
+
+if ( ! function_exists('sort_array_date'))
+{
+	function sort_array_date($a,$b)
+	{
+
+		if ($a['date_created'] == $b['date_created']) {
+			return 0;
+		}
+		return ($a['date_created'] < $b['date_created']) ? -1 : 1;
+
+	}
 }
 
 /* End of file phsite_helper.php */

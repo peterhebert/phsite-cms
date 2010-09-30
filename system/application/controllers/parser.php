@@ -393,7 +393,13 @@ class Parser extends MY_Controller {
 
 	function _prepare_view()
 	{
-		
+		// if user logged in, pass session values to view
+		$this->load->library('session');
+		if($this->session->userdata('user_id'))
+		{
+			$this->data['userdata'] = $this->session->userdata;
+		}
+				
 		// initialize content array
 		$content_vars = array();
 
@@ -619,7 +625,10 @@ class Parser extends MY_Controller {
 			$this->data['other_langs'] = $other_langs;
 		}
 		
-
+		// get top-level menu
+		$this->Content_model->content_id = '';
+		$top_menu = $this->Content_model->get_descendant_content();
+		$this->data['top_menu'] = $top_menu;
 	}
 
 	function _home()

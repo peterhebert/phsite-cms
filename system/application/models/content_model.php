@@ -2,7 +2,7 @@
 class Content_model extends MY_Model {
 
 	// 'c_content' variables
-	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish;
+	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish, $show_in_nav;
 
 	// list variables
 	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array(), $attachments = array();
@@ -118,6 +118,7 @@ class Content_model extends MY_Model {
 				'date_end_expiry' => $row->date_end_expiry,
 				'date_updated' => $row->date_updated,
 				'publish' => $row->publish,
+				'show_in_nav' => $row->show_in_nav,
 				'type_label' => '',
 				'title_id' => '',
 				'scope' => '',
@@ -168,6 +169,8 @@ class Content_model extends MY_Model {
 				{
 				   $r2 = $q2->row();
 				   $tmp['type_label'] = $r2->label;
+				   $tmp['index_home'] = $r2->index_home;
+				   $tmp['index_rss'] = $r2->index_rss;
 				   $tmp['menu_children'] = $r2->menu_children;
 				}
 				
@@ -283,6 +286,8 @@ class Content_model extends MY_Model {
 				$this->date_end_expiry = $row->date_end_expiry;
 				$this->date_updated = $row->date_updated;
 				$this->publish = $row->publish;
+				$this->show_in_nav = $row->show_in_nav;
+
 			}
 
 			// now get type name
@@ -383,6 +388,7 @@ class Content_model extends MY_Model {
 		'date_created' => $this->date_created,
 		'date_end_expiry' => $this->date_end_expiry,
 		'publish' => $this->publish,
+		'show_in_nav' => $this->show_in_nav,
 		);
 
 		if($this->content_id == '') {
@@ -406,7 +412,7 @@ class Content_model extends MY_Model {
     function get_parents_dropdown()
     {
 
-		$parents['0'] = "site root";
+		$parents['0'] = $this->cms_labels['site_root'];
 
 		if($this->type_id == 2)
 		{
@@ -691,7 +697,8 @@ class Content_model extends MY_Model {
 				'date_created' => $row->date_created,
 				'date_end_expiry' => $row->date_end_expiry,
 				'date_updated' => $row->date_updated,
-				'publish' => $row->publish
+				'publish' => $row->publish,
+				'show_in_nav' => $row->show_in_nav,
                 );
 
 
@@ -1008,6 +1015,32 @@ class Content_model extends MY_Model {
 		return FALSE;
 
 	}
+
+	function update_navigation()
+	{
+
+		$data = array(
+		'show_in_nav' => $this->show_in_nav,
+		);
+
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $id)
+			{
+				$this->db->or_where('content_id', $id);
+			}
+			// update
+			if($this->db->update('c_content', $data))
+			{
+				return TRUE;
+			}
+
+		}
+
+		return FALSE;
+
+	}
 	
 	function delete_content()
 	{
@@ -1098,6 +1131,8 @@ class Content_model extends MY_Model {
 		$this->date_end_expiry = '';
 		$this->date_updated = '';
 		$this->publish = '';
+		$this->show_in_nav = '';
+		
 	}
 
 }
