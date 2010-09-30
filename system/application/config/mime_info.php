@@ -116,6 +116,7 @@ $config['mime_types'] = array(
 'text' => 'text/plain',
 'tsv' => 'text/tab-separated-values',
 'txt' => 'text/plain',
+'vcf' => 'text/x-vcard',
 
 'asf' => 'video/x-ms-asf',
 'asx' => 'video/x-ms-asf',
