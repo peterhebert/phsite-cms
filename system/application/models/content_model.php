@@ -601,7 +601,7 @@ class Content_model extends MY_Model {
 		return $children;
 	}
 	
-	function get_descendant_content($parent = 0,$recursive=TRUE)
+	function get_descendant_content($parent = 0,$recursive=TRUE,$include_meta=TRUE)
 	{
 		if(!$recursive)
 		{
@@ -626,11 +626,7 @@ class Content_model extends MY_Model {
 			{
 				$this->db->where('publish', 1);
 			}
-			if($this->date_filter != '')
-			{
-				$this->db->like('date_created', $this->date_filter, 'after'); 
-			}
-			
+						
 			$query = $this->db->get('c_content');
 			$this->content_count = $query->num_rows();	
 	
@@ -675,10 +671,6 @@ class Content_model extends MY_Model {
 		if($this->link_mode == 0)
 		{
 			$this->db->where('publish', 1);
-		}
-		if($this->date_filter != '')
-		{
-			$this->db->like('date_created', $this->date_filter, 'after'); 
 		}
 
 		$query = $this->db->get('c_content');
@@ -733,15 +725,18 @@ class Content_model extends MY_Model {
 				$this->load_type();
 				$info['menu_children'] = $this->menu_children;
 				
-				$this->scope = 'types';
-				$this->list_fields_related();
-				$this->scope = 'content';
-				$this->temp_id = $row->content_id;
-				$this->load_metadata();
-				
-				foreach($this->metadata as $field)
+				if($include_meta)
 				{
-					$info[$field['field_ref_name']] = $field['value'];
+					$this->scope = 'types';
+					$this->list_fields_related();
+					$this->scope = 'content';
+					$this->temp_id = $row->content_id;
+					$this->load_metadata();
+					
+					foreach($this->metadata as $field)
+					{
+						$info[$field['field_ref_name']] = $field['value'];
+					}
 				}
 
 				if($recursive)

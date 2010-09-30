@@ -626,8 +626,8 @@ class Parser extends MY_Controller {
 		}
 		
 		// get top-level menu
-		$this->Content_model->content_id = '';
-		$top_menu = $this->Content_model->get_descendant_content();
+		$this->Content_model->reset_vars();
+		$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
 		$this->data['top_menu'] = $top_menu;
 	}
 
