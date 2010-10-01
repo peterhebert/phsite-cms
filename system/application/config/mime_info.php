@@ -200,8 +200,66 @@ $config['playable_types'] = array(
 */
 );
 
-$config['html5_types'] = array('flac' => 'audio/flac', 'm4a' => 'audio/mp4', 'm4b' => 'audio/mp4', 'mp3' => 'audio/mpeg3', 'oga' => 'audio/ogg', 'ogg' => 'audio/ogg', 'spx' => 'audio/ogg', 'f4v' => 'video/x-flv', 'flv' => 'video/x-flv', 'm4u' => 'video/x-mpegurl', 'm4v' => 'video/mp4', 'mkv' => 'video/x-matroska', 'mov' => 'video/quicktime', 'mp4' => 'video/mp4', 'mpeg4' => 'video/mp4', 'ogm' => 'video/ogg', 'ogv' => 'video/ogg', 'webm' => 'video/x-webm');
-$config['mime_icons'] = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
+$config['html5_types'] = array(
+'f4v' => 'video/x-flv', 
+'flac' => 'audio/flac', 
+'flv' => 'video/x-flv', 
+'m4a' => 'audio/mp4', 
+'m4b' => 'audio/mp4', 
+'m4u' => 'video/x-mpegurl', 
+'m4v' => 'video/mp4', 
+'mkv' => 'video/x-matroska', 
+'mov' => 'video/quicktime', 
+'mp3' => 'audio/mpeg3', 
+'mp4' => 'video/mp4', 
+'mpeg4' => 'video/mp4', 
+'oga' => 'audio/ogg', 
+'ogg' => 'audio/ogg', 
+'ogm' => 'video/ogg', 
+'ogv' => 'video/ogg', 
+'spx' => 'audio/ogg', 
+'webm' => 'video/x-webm',
+);
+
+$config['mime_icons'] = array(
+'ai', 
+'doc', 
+'docx', 
+'eps', 
+'gz', 
+'gzip', 
+'odb', 
+'odf', 
+'odg', 
+'odm', 
+'odp', 
+'ods', 
+'odt', 
+'pdf', 
+'pps', 
+'ppsx', 
+'ppt', 
+'pptx', 
+'ps', 
+'ram', 
+'rm', 
+'sit', 
+'sldx', 
+'swf', 
+'tar', 
+'tgz', 
+'vcf',
+'wp', 
+'wp5', 
+'wp5', 
+'wp6', 
+'wpd', 
+'wpd', 
+'wpl', 
+'xls', 
+'xlsx', 
+'zip',
+);
 
 /* End of file mime_info_prefs.php */
 /* Location: ./system/application/config/mime_info_prefs.php */
