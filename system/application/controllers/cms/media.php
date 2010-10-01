@@ -34,7 +34,7 @@ class Media extends MY_Controller {
 		{
 
 			$new_files = $this->File_model->new_file_list;
-			$html .= "<p>".sprintf($this->cms_labels['media_scan_x_results'],$this->File_model->file_count)."</p>\r";
+			$html .= "<p>".sprintf($this->cms_labels['media_scan_x_results'],$this->File_model->new_file_count)."</p>\r";
 		
 			foreach($new_files as $media)
 			{
