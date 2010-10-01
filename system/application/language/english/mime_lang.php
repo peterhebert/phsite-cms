@@ -164,7 +164,8 @@ $lang['mime'] = array(
 'wp6' => 'WordPerfect Document',
 'wpd' => 'WordPerfect Document',
 'wpd' => 'WordPerfect Document',
-'zip' => 'Zip archive'
+'zip' => 'Zip archive',
+'vcf' => 'vCard electronic business card',
 );
 
 $lang['fallbacks'] = array(

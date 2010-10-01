@@ -181,6 +181,7 @@ $lang['mime'] = array(
 'xltx' => "gabarit de feuille de calcul Microsoft Excel Open <acronym title=\"Extensible Markup Language\">XML</acronym>",
 'xml' => "langage <acronym title=\"Extensible Markup Language\">XML</acronym>",
 'zip' => "archive Zip",
+'vcf' => "carte d'adresse &eacute;lectronique format vCard",
 );
 
 

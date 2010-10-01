@@ -1261,7 +1261,11 @@ class Content extends MY_Controller
 					$html .= $this->File_model->title."<br />\r";
 				}
 				$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
-				$html .= "</span><br />\r".$mime_labels[$ext];
+				$html .= "</span>";
+				if(in_array($ext,$mime_labels))
+				{
+					$html .= "<br />\r".$mime_labels[$ext];
+				}
 				$html .= "</th>\r";
 
 				$html .= "\t\t\t<td headers=\"att-{$file['media_id']} removal\">";
