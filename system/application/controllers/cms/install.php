@@ -1052,19 +1052,26 @@ class Install extends Controller
 		}
 
 		// now add routing directives
-		$txt  .= "\rRewriteEngine On\r\r";
-		$txt  .= "# Removes access to the system folder by users.\r";
-		$txt  .= "# Additionally this will allow you to create a System.php controller,\r";
-		$txt  .= "# previously this would not have been possible.\r";
-		$txt  .= "# 'system' can be replaced if you have renamed your system folder.\r\r";
-		$txt  .= 'RewriteCond %{REQUEST_URI} ^system.*'."\r";
-		$txt  .= 'RewriteRule ^(.*)$ /index.php/$1 [L]'."\r\r";
-		$txt  .= "# Checks to see if the user is attempting to access a valid file,\r";
-		$txt  .= "# such as an image or css document, if this isn't true it sends the\r";
-		$txt  .= "# request to index.php\r\r";
-		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-f'."\r";
-		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-d'."\r";
-		$txt  .= 'RewriteRule ^(.*)$ ./index.php/$1 [L]'."\r\r";
+		$txt  .= "<IfModule mod_rewrite.c>\r\r";
+		$txt  .= "\tRewriteEngine On\r\r";
+		$txt  .= "\t# Removes access to the system folder by users.\r";
+		$txt  .= "\t# Additionally this will allow you to create a System.php controller,\r";
+		$txt  .= "\t# previously this would not have been possible.\r";
+		$txt  .= "\t# 'system' can be replaced if you have renamed your system folder.\r\r\t";
+		$txt  .= 'RewriteCond %{REQUEST_URI} ^system.*'."\r\t";
+		$txt  .= 'RewriteRule ^(.*)$ /index.php?/$1 [L]'."\r\r";
+		$txt  .= "\t# Checks to see if the user is attempting to access a valid file,\r";
+		$txt  .= "\t# such as an image or css document, if this isn't true it sends the\r";
+		$txt  .= "\t# request to index.php\r\r\t";
+		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-f'."\r\t";
+		$txt  .= 'RewriteCond %{REQUEST_FILENAME} !-d'."\r\t";
+		$txt  .= 'RewriteRule ^(.*)$ ./index.php?/$1 [L]'."\r\r";
+		$txt  .= "</IfModule>\r\r";
+		$txt  .= "<IfModule !mod_rewrite.c>\r";
+		$txt  .= "\t# If we don't have mod_rewrite installed, all 404 errors\r";
+		$txt  .= "\t# can be sent to index.php, and everything works as normal.\r\r";
+		$txt  .= "\tErrorDocument 404 /index.php\r\r";
+		$txt  .= "</IfModule>\r\r";
 
 		$this->load->helper('file');
 		$filename = ROOT_REL.'/.htaccess';
