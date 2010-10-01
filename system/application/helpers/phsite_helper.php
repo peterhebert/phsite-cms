@@ -466,7 +466,7 @@ if ( ! function_exists('build_menu'))
 		{
 			if($item['show_in_nav'] == 1 && (!isset($skip_id) || $skip_id != $item['content_id']))
 			{
-				$menu .= "<li><a href=\"{$item['uri']}\">{$item['title']}</a>";
+				$menu .= "<li>".anchor($item['uri'],$item['title']);
 				$tmp_level = $current_level;
 				if($item['menu_children'] == 1 && isset($item['children']) && count($item['children']) > 0 && $current_level < $levels)
 				{

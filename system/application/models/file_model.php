@@ -87,9 +87,10 @@ class File_model extends MY_Model {
 			
 			// ignore all hidden files and directory navigation (.*)
 			$ignore = preg_match("#^\..*$#",$file);
+
 			if($ignore <= 0) {
 				
-				$this->reset_media_vars();
+				//$this->reset_media_vars();
 				$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
 				$file_index = $this->file_uri;
 				
@@ -109,16 +110,11 @@ class File_model extends MY_Model {
 				'fileperms' => fileperms($newpath),
 				);
 				
-				if(!is_dir($newpath))
+				if(is_file($newpath))
 				{
-
-					if($dirs === FALSE)
-					{
-						$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
-						$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
-	
-						$files[$file_index] = $fileinfo;
-					}
+					$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
+					$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
+					$files[$file_index] = $fileinfo;
 				}
 				else
 				{
