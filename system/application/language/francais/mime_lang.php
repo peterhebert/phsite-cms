@@ -46,6 +46,7 @@ $lang['mime'] = array(
 'aif' => "audio <acronym title=\"Audio Interchange Format\">AIFF</acronym>",
 'aifc' => "audio <acronym title=\"Audio Interchange Format\">AIFF</acronym>",
 'aiff' => "audio <acronym title=\"Audio Interchange Format\">AIFF</acronym>",
+'asc' => 'fichier <acronym title="American Standard Code for Information Interchange">ASCII</acronym> Armored <acronym title="GNU Privacy Guard">GPG</acronym>/<acronym title="Pretty Good Privacy">PGP</acronym>',
 'asf' => "vid&eacute;o Microsoft Advanced Systems Format",
 'asx' => "Advanced Stream Redirector",
 'au' => "audio Sun/NeXT/DEC",

@@ -75,7 +75,7 @@ class Content extends MY_Controller
 		{
 			$this->data['msg'] = $msg;
 		}
-		
+		$this->_load_cms_menus();
 	
 		$this->load->view('cms/cms_form_2col',$this->data);
 	}

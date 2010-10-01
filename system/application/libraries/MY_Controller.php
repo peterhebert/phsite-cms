@@ -439,7 +439,10 @@ class MY_Controller extends Controller {
 			}
 			$html .= anchor($edit_uri, $txt, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 			$html .= "</span>";
-			$html .= "<br />\r".$mime_labels[$ext];
+			if(in_array($ext,$mime_labels))
+			{
+				$html .= "<br />\r".$mime_labels[$ext];
+			}
 
 			$html .= "</th>\r";
 

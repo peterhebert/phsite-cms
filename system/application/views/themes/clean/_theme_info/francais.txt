@@ -1,7 +1,7 @@
 title:			Clean
-description:	Un thème utilisant des unités de mesure 'Em', qui rend une mise à l'échelle élégante dans le navigateur. Basé sur la thème du panneau de contrôle.
+description:	Un thÃ¨me utilisant des unitÃ©s de mesure 'Em', qui rend une mise Ã  l'Ã©chelle Ã©lÃ©gante dans le navigateur. BasÃ© sur la thÃ¨me du panneau de contrÃ´le.
 author:			Peter Hebert
 email:			mail@peterhebert.com
 website:		http://www.peterhebert.com
-version:		0.1
-release_date:	2010-09-13
+version:		0.2
+release_date:	2010-10-01

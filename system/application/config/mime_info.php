@@ -8,6 +8,7 @@ $config['mime_categories'] = array('image','audio','video','text','application')
 // allowable mime types
 $config['mime_types'] = array(
 'ai' => 'application/postscript',
+'asc' => 'application/x-pgp',
 'bin' => 'application/x-macbinary',
 'dcr' => 'application/x-director',
 'dmg' => 'application/x-apple-diskimage',

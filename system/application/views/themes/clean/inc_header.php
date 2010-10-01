@@ -58,3 +58,5 @@ if(isset($content['author']['name_last'] ) && isset($content['author']['name_fir
 
 ?>
 <meta name="generator" content="phSite CMS" />
+<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
+<script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/admin_ui/jquery_external_links.js"></script>

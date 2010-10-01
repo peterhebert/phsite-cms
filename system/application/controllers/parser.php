@@ -772,6 +772,7 @@ class Parser extends MY_Controller {
 		// load mime type labels
 		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
 		$this->data['mime_labels'] = $this->lang->line('mime');
+		$ll = $this->lang->line('file_size_abbr');
 
 		$this->Content_model->list_attachments();
 		if(count($this->Content_model->attachments) > 0)
@@ -802,9 +803,18 @@ class Parser extends MY_Controller {
 
 				if($this->File_model->external == 0)
 				{
+					$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
 					$tmp_array['path_basename'] = ROOT_REL.MEDIA_PATH_ORIG.basename($this->File_model->file_uri);
-					$tmp_array['server_path'] = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
+					$tmp_array['server_path'] = $fullpath;
 					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($this->File_model->file_uri);
+					// get file size in bytes and formatted
+					if(file_exists($fullpath))
+					{
+						$bytes = filesize($fullpath);
+						$tmp_array['filesize_bytes'] = $bytes;
+						$tmp_array['filesize_formatted'] = resize_bytes_lang($bytes,$ll);
+					}
+					
 				}
 
 				$this->File_model->scope = 'media';
