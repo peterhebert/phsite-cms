@@ -35,15 +35,6 @@ if ($site['keywords'] != '') { echo "<meta name=\"Keywords\" content=\"{$site['k
 	</div>
 </div>
 <!-- end page wrapper -->
-<!-- start footer -->
-<div class="wrap" id="footer">
-<?php
-if (isset($site['copyright']) ) {
-echo "\t<p>".$site['copyright']."</p>\r";
-}
-echo $cms_labels['powered_by'];
-?>
-</div>
-<!-- end footer -->
+<?php require_once('inc_footer.php'); ?>
 </body>
 </html>
