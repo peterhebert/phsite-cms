@@ -54,7 +54,7 @@ if(isset($attachments) && count($attachments) > 0)
 		}
 
 
-		echo anchor($mylink, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
+		echo anchor($mylink, $filename, array('title' => sprintf($this->cms_labels['download_file'],$filename)));
 		echo "</span><br />\r";
 
 		if(array_key_exists('extension',$att) && array_key_exists($att['extension'],$mime_labels))
