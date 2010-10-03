@@ -1159,6 +1159,8 @@ class Setup extends MY_Controller
 				$success_field = $this->Content_model->update_field();
 				if($success_field)
 				{
+					$this->Content_model->label_rel_id = $this->Content_model->field_id;
+					
 					$success_meta = $this->Content_model->update_label();
 					if(!$success_meta)
 					{
