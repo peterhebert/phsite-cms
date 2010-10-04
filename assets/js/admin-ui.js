@@ -5,7 +5,7 @@
 $().ready(function(){
 
 	/* jquery_change_type.js */
-	$("form select[name='type_id']").change(function () {
+	$("form#content_editor select[name='type_id']").change(function () {
 	
 		var myloc = $("form input[name='my_url']").val();
 		var content_id = $("form input[name='content_id']").val();
