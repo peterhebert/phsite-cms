@@ -3,7 +3,11 @@ if(isset($content['title']))
 {
 	$titleA[] = $content['title'];
 }
-$titleA[] = $site['title'];
+if(!isset($home_content_id) || $content['content_id'] != $home_content_id)
+{
+	$titleA[] = $site['title'];
+}
+
 $title = implode(' | ',$titleA);
 ?>
 <title><?php echo $title; ?></title>

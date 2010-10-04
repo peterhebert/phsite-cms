@@ -30,6 +30,7 @@ class MY_Controller extends Controller {
 		
 		$this->_db_test();
 
+		$this->data['home_content_id'] = $this->Site_model->home_content_id;
 		$this->data['img_size_th'] = $this->Site_model->img_size_th;
 		$this->data['img_size_sm'] = $this->Site_model->img_size_sm;
 		$this->data['img_size_md'] = $this->Site_model->img_size_md;
