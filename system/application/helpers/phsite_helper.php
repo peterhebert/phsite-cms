@@ -533,7 +533,7 @@ if ( ! function_exists('ph_form_list'))
 
 	function ph_form_list($name = '', $values = array(), $selected = array(), $multiple = FALSE)
 	{
-		if($multiple)
+		if($multiple == TRUE)
 		{
 			$control = 'checkbox';
 		}

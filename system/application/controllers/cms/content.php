@@ -552,6 +552,7 @@ class Content extends MY_Controller
 		$html .= "</p>";
 
 		// fields
+
 		foreach($this->Content_model->metadata as $index => $fd)
 		{
 			$this->Content_model->reset_label();
@@ -664,8 +665,16 @@ class Content extends MY_Controller
 				$this->Content_model->temp_id = $fd['list_id'];
 				$this->Content_model->load_value_list();
 				$listvals = prepare_list_values($this->Content_model->value_list);
+				if($fd['field_allow_multiple'] == 1)
+				{
+					$valArr = explode('|',$fd['value']);
+				}
+				else
+				{
+					$valArr = array($fd['value']);
+				}
 
-				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+				$html .= ph_form_list($form_options['name'], $listvals, $valArr, $fd['field_allow_multiple']);
 
 				break;
 			default:
@@ -1000,8 +1009,13 @@ class Content extends MY_Controller
 					foreach($tmp_field_id as $index => $fd_id)
 					{
 						$val_lbl = 'value_'.$fd_id;
+						$value = $this->input->post($val_lbl);
+						if(is_array($value))
+						{
+							$value = implode('|',$value);
+						}
 
-						$value = decode_html_entities($this->input->post($val_lbl));
+						$value = decode_html_entities($value);
 						
 						$this->Content_model->temp_id = $fd_id;
 						$this->Content_model->load_field();

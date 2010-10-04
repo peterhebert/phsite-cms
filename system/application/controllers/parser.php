@@ -400,8 +400,9 @@ class Parser extends MY_Controller {
 			$this->data['userdata'] = $this->session->userdata;
 		}
 				
-		// initialize content array
+		// initialize content array and field labels
 		$content_vars = array();
+		$field_labels = array();
 
 		// load author user data
 
@@ -543,6 +544,14 @@ class Parser extends MY_Controller {
 				$content_vars['dir_listing'] = $this->File_model->file_list;
 				$content_vars['subdirs'] = $this->File_model->dir_list;
 			}
+			// load field label
+	
+			$this->Content_model->label_scope = 'field';
+			$this->Content_model->temp_id = $field['field_id'];
+			$this->Content_model->label_id = '';
+			$this->Content_model->load_label();
+
+			$field_labels[$field['field_ref_name']] = $this->Content_model->label;
 
 		}
 

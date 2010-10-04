@@ -438,86 +438,6 @@ class Setup extends MY_Controller
 		$html .=  form_textarea($form_options);
 		$html .= "</p>\r";
 
-/*		$fd_meta = $this->Site_model->metadata;
-
-		foreach($fd_meta as $index => $fd)
-		{
-			// hidden fields
-			$form_options = array(
-			'field_id[]' =>  $index,
-			'field_ref_name[]' =>  $fd['field_ref_name'],
-			'meta_id[]' => $fd['meta_id'],
-			'required[]' =>  $fd['required'],
-			'field_needs_lang[]' => $fd['field_needs_lang']
-			);
-			$html .= form_hidden($form_options);
-
-			$this->Site_model->label_scope = 'field';
-			$this->Site_model->temp_id = $index;
-
-			$tmp_label = $fd['field_ref_name'];
-			if($this->Site_model->load_label())
-			{
-				$tmp_label = $this->Site_model->label;
-			}
-			$html .= "<p>\r";
-			$html .= form_label($tmp_label, $fd['field_ref_name']);
-			$form_options = array(
-			'id' => $fd['field_ref_name'],
-			'name' => 'value_'.$index,
-			'value' => $fd['value'],
-			'class' => $fd['field_input_type']
-			);
-
-			switch($fd['field_input_type']) {
-
-			case 'directory':
-				$this->load->model('File_model');
-				$this->File_model->list_dirs();
-				$media_root = $this->File_model->dir_base;
-				$dir_list_temp = $this->File_model->dir_list;
-				$dir_vals[''] = 'media root';
-				
-				foreach($dir_list_temp as $the_dir) {
-					$temp_dir_val = str_replace($media_root,'',$the_dir);
-					$dir_vals[$temp_dir_val] = $temp_dir_val;
-				}
-				
-				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
-				break;
-			case 'file':
-				$this->load->model('File_model');
-				$this->File_model->list_dirs();
-				$media_root = $this->File_model->dir_base;
-				$dir_files = array('' => 'no file');
-				foreach($this->File_model->dir_list as $index => $dir)
-				{
-					$this->File_model->dir_current = $dir;
-					$dest_dir = str_replace($media_root,'',$dir);
-
-					$this->File_model->list_files();
-					foreach($this->File_model->file_list as $file_path) {
-						$file_rel = str_replace($media_root,'',$file_path);
-						$pinfo = pathinfo($file_path);
-						$dir_files[$file_rel] = $pinfo['basename'];
-					}
-					
-				}
-
-				$html .= form_dropdown($form_options['name'], $dir_files, $fd['value']);
-				break;
-			case 'textarea' || 'richtext':
-				$form_options['cols'] = 38;
-				$html .= ph_form_textarea($form_options);
-				break;
-			default:
-				$html .=  form_input($form_options);
-			}
-
-			$html .= "</p>\r";
-		}
-*/
-
 		// fields
 		foreach($this->Site_model->metadata as $index => $fd)
 		{
@@ -628,7 +548,16 @@ class Setup extends MY_Controller
 				$this->Site_model->load_value_list();
 				$listvals = prepare_list_values($this->Site_model->value_list);
 
-				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+				if($fd['field_allow_multiple'] == 1)
+				{
+					$valArr = explode('|',$fd['value']);
+				}
+				else
+				{
+					$valArr = array($fd['value']);
+				}
+
+				$html .= ph_form_list($form_options['name'], $listvals, $valArr, $fd['field_allow_multiple']);
 
 				break;
 			default:
@@ -1140,8 +1069,18 @@ class Setup extends MY_Controller
 				$this->Content_model->field_id = $this->input->post('field_id');
 				$this->Content_model->field_ref_name = $this->input->post('field_ref_name');	
 				$this->Content_model->field_input_type = $this->input->post('field_input_type');
-				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang[]');
-				$this->Content_model->field_allow_multiple = $this->input->post('field_allow_multiple[]');
+
+				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang');
+				$this->Content_model->field_allow_multiple = $this->input->post('field_allow_multiple');
+
+				if($this->Content_model->field_needs_lang == '')
+				{
+					$this->Content_model->field_needs_lang = 0;
+				}
+				if($this->Content_model->field_allow_multiple == '')
+				{
+					$this->Content_model->field_allow_multiple = 0;
+				}
 
 				$this->Content_model->validation_string = $this->input->post('validation_string');	
 				$this->Content_model->validation_exact = $this->input->post('validation_exact');	
@@ -2366,12 +2305,13 @@ class Setup extends MY_Controller
 				$edit_links[] = anchor($link,$label);
 				
 			}
-			$html = ul($edit_links);
+			$html = '<p>'. anchor("cms/setup/list_edit/",$this->cms_labels['new_list'])."</p>\r";
+			$html .= ul($edit_links);
 			
 		}
 		else
 		{
-			$html = "<p>no lists found</p>\r";
+			$html = '<p>'.$this->cms_labels['no_lists']."</p>\r";
 		}
 		
 		$this->data['form'] = $html;
@@ -2607,7 +2547,19 @@ class Setup extends MY_Controller
 					// update label 
 					if($this->Content_model->update_label())
 					{
-
+						if(!is_array($val_ids))
+						{
+							$val_ids = array($val_ids);
+						}
+						if(!is_array($list_values))
+						{
+							$list_values = array($list_values);
+						}
+						if(!is_array($list_labels))
+						{
+							$list_labels = array($list_labels);
+						}
+						
 						// update list values
 						foreach($val_ids as $index => $v_id)
 						{
@@ -2619,11 +2571,12 @@ class Setup extends MY_Controller
 							{
 								if($list_values[$index] == '')
 								{
-									$this->Content_model->messages[] = 'missing value #'.$v_id;
+									$this->Content_model->debugging[] = sprintf($this->cms_labels['list_missing_value'],$v_id);
+									
 								}
 								if($list_labels[$index] == '')
 								{
-									$this->Content_model->messages[] = 'missing label #'.$v_id;
+									$this->Content_model->debugging[] = sprintf($this->cms_labels['list_missing_label'],$v_id);
 								}
 							}
 		

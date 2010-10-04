@@ -419,6 +419,7 @@ class MY_Model extends Model {
     {
 
 		$list = array();
+		$this->db->order_by("field_ref_name", "asc");
 		$query = $this->db->get('s_fields');
 
 		if ($query->num_rows() > 0)
@@ -494,6 +495,11 @@ class MY_Model extends Model {
 		if($this->field_input_type != 'list')
 		{
 			$this->list_id = 0;	
+			$this->field_allow_multiple = 0;
+		}
+
+		if($this->field_allow_multiple == '')
+		{
 			$this->field_allow_multiple = 0;
 		}
 
@@ -630,6 +636,7 @@ class MY_Model extends Model {
 			$this->field_input_type = $row['field_input_type'];
 			$this->field_validation = $row['field_validation'];
 			$this->field_needs_lang = $row['field_needs_lang'];
+			$this->field_allow_multiple = $row['field_allow_multiple'];
 			$this->list_id = $row['list_id'];
 			if($parse)
 			{
@@ -1108,6 +1115,7 @@ class MY_Model extends Model {
     // get value lists
 	function value_lists_all()
 	{
+		$this->db->order_by("list_ref_name", "asc");
 		$query = $this->db->get('s_lists');
 		if($query->num_rows() > 0)
 		{

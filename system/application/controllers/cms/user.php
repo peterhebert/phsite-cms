@@ -399,7 +399,20 @@ class User extends MY_Controller
 				$this->User_model->load_value_list();
 				$listvals = prepare_list_values($this->User_model->value_list);
 
-				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+				// load list values
+				$this->Content_model->temp_id = $fd['list_id'];
+				$this->Content_model->load_value_list();
+				$listvals = prepare_list_values($this->Content_model->value_list);
+				if($fd['field_allow_multiple'] == 1)
+				{
+					$valArr = explode('|',$fd['value']);
+				}
+				else
+				{
+					$valArr = array($fd['value']);
+				}
+
+				$html .= ph_form_list($form_options['name'], $listvals, $valArr, $fd['field_allow_multiple']);
 
 				break;
 
