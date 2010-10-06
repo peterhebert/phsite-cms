@@ -106,6 +106,12 @@ class Media extends MY_Controller {
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['media_scan'];
 
+		$msg = $this->File_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
 		$this->load->view('cms/cms_form_2col', $this->data);
 	}
 
@@ -470,10 +476,10 @@ class Media extends MY_Controller {
 		}
 
 
-		$html .= form_hidden('external',$this->File_model->external);
 
-		if($this->File_model->external == 1)
+		if($this->File_model->external == 1 || $this->File_model->media_id == '')
 		{
+			$html .= form_hidden('external',1);
 
 			$form_options = array(
 			'name'        => 'file_uri',
@@ -489,6 +495,7 @@ class Media extends MY_Controller {
 		}
 		else
 		{
+			$html .= form_hidden('external',0);
 			$html .= form_hidden('file_uri',$this->File_model->file_uri);
 			$html .= form_hidden('mime_type',$this->File_model->mime_type);
 		
@@ -661,8 +668,16 @@ class Media extends MY_Controller {
 				$this->File_model->temp_id = $fd['list_id'];
 				$this->File_model->load_value_list();
 				$listvals = prepare_list_values($this->File_model->value_list);
+				if($fd['field_allow_multiple'] == 1)
+				{
+					$valArr = explode('|',$fd['value']);
+				}
+				else
+				{
+					$valArr = array($fd['value']);
+				}
 
-				$html .= ph_form_list($form_options['name'], $listvals, $fd['value'], $fd['field_allow_multiple']);
+				$html .= ph_form_list($form_options['name'], $listvals, $valArr, $fd['field_allow_multiple']);
 
 				break;
 
@@ -792,11 +807,10 @@ class Media extends MY_Controller {
 			foreach($tmp_field_id as $index => $fd_id)
 			{
 				$val_lbl = 'value_'.$fd_id;
-				
 				$value = $this->input->post($val_lbl);
 				if(is_array($value))
 				{
-					$value = $value[0];
+					$value = implode('|',$value);
 				}
 
 				$value = decode_html_entities($value);

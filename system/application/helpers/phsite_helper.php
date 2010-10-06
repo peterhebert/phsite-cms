@@ -464,7 +464,7 @@ if ( ! function_exists('build_menu'))
 
 		foreach($content_array as $item)
 		{
-			if($item['show_in_nav'] == 1 && (!isset($skip_id) || $skip_id != $item['content_id']))
+			if($item['title'] != '' && $item['show_in_nav'] == 1 && (!isset($skip_id) || $skip_id != $item['content_id']))
 			{
 				$menu .= "<li>".anchor($item['uri'],$item['title']);
 				$tmp_level = $current_level;

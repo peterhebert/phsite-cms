@@ -585,7 +585,14 @@ class User extends MY_Controller
 				$meta_fields[$row_key]['rel_id'] = $this->input->post('user_id');
 
 				$val_lbl = 'value_'.$fd_id;
-				$meta_fields[$row_key]['value'] = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
+				$value = $this->input->post($val_lbl);
+				if(is_array($value))
+				{
+					$value = implode('|',$value);
+				}
+
+				$value = decode_html_entities($value);
+				$meta_fields[$row_key]['value'] = $value;
 
 				$tmp_lang = '';
 				if($needs_lang[$index] == 1)

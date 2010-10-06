@@ -193,7 +193,7 @@ if ( ! function_exists('view_image'))
 				$scaled_image_path_rel = trim($scaled_image_path_rel,'/');
 				
 				if(!file_exists ( $dest_dir ) ){
-					if(!mkdir($dest_dir)) {
+					if(!mkdir($dest_dir,0777,TRUE)) {
 						$result = "<p>cache directory '".$dest_dir."' does not exist and cannot be written</p>\r";
 					}
 				}

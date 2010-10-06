@@ -27,6 +27,8 @@ class Content_model extends MY_Model {
     // list content
 	function list_content($include_meta = FALSE)
     {
+		$list = array();
+
 		// first get total matching results
 		if(count($this->omit_types) > 0)
 		{
@@ -52,14 +54,14 @@ class Content_model extends MY_Model {
 		{
 			$this->db->like('date_created', $this->date_filter, 'after'); 
 		}
+
+		$this->db->where('site_id', $this->site_id);
 		
 		$query = $this->db->get('c_content');
 		$this->content_count = $query->num_rows();	
-
-		// then get content with limits
 		$query->free_result();
 
-		$list = array();
+		// then get content with limits
 
 		if(count($this->omit_types) > 0)
 		{
@@ -100,7 +102,7 @@ class Content_model extends MY_Model {
 		{
 			$this->db->like('date_created', $this->date_filter, 'after'); 
 		}
-		
+		$this->db->where('site_id', $this->site_id);
 		$query = $this->db->get('c_content');
 	
 		if ($query->num_rows() > 0)
@@ -190,6 +192,7 @@ class Content_model extends MY_Model {
 
 				$list[$key] = $tmp;
 		   }
+
 		}
 
 		$this->content_list = $list;
@@ -215,7 +218,7 @@ class Content_model extends MY_Model {
 		$this->temp_id = $this->content_id;
 		$this->load_metadata();
 	}
-
+	
     function load_content_form()
     {
 		if($this->content_id != '')
@@ -584,6 +587,7 @@ class Content_model extends MY_Model {
 					foreach($row['metadata'] as $field)
 					{
 						$tmp_child[$field['field_ref_name']] = $field['value'];
+						$tmp_child['fields'][$field['field_ref_name']] = $field;
 					}
 					unset($tmp_child['metadata']);
 				}
@@ -914,7 +918,7 @@ class Content_model extends MY_Model {
 		foreach($this->type_list as $row)
 		{
 			$type_url = site_url('cms/content/edit/type/'.$row['type_id']);
-			if($row['label'] != '')
+			if(array_key_exists('label',$row) && $row['label'] != '')
 			{
 				$list[$type_url] = $row['label'];
 			} else {

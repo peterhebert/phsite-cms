@@ -185,7 +185,7 @@ class MY_Form_validation extends CI_Form_validation {
 	 */	
 	function is_uri($str)
 	{
-		$pattern = "|^http(s)?:\/\/([a-zA-Z0-9-_]+)\.([a-zA-Z]{2,})([a-zA-Z0-9-_\+% \.\/]+)([a-zA-Z0-9-_\+\.\/\?=&]+)$|";
+		$pattern = "|^http(s)?:\/\/([a-zA-Z0-9-_]+)\.?([a-zA-Z]{2,})([a-zA-Z0-9-_\+% \.\/]+)([a-zA-Z0-9-_\+\.\/\?=&]+)$|";
 		
 		return ( ! preg_match($pattern, $str)) ? FALSE : TRUE;
 	}

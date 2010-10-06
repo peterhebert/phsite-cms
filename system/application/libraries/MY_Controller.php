@@ -41,8 +41,9 @@ class MY_Controller extends Controller {
 		// load mime icon extensions
 		$this->config->load('mime_info');
 		$this->data['mime_icons'] = $this->config->item('mime_icons');
+		
 	}
-
+	
 	function _authenticate()
 	{
 		$this->load->library('session');
@@ -110,8 +111,11 @@ class MY_Controller extends Controller {
 
 		if(!$installed)
 		{
-			redirect('cms/install');
-			exit();
+			//redirect('cms/install');
+			$this->data['header'] = 'DB error';
+			$this->data['message'] = 'cannot establish database connection';
+			$this->load->view('error_404',$this->data);
+			die();		
 		}
 
 	}
@@ -268,9 +272,17 @@ class MY_Controller extends Controller {
 		$this->Site_model->lang_load();
 
 		$this->load->library('langues');
-
-		$this->cms_labels = $this->langues->load('cms', 'cms_labels', $this->Site_model->lang_CI_Name);
+		$lang_file = APPPATH.'language/'.$this->Site_model->lang_CI_Name.'/cms_lang.php';
+		if(file_exists($lang_file) && is_readable($lang_file))
+		{
+			$this->cms_labels = $this->langues->load('cms', 'cms_labels', $this->Site_model->lang_CI_Name);
+		}
+		else
+		{
+			$this->cms_labels = $this->langues->load('cms', 'cms_labels', 'english');
+		}
 		$this->data['cms_labels'] = $this->cms_labels;
+
 
     }
 

@@ -507,6 +507,11 @@ class Content extends MY_Controller
 		{
 			$action .= '/id/'.$this->Content_model->content_id;
 		}
+		else
+		{
+			$form_options['class'] = 'collapsible new';
+		}
+		
 		if($this->Content_model->temp_lang != '')
 		{
 			$action .= '/lang/'.$this->Content_model->temp_lang;

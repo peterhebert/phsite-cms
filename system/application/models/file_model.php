@@ -77,159 +77,176 @@ class File_model extends MY_Model {
 		$filepath = $this->dir_current;
 
 		//using the opendir function
-		$dir_handle = @opendir($filepath) or die("Unable to open $filepath");
 		$files = array();
 		$dirs = array();
+		$updated_files = array();
 		
-		//running the while loop
-		while ($file = readdir($dir_handle)) {
-			$newpath = str_replace('//','/',$filepath.'/'.$file);
-			
-			// ignore all hidden files and directory navigation (.*)
-			$ignore = preg_match("#^\..*$#",$file);
-
-			if($ignore <= 0) {
-				
-				//$this->reset_media_vars();
-				$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
-				$file_index = $this->file_uri;
-				
-				// get file information
-				$fileinfo = array(
-				'name' => substr(strrchr($newpath, DIRECTORY_SEPARATOR), 1),
-				'filename' => basename($this->file_uri),
-				'server_path' => $newpath,
-				'server_directory' => dirname($newpath),
-				'external' => 0,
-				'file_uri' => $this->file_uri,
-				'size' => filesize($newpath),
-				'date' => filectime($newpath),
-				'readable' => is_readable($newpath),
-				'writable' => is_writable($newpath),
-				'executable' => is_executable($newpath),
-				'fileperms' => fileperms($newpath),
-				);
-				
-				if(is_file($newpath))
-				{
-					$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
-					$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
-					$files[$file_index] = $fileinfo;
-				}
-				else
-				{
-
-					if($recursive)
-					{
-						// get subdirectory contents
-						$this->dir_current = $newpath;
-						$subdirs = $this->list_files(TRUE);
-
-						$files = array_merge($files,$subdirs['files']);
-						$dirs = array_merge($dirs,$subdirs['dirs']);
-
-					}
-
-					$dirs[$file_index] = $fileinfo;
-				}
-
-			}
-
-		}
-		//closing the directory
-		closedir($dir_handle);
-		unset($fileinfo);
-
-		// get unique basenames from list
-		// if two files in same directory with same basename, image will be ignored
-		// image will be used only for thumbnail of file
-		// ie. mymovie.mp4 could have thumbnail mymovie.jpg
-		
-		if($unique)
+		if(is_dir($filepath) && $dir_handle = @opendir($filepath))
 		{
-			$only_files = array();
-			$fnames = array();
-			$exts = array();
-			$new_list = array();
-			$imageTypes = array("jpg","gif","png");
-	
-			foreach ($files as $fpath => $finfo) {
-				$fnames[] = $finfo['path_basename'];
-				$exts[] = strtolower($finfo['extension']);
-				$paths[] = $fpath;
-			}
-	
-			$unique_names = array_count_values($fnames);
-			
-			$unique_list = array();
-			foreach($unique_names as $uname => $times) {
-	
-				$matching_keys = array_keys( $fnames, $uname);
+			//running the while loop
+			while ($file = readdir($dir_handle)) {
+				$newpath = str_replace('//','/',$filepath.'/'.$file);
 				
-				if($times > 1) {
-					foreach($matching_keys as $key) {
-						if(!in_array($exts[$key],$imageTypes)) {
-							$newindex = $paths[$key];
+				// ignore all hidden files and directory navigation (.*)
+				$ignore = preg_match("#^\..*$#",$file);
+	
+				if($ignore <= 0) {
+					
+					//$this->reset_media_vars();
+					$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
+					$file_index = $this->file_uri;
+					
+					// get file information
+					$fileinfo = array(
+					'name' => substr(strrchr($newpath, DIRECTORY_SEPARATOR), 1),
+					'filename' => basename($this->file_uri),
+					'server_path' => $newpath,
+					'server_directory' => dirname($newpath),
+					'external' => 0,
+					'file_uri' => $this->file_uri,
+					'readable' => is_readable($newpath),
+					'writable' => is_writable($newpath),
+					'executable' => is_executable($newpath),
+					);
+
+					if(is_readable($newpath))
+					{
+						$fileinfo['size'] = filesize($newpath);
+						$fileinfo['date'] = filectime($newpath);
+						$fileinfo['fileperms'] = fileperms($newpath);
+					}
+					
+					if(is_file($newpath))
+					{
+						$fileinfo['extension'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$2",$file);
+						$fileinfo['path_basename'] = preg_replace("#^(.*)\.([a-zA-Z0-9]+)$#","$1",$newpath);
+						$files[$file_index] = $fileinfo;
+					}
+					else
+					{
+	
+						if($recursive)
+						{
+							// get subdirectory contents
+							$this->dir_current = $newpath;
+							$subdirs = $this->list_files(TRUE);
+							if(is_array($subdirs) && array_key_exists('files',$subdirs))
+							{
+								$files = array_merge($files,$subdirs['files']);
+							}
+							if(is_array($subdirs) && array_key_exists('dirs',$subdirs))
+							{
+								$dirs = array_merge($dirs,$subdirs['dirs']);
+							}
+	
+						}
+	
+						$dirs[$file_index] = $fileinfo;
+					}
+	
+				}
+	
+			}
+			//closing the directory
+			closedir($dir_handle);
+			unset($fileinfo);
+	
+			// get unique basenames from list
+			// if two files in same directory with same basename, image will be ignored
+			// image will be used only for thumbnail of file
+			// ie. mymovie.mp4 could have thumbnail mymovie.jpg
+			
+			if($unique)
+			{
+				$only_files = array();
+				$fnames = array();
+				$exts = array();
+				$new_list = array();
+				$imageTypes = array("jpg","gif","png");
+		
+				foreach ($files as $fpath => $finfo) {
+					$fnames[] = $finfo['path_basename'];
+					$exts[] = strtolower($finfo['extension']);
+					$paths[] = $fpath;
+				}
+		
+				$unique_names = array_count_values($fnames);
+				
+				$unique_list = array();
+				foreach($unique_names as $uname => $times) {
+		
+					$matching_keys = array_keys( $fnames, $uname);
+					
+					if($times > 1) {
+						foreach($matching_keys as $key) {
+							if(!in_array($exts[$key],$imageTypes)) {
+								$newindex = $paths[$key];
+								$newfile = $files[$newindex];
+							}
+						}
+						if(!isset($newfile)) {
+							$newindex = $paths[$matching_keys[0]];
 							$newfile = $files[$newindex];
 						}
-					}
-					if(!isset($newfile)) {
+		
+					} else {
 						$newindex = $paths[$matching_keys[0]];
 						$newfile = $files[$newindex];
 					}
-	
-				} else {
-					$newindex = $paths[$matching_keys[0]];
-					$newfile = $files[$newindex];
+					$unique_list[$newindex] = $newfile;
+					unset($newfile);
 				}
-				$unique_list[$newindex] = $newfile;
-				unset($newfile);
+				
+				$files = $unique_list;
+				unset($unique_list);
 			}
-			
-			$files = $unique_list;
-			unset($unique_list);
-		}
-		// end filter duplicate basenames
-		
-		$updated_files = array();
-		
-		// now go through list and update db
-		foreach ($files as $fpath => $finfo) {
-			$this->reset_media_vars();
-
-			$fileinfo =& $finfo;
-			
-			$this->file_current = $finfo['server_path'];
-			$this->file_uri = $finfo['file_uri'];
-			$this->read_file_info();
-
-			// if file in db, then load; otherwise get info from file and insert to db
-			$this->update_file();
-
-			$fileinfo['media_id'] = $this->media_id;
-			$fileinfo['mime_type'] = $this->mime_type;
-			$fileinfo['mime_cat'] = $this->mime_cat;
-			$fileinfo['title_id'] = $this->title_id;
-			$fileinfo['title'] = $this->title;
-			$fileinfo['uri_title'] = $this->uri_title;
-			$fileinfo['subtitle'] = $this->subtitle;
-			$fileinfo['keywords'] = $this->keywords;
-			$fileinfo['title_updated'] = $this->title_updated;
-			$fileinfo['date_created'] = $this->date_created;
-
-			if(is_array($this->metadata) && count($this->metadata) > 0)
-			{
-				foreach($this->metadata as $index => $info)
+			// end filter duplicate basenames
+					
+			// now go through list and update db
+			foreach ($files as $fpath => $finfo) {
+				$this->reset_media_vars();
+	
+				$fileinfo =& $finfo;
+				
+				$this->file_current = $finfo['server_path'];
+				$this->file_uri = $finfo['file_uri'];
+				$this->read_file_info();
+	
+				// if file in db, then load; otherwise get info from file and insert to db
+				$this->update_file();
+	
+				$fileinfo['media_id'] = $this->media_id;
+				$fileinfo['mime_type'] = $this->mime_type;
+				$fileinfo['mime_cat'] = $this->mime_cat;
+				$fileinfo['title_id'] = $this->title_id;
+				$fileinfo['title'] = $this->title;
+				$fileinfo['uri_title'] = $this->uri_title;
+				$fileinfo['subtitle'] = $this->subtitle;
+				$fileinfo['keywords'] = $this->keywords;
+				$fileinfo['title_updated'] = $this->title_updated;
+				$fileinfo['date_created'] = $this->date_created;
+	
+				if(is_array($this->metadata) && count($this->metadata) > 0)
 				{
-					$fileinfo[$info['field_ref_name']] = $info['value'];
+					foreach($this->metadata as $index => $info)
+					{
+						$fileinfo[$info['field_ref_name']] = $info['value'];
+					}
+		
 				}
+	
+				$updated_files[$fpath] = $fileinfo;
 	
 			}
 
-			$updated_files[$fpath] = $fileinfo;
-
 		}
-		
+		else
+		{
+			$dir_rel = str_replace(ROOT_REL,'',$filepath);
+			$this->messages[] = sprintf($this->cms_labels['media_cannot_open'],$dir_rel);
+			return FALSE;
+		}
+				
 		$files = $updated_files;
 		
 		uksort($files,"cmp_dirs");
@@ -537,9 +554,11 @@ class File_model extends MY_Model {
 			if ($imagetype == FALSE)
 			{
 				$fileinfo = pathinfo($this->file_current);
-				if($fileinfo)
+
+				if($fileinfo != FALSE && array_key_exists('extension',$fileinfo))
 				{
 					$ext = strtolower($fileinfo['extension']);
+
 					if(array_key_exists($ext,$this->mime_types))
 					{
 						$this->mime_type = $this->mime_types[$ext];

@@ -6,14 +6,13 @@ if(isset($html_header))
 {
 echo $html_header;
 }
-$size = $this->Site_model->img_size_th;
 ?>
 <style type="text/css">
 <!--
 ul.thumbnails li {
-min-height: <?php echo round(($size/15)+2.5,3); ?>em;
+min-height: <?php echo round(($img_size_th/15)+2.5,3); ?>em;
 }
-ul.thumbnails li .thumb { width: <?php echo $size + 4 ; ?>px; height: <?php echo $size + 4; ?>px; }
+ul.thumbnails li .thumb { width: <?php echo $img_size_th + 4 ; ?>px; height: <?php echo $img_size_th + 4; ?>px; }
 -->
 </style>
 </head>

@@ -35,22 +35,22 @@ class Parser extends MY_Controller {
     {
 		$this->data['parents'] = array();
 
-		$this->Content_model->link_mode = 0;
-		$this->Content_model->lang_mode = $this->Content_model->lang_count;
-
 		// get all parameters from uri
 		$this->_parse_uri();
 
+		$this->Content_model->link_mode = 0;
+		$this->Content_model->lang_mode = $this->Content_model->lang_count;
+
+
 		switch($this->segment_count)
 		{
-		
 		case 0:
 			// no segments - do home page
 			$this->_home();
 			break;
-		
 		case 1:
 			$this->Content_model->temp_value = $this->segments[0];
+			$this->Content_model->temp_lang = $this->Content_model->lang_ISO_639_3;
 			$this->Content_model->temp_id = '';
 			$results = $this->Content_model->find_by_uri();
 
@@ -88,7 +88,6 @@ class Parser extends MY_Controller {
 				$this->Content_model->load_metadata();
 
 				$this->_prepare_view();
-
 			}
 			else
 			{
@@ -96,14 +95,19 @@ class Parser extends MY_Controller {
 				$this->data['header'] = $this->cms_labels['server_error_404_header'];
 				$html = "<p>".sprintf($this->cms_labels['server_error_404_message'],implode('/',$this->segments))."</p>";
 				$html .= "<p>".$this->cms_labels['server_error_404_suggest']."</p>";
-				$html .= '<p>'.anchor('',$this->cms_labels['home'])."</p>";
+				$home_uri = '';
+				if($this->Content_model->lang_ISO_639_3 != $this->Site_model->site_default_lang)
+				{
+					$home_uri .= $this->Content_model->lang_ISO_639_3;
+				}
+				$html .= '<p>'.anchor($home_uri,$this->cms_labels['home'])."</p>";
 
 				$this->data['message'] = $html;
 				$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
 			}
 
+
 			break;
-		
 		default:
 			// if site preferences specify a vaild home page ID, then omit home page from menu
 			if($this->Site_model->home_content_id > 0)
@@ -134,7 +138,12 @@ class Parser extends MY_Controller {
 					$html .= ul($this->matches);
 				}
 				$html .= "<p>".$this->cms_labels['server_error_404_suggest']."</p>";
-				$html .= '<p>'.anchor('',$this->cms_labels['home'])."</p>";
+				$home_uri = '';
+				if($this->Content_model->lang_ISO_639_3 != $this->Site_model->site_default_lang)
+				{
+					$home_uri .= $this->Content_model->lang_ISO_639_3;
+				}
+				$html .= '<p>'.anchor($home_uri,$this->cms_labels['home'])."</p>";
 				
 				$this->data['message'] = $html;
 
@@ -179,7 +188,7 @@ class Parser extends MY_Controller {
 
 	function _parse_uri()
 	{
-
+		
 		$uri_segments = array();
 		$uri_array = $this->uri->segment_array();
 
@@ -267,6 +276,10 @@ class Parser extends MY_Controller {
 		}
 		$this->Site_model->temp_lang = $params['lang'];
 		$this->Content_model->temp_lang = $params['lang'];
+
+		$this->Site_model->lang_load();
+		$this->Content_model->lang_load();
+
 		$this->_load_cms_labels();
 		$this->_load_site_metadata();
 
@@ -278,11 +291,11 @@ class Parser extends MY_Controller {
 		
 		if($params['media'] != '')
 		{
-			$this->File_model->temp_lang = $this->Content_model->temp_lang;
+			$this->File_model->temp_lang = $this->Content_model->lang_ISO_639_3;
 			$this->File_model->file_uri = $params['media'];
 			$this->media_view = $this->File_model->find_media_by_uri(TRUE);
 		}
-		
+
 	}
 	
 	function _find_content()
@@ -393,16 +406,22 @@ class Parser extends MY_Controller {
 
 	function _prepare_view()
 	{
+		// initialize content array and field labels
+		$content_vars = array();
+		$field_labels = array();
+
+		// load data for view
+		$this->Content_model->temp_id = $this->Content_model->type_id;
+		$this->Content_model->scope = 'content';
+		$this->Content_model->load_type();
+		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
+				
 		// if user logged in, pass session values to view
 		$this->load->library('session');
 		if($this->session->userdata('user_id'))
 		{
 			$this->data['userdata'] = $this->session->userdata;
 		}
-				
-		// initialize content array and field labels
-		$content_vars = array();
-		$field_labels = array();
 
 		// load author user data
 
@@ -417,12 +436,6 @@ class Parser extends MY_Controller {
 			'email' => $this->User_model->email
 			);
 		}
-
-		// load data for view
-		$this->Content_model->temp_id = $this->Content_model->type_id;
-		$this->Content_model->scope = 'content';
-		$this->Content_model->load_type();
-		$this->view = 'themes/'.$this->Site_model->theme.'/'.$this->Content_model->type_uri_name;
 
 		// see if we are viewing attached media, and if so, load media info and switch to 'media' view
 		if($this->media_view)
@@ -507,14 +520,9 @@ class Parser extends MY_Controller {
 			$content_vars['keyword_links'] = $this->Content_model->keyword_links();
 		}
 
-		$content_vars['date_created'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone);
-		$content_vars['date_created_W3C'] = convert_time($this->Content_model->date_created, $this->Site_model->site_timezone, "Y-m-d");
-
-		if($this->Content_model->date_end_expiry != '0000-00-00 00:00:00')
-		{
-			$content_vars['date_expiry'] = convert_time($this->Content_model->date_end_expiry, $this->Site_model->site_timezone,DATE_RFC1123);
-			$content_vars['date_expiry_RFC850'] = convert_time($this->Content_model->date_end_expiry, 'UTC',DATE_RFC850);
-		}
+		//format dates
+		$dates = $this->_format_dates($this->Content_model->date_created,$this->Content_model->date_end_expiry);
+		$content_vars = array_merge($content_vars,$dates);
 
 		$this->Content_model->temp_id = $this->Content_model->type_id;
 		$this->Content_model->scope = 'types';
@@ -562,9 +570,10 @@ class Parser extends MY_Controller {
 		$content_vars['lang_ISO_639_3'] = $this->Content_model->lang_ISO_639_3;
 
 		$this->data['content'] = $content_vars;
+		$this->data['field_labels'] = $field_labels;
 
 		// list attachments
-		$this->_attachment_info();
+		$this->data['attachments'] = $this->_attachment_info();
 
 		// build menu array
 		if($this->Content_model->parent_id == 0)
@@ -605,7 +614,12 @@ class Parser extends MY_Controller {
 				'email' => $this->User_model->email
 				);
 			}
+			
+			// get attachments to entry
+			$this->Content_model->content_id = $entry['content_id'];
+			$children[$index]['attachments'] = $this->_attachment_info();
 		}
+
 		$this->data['children'] = $children;
 		$this->data['total_children'] = $this->Content_model->content_count;
 		$this->data['page'] = $this->Content_model->page;
@@ -660,14 +674,39 @@ class Parser extends MY_Controller {
 		if($this->home)
 		{
 			$this->view = 'themes/'.$this->Site_model->theme.'/home';
+			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
+
 			$menu = $this->Content_model->get_descendant_content();
 			$this->data['menu'] = $menu;
-	
-			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
-			
+
+			$this->Site_model->count_site_langs();
+			$other_langs = array();
+			foreach($this->Site_model->lang_list as $lang)
+			{
+				if($lang != $this->Site_model->lang_ISO_639_3)
+				{
+					$this->Content_model->temp_lang = $lang;
+					$this->Content_model->lang_load();
+					$lang_name = $this->Content_model->lang_Ref_Name;
+					if($this->Content_model->lang_Native_Name != '')
+					{
+						$lang_name = $this->Content_model->lang_Native_Name;
+					}
+					$other_langs[] = anchor($lang,$lang_name);
+				}
+			}
+
+			if(count($other_langs) > 0)
+			{
+				$this->data['site_other_langs'] = $other_langs;
+			}
+
 			// recently added content
 			$this->Content_model->reset_vars();
+			$this->Content_model->temp_lang = $this->Site_model->lang_ISO_639_3;
+			$this->Content_model->lang_load();
 			$this->Content_model->limit = $this->Site_model->limit_posts;
+
 			$this->data['recent'] = $this->_recent();
 		}
 
@@ -684,30 +723,18 @@ class Parser extends MY_Controller {
 		{
 			$this->Content_model->parent_id = $parent;
 		}
+		$this->Content_model->content_list = array();
 		$this->Content_model->list_content(TRUE);
 
 		$recent = $this->Content_model->content_list;
 		$recent_entries = array();
-
 		
 		if(count($recent) > 0)
 		{
+			
 			foreach($recent as $index => $post)
 			{
-				$entry = array(
-				'content_id' => $post['content_id'],
-				'user_id' => $post['user_id'],
-				'parent_id' => $post['parent_id'],
-				'type_id' => $post['type_id'],
-				'type_uri_name' => $post['type_uri_name'],
-				'type_label' => $post['type_label'],
-				'title_id' => $post['title_id'],
-				'title' => $post['title'],
-				'uri_title' => $post['uri_title'],
-				'subtitle' => $post['subtitle'],
-				'keywords' => $post['keywords'],
-				'lang_ISO_639_3' => $post['lang_ISO_639_3']
-				);
+				$entry =& $post;
 
 				// get author info
 				$this->User_model->temp_id = $post['user_id'];
@@ -721,36 +748,34 @@ class Parser extends MY_Controller {
 					);
 				}
 
-				$entry['date_created'] = convert_time($post['date_created'], $this->Site_model->site_timezone);
-	
 				$date_updated = $post['date_updated'];
+				$dates = $this->_format_dates($post['date_created'],$post['date_end_expiry']);
+				$entry = array_merge($entry,$dates);
 
-				if($post['date_end_expiry'] != '0000-00-00 00:00:00')
+				if(array_key_exists('metadata',$post))
 				{
-					$entry['date_end_expiry'] = convert_time($post['date_end_expiry'], $this->Site_model->site_timezone);
-				}
-	
-				foreach($post['metadata'] as $id => $field) {
-				
-					if(array_key_exists('field_ref_name',$field))
-					{
-						$tmp_field_name = $field['field_ref_name'];
-					}
-					else
-					{
-						$this->Content_model->temp_id = $id;
-						$this->Content_model->load_field();
-						$tmp_field_name = $this->Content_model->field_ref_name;;
-					}
-		
-					$entry[$tmp_field_name] = encode_entities($field['value']);
+					foreach($post['metadata'] as $id => $field) {
 					
-					if($field['date_updated'] > $date_updated) {
-						$date_updated = $field['date_updated'];
+						if(array_key_exists('field_ref_name',$field))
+						{
+							$tmp_field_name = $field['field_ref_name'];
+						}
+						else
+						{
+							$this->Content_model->temp_id = $id;
+							$this->Content_model->load_field();
+							$tmp_field_name = $this->Content_model->field_ref_name;;
+						}
+			
+						$entry[$tmp_field_name] = encode_entities($field['value']);
+						
+						if($field['date_updated'] > $date_updated) {
+							$date_updated = $field['date_updated'];
+						}
+			
 					}
-		
 				}
-	
+
 				$entry['date_updated'] = convert_time($date_updated, $this->Site_model->site_timezone);
 				
 				// keyword links
@@ -762,13 +787,28 @@ class Parser extends MY_Controller {
 				// get uri of content
 				$this->Content_model->scope = 'content';
 				$this->Content_model->temp_id = $post['content_id'];
-				$this->Content_model->temp_lang = $post['lang_ISO_639_3'];
 				$entry['uri'] = $this->Content_model->generate_uri();
+				
+				// get parent info
+				if($post['parent_id'] > 0)
+				{
+					$this->Content_model->temp_id = $post['parent_id'];
+					$this->Content_model->load_title();
+					$entry['parent_title'] = $this->Content_model->title;
+					$puri = explode('/',$entry['uri']);
+					array_pop($puri);
+					$entry['parent_uri'] = implode('/',$puri);
+				}
+
+				// get attachments to entry
+				$this->Content_model->content_id = $post['content_id'];
+				$entry['attachments'] = $this->_attachment_info();
 				
 				$recent_entries[] = $entry;
 				$this->Content_model->reset_vars();
-			
+
 			}
+
 		}
 
 		return $recent_entries;
@@ -778,6 +818,8 @@ class Parser extends MY_Controller {
 	function _attachment_info()
 	{
 
+		$attachments = array();
+
 		// load mime type labels
 		$this->lang->load('mime', $this->Content_model->lang_CI_Name);
 		$this->data['mime_labels'] = $this->lang->line('mime');
@@ -786,7 +828,6 @@ class Parser extends MY_Controller {
 		$this->Content_model->list_attachments();
 		if(count($this->Content_model->attachments) > 0)
 		{
-			$attachments = array();
 
 			foreach($this->Content_model->attachments as $media)
 			{
@@ -845,8 +886,80 @@ class Parser extends MY_Controller {
 				$attachments[$this->File_model->file_uri] = $tmp_array;
 				unset($tmp_array);
 			}
-			$this->data['attachments'] = $attachments;
 		}
+		return $attachments;
+	}
+	
+	function _format_dates($created,$end)
+	{
+		$dates = array();
+
+		$dates['date_created'] = convert_time($created, $this->Site_model->site_timezone);
+		$dates['date_created_W3C'] = convert_time($created, $this->Site_model->site_timezone, "Y-m-d");
+
+		if($end != '0000-00-00 00:00:00')
+		{
+			$dates['date_end_expiry'] = convert_time($end, $this->Site_model->site_timezone);
+			$dates['date_expiry_RFC850'] = convert_time($end, 'UTC',DATE_RFC850);
+		}
+
+		// load date formatting
+		$this->lang->load('calendar', $this->Content_model->lang_CI_Name);
+		
+		$calendar_labels = array(
+		'cal_day_sm' => $this->lang->line('cal_day_sm'),
+		'cal_day_md' => $this->lang->line('cal_day_md'),
+		'cal_day_lg' => $this->lang->line('cal_day_lg'),
+		'cal_month_sm' => $this->lang->line('cal_month_sm'),
+		'cal_month_lg' => $this->lang->line('cal_month_lg'),
+		);
+		
+		$date_info = array(
+		'day' => convert_time($created, $this->Site_model->site_timezone, "j"),
+		'day_of_week' => strtolower(convert_time($created, $this->Site_model->site_timezone, "D")),
+		'month_num' => convert_time($created, $this->Site_model->site_timezone, "m"),
+		'year' => convert_time($created, $this->Site_model->site_timezone, "Y"),
+		);
+
+		$date_info['day_sm'] = $calendar_labels['cal_day_sm'][$date_info['day_of_week']];
+		$date_info['day_md'] = $calendar_labels['cal_day_md'][$date_info['day_of_week']];
+		$date_info['day_lg'] = $calendar_labels['cal_day_lg'][$date_info['day_of_week']];
+		$date_info['month_sm'] = $calendar_labels['cal_month_sm'][$date_info['month_num']];
+		$date_info['month_lg'] = $calendar_labels['cal_month_lg'][$date_info['month_num']];
+		
+		// long format date according to the content language
+		$order_date_long = $this->lang->line('order_date_long');
+		$date_long = '';
+		foreach($order_date_long as $dd)
+		{
+			if(array_key_exists($dd,$date_info))
+			{
+				$date_long .= $date_info[$dd];
+			}
+			else
+			{
+				$date_long .= $dd;
+			}
+		}
+		$dates['date_created_long'] = $date_long;
+
+		// short format date according to the content language
+		$order_date_short = $this->lang->line('order_date_short');
+		$date_short = '';
+		foreach($order_date_short as $dd)
+		{
+			if(array_key_exists($dd,$date_info))
+			{
+				$date_short .= $date_info[$dd];
+			}
+			else
+			{
+				$date_short .= $dd;
+			}
+		}
+		$dates['date_created_short'] = $date_short;
+		return $dates;
+		
 	}
 
 }

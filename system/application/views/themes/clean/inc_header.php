@@ -14,8 +14,8 @@ $title = implode(' | ',$titleA);
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <?php if (isset($theme_path)) {
 	echo "<link href=\"{$theme_path}clean";
-	if (!DEV_MODE) {
-		echo '-min';
+	if (DEV_MODE == FALSE) {
+		//echo '-min';
 	}
 	echo ".css\" rel=\"stylesheet\" type=\"text/css\" />\r";
 } 

@@ -102,6 +102,33 @@ class MY_Model extends Model {
 
 	}
 
+	function count_site_langs()
+	{
+		$langs = array();
+		$this->db->select('lang_ISO_639_3');
+		$this->db->where('lang_ISO_639_3 !=', '');
+		$this->db->group_by("lang_ISO_639_3");
+		$query = $this->db->get('c_titles');
+		foreach ($query->result() as $row)
+		{
+		   $langs[] = $row->lang_ISO_639_3;
+		}		
+		
+
+		$this->db->select('lang_ISO_639_3');
+		$this->db->where('lang_ISO_639_3 !=', '');
+		$this->db->group_by("lang_ISO_639_3");
+		$query = $this->db->get('c_metadata');
+		foreach ($query->result() as $row)
+		{
+		   $langs[] = $row->lang_ISO_639_3;
+		}		
+
+		$langs = array_unique($langs);
+		$this->lang_list = $langs;
+		$this->lang_count = count($langs);
+	}
+
     // get list of active languages for form drop-down
 	function langs_dropdown()
     {

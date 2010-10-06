@@ -1856,6 +1856,14 @@ class Setup extends MY_Controller
 				$this->Content_model->scope = 'content';
 				if($this->Content_model->update_type())
 				{
+
+					// put content type in array
+	
+					foreach($field_updates as $index => $id)
+					{
+						$field_updates[$index]['rf_rel_id'] = $this->Content_model->type_id;
+						$field_updates[$index]['rf_rel_ref_name'] = $this->Content_model->type_uri_name;
+					}
 	
 					$this->Content_model->field_list = $field_updates;
 					$this->Content_model->scope = 'types';
