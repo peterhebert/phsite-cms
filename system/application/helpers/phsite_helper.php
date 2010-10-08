@@ -643,28 +643,31 @@ if ( ! function_exists('email_user_info'))
 	} // end email_user_info()
 }
 
-if ( ! function_exists('sort_array_titles'))
+if ( ! function_exists('sort_array_multi'))
 {
-	function sort_array_titles($a,$b)
+	function sort_array_multi($data,$sort=array('date' => 'desc'))
 	{
 
-		if ($a['title'] == $b['title']) {
-			return 0;
+		$date = array();
+		$order = array();
+		$title = array();
+		// Obtain a list of columns
+		foreach ($data as $key => $row) {
+			$date[$key]  = $row['date_created'];
+			$order[$key] = $row['order'];
+			$title[$key] = $row['title'];
 		}
-		return ($a['title'] < $b['title']) ? -1 : 1;
 
-	}
-}
-
-if ( ! function_exists('sort_array_date'))
-{
-	function sort_array_date($a,$b)
-	{
-
-		if ($a['date_created'] == $b['date_created']) {
-			return 0;
+		$txt = 'array_multisort(';
+		// generate sort order
+		foreach ($sort as $key => $dir) {
+			$txt .= '$'.$key.', SORT_'.strtoupper($dir).', ';
 		}
-		return ($a['date_created'] < $b['date_created']) ? -1 : 1;
+		$txt .= '$data);';
+
+		eval($txt);
+
+		return $data;
 
 	}
 }

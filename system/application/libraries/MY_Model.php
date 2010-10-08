@@ -16,6 +16,9 @@ class MY_Model extends Model {
 	var $page; // page number number for query limit
 	var $link_mode; // display links for site (0) or cms (1)
 	var $lang_mode; // display language at beginning of url: No (0) or Yes ( > 0)
+	var $sort_by; // which key to sort by in db query
+	var $sort_dir; // sort ascending or descending in db query
+	var $sort_order = array('date' => 'desc'); // sort array with helper function array_sort_multi()
 	
 	var $date_filter;
 	// add < or > for before or after at beginning of string

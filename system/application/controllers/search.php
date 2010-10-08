@@ -45,11 +45,13 @@ class Search extends MY_Controller {
 		
 		if($kwd != '')
 		{
-			$this->data['term'] = sprintf($this->cms_labels['search_matching_keywords'],$kwd);
-			$this->Content_model->temp_value = $kwd;
+			$term = rawurldecode($kwd);
+			$term = $this->input->xss_clean($term);
+			$this->data['term'] = sprintf($this->cms_labels['search_matching_keywords'],$term);
+			$this->Content_model->temp_value = $term;
 			$content = $this->Content_model->search_content_keywords();
 
-			$this->File_model->temp_value = $kwd;
+			$this->File_model->temp_value = $term;
 			$media = $this->File_model->media_search_keywords();
 	
 			// content matches
@@ -68,7 +70,7 @@ class Search extends MY_Controller {
 
 		$bclinks[] = anchor("",$this->cms_labels['home']);
 		$bclinks[] = $this->cms_labels['search_results'];
-		$this->data['breadcrumb'] = $bclinks;
+		$this->data['breadcrumb_links'] = $bclinks;
 
 		$this->view = 'themes/'.$this->Site_model->theme.'/search_results';
 

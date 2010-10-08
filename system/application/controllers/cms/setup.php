@@ -902,7 +902,11 @@ class Setup extends MY_Controller
 
 	function _form_field_edit()
 	{
-		$action = "cms/setup/field_edit/id/".$this->Content_model->field_id;
+		$action = 'cms/setup/field_edit';
+		if($this->Content_model->field_id != '')
+		{
+			$action .= "/id/".$this->Content_model->field_id;
+		}
 		$action .= "/lang/".$this->Content_model->temp_lang;
 		
 		$attributes = array('name' => "field_editor", 'id' => "field_editor");
@@ -965,7 +969,7 @@ class Setup extends MY_Controller
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['select_allow_multiple'], 'field_allow_multiple');
-		$html .= ph_form_list('field_allow_multiple', $form_options, $allow_multiple);
+		$html .= form_dropdown('field_allow_multiple', $form_options, $allow_multiple);
 		$html .= "</p>\r";
 
 		if($this->Content_model->field_needs_lang == '')
@@ -978,7 +982,7 @@ class Setup extends MY_Controller
 		}
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['field_needs_lang'], 'field_needs_lang');
-		$html .= ph_form_list('field_needs_lang', $form_options, $needs_lang);
+		$html .= form_dropdown('field_needs_lang', $form_options, $needs_lang);
 		$html .= "</p>\r";
 
 		$html .= form_fieldset_close("\r");

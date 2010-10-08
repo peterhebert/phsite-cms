@@ -158,6 +158,7 @@ class Parser extends MY_Controller {
 		array_pop($zz);
 		array_pop($zz);
 		$this->data['parent_uri'] = implode('/',$zz);
+		$this->data['parent_title'] = $this->parent_title;
 
 		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
 		{
@@ -590,7 +591,9 @@ class Parser extends MY_Controller {
 		$this->Content_model->temp_lang = $this->Content_model->lang_ISO_639_3;
 		$this->Content_model->type_id = '';
 		$this->Content_model->limit = '';
+		$this->Content_model->limit = '';
 
+		$this->Content_model->sort_order = array('title' => 'asc');
 		$menu = $this->Content_model->get_children(true,true);
 		$this->data['menu'] = $menu;
 
@@ -598,6 +601,7 @@ class Parser extends MY_Controller {
 		$this->Content_model->parent_id = $content_vars['content_id'];
 		$this->Content_model->page = $this->page;
 		$this->Content_model->limit = $this->Site_model->limit_posts;
+		$this->Content_model->sort_order = array('date' => 'desc');
 		$children = $this->Content_model->get_children(false,true);
 
 		foreach($children as $index => $entry)
@@ -650,6 +654,7 @@ class Parser extends MY_Controller {
 		
 		// get top-level menu
 		$this->Content_model->reset_vars();
+		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
 		$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
 		$this->data['top_menu'] = $top_menu;
 	}
@@ -676,6 +681,7 @@ class Parser extends MY_Controller {
 			$this->view = 'themes/'.$this->Site_model->theme.'/home';
 			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 
+			$this->Content_model->sort_order = array('title' => 'asc');
 			$menu = $this->Content_model->get_descendant_content();
 			$this->data['menu'] = $menu;
 
@@ -724,6 +730,8 @@ class Parser extends MY_Controller {
 			$this->Content_model->parent_id = $parent;
 		}
 		$this->Content_model->content_list = array();
+		$this->Content_model->sort_order = array('date' => 'desc');
+
 		$this->Content_model->list_content(TRUE);
 
 		$recent = $this->Content_model->content_list;
