@@ -40,12 +40,11 @@ class Content_model extends MY_Model {
 				$this->db->where('type_id !=', $omit);
 			}
 		}
-
-		if($this->parent_id != '')
+		if(is_int($this->parent_id) && $this->parent_id > -1)
 		{
 			$this->db->where('parent_id', $this->parent_id);
 		}
-		if($this->type_id != '')
+		if(is_int($this->type_id) && $this->type_id > 0)
 		{
 			$this->db->where('type_id', $this->type_id);
 		}
@@ -73,16 +72,14 @@ class Content_model extends MY_Model {
 				$this->db->where('type_id !=', $omit);
 			}
 		}
-		if($this->parent_id != '')
+		if(is_int($this->parent_id) && $this->parent_id > -1)
 		{
 			$this->db->where('parent_id', $this->parent_id);
 		}
-
-		if($this->type_id != '')
+		if(is_int($this->type_id) && $this->type_id > 0)
 		{
 			$this->db->where('type_id', $this->type_id);
 		}
-
 		if($this->limit != '')
 		{
 			$this->db->limit($this->limit);
@@ -112,6 +109,7 @@ class Content_model extends MY_Model {
 		}
 		
 		$query = $this->db->get('c_content');
+		$this->debugging[] =  "<p>".$this->db->last_query()."</p>\r";
 	
 		if ($query->num_rows() > 0)
 		{
@@ -1033,6 +1031,40 @@ class Content_model extends MY_Model {
 		}
 
 		return FALSE;
+
+	}
+
+	function update_order()
+	{
+
+		$errors = array();
+
+		if(is_array($this->temp_value) && count($this->temp_value) > 0)
+		{
+
+			foreach($this->temp_value as $child)
+			{
+				$data = array(
+				'order' => $child['order'],
+				);
+				$this->db->where('content_id', $child['content_id']);
+				// update
+				if(!$this->db->update('c_content', $data))
+				{
+					$this->messages[] = sprintf($this->cms_labels['update_failure'],$child['title']);
+				}
+			}
+
+		}
+		if(count($errors) == 0)
+		{
+			return TRUE;
+		}
+		else
+		{
+			return FALSE;
+		}
+		
 
 	}
 

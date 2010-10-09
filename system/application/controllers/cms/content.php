@@ -92,7 +92,7 @@ class Content extends MY_Controller
 		}
 
 		// get filter for list
-		$params = $this->uri->uri_to_assoc();
+		$params = $this->uri->uri_to_assoc(3);
 		$limit = $this->input->post('limit');
 		if(array_key_exists('limit',$params))
 		{
@@ -100,7 +100,7 @@ class Content extends MY_Controller
 		}
 		if(!$limit || $limit == '')
 		{
-			$limit = 10;
+			$limit = $this->Site_model->limit_posts;
 		}
 
 		$this->Content_model->limit = $limit;
@@ -166,9 +166,12 @@ class Content extends MY_Controller
 		$html .=  form_label($this->cms_labels['content_type'], 'type_id');
 		$html .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
 
-		$form_options = array(10 => 10,20 => 20,30=>30,40=>40,50=>50);
+		$form_options = array(10 => 10, 20 => 20, 30 => 30, 40 => 40, 50 => 50);
+		$form_options[$this->Content_model->limit] = $this->Content_model->limit;
+		asort($form_options);
+		
 		$html .=  form_label($this->cms_labels['results_per_page'], 'limit');
-		$html .=  form_dropdown('limit', $form_options, $limit);
+		$html .=  form_dropdown('limit', $form_options, $this->Content_model->limit);
 		$html .= form_submit('filter', $this->cms_labels['results_filter']);
 		$html .= "</div>\r";
 
@@ -176,7 +179,7 @@ class Content extends MY_Controller
 		$html .= "<p class=\"align-center\">\r";
 		$html .= "{$results}<br />\r";
 		$this->load->library('pagination');
-		$base_url = '/cms/content/find';
+		$base_url = '/cms/content';
 		$base_url .= '/limit/'.$limit;
 		if ($this->Content_model->type_id != '')
 		{
@@ -491,6 +494,7 @@ class Content extends MY_Controller
 		$this->load->view('cms/cms_form_2col',$this->data);
 
 	}
+
 	function _form_edit()
 	{
 		$this->load->helper('form');
@@ -732,6 +736,17 @@ class Content extends MY_Controller
 		$html .=  form_dropdown('show_in_nav', $form_options, $this->Content_model->show_in_nav);
 		$html .= "</p>\n";
 
+		$form_options = array(
+		'id' => 'content_order',
+		'name' => 'content_order',
+		'class' => 'tiny_input',
+		'value' => $this->Content_model->content_order
+		);
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['order'], 'content_order');
+		$html .=  form_input($form_options);
+		$html .= "</p>\n";
+
 		$form_options = $this->User_model->get_list_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['author'], 'user_id');
@@ -920,6 +935,7 @@ class Content extends MY_Controller
 			$this->form_validation->set_rules('user_id', $this->cms_labels['author'], 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('parent_id', $this->cms_labels['parent'], 'required|is_natural');
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
+			$this->form_validation->set_rules('content_order', $this->cms_labels['order'], 'is_natural');
 
 			$tmp_field_id = $this->input->post('field_id');
 			$tmp_field_ref_name = $this->input->post('field_ref_name');
@@ -979,6 +995,11 @@ class Content extends MY_Controller
 				$this->Content_model->date_end_expiry = $this->input->post('date_end_expiry');
 				$this->Content_model->publish = $this->input->post('publish');
 				$this->Content_model->show_in_nav = $this->input->post('show_in_nav');
+				$this->Content_model->content_order = $this->input->post('content_order');
+				if($this->Content_model->content_order == '')
+				{
+					$this->Content_model->content_order = 0;
+				}
 
 				$this->Content_model->title_id = $this->input->post('title_id');
 				$this->Content_model->temp_lang = $this->input->post('content_lang');
@@ -1082,48 +1103,56 @@ class Content extends MY_Controller
 			// list active languages
 			$lang_links = array();
 			$this->Content_model->list_langs();
-			foreach($this->Content_model->lang_list as $llang)
+			if($this->Content_model->lang_count > 1)
 			{
-				$this->Content_model->clear_title();
-				$this->Content_model->temp_lang = $llang['ISO_639_3'];
-				$this->Content_model->temp_id = $this->Content_model->content_id;
-				$this->Content_model->load_title();
-
-				$temp_link = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$llang['ISO_639_3'];
-
-				if($llang['Native_Name'] != '')
+				foreach($this->Content_model->lang_list as $llang)
 				{
-					$temp_txt = $llang['Native_Name'];
+					$this->Content_model->clear_title();
+					$this->Content_model->temp_lang = $llang['ISO_639_3'];
+					$this->Content_model->temp_id = $this->Content_model->content_id;
+					$this->Content_model->load_title();
+	
+					$temp_link = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$llang['ISO_639_3'];
+	
+					if($llang['Native_Name'] != '')
+					{
+						$temp_txt = $llang['Native_Name'];
+					}
+					else
+					{
+						$temp_txt = $llang['Ref_Name'];
+					}
+					
+	
+					if($this->Content_model->title != '')
+					{
+						$temp_txt = $this->Content_model->title." ($temp_txt)";
+					}
+	
+					
+					$lang_links[] = anchor($temp_link,$temp_txt);
 				}
-				else
-				{
-					$temp_txt = $llang['Ref_Name'];
-				}
-				
-
-				if($this->Content_model->title != '')
-				{
-					$temp_txt = $this->Content_model->title." ($temp_txt)";
-				}
-
-				
-				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
 
 			$this->Content_model->scope = 'content';
 			$this->Content_model->temp_id = $this->Content_model->content_id;
 			$this->Content_model->temp_lang = $this->Content_model->temp_value;			
 			$my_uri = $this->Content_model->generate_uri();
+			$sort_uri = '/cms/content/sort_content/id/'.$this->Content_model->content_id.'/lang/'.$this->Content_model->temp_lang;
 
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
+			$sort_link = anchor($sort_uri,$this->cms_labels['sort_children'], array('title' => sprintf($this->cms_labels['sort_children_of'],$this->Content_model->title)));
 			
 			$menu .= '<h3>'.sprintf($this->cms_labels['options'],$this->cms_labels['editor'])."</h3>\r";
 			$menu .=  "<ul>\r";
-			$menu .=  "<li>".$my_link."\r";
-			$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
-			$menu .= ul($lang_links);
-			$menu .=  "</li>\r";
-	
+			$menu .=  "<li>".$my_link."</li>\r";
+			$menu .=  "<li>".$sort_link."</li>\r";
+			if($this->Content_model->lang_count > 1)
+			{
+				$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
+				$menu .= ul($lang_links);
+				$menu .=  "</li>\r";
+			}
 			$menu .=  "</ul>\r";
 
 		}
@@ -1215,7 +1244,6 @@ class Content extends MY_Controller
 		$html .= form_open($action, $attributes)."\r";
 		$html .= form_hidden('content_id', $this->Content_model->content_id)."\r";
 		$html .= form_fieldset($this->cms_labels['attachments']);
-		
 
 		$now_attached = array();
 
@@ -1354,5 +1382,189 @@ class Content extends MY_Controller
 			$this->Content_model->messages[] = $this->cms_labels['attachments_update_success'];
 		}
 	}
+
+	function sort_content()
+	{
+
+		$this->_process_sort();
+		
+		$params = $this->uri->uri_to_assoc(4);
+		if( array_key_exists('id',$params) && $params['id'] != '')
+		{
+			$this->Content_model->parent_id = intval($params['id']);
+		}
+		else
+		{
+			$this->Content_model->parent_id = 0;
+		}
+
+		if( array_key_exists('lang',$params) )
+		{
+			$this->Content_model->temp_lang = $params['lang'];
+		}
+		else
+		{
+			$this->Content_model->temp_lang = $this->Site_model->site_default_lang;
+		}
+
+		$this->_form_sort();
+		
+		$msg = $this->Content_model->_output_messages();
+		if($msg)
+		{
+			$this->data['msg'] = $msg;
+		}
+
+		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
+		$breadcrumb[] = anchor("cms/content",$this->cms_labels['content']);
+		$breadcrumb[] = $this->cms_labels['sort_children'];
+		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
+
+		if($this->Content_model->parent_id > 0)
+		{
+			$this->Content_model->temp_id = $this->Content_model->parent_id;
+			$this->Content_model->scope = 'content';
+			$this->Content_model->load_title();
+			$title = sprintf($this->cms_labels['sort_children_of'],$this->Content_model->title);
+		}
+		else
+		{
+			$title = sprintf($this->cms_labels['sort_children_of'],$this->cms_labels['site_root']);
+		}
+
+		$this->data['title_tag'] = $this->cms_labels['sort_children'];
+		$this->data['title_h1'] = $title;
+		
+		$this->data['sidebar'] = $this->_content_meta_menu();
+		$this->_load_cms_menus();
+
+		$this->load->view('cms/cms_form_2col',$this->data);
+
+	}
+	
+	function _form_sort()
+	{
+		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$this->Content_model->limit = '';
+		$this->Content_model->sort_by = '';
+		$this->Content_model->list_content();
+		
+		$action = "/cms/content/sort_content";
+		if($this->Content_model->parent_id != '')
+		{
+			$action .= "/id/".$this->Content_model->parent_id;
+		}
+		if($this->Content_model->temp_lang != '')
+		{
+			$action .= "/lang/".$this->Content_model->temp_lang;
+		}
+
+		$attributes = array('name' => "sort_menus", 'id' => "sort_menus");
+		$hidden = array(
+		'parent_id' => $this->Content_model->parent_id,
+		);
+		
+		$html = form_open($action,$attributes,$hidden)."\r";
+
+		$html .= "<div class=\"align-labels label-wide\">\r";
+
+
+		$html .= "<table class=\"properties left\">\r";
+		$html .= "<thead>\r";
+		$html .= "<tr>\r";
+		$html .= "<th id=\"hd_title\" class=\"align-left\">".$this->cms_labels['title']."</th>\r";
+		$html .= "<th id=\"hd_order\">".$this->cms_labels['order']."</th>\r";
+		$html .= "</tr>\r";
+		$html .= "</thead>\r";
+
+		$html .= "<tbody>\r";
+
+		foreach($this->Content_model->content_list as $child)
+		{
+			$row_header = form_hidden('content_id[]', $child['content_id']);
+			$row_header .= form_hidden('title[]', $child['title']);
+			$row_header .= $child['title'];
+	
+			$params = array(
+			'name'        => "order[]",
+			'id'          => "order[]",
+			'value'       => $child['order'],
+			'maxlength'   => '3',
+			'size'        => '3'
+			);
+
+			$input_order = form_input($params);
+			
+			$html .= "<tr>\r";
+			$html .= "<th headers=\"hd_title\" id=\"row_{$child['content_id']}\" class=\"align-left\">".$row_header."</th>\r";
+			$html .= "<td headers=\"hd_order row_{$child['content_id']}\">".$input_order."</td>\r";
+			$html .= "</tr>\r";
+
+		}
+
+		$html .= "</tbody>\r";
+		$html .= "</table>\r";
+
+		$html .= "</div>\r";
+
+		$html .= "<p>";
+		$html .= form_submit('submit', $this->cms_labels['save']);
+		$html .= "</p>\n";
+		$html .= form_close();
+
+		$this->data['form'] = $html;
+	}
+	
+	function _process_sort()
+	{
+
+		if($this->input->post('submit') != '')
+		{
+			// set validation rules
+			$this->load->library('form_validation');
+
+			$this->form_validation->set_rules('parent_id', $this->cms_labels['id'], 'required');
+			$this->form_validation->set_rules('content_id', $this->cms_labels['title'], 'required');
+			$this->form_validation->set_rules('order', $this->cms_labels['order'], 'required');
+
+			$form_is_valid = $this->form_validation->run();
+			
+			if ($form_is_valid)
+			{
+
+				$temp_ids = $this->input->post('content_id');
+				$temp_order = $this->input->post('order');
+				$temp_titles = $this->input->post('title');
+				$updates = array();
+	
+				foreach($temp_ids as $index => $id)
+				{
+					$temp_content = array(
+					'content_id' => $id,
+					'order' => $temp_order[$index],
+					'title' => $temp_titles[$index],
+					);
+					
+					$updates[] = $temp_content;
+				}
+
+				$this->Content_model->temp_value = $updates;
+				$updated = $this->Content_model->update_order();
+				
+				if($updated)
+				{
+					$this->Content_model->messages[] = $this->cms_labels['sort_update_success'];
+				}
+			}
+			else
+			{
+				$this->Content_model->messages[] = validation_errors();
+			}
+			
+			
+		}
+
+	}
+
 }
 ?>
