@@ -40,13 +40,21 @@ class Content_model extends MY_Model {
 				$this->db->where('type_id !=', $omit);
 			}
 		}
-		if(is_int($this->parent_id) && $this->parent_id > -1)
+		if($this->parent_id != '')
 		{
-			$this->db->where('parent_id', $this->parent_id);
+			$parent = intval($this->parent_id);
+			if($parent > -1)
+			{
+				$this->db->where('parent_id', $parent);
+			}
 		}
-		if(is_int($this->type_id) && $this->type_id > 0)
+		if($this->type_id != '')
 		{
-			$this->db->where('type_id', $this->type_id);
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where('type_id', $type);
+			}
 		}
 		if($this->link_mode == 0)
 		{
@@ -72,13 +80,21 @@ class Content_model extends MY_Model {
 				$this->db->where('type_id !=', $omit);
 			}
 		}
-		if(is_int($this->parent_id) && $this->parent_id > -1)
+		if($this->parent_id != '')
 		{
-			$this->db->where('parent_id', $this->parent_id);
+			$parent = intval($this->parent_id);
+			if($parent > -1)
+			{
+				$this->db->where('parent_id', $parent);
+			}
 		}
-		if(is_int($this->type_id) && $this->type_id > 0)
+		if($this->type_id != '')
 		{
-			$this->db->where('type_id', $this->type_id);
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where('type_id', $type);
+			}
 		}
 		if($this->limit != '')
 		{

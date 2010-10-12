@@ -162,6 +162,12 @@ class Parser extends MY_Controller {
 
 		if(is_array($this->breadcrumb_links) && count($this->breadcrumb_links) > 0)
 		{
+			if($this->media_view)
+			{
+				$tmp_parent = array_pop($this->breadcrumb_links);
+				$this->breadcrumb_links[] = anchor($this->temp_uri,$tmp_parent);
+				$this->breadcrumb_links[] = $this->File_model->title;
+			}
 			$this->data['breadcrumb_links'] = $this->breadcrumb_links;
 		}
 		
@@ -442,7 +448,6 @@ class Parser extends MY_Controller {
 		if($this->media_view)
 		{
 			$this->view = 'themes/'.$this->Site_model->theme.'/media';
-			$this->breadcrumb_links[] = $this->File_model->title;
 
 			$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
 			$media_vars = array(
@@ -591,9 +596,8 @@ class Parser extends MY_Controller {
 		$this->Content_model->temp_lang = $this->Content_model->lang_ISO_639_3;
 		$this->Content_model->type_id = '';
 		$this->Content_model->limit = '';
-		$this->Content_model->limit = '';
 
-		$this->Content_model->sort_order = array('title' => 'asc');
+		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
 		$menu = $this->Content_model->get_children(true,true);
 		$this->data['menu'] = $menu;
 
@@ -623,14 +627,16 @@ class Parser extends MY_Controller {
 			$this->Content_model->content_id = $entry['content_id'];
 			$children[$index]['attachments'] = $this->_attachment_info();
 		}
-
+		
 		$this->data['children'] = $children;
 		$this->data['total_children'] = $this->Content_model->content_count;
+
 		$this->data['page'] = $this->Content_model->page;
 		$this->data['limit'] = $this->Content_model->limit;
 		
 		// number of pages
 		$this->data['pages'] = ceil($this->Content_model->content_count / $this->Content_model->limit);
+
 		$this->load->library('pagination');
 		
 		// recently added children
@@ -681,7 +687,7 @@ class Parser extends MY_Controller {
 			$this->view = 'themes/'.$this->Site_model->theme.'/home';
 			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 
-			$this->Content_model->sort_order = array('title' => 'asc');
+			$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
 			$menu = $this->Content_model->get_descendant_content();
 			$this->data['menu'] = $menu;
 
