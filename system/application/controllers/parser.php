@@ -972,6 +972,24 @@ class Parser extends MY_Controller {
 			}
 		}
 		$dates['date_created_short'] = $date_short;
+
+		// month and year date according to the content language
+		$order_date_mmm_yyyy = $this->lang->line('order_date_mmm_yyyy');
+		$date_mmm_yyyy = '';
+		foreach($order_date_mmm_yyyy as $dd)
+		{
+			if(array_key_exists($dd,$date_info))
+			{
+				$date_mmm_yyyy .= $date_info[$dd];
+			}
+			else
+			{
+				$date_mmm_yyyy .= $dd;
+			}
+		}
+		$dates['date_created_mmm_yyyy'] = $date_mmm_yyyy;
+
+		$dates['date_created_parts'] = $date_info;
 		return $dates;
 		
 	}

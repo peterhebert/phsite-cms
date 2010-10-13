@@ -50,6 +50,9 @@ $lang['cal_month_lg']['10'] = "October";
 $lang['cal_month_lg']['11'] = "November";
 $lang['cal_month_lg']['12'] = "December";
 
+// September 2008
+$lang['order_date_mmm_yyyy'] = array('month_lg',' ','year');
+
 // 30 Sept 2008
 $lang['order_date_short'] = array('day',' ','month_sm',' ','year');
 // Thursday, September 30, 2008

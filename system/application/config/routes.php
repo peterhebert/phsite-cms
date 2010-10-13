@@ -47,7 +47,8 @@ $route['cms'] = "cms/cms/index";
 $route['cms/login'] = "cms/cms/login";
 $route['cms/logout'] = "cms/cms/logout";
 $route['cms/forgot_password'] = "cms/cms/forgot_password";
-$route['cms/content/([limit|page]{1})(.*)'] = "cms/content/index/$1$2";
+$route['cms/content/([limit|page]{1})/([0-9]+)/?'] = "cms/content/index/$1/$2";
+$route['cms/content/([limit|page]{1})/([0-9]+)/([limit|page]{1})/([0-9]+)'] = "cms/content/index/$1/$2/$3/$4";
 $route['cms/([content|install|media|setup|user]{1})(.*)'] = "cms/$1$2";
 
 $route['image/(root|browser|embed|ajax_preview)'] = "image/$1";

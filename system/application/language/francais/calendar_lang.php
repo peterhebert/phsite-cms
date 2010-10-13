@@ -49,8 +49,8 @@ $lang['cal_month_lg']['10'] = "octobre";
 $lang['cal_month_lg']['11'] = "novembre";
 $lang['cal_month_lg']['12'] = "d&eacute;cembre";
 
-$lang['date_long'] = "%s, le %u %s %u";
-$lang['date_short'] = "le %u %s %u";
+// septembre 2008
+$lang['order_date_mmm_yyyy'] = array('month_lg',' ','year');
 
 // le 30 sept 2008
 $lang['order_date_short'] = array('le ','day',' ','month_sm',' ','year');
