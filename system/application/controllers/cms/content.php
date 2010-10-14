@@ -411,35 +411,6 @@ class Content extends MY_Controller
 
 	}
 
-	function site_map()
-	{
-
-		$this->Content_model->levels = -1;
-		$this->Content_model->link_mode = 1;
-		$this->Content_model->lang_mode = $this->Content_model->lang_count;
-
-		if($this->Content_model->lang_ISO_639_3 == '')
-		{
-			$this->Content_model->temp_lang = $this->Site_model->temp_lang;
-		}
-
-		$body = "<p>".$this->cms_labels['click_to_edit']."</p>\r";
-		$body .= $this->Content_model->site_map();
-
-		$this->data['form'] = $body;
-
-		$this->data['title_h1'] = $this->cms_labels['site_map'];
-		$this->data['title_tag'] = $this->cms_labels['site_map'];
-
-		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
-		$breadcrumb[] = $this->cms_labels['site_map'];
-		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
-
-		
-		$this->load->view('cms/cms_form',$this->data);
-	}
-
-
 	function edit()
 	{
 		if($this->session->userdata('message'))
@@ -447,7 +418,6 @@ class Content extends MY_Controller
 			$this->Content_model->messages[] = $this->session->userdata('message');
 			$this->session->unset_userdata('message');
 		}
-		
 
 		$this->_process_edit();
 		

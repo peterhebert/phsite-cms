@@ -232,10 +232,8 @@ class MY_Controller extends Controller {
 		$this->data['type_list'] = $this->Content_model->type_list;
 		$this->data['objects'] = $this->load->view('cms/content_types_list',$this->data, true);
 
-
 		$html .= "<ul>\r";
 		$html .= "<li>".anchor("cms/content",$this->cms_labels['content_find'])."</li>\r";
-		$html .= "<li>".anchor("cms/content/site_map",$this->cms_labels['site_map'])."</li>\r";
 		$form_options = $this->Content_model->new_content_dropdown();
 		$html .= "<li class=\"double-spaced\">".$this->cms_labels['content_new']."<br />\r";
 		$html .= form_dropdown('new_content',$form_options).' ';
