@@ -1,23 +1,33 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>Search Results | phSite</title>
+<head><?php
+$header_titles = array();
+if(isset($title_tag))
+{
+	$header_titles[] = $title_tag;
+}
+$header_titles[] = $cms_labels['search_results'];
+$header_titles[] = $cms_labels['phsite_cms'];
+if (isset($site['title'])) {
+	$header_titles[] = $site['title'];
+}
+$title_tag = implode(' | ',$header_titles); 
+?>
+<title><?php echo $title_tag; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/simple.css" rel="stylesheet" type="text/css" />
-<link href="<?php echo BASE_PATH; ?>/assets/css/jqueryFileTree.css" rel="stylesheet" type="text/css" />
-</head>
+<link href="<?php echo BASE_PATH; ?>/assets/css/reset.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/grid.css" rel="stylesheet" type="text/css" media="screen" />
+<link href="<?php echo BASE_PATH; ?>/assets/css/admin.css" rel="stylesheet" type="text/css" media="screen" />
+<?php if (isset($custom_header)){
+	echo $custom_header;
+}
+?></head>
 <body>
 <?php require_once('masthead.php'); ?>
-<div id="page">
-<?php if (isset($breadcrumb) && is_array($breadcrumb) && count($breadcrumb) > 0) {
-	$bc = implode(' : ',$breadcrumb);
-?>
-<div class="page-wrap block" id="breadcrumb"><?php echo $bc; ?></div>
-<?php } ?>
-
-	
-	<div class="page-wrap block">
+<div class="wrap pad-h">
+	<div id="container" class="margins">
+		<div id="content">
 		<h1><?php echo $cms_labels['search_results']; ?></h1>
 		<?php 
 		if (isset($keyword_search)) {
@@ -42,8 +52,15 @@
 			echo ul($content_results);
 		}
 		?>
+		</div>
 	</div>
-	<div class="page-wrap block" id="footer"><?php require_once('footer.php'); ?></div>
 </div>
+<div class="wrap" id="footer"><?php require_once('footer.php'); ?></div>
+<?php
+require_once('js_includes.php');
+if (isset($custom_js)){
+	echo $custom_js;
+}
+?>
 </body>
 </html>
