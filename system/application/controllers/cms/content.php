@@ -770,11 +770,11 @@ class Content extends MY_Controller
 	
 		}
 
-		if($this->Content_model->date_created == '0000-00-00 00:00:00')
+		if($this->Content_model->date_created == '0000-00-00 00:00:00' || preg_match('#^-(.*)$#',$this->Content_model->date_created))
 		{
 			$this->Content_model->date_created = '';
 		}
-		if($this->Content_model->date_end_expiry == '0000-00-00 00:00:00')
+		if($this->Content_model->date_end_expiry == '0000-00-00 00:00:00' || preg_match('#^-(.*)$#',$this->Content_model->date_end_expiry))
 		{
 			$this->Content_model->date_end_expiry = '';
 		}
