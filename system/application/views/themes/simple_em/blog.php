@@ -92,7 +92,7 @@ echo $html_header;
 
 				$pconfig = array(
 				'base_url' => site_url($resource_uri),
-				'total_rows' => $total_children+30,
+				'total_rows' => $total_children,
 				'per_page' => $limit,
 				'cur_page' => $page,
 				'first_text' => $cms_labels['first'],
