@@ -23,6 +23,7 @@ class Parser extends MY_Controller {
 		$this->load->model('File_model');
 		$this->load->model('User_model');
 		$this->load->helper(array('url', 'image'));
+		$this->load->library('pagination');
 
 		$this->data['mime_types'] = $this->File_model->mime_types;
 		$this->data['image_types'] = $this->File_model->image_types;
@@ -636,8 +637,6 @@ class Parser extends MY_Controller {
 		
 		// number of pages
 		$this->data['pages'] = ceil($this->Content_model->content_count / $this->Content_model->limit);
-
-		$this->load->library('pagination');
 		
 		// recently added children
 		if($this->page > 1)
@@ -688,6 +687,7 @@ class Parser extends MY_Controller {
 			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 
 			$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+			$this->Content_model->limit = '';
 			$menu = $this->Content_model->get_descendant_content();
 			$this->data['menu'] = $menu;
 
@@ -720,12 +720,16 @@ class Parser extends MY_Controller {
 			$this->Content_model->limit = $this->Site_model->limit_posts;
 
 			$this->data['recent'] = $this->_recent();
+			$this->data['recent_total'] = $this->Content_model->content_count;
+			$this->data['limit'] = $this->Site_model->limit_posts;
+			$this->data['page'] = $this->page;
 		}
 
 	}
 
 	function _recent($parent=NULL)
 	{
+		$this->Content_model->type_id = '';
 		$this->Content_model->list_types();
 		if($this->home)
 		{

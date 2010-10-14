@@ -111,7 +111,7 @@ class MY_Pagination extends CI_Pagination {
 		}
 
 		// Render the "previous" link
-		if  ($this->show_prev_next && $this->cur_page > 1  && $num_pages > $total_links)
+		if  ($this->show_prev_next && $this->cur_page > 1)
 		{
 			$i = $this->cur_page - 1;
 			$txt = trim($this->prev_link.' '.$this->prev_text);
@@ -143,7 +143,7 @@ class MY_Pagination extends CI_Pagination {
 		}
 
 		// Render the "next" link
-		if ($this->show_prev_next && $this->cur_page < $num_pages && $num_pages > $total_links)
+		if ($this->show_prev_next && $this->cur_page < $num_pages)
 		{
 			$i = $this->cur_page + 1;
 			$txt = trim($this->next_text.' '.$this->next_link);
