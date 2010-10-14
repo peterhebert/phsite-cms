@@ -53,68 +53,123 @@ if (isset($theme_path)) {
 			{
 				echo "<h2>".$cms_labels['recent_content']."</h2>\r";
 
-				foreach($recent as $entry)
+				foreach($recent as $index => $entry)
 				{
-				
-					if(array_key_exists('title',$entry) && $entry['title'] != '') 
+					$cls = '';
+					if($index == 0) 
 					{
-						$title = $entry['title'];
-						if(array_key_exists('uri',$entry)) 
-						{
-							$pl_title = sprintf($cms_labels['permalink_title'],$entry['title']);
-							$title = anchor($entry['uri'], $entry['title'], array('title' => $pl_title));
-					
-						}
-						echo "<h3>".$title."</h3>\r";
+						$cls = ' first';
 					}
-				
-					if(array_key_exists('subtitle',$entry) && $entry['subtitle'] != '') 
+					echo "<article><div class=\"block article{$cls}\">";
+					// generate permalink
+					if(isset($entry['uri']) && $entry['uri'] != '') 
+					{
+						$pl_title = sprintf($cms_labels['permalink_title'],$entry['title']);
+					}
+
+					// entry title
+					if(isset($entry['title']) && $entry['title'] != '') 
+					{
+						echo "<h3>";
+						if(isset($pl_title))
+						{
+							echo anchor($entry['uri'],$entry['title']);
+						}
+						else
+						{
+							echo $entry['title'];
+						}
+						echo "</h3>\r";
+					}
+
+					// entry subtitle
+					if(isset($entry['subtitle']) && $entry['subtitle'] != '') 
 					{
 						echo "<h4>{$entry['subtitle']}</h4>\r";
 					}
-					
-					if(array_key_exists('author',$entry)) 
+					// byline
+					if(isset($entry['author'])) 
 					{
 						$user_name_formatted = $entry['author']['name_first'].' '.$entry['author']['name_last'];
 						$byline = sprintf($cms_labels['posted_by'],$entry['date_created'],$user_name_formatted);
+
+						// parent title
+						if(isset($entry['parent_title']) && $entry['parent_title'] != '') 
+						{
+							$to = anchor($entry['parent_uri'],$entry['parent_title']);
+							$byline = sprintf($cms_labels['posted_to_by'],$to,$user_name_formatted,$entry['date_created_short']);
+						}
 						echo "<p>{$byline}</p>\r";
 					}
-					
-					if(array_key_exists('excerpt',$entry) && $entry['excerpt'] != '') 
+					// image_poster
+					if(array_key_exists('attachments',$entry) && array_key_exists('image_poster',$entry)) 
 					{
-						echo $entry['excerpt'];
-					} 
-					else if (array_key_exists('body',$entry) && $entry['body'] != '') 
-					{
-						echo $entry['body'];
-					}
-					
-					if(array_key_exists('keyword_links',$entry) && $entry['keyword_links'] != '') 
-					{
-						echo "<p>".$cms_labels['keywords']." : ".$entry['keyword_links']."</p>\r";
-					}
+
+						echo "<div class=\"image-left\">";
 				
-					if(array_key_exists('uri',$entry)) 
-					{
-						$pl_title = sprintf($cms_labels['permalink_title'],$entry['title']);
-						
-				
-						if(array_key_exists('excerpt',$entry) && $entry['excerpt'] != '') 
+						foreach($entry['attachments'] as $file)
 						{
-							$pl_label = $cms_labels['read_more'];
-						} 
-						else
-						{
-							$pl_label = $cms_labels['permalink'];
+							if($file['media_id'] == $entry['image_poster'])
+							{
+								if($file['mime_cat'] == 'image')
+								{
+									$attributes = array(
+									'alt' => $file['title'],
+									);
+									echo view_image($file['server_path'],$this->Site_model->img_size_sm,$attributes);
+								}
+							}
 						}
-				
-						$permalink = anchor($entry['uri'], $pl_label, array('title' => $pl_title));
+						echo "</div>\r";
+					}
+
+					// excerpt
+					if(isset($entry['excerpt']) && $entry['excerpt'] != '') 
+					{
+						echo "<p>{$entry['excerpt']}</p>\r";
+						$permalink = anchor($entry['uri'],$cms_labels['read_more'],array('title' => $entry['title']));
 						echo "<p>{$permalink}</p>\r";
 					}
-					
-					
-				}
+					else
+					{
+						// if no excerpt, try to print body
+						if(isset($entry['body']) && $entry['body'] != '') 
+						{
+							echo $entry['body'];
+						}
+					}
 
+					// keywords
+					if(isset($entry['keyword_links'])) 
+					{
+						echo "<p>{$cms_labels['keywords']} : {$entry['keyword_links']}</p>\r";
+					}
+					echo "</div></article>\r";
+				}
+			}
+			// pagination
+			if (isset($recent_total)) {
+
+				$pconfig = array(
+				'base_url' => site_url(''),
+				'total_rows' => $recent_total,
+				'per_page' => $limit,
+				'cur_page' => $page,
+				'first_text' => $cms_labels['first'],
+				'last_text' => $cms_labels['last'],
+				'prev_text' => $cms_labels['entries_prev'],
+				'next_text' => $cms_labels['entries_next'],
+				'page_prefix' => 'p',
+				'prev_link' => '',
+				'next_link' => '',
+				'show_numbers' => false,
+				'show_prev_next' => true,
+				'show_first_last' => false,
+				);
+				$this->pagination->initialize($pconfig); 
+				$page_links = $this->pagination->create_links_proper();
+		
+				echo "<p>{$page_links}</p>\r";
 			}
 
 			?>
