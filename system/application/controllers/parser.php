@@ -657,6 +657,7 @@ class Parser extends MY_Controller {
 		$this->data['recent'] = $recent;
 
 		// see if there are other languages for this content
+		$this->Content_model->lang_load();
 		$other_langs = $this->Content_model->get_other_lang_ids();
 		if($other_langs)
 		{

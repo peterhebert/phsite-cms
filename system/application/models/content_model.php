@@ -355,7 +355,7 @@ class Content_model extends MY_Model {
 		
 		$this->db->where('scope', $this->scope);
 		$this->db->where('rel_id', $this->content_id);
-		$this->db->where('lang_ISO_639_3 !=', $this->temp_lang);
+		$this->db->where('lang_ISO_639_3 !=', $this->lang_ISO_639_3);
 		$query = $this->db->get('c_titles');
 		
 		if ($query->num_rows() > 0)
