@@ -173,7 +173,7 @@ class Parser extends MY_Controller {
 			{
 				$tmp_parent = array_pop($this->breadcrumb_links);
 				$this->breadcrumb_links[] = anchor($this->temp_uri,$tmp_parent);
-				$this->breadcrumb_links[] = $this->File_model->title;
+				$this->breadcrumb_links[] = $this->cms_labels['gallery'];
 			}
 			$this->data['breadcrumb_links'] = $this->breadcrumb_links;
 		}
