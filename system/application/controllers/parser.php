@@ -617,12 +617,14 @@ class Parser extends MY_Controller {
 
 		foreach($children as $index => $entry)
 		{
+			$zentry =& $entry;
+			
 			// load author user data
 			$this->User_model->temp_id = $entry['user_id'];
 			$this->User_model->load_user();
 			if($this->User_model->name_first != '')
 			{
-				$children[$index]['author'] = array(
+				$zentry['author'] = array(
 				'name_first' => $this->User_model->name_first,
 				'name_last' => $this->User_model->name_last,
 				'username' => $this->User_model->username,
@@ -630,9 +632,15 @@ class Parser extends MY_Controller {
 				);
 			}
 			
+			// format date info for entry
+			$dates = $this->_format_dates($entry['date_created'],$entry['date_end_expiry']);
+			$zentry = array_merge($zentry,$dates);
+			
 			// get attachments to entry
 			$this->Content_model->content_id = $entry['content_id'];
-			$children[$index]['attachments'] = $this->_attachment_info();
+			$zentry['attachments'] = $this->_attachment_info();
+			
+			$children[$index] = $zentry;
 		}
 		
 		$this->data['children'] = $children;
