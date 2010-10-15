@@ -55,6 +55,7 @@ $route['image(/?)(.*)'] = "image/index$1$2";
 $route['filetree(/?)(.*)'] = "filetree/index$1$2";
 
 $route['search(/?)(.*)'] = "search$1$2";
+$route['test(/?)(.*)'] = "test$1$2";
 $route['(.*)'] = "parser/index/$1";
 
 
