@@ -898,7 +898,7 @@ class MY_Model extends Model {
 			'rel_id' => $meta['rel_id'],
 			'field_id' => $meta['field_id'],
 			'field_ref_name' => $meta['field_ref_name'],
-			'value' => $meta['value'],
+			'value' => utf8_encode($meta['value']),
 			'lang_ISO_639_3' => '',
 			);
 
