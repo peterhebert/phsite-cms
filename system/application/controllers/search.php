@@ -34,6 +34,8 @@ class Search extends MY_Controller {
 			// media matches
 		}
 
+		$this->_menu();
+
 		$this->view = 'themes/'.$this->Site_model->theme.'/search_results';
 
 		$this->load->view($this->view,$this->data);
@@ -71,13 +73,22 @@ class Search extends MY_Controller {
 		$bclinks[] = anchor("",$this->cms_labels['home']);
 		$bclinks[] = $this->cms_labels['search_results'];
 		$this->data['breadcrumb_links'] = $bclinks;
+		$this->_menu();
 
 		$this->view = 'themes/'.$this->Site_model->theme.'/search_results';
 
 		$this->load->view($this->view,$this->data);
 
 	}
-	
+
+	function _menu()
+	{
+		// get top-level menu
+		$this->Content_model->reset_vars();
+		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
+		$this->data['top_menu'] = $top_menu;
+	}	
 
 }
 ?>

@@ -103,6 +103,12 @@ class Parser extends MY_Controller {
 				}
 				$html .= '<p>'.anchor($home_uri,$this->cms_labels['home'])."</p>";
 
+				// get top-level menu
+				$this->Content_model->reset_vars();
+				$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+				$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
+				$this->data['top_menu'] = $top_menu;
+
 				$this->data['message'] = $html;
 				$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
 			}
