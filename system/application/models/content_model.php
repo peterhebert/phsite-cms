@@ -173,7 +173,7 @@ class Content_model extends MY_Model {
 				   $tmp['uri_title'] = $r2->uri_title;
 				   $tmp['subtitle'] = $r2->subtitle;
 				   $tmp['keywords'] = $r2->keywords;
-				   $tmp['title_updated'] = $r2->title_updated;
+				   $tmp['title_updated'] = $r2->date_updated;
 				   $tmp['lang_ISO_639_3'] = $r2->lang_ISO_639_3;
 
 				}
@@ -383,7 +383,7 @@ class Content_model extends MY_Model {
 				'lang_Ref_Name' => $this->lang_Ref_Name,
 				'lang_Inverted_Name' => $this->lang_Inverted_Name,
 				'lang_Native_Name' => $this->lang_Native_Name,
-				'title_updated' => $row['title_updated'],
+				'title_updated' => $row['date_updated'],
 				'uri' => $tmp_uri
 				);
 

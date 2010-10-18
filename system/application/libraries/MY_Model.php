@@ -979,7 +979,7 @@ class MY_Model extends Model {
 		   $this->subtitle = $row->subtitle;
 		   $this->keywords = $row->keywords;
 		   $this->temp_lang = $row->lang_ISO_639_3;
-		   $this->title_updated = $row->title_updated;
+		   $this->title_updated = $row->date_updated;
 		}
 
     }
@@ -1011,7 +1011,7 @@ class MY_Model extends Model {
 		   $this->uri_title = $row->uri_title;
 		   $this->subtitle = $row->subtitle;
 		   $this->keywords = $row->keywords;
-		   $this->title_updated = $row->title_updated;
+		   $this->title_updated = $row->date_updated;
 
 		   return true;
 		}
