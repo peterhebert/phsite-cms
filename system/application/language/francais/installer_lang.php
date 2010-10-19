@@ -26,6 +26,8 @@ $lang['installer'] = array(
 'db_config_failure' => 'Le fichier configuration de la connection &agrave; la base de donn&eacute;es ne pouvait pas &eacute;t&eacute; &eacute;crit',
 'admin_user_success' => 'Le compte d\'utilisateur administratif a &eacute;t&eacute; cr&eacute;e',
 'admin_user_failure' => 'Le compte d\'utilisateur administratif ne pouvait pas &eacute;t&eacute; cr&eacute;e',
+'ci_config_success' => 'Le fichier configuration principal a &eacute;t&eacute; &eacute;crit',
+'ci_config_failure' => 'Le fichier configuration principal (config.php) ne pouvait pas &eacute;t&eacute; &eacute;crit',
 );
 
 $lang['status_labels'] = array(

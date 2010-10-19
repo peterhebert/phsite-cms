@@ -27,6 +27,8 @@ $lang['installer'] = array(
 'db_config_failure' => 'The database configuration file could not be written',
 'admin_user_success' => 'The admin user was created successfully',
 'admin_user_failure' => 'The admin user could not be created',
+'ci_config_success' => 'The main configuration file was written successfully',
+'ci_config_failure' => 'The main configuration file (config.php) could not be written',
 );
 
 $lang['db_drivers'] = array(
