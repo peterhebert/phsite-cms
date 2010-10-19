@@ -37,7 +37,7 @@ class MY_Model extends Model {
 	var $field_id, $field_ref_name, $field_input_type, $field_allow_multiple, $field_validation, $field_needs_lang;
 	
 	// type variables
-	var $type_id, $type_uri_name, $type_list = array(), $index_home, $index_rss, $menu_children;
+	var $type_id, $type_uri_name, $type_list = array(), $parent_type, $is_index, $index_home, $index_rss, $menu_children;
 	var $omit_types_home = array(), $omit_types_rss = array();
 
 	// labels for fields, types 
@@ -281,6 +281,8 @@ class MY_Model extends Model {
 			$this->type_id = $row['type_id'];
 			$this->scope = $row['scope'];
 			$this->type_uri_name = $row['type_uri_name'];
+			$this->parent_type = $row['parent_type'];
+			$this->is_index = $row['is_index'];
 			$this->index_home = $row['index_home'];
 			$this->index_rss = $row['index_rss'];
 			$this->menu_children = $row['menu_children'];
@@ -297,6 +299,8 @@ class MY_Model extends Model {
 		$type_data = array(
 		'scope' => $this->scope,
 		'type_uri_name' => $this->type_uri_name,
+		'parent_type' => $this->parent_type,
+		'is_index' => $this->is_index,
 		'index_home' => $this->index_home,
 		'index_rss' => $this->index_rss,
 		'menu_children' => $this->menu_children,
@@ -348,6 +352,8 @@ class MY_Model extends Model {
 			$temp =  array(
 			'type_id' => $row->type_id,
 			'type_uri_name' => $row->type_uri_name,
+			'parent_type' => $row->parent_type,
+			'is_index' => $row->is_index,
 			'index_home' => $row->index_home,
 			'index_rss' => $row->index_rss,
 			'menu_children' => $row->menu_children,

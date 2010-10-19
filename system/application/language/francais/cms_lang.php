@@ -39,6 +39,11 @@ $lang['cms_labels'] = array(
 'content_type_update_success' => "Le type de contenu a &eacute;t&eacute; mise &agrave; jour",
 'content_type' => "Type de contenu",
 'content_types' => "Types de contenu",
+
+'content_type_is_index' => "Type indexe",
+'note_type_index' => "Une type indexe est utilis&eacute; pour cr&eacute;er une page indexe de contenu p&eacute;riodique. Des fils de syndication (RSS, Atom, etc.) seront disponibles pour toutes ces types.",
+'content_type_parent' => "Type parent",
+
 'content_update_failure' => "Le contenu ne pouvait pas &ecirc;tre mise &agrave; jour",
 'content_update_success' => "Le contenu a &eacute;t&eacute; mise &agrave; jour",
 'content' => "Contenu",

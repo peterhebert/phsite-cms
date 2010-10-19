@@ -1590,7 +1590,7 @@ class Setup extends MY_Controller
 
 		$this->_load_cms_menus();
 
-		$this->load->view('cms/cms_form',$this->data);
+		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function _form_content_type()
@@ -1640,6 +1640,33 @@ class Setup extends MY_Controller
 		$html .= "</p>\r";
 		$html .= "<p class=\"indent-wide\">".$this->cms_labels['note_type_uri_name']."</p>\r";
 
+		// is index for purposes of rss and serial content types?
+		$form_options = array(
+		'name'        => 'is_index',
+		'id'          => 'is_index',
+		'value'       => 1,
+		'checked'     => FALSE,
+		);
+
+		if($this->Content_model->is_index == 1)
+		{
+			$form_options['checked'] = TRUE;
+		}
+		
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['content_type_is_index'], 'is_index');
+		$html .= form_checkbox($form_options);
+		$html .= "</p>\r";
+		$html .= "<p class=\"indent-wide\">".$this->cms_labels['note_type_index']."</p>\r";
+
+		// parent types
+		$parent_types = $this->Content_model->index_types_dropdown();
+		$html .= "<p>\r";
+		$html .= form_label($this->cms_labels['content_type_parent'], 'parent_type');
+		$html .= form_dropdown('parent_type', $parent_types, $this->Content_model->parent_type); 
+		$html .= "</p>\r";
+
+		// index on home page?
 		$form_options = array(
 		'name'        => 'index_home',
 		'id'          => 'index_home',
@@ -1820,6 +1847,14 @@ class Setup extends MY_Controller
 			// get values from form post data
 			$this->Content_model->type_id = $this->input->post('type_id');
 			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
+			$this->Content_model->is_index = $this->input->post('is_index');
+			$this->Content_model->parent_type = $this->input->post('parent_type');
+
+			if($this->input->post('is_index') == 1)
+			{
+				$this->Content_model->parent_type = 0;
+			}
+
 			$this->Content_model->index_home = $this->input->post('index_home');
 			$this->Content_model->index_rss = $this->input->post('index_rss');
 			$this->Content_model->menu_children = $this->input->post('menu_children');

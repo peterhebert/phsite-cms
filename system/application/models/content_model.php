@@ -440,16 +440,18 @@ class Content_model extends MY_Model {
 
     function get_parents_dropdown()
     {
+		$this->temp_id = $this->type_id;
+		$this->load_type();
 
 		$parents['0'] = $this->cms_labels['site_root'];
 
-		if($this->type_id == 2)
+		if($this->parent_type > 0)
 		{
 			if($this->content_id != '')
 			{
 				$this->db->where('c_content.content_id !=',$this->content_id);
 			}
-			$this->db->where('type_id',3);
+			$this->db->where('type_id',$this->parent_type);
 	
 			if($this->temp_lang != '')
 			{
@@ -474,6 +476,8 @@ class Content_model extends MY_Model {
 		}
 		else
 		{
+			$index_types = $this->list_index_types();
+
 			if($this->content_id != '')
 			{
 	
@@ -487,7 +491,14 @@ class Content_model extends MY_Model {
 				$this->db->where('parent_id !=',$this->content_id);
 				$this->db->where('c_content.content_id !=',$this->content_id);
 			}
-			$this->db->where('type_id !=',2);
+
+			if(count($index_types) > 0)
+			{
+				foreach($index_types as $itype)
+				{
+					$this->db->where('type_id !=',$itype['type_id']);
+				}
+			}
 	
 			if($this->temp_lang != '')
 			{
@@ -1202,6 +1213,46 @@ class Content_model extends MY_Model {
 		$this->show_in_nav = '';
 		
 	}
+
+	function list_index_types()
+    {
+		$this->scope = 'content';
+		$this->list_types();
+
+		$list = array();
+		foreach($this->type_list as $row)
+		{
+			if($row['is_index'] == 1)
+			{
+				$list[] = $row;
+			}
+		}
+		return $list;
+
+	}
+
+	function index_types_dropdown()
+    {
+		
+		$itypes = $this->list_index_types();
+		$list = array(0 => $this->cms_labels['none']);
+		foreach($itypes as $row)
+		{
+			if($row['type_id'] != $this->type_id)
+			{
+				if($row['label'] != '')
+				{
+					$list[$row['type_id']] = $row['label'];
+				} else {
+					$list[$row['type_id']] = $row['type_uri_name'];
+				}
+			}
+
+		}
+
+		return $list;
+	}
+
 
 }
 
