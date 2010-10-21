@@ -20,7 +20,7 @@ $config['tables'] = array(
 's_labels' => array('label_id', 'scope', 'rel_id', 'rel_name', 'label', 'lang_ISO_639_3'),
 's_lists' => array('list_id', 'list_ref_name'),
 's_site_prefs' => array('site_id', 'theme', 'timezone', 'default_lang', 'default_content_type', 'date_created', 'date_updated', 'home_content_id', 'home_content_type', 'site_admin_id', 'site_editor_id', 'img_size_th', 'img_size_sm', 'img_size_md', 'img_size_lg', 'limit_posts', 'limit_thumbs'),
-'s_types' => array('type_id', 'scope', 'type_uri_name'),
+'s_types' => array('type_id', 'scope', 'type_uri_name','is_index','parent_type','index_home','index_rss','menu_children'),
 's_users' => array('user_id', 'name_first', 'name_last', 'username', 'password', 'timezone', 'default_lang', 'email')
 );
 
@@ -38,7 +38,7 @@ $config['tables_mssql'] = array(
 's_labels' => "CREATE TABLE IF NOT EXISTS \"%s\" (\"label_id\" int NOT NULL IDENTITY, \"scope\" ntext NOT NULL, \"rel_id\" int NOT NULL COMMENT 'primary id of related item', \"rel_name\" ntext COMMENT 'human-readable name of of related item', \"label\" ntext NOT NULL, \"lang_ISO_639_3\" nchar(3) NOT NULL DEFAULT 'eng', PRIMARY KEY (\"label_id\"))",
 's_lists' => "CREATE TABLE IF NOT EXISTS \"%s\" (\"list_id\" int NOT NULL IDENTITY, \"list_ref_name\" ntext NOT NULL, PRIMARY KEY (\"list_id\"))",
 's_site_prefs' => "CREATE TABLE IF NOT EXISTS \"%s\" (\"site_id\" int NOT NULL IDENTITY, \"theme\" ntext, \"timezone\" nvarchar(100) NOT NULL DEFAULT 'America/Vancouver' COMMENT 'default time zone for site', \"default_lang\" nvarchar(3) NOT NULL DEFAULT 'eng', \"default_content_type\" int NOT NULL DEFAULT '1', \"date_created\" datetime NOT NULL, \"date_updated\" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, \"home_content_id\" int NOT NULL DEFAULT '0', \"site_admin_id\" int NOT NULL DEFAULT '1', \"site_editor_id\" int NOT NULL DEFAULT '1', \"img_size_th\" smallint(5) NOT NULL DEFAULT '120', \"img_size_sm\" smallint(5) NOT NULL DEFAULT '255', \"img_size_md\" smallint(5) NOT NULL DEFAULT '480', \"img_size_lg\" smallint(5) NOT NULL DEFAULT '795', \"limit_posts\" smallint(5) NOT NULL DEFAULT '5', \"limit_thumbs\" smallint(5) NOT NULL DEFAULT '30', PRIMARY KEY (\"site_id\"))",
-'s_types' => "CREATE TABLE IF NOT EXISTS \"%s\" ( \"type_id\" int NOT NULL IDENTITY,  \"scope\" ntext NOT NULL,  \"type_uri_name\" ntext NOT NULL,  \"index_home\" tinyint  NOT NULL default '0', \"index_rss\" tinyint  NOT NULL default '1', \"menu_children\" tinyint  NOT NULL default '1', PRIMARY KEY (\"type_id\"))",
+'s_types' => "CREATE TABLE IF NOT EXISTS \"%s\" ( \"type_id\" int NOT NULL IDENTITY,  \"scope\" ntext NOT NULL,  \"type_uri_name\" ntext NOT NULL, \"is_index\" tinyint NOT NULL default '0', \"parent_type\" tinyint NOT NULL default '0', \"index_home\" tinyint  NOT NULL default '0', \"index_rss\" tinyint  NOT NULL default '1', \"menu_children\" tinyint  NOT NULL default '1', PRIMARY KEY (\"type_id\"))",
 's_users' => "CREATE TABLE IF NOT EXISTS \"%s\" (\"user_id\" int NOT NULL IDENTITY, \"name_first\" nvarchar(20) NOT NULL, \"name_last\" nvarchar(20) NOT NULL, \"username\" nvarchar(20) NOT NULL COMMENT 'username', \"password\" nvarchar(50) NOT NULL COMMENT 'hash of salt & password', \"timezone\" nvarchar(100) NOT NULL DEFAULT 'America/Vancouver' COMMENT 'time zone for user', \"default_lang\" nvarchar(3) NOT NULL DEFAULT 'eng', \"email\" ntext NOT NULL, PRIMARY KEY (\"user_id\"))",
 );
 
@@ -56,7 +56,7 @@ $config['tables_mysql'] = array(
 's_labels' => "CREATE TABLE `%s` ( `label_id` int(10) unsigned NOT NULL auto_increment, `scope` text NOT NULL, `rel_id` int(10) unsigned NOT NULL ",
 's_lists' => "CREATE TABLE `%s` ( `list_id` int(10) unsigned NOT NULL auto_increment, `list_ref_name` text NOT NULL, PRIMARY KEY (`list_id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
 's_site_prefs' => "CREATE TABLE `%s` ( `site_id` int(10) unsigned NOT NULL auto_increment, `theme` text, `timezone` varchar(100) NOT NULL default 'America/Vancouver' ",
-'s_types' => "CREATE TABLE `%s` ( `type_id` int(10) unsigned NOT NULL auto_increment, `scope` text NOT NULL, `type_uri_name` text NOT NULL, `index_home` tinyint(1) unsigned NOT NULL default '0', `index_rss` tinyint(1) unsigned NOT NULL default '1', `menu_children` tinyint(1) unsigned NOT NULL default '1', PRIMARY KEY (`type_id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8",
+'s_types' => "CREATE TABLE `%s` ( `type_id` int(10) unsigned NOT NULL auto_increment, `scope` text NOT NULL, `type_uri_name` text NOT NULL, `is_index` tinyint(1) unsigned NOT NULL default '0', `parent_type` int(10) unsigned NOT NULL default '0', `index_home` tinyint(1) unsigned NOT NULL default '0', `index_rss` tinyint(1) unsigned NOT NULL default '1', `menu_children` tinyint(1) unsigned NOT NULL default '1', PRIMARY KEY  (`type_id`) ) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 's_users' => "CREATE TABLE `%s` ( `user_id` int(10) unsigned NOT NULL auto_increment, `name_first` varchar(20) NOT NULL, `name_last` varchar(20) NOT NULL, `username` varchar(20) NOT NULL ",
 );
 
