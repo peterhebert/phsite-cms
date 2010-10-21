@@ -72,7 +72,6 @@ class Parser extends MY_Controller {
 				$this->Content_model->subtitle = $results[0]['subtitle'];
 				$this->Content_model->uri_title = $results[0]['uri_title'];
 				$this->Content_model->keywords = $results[0]['keywords'];
-				$this->Content_model->title_updated = $results[0]['title_updated'];
 			
 				// prepare breadcrumbs
 				$this->temp_uri .= '/'.$results[0]['uri_title'];
@@ -365,7 +364,6 @@ class Parser extends MY_Controller {
 					$this->Content_model->subtitle = $vals['subtitle'];
 					$this->Content_model->uri_title = $vals['uri_title'];
 					$this->Content_model->keywords = $vals['keywords'];
-					$this->Content_model->title_updated = $vals['title_updated'];
 		
 					$this->Content_model->temp_id = $vals['content_id'];
 					$this->temp_uri = $this->Content_model->generate_uri();
@@ -470,7 +468,6 @@ class Parser extends MY_Controller {
 			'title_rel_id' => $this->File_model->title_rel_id,
 			'title' => $this->File_model->title,
 			'uri_title' => $this->File_model->uri_title,
-			'title_updated' => $this->File_model->title_updated,
 			);
 			if($this->File_model->keywords != '') {
 				$media_vars['keywords'] = $this->File_model->keywords;

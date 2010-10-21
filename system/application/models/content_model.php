@@ -823,6 +823,7 @@ class Content_model extends MY_Model {
 			$query = $this->db->get('c_content');
 
 			$parent = 0;
+			$parent_is_index = 0;
 	
 			if ($query->num_rows() > 0)
 			{
@@ -833,6 +834,20 @@ class Content_model extends MY_Model {
 				$type_id = $row->type_id;
 				$date_segment = substr($row->date_created, 0, 10);
 			}
+			// see if parent is index
+			if($parent > 0)
+			{
+				$this->db->where('content_id', $parent);
+				$this->db->join('s_types', 'c_content.type_id = s_types.type_id', 'left');
+				$query = $this->db->get('c_content');
+		 
+				if ($query->num_rows() > 0)
+				{
+					$row = $query->row_array();
+					$parent_is_index = $row['is_index'];
+				}
+			}
+
 			// get uri title
 			$this->db->where('scope', $this->scope);
 			$this->db->where('rel_id', $this->temp_id);
@@ -845,7 +860,7 @@ class Content_model extends MY_Model {
 				$row = $query->row_array();
 				$uriArray[] = $row['uri_title'];
 				
-				if($type_id == 2)
+				if($parent_is_index == 1)
 				{
 					$uriArray[] = $date_segment;
 				}
