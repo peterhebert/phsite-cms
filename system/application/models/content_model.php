@@ -1268,7 +1268,70 @@ class Content_model extends MY_Model {
 		return $list;
 	}
 
+	// simple content listing with title match
 
+	function simple_list()
+	{
+		// first get total matching results
+		if($this->type_id != '')
+		{
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where('c_content.type_id', $type);
+			}
+		}
+		$this->db->where('c_content.site_id', $this->site_id);
+		
+		if($this->temp_value != '')
+		{
+			$this->db->like('c_titles.title', $this->temp_value);
+		}
+		$this->db->where('c_titles.scope', 'content');
+		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+		
+		$query = $this->db->get('c_content');
+		$this->content_count = $query->num_rows();
+		$query->free_result();
+		
+		// now do query with limits
+		if($this->limit != '')
+		{
+			$this->db->limit($this->limit);
+
+			if($this->page > 1)
+			{
+				$offset = ($this->page - 1) * $this->limit;
+				
+				$this->db->limit($this->limit, $offset);
+			}
+
+		}
+		if($this->type_id != '')
+		{
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where('c_content.type_id', $type);
+			}
+		}
+		$this->db->where('c_content.site_id', $this->site_id);
+		
+		if($this->temp_value != '')
+		{
+			$this->db->like('c_titles.title', $this->temp_value);
+		}
+		$this->db->where('c_titles.scope', 'content');
+		$this->db->join('c_titles', 'c_content.content_id = c_titles.rel_id', 'left');
+		$query = $this->db->get('c_content');
+
+		$result_list = array();
+		if($query->num_rows() > 0)
+		{
+			$result_list = $query->result_array();
+		}
+		$this->content_list = $result_list;
+	}
 }
 
 ?>

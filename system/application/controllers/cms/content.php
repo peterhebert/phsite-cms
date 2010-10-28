@@ -115,13 +115,30 @@ class Content extends MY_Controller
 			$this->Content_model->type_id = $type;
 		}
 
+		// matching title
+		$title_match = $this->input->post('title');
+		if(array_key_exists('title',$params))
+		{
+			$title_match = urldecode($params['title']);
+		}
+		if ($title_match !== FALSE)
+		{
+			$title_match = $this->input->xss_clean($title_match);
+		}
+		else
+		{
+			$title_match = '';
+		}
+		$this->Content_model->temp_value = $title_match;
+
 		$this->Content_model->page = 1;
 		if(array_key_exists('page',$params))
 		{
 			$this->Content_model->page = $params['page'];
 		}
 
-		$this->Content_model->list_content();
+		$this->Content_model->simple_list();
+
 		$total = $this->Content_model->content_count;
 
 		$end = $this->Content_model->page * $limit;
@@ -142,27 +159,40 @@ class Content extends MY_Controller
 
 		$action = 'cms/content';
 		$attributes = array(
-		'id' => 'content_list'
+		'id' => 'content_filter'
 		);
 		$html = form_open($action, $attributes);
 		$html .= form_hidden('confirm', '')."\r";
 		
+		$html .= "<div class=\"form-filter\">\r";
+
+		$form_options = array(
+		'name'        => 'title',
+		'id'          => 'title',
+		'value'       => $title_match,
+		'class'       => 'small_input',
+		);
+		
+		$html .=  form_label($this->cms_labels['title_contains'], 'title');
+		$html .=  form_input($form_options);
+		unset($form_options);
+
 		// get list of content types
 		$form_options[''] = $this->cms_labels['all'];
 		$this->Content_model->scope = 'content';
 		$this->Content_model->list_types();
-		$list = array();
+
 		foreach($this->Content_model->type_list as $row)
 		{
-			if($row['label'] != '')
-			{
-				$form_options[$row['type_id']] = $row['label'];
-			} else {
-				$form_options[$row['type_id']] = $row['type_uri_name'];
-			}
+			// get type label
+			$this->Content_model->label = '';
+			$this->Content_model->label_id = '';
+			$this->Content_model->temp_id = $row['type_id'];
+			$this->Content_model->label_scope = 'types';
+			$this->Content_model->load_label();
+			$form_options[$row['type_id']] = $this->Content_model->label;
 		}
 
-		$html .= "<div class=\"form-filter\">\r";
 		$html .=  form_label($this->cms_labels['content_type'], 'type_id');
 		$html .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
 
@@ -174,6 +204,7 @@ class Content extends MY_Controller
 		$html .=  form_dropdown('limit', $form_options, $this->Content_model->limit);
 		$html .= form_submit('filter', $this->cms_labels['results_filter']);
 		$html .= "</div>\r";
+		$html .= form_close();
 
 
 		$html .= "<p class=\"align-center\">\r";
@@ -184,6 +215,10 @@ class Content extends MY_Controller
 		if ($this->Content_model->type_id != '')
 		{
 			$base_url .= '/type/'.$this->Content_model->type_id;
+		}
+		if ($title_match != '')
+		{
+			$base_url .= '/title/'.$title_match;
 		}
 		$base_url .= '/page/';
 
@@ -196,105 +231,122 @@ class Content extends MY_Controller
 		$html .= $this->pagination->create_links_proper();
 		$html .= "</p>\r";
 
-		// generate result table
-		$html .= "<table class=\"borders full\">\r";
-		$html .= "\t<thead>\r";
-		$html .= "\t\t<tr>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"types\">{$this->cms_labels['content_type']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"created\">{$this->cms_labels['date_created']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"navved\">{$this->cms_labels['show_in_nav']}</th>\r";
-		$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
-		$html .= "<ul class=\"option-list\">\r";
-		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
-		$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-none\">{$this->cms_labels['none']}</a></li>\r";
-		$html .= "</ul>\r";
-		$html .= "</th>\r";
-		$html .= "\t\t</tr>\r";
-		$html .= "\t</thead>\r";
-		$html .= "\t<tbody>\r";
-		
-		foreach($this->Content_model->content_list as $item)
+		if($total > 0)
 		{
-
-			// determine edit uri
-			$edit_uri = 'cms/content/edit/id/'.$item['content_id'];
-			if($this->Content_model->temp_lang != '')
-			{
-				$edit_uri .= '/lang/'.$this->Content_model->temp_lang;
-			}
-			$cid = $item['content_id'];
-
-			$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
-			$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
-			$html .= "</th>\r";
-
-			$type_name = $item['type_uri_name'];
-			if($item['type_label'] != '')
-			{
-				$type_name = $item['type_label'];
-			}
-			$html .= "\t\t\t<td headers=\"content-{$cid} types\">".$type_name."</td>\r";
-
-			// author info
-			$this->User_model->temp_id = $item['user_id'];
-			$this->User_model->load_user();
-			$name = $this->User_model->name_last.', '.$this->User_model->name_first;
-
-			if($this->session->userdata('admin') == 1)
-			{
-				$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".anchor('cms/user/edit/id/'.$item['user_id'],$name,array('title' => $this->cms_labels['user_edit']))."</td>\r";
-			}
-			else
-			{
-				$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".$name."</td>\r";
-			}
-
-			$html .= "\t\t\t<td headers=\"content-{$cid} created\">".$item['date_created']."</td>\r";
-
-			$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
-			$html .= "\t\t\t<td headers=\"content-{$cid} published\">";
-			$html .= $options[$item['publish']];
-			$html .= "</td>\r";
-
-			$html .= "\t\t\t<td headers=\"content-{$cid} navved\">";
-			$html .= $options[$item['show_in_nav']];
-			$html .= "</td>\r";
-
-			$html .= "\t\t\t<td headers=\"content-{$cid} actions\">";
-
-			$options = array(
-			'name'        => "select[]",
-			'value'       => $item['content_id'],
+			$action = 'cms/content';
+			$attributes = array(
+			'id' => 'content_list'
 			);
-			
-			$html .= form_checkbox($options);
-			$html .= "</td>\r";
+			$html .= form_open($action, $attributes);
+			$html .= form_hidden('confirm', '')."\r";
+
+			// generate result table
+			$html .= "<table class=\"borders full\">\r";
+			$html .= "\t<thead>\r";
+			$html .= "\t\t<tr>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"content-ids\">{$this->cms_labels['title']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"types\">{$this->cms_labels['content_type']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"created\">{$this->cms_labels['date_created']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"navved\">{$this->cms_labels['show_in_nav']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
+			$html .= "<ul class=\"option-list\">\r";
+			$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-all\">{$this->cms_labels['all']}</a></li>\r";
+			$html .= "<li class=\"hide\"><a href=\"#\" id=\"select-none\">{$this->cms_labels['none']}</a></li>\r";
+			$html .= "</ul>\r";
+			$html .= "</th>\r";
 			$html .= "\t\t</tr>\r";
+			$html .= "\t</thead>\r";
+			$html .= "\t<tbody>\r";
+			
+			foreach($this->Content_model->content_list as $item)
+			{
+	
+				// determine edit uri
+				$edit_uri = 'cms/content/edit/id/'.$item['content_id'];
+				if($this->Content_model->temp_lang != '')
+				{
+					$edit_uri .= '/lang/'.$this->Content_model->temp_lang;
+				}
+				$cid = $item['content_id'];
+	
+				$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
+				$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
+				$html .= "</th>\r";
+	
+				// get type label
+				$this->Content_model->label = '';
+				$this->Content_model->label_id = '';
+				$this->Content_model->temp_id = $item['type_id'];
+				$this->Content_model->label_scope = 'types';
+				$this->Content_model->load_label();
+	
+				$type_name = $item['type_uri_name'];
+				if($this->Content_model->label != '')
+				{
+					$type_name = $this->Content_model->label;
+				}
+				$html .= "\t\t\t<td headers=\"content-{$cid} types\">".$type_name."</td>\r";
+	
+				// author info
+				$this->User_model->temp_id = $item['user_id'];
+				$this->User_model->load_user();
+				$name = $this->User_model->name_last.', '.$this->User_model->name_first;
+	
+				if($this->session->userdata('admin') == 1)
+				{
+					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".anchor('cms/user/edit/id/'.$item['user_id'],$name,array('title' => $this->cms_labels['user_edit']))."</td>\r";
+				}
+				else
+				{
+					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".$name."</td>\r";
+				}
+	
+				$html .= "\t\t\t<td headers=\"content-{$cid} created\">".$item['date_created']."</td>\r";
+	
+				$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
+				$html .= "\t\t\t<td headers=\"content-{$cid} published\">";
+				$html .= $options[$item['publish']];
+				$html .= "</td>\r";
+	
+				$html .= "\t\t\t<td headers=\"content-{$cid} navved\">";
+				$html .= $options[$item['show_in_nav']];
+				$html .= "</td>\r";
+	
+				$html .= "\t\t\t<td headers=\"content-{$cid} actions\">";
+	
+				$options = array(
+				'name'        => "select[]",
+				'value'       => $item['content_id'],
+				);
+				
+				$html .= form_checkbox($options);
+				$html .= "</td>\r";
+				$html .= "\t\t</tr>\r";
+			}
+	
+			$html .= "\t</tbody>\r";
+			$html .= "</table>\r";
+	
+			$form_options = array(
+			''=>'',
+			'delete' => $this->cms_labels['delete'],
+			'publish'=> $this->cms_labels['publish'],
+			'unpublish'=> $this->cms_labels['unpublish'],
+			'show'=> $this->cms_labels['show_in_nav'],
+			'hide'=> $this->cms_labels['hide_from_nav']
+			);
+			$html .= "<p class=\"align-right\">";
+			$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
+			$html .=  form_dropdown('action', $form_options);
+			$html .= "&nbsp; ";
+	
+			$html .= form_submit('submit', $this->cms_labels['submit']);
+			$html .= "</p>\n";
+	
+			$html .= form_close();
 		}
-
-		$html .= "\t</tbody>\r";
-		$html .= "</table>\r";
-
-		$form_options = array(
-		''=>'',
-		'delete' => $this->cms_labels['delete'],
-		'publish'=> $this->cms_labels['publish'],
-		'unpublish'=> $this->cms_labels['unpublish'],
-		'show'=> $this->cms_labels['show_in_nav'],
-		'hide'=> $this->cms_labels['hide_from_nav']
-		);
-		$html .= "<p class=\"align-right\">";
-		$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
-		$html .=  form_dropdown('action', $form_options);
-		$html .= "&nbsp; ";
-
-		$html .= form_submit('submit', $this->cms_labels['submit']);
-		$html .= "</p>\n";
-
-		$html .= form_close();
 
 		$this->data['form'] = $html;
 	}

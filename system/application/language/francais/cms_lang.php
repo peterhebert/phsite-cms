@@ -271,6 +271,7 @@ $lang['cms_labels'] = array(
 'timezone' => "Fuseau horaire",
 'title_update_failure' => "incapable de mettre &agrave; jour le titre",
 'title' => "Titre",
+'title_contains' => "Titre contient",
 'toggle' => "Basculer",
 'type_label' => "&Eacute;tiquette pour ce type",
 'type_metadata' => "M&eacute;tadonn&eacute;es de type",

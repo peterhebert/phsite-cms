@@ -291,6 +291,7 @@ $lang['cms_labels'] = array(
 'timezone' => "Time zone",
 'title_update_failure' => "Title could not be updated",
 'title' => "Title",
+'title_contains' => "Title contains",
 'toggle' => "Invert",
 'type_label' => "Type label",
 'type_metadata' => "Type Metadata",
