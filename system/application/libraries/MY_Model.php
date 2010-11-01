@@ -19,6 +19,7 @@ class MY_Model extends Model {
 	var $sort_by; // which key to sort by in db query
 	var $sort_dir; // sort ascending or descending in db query
 	var $sort_order = array('date' => 'desc'); // sort array with helper function array_sort_multi()
+	var $result_list = array(), $result_count = 0;
 	
 	var $date_filter;
 	// add < or > for before or after at beginning of string
@@ -392,7 +393,7 @@ class MY_Model extends Model {
 		$list = array();
 		foreach($this->type_list as $row)
 		{
-			if($row['label'] != '')
+			if(isset($row['label']) && $row['label'] != '')
 			{
 				$list[$row['type_id']] = $row['label'];
 			} else {
@@ -1332,6 +1333,149 @@ class MY_Model extends Model {
 		}
 		return FALSE;
 
+	}
+
+	function build_form_titles()
+	{
+		$html = form_hidden('title_id',$this->title_id);
+		$form_options = $this->langs_dropdown();
+		$html .= "<p>";
+		$html .=  form_label($this->cms_labels['language'], 'meta_lang');
+		$html .=  form_dropdown('meta_lang', $form_options, $this->temp_lang);
+		$html .= "</p>\n";
+
+		$form_options = array(
+		'id' => 'title',
+		'name' => 'title',
+		'class' => 'text',
+		'value' => $this->title
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['title'],'title');
+		$html .= form_input($form_options);
+		$html .= "</p>";
+
+		$form_options = array(
+		'id' => 'subtitle',
+		'name' => 'subtitle',
+		'class' => 'text',
+		'value' => $this->subtitle
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
+		$html .= form_input($form_options);
+		$html .= "</p>";
+
+		$form_options = array(
+		'id' => 'keywords',
+		'name' => 'keywords',
+		'class' => 'textarea',
+		'value' => $this->keywords
+		);
+		$html .= "<p>";
+		$html .= form_label($this->cms_labels['keywords'],'keywords');
+		$html .=  form_textarea($form_options);
+		$html .= "</p>\r";
+
+		return $html;
+	}
+
+	// simple listing with title match
+
+	function simple_list()
+	{
+		// set vars based upon scope
+		$table = 'c_'.$this->scope;
+		$id = $table.'.'.$this->scope.'_id';
+		$result_list = array();
+		
+		// first get total matching results
+		if ($this->scope == 'content' && $this->type_id != '')
+		{
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where("{$table}.type_id", $type);
+			}
+		}
+
+		if ($this->scope == 'media' && $this->mime_type != '')
+		{
+			$this->db->like("{$table}.mime_type", $this->mime_type, 'after');
+		}
+		$this->db->where("{$table}.site_id", $this->site_id);
+		
+		if($this->temp_value != '')
+		{
+			$this->db->like('c_titles.title', $this->temp_value);
+		}
+
+		if(count($this->omit_types_home) > 0)
+		{
+			foreach($this->omit_types_home as $omitted)
+			{
+				$this->db->where("{$table}.{$this->scope}_id !=", $omitted);
+			}
+		}
+
+		$this->db->where('c_titles.scope', $this->scope);
+		$this->db->join('c_titles', "{$id} = c_titles.rel_id", 'left');
+		$query = $this->db->get($table);
+		$this->debugging[] = "<p>".$this->db->last_query()."</p>\r";
+
+		$this->result_count = $query->num_rows();
+		$query->free_result();
+
+		// now do query with limits
+		if($this->limit != '')
+		{
+			$this->db->limit($this->limit);
+
+			if($this->page > 1)
+			{
+				$offset = ($this->page - 1) * $this->limit;
+				
+				$this->db->limit($this->limit, $offset);
+			}
+
+		}
+		if ($this->scope == 'content' && $this->type_id != '')
+		{
+			$type = intval($this->type_id);
+			if($type > 0)
+			{
+				$this->db->where("{$table}.type_id", $type);
+			}
+		}
+
+		if ($this->scope == 'media' && $this->mime_type != '')
+		{
+			$this->db->like("{$table}.mime_type", $this->mime_type, 'after');
+		}
+		$this->db->where("{$table}.site_id", $this->site_id);
+		
+		if($this->temp_value != '')
+		{
+			$this->db->like('c_titles.title', $this->temp_value);
+		}
+		if(count($this->omit_types_home) > 0)
+		{
+			foreach($this->omit_types_home as $omitted)
+			{
+				$this->db->where("{$table}.{$this->scope}_id !=", $omitted);
+			}
+		}
+
+		$this->db->where('c_titles.scope', $this->scope);
+		$this->db->join('c_titles', "{$id} = c_titles.rel_id", 'left');
+		$query = $this->db->get($table);
+
+		if($query->num_rows() > 0)
+		{
+			$result_list = $query->result_array();
+		}
+
+		$this->result_list = $result_list;
 	}
 	
 }

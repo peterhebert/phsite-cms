@@ -195,6 +195,22 @@ class Media extends MY_Controller {
 		}
 		$this->File_model->lang_load();
 
+		// matching title
+		$title_match = $this->input->post('title');
+		if(array_key_exists('title',$params))
+		{
+			$title_match = urldecode($params['title']);
+		}
+		if ($title_match !== FALSE)
+		{
+			$title_match = $this->input->xss_clean($title_match);
+		}
+		else
+		{
+			$title_match = '';
+		}
+		$params['title'] = $title_match;
+
 		$action = 'cms/media/manage';
 		$attributes = array(
 		'id' => 'process'
@@ -427,14 +443,16 @@ class Media extends MY_Controller {
 			{
 				$action .= 'id/'.$this->File_model->media_id;
 	
-				$this->File_model->load_type_by_mime();
-	
 				$this->File_model->load_title();
 	
-				$this->File_model->scope = 'types';
-				$this->File_model->temp_id = $this->File_model->type_id;
-				$this->File_model->list_fields_related();
-	
+				if($this->File_model->mime_type != '')
+				{
+					$this->File_model->load_type_by_mime();
+					$this->File_model->scope = 'types';
+					$this->File_model->temp_id = $this->File_model->type_id;
+					$this->File_model->list_fields_related();
+				}
+
 				$this->File_model->scope = 'media';
 				$this->File_model->temp_id = $this->File_model->media_id;
 				$this->File_model->load_metadata();
@@ -475,8 +493,6 @@ class Media extends MY_Controller {
 			}
 		}
 
-
-
 		if($this->File_model->external == 1 || $this->File_model->media_id == '')
 		{
 			$html .= form_hidden('external',1);
@@ -484,12 +500,19 @@ class Media extends MY_Controller {
 			$form_options = array(
 			'name'        => 'file_uri',
 			'id'          => 'file_uri',
-			'class'	=> 'input',
+			'class'	=> 'text',
 			'value' => $this->File_model->file_uri,
 			);
 			$html .= "<p>";
 			$html .=  form_label($this->cms_labels['file_external_uri'], 'file_uri');
 			$html .=  form_input($form_options);
+			$html .= "</p>\r";
+
+			$form_options = $this->File_model->mime_categories;
+	
+			$html .= "<p>";
+			$html .=  form_label($this->cms_labels['mime'], 'mime_type');
+			$html .=  form_dropdown('mime_type', $form_options, $this->File_model->mime_type);
 			$html .= "</p>\r";
 
 		}
@@ -540,7 +563,6 @@ class Media extends MY_Controller {
 			{
 				$this->File_model->date_created = convert_time($this->File_model->date_created, $usr_zone);
 			}
-	
 		}
 
 		if($this->File_model->date_created == '0000-00-00 00:00:00')
@@ -566,33 +588,7 @@ class Media extends MY_Controller {
 		$html .= form_fieldset($this->cms_labels['metadata']);
 		$html .= "<div class=\"align-labels label-normal\">\r";
 
-		$form_options = $this->File_model->langs_dropdown();
-		$html .= "<p>";
-		$html .=  form_label($this->cms_labels['language'], 'media_lang');
-		$html .=  form_dropdown('media_lang', $form_options, $this->File_model->lang_ISO_639_3);
-		$html .= "</p>\r";
-
-		$form_options = array(
-		'id' => 'title',
-		'name' => 'title',
-		'class' => 'text',
-		'value' => $this->File_model->title
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['title'],'title');
-		$html .= form_input($form_options);
-		$html .= "</p>";
-
-		$form_options = array(
-		'id' => 'subtitle',
-		'name' => 'subtitle',
-		'class' => 'text',
-		'value' => $this->File_model->subtitle
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
-		$html .= form_input($form_options);
-		$html .= "</p>";
+		$html .= $this->File_model->build_form_titles();
 
 		// start meta fields
 		foreach($this->File_model->metadata as $index => $fd)
@@ -624,7 +620,6 @@ class Media extends MY_Controller {
 				}
 			}
 
-
 			// hidden fields
 			$form_options = array(
 			'field_id[]' =>  $index,
@@ -655,7 +650,6 @@ class Media extends MY_Controller {
 			'value' => $fd['value'],
 			'class' => $tmp_input_type
 			);
-
 			
 			switch($tmp_input_type) {
 			case 'textarea':
@@ -690,17 +684,6 @@ class Media extends MY_Controller {
 		}
 		// end meta fields
 
-		$form_options = array(
-		'id' => 'keywords',
-		'name' => 'keywords',
-		'class' => 'textarea',
-		'value' => $this->File_model->keywords
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['keywords'],'keywords');
-		$html .=  form_textarea($form_options);
-		$html .= "</p>";
-
 		$html .= "</div>\r";
 		$html .= form_fieldset_close();
 
@@ -723,40 +706,10 @@ class Media extends MY_Controller {
 			$this->load->library('form_validation');
 			
 			// set validation rules for media 
-
 			$this->form_validation->set_rules('external', $this->cms_labels['file_external'], 'required');
-			if($this->input->post('external') != 1)
-			{
-				$this->form_validation->set_rules('file_uri', $this->cms_labels['file'], 'required|path_file');
-			}
-			else
-			{
-				$this->form_validation->set_rules('file_uri', $this->cms_labels['file'], 'required|uri_exists');
-			}
-
-			$this->form_validation->set_rules('mime_type', $this->cms_labels['mime'], 'required');
-			$this->form_validation->set_rules('date_created', $this->cms_labels['date_created'], 'is_date');
-			$this->form_validation->set_rules('publish', $this->cms_labels['publish'], 'required');
-
+			$this->form_validation->set_rules('file_uri', $this->cms_labels['file'], 'required');
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
 
-			// run form validation
-			$form_valid = $this->form_validation->run();
-
-			// load validated POST data
-			$this->File_model->media_id = $this->input->post('media_id');
-			$this->File_model->title_rel_id = $this->input->post('media_id');
-			$this->File_model->file_uri = $this->input->post('file_uri');
-			$this->File_model->external = $this->input->post('external');
-			$this->File_model->mime_type = $this->input->post('mime_type');
-			$this->File_model->date_created = $this->input->post('date_created');
-			$this->File_model->publish = $this->input->post('publish');
-
-			$this->File_model->title_id = $this->input->post('title_id');
-			$this->File_model->title = $this->input->post('title');
-			$this->File_model->subtitle = $this->input->post('subtitle');
-			$this->File_model->keywords = $this->input->post('keywords');
-		
 			$tmp_field_id = $this->input->post('field_id');
 			$tmp_field_ref_name = $this->input->post('field_ref_name');
 			$tmp_meta_id = $this->input->post('meta_id');
@@ -765,108 +718,141 @@ class Media extends MY_Controller {
 			$tmp_validation = $this->input->post('field_validation');
 
 			// set validation of field data
-			foreach($tmp_field_id as $index => $fd_id)
+			if(is_array($tmp_field_id) && count($tmp_field_id) > 0)
 			{
-				$tmp_valid = array();
-
-				//is the field required?
-				if($tmp_required[$index] == 1)
+				foreach($tmp_field_id as $index => $fd_id)
 				{
-					$tmp_valid[] = 'required';
-				}
-
-				// get field validation
-				if($tmp_validation[$index] != '')
-				{
-					$tmp_valid[] = $tmp_validation[$index];
-				}
-				
-				$lbl_name = $tmp_field_ref_name[$index];
-				
-				// load label
-				$this->File_model->label_scope = 'field';
-				$this->File_model->temp_id = $fd_id;
+					$tmp_valid = array();
 	
-				if($this->File_model->load_label())
-				{
-					$lbl_name = $this->File_model->label;
-				}
-
-				$concat_valid = implode('|', $tmp_valid);
-
-				if($concat_valid != '')
-				{
-					$this->form_validation->set_rules('value_'.$fd_id, $lbl_name, $concat_valid);
-				}
-
-			}
-
-			// build metadata
-
-			$form_meta = array();
-			foreach($tmp_field_id as $index => $fd_id)
-			{
-				$val_lbl = 'value_'.$fd_id;
-				$value = $this->input->post($val_lbl);
-				if(is_array($value))
-				{
-					$value = implode('|',$value);
-				}
-
-				$value = decode_html_entities($value);
-				
-				$this->File_model->temp_id = $fd_id;
-				$this->File_model->load_field();
-				
-				$tmp_meta = array(
-				'meta_id' => $tmp_meta_id[$index],
-				'scope' => 'media',
-				'rel_id' => $this->input->post('media_id'),
-				'field_id' => $this->File_model->field_id,
-				'field_ref_name' => $this->File_model->field_ref_name,
-				'value' => $value,
-				'lang_ISO_639_3' => '',
-				'required' => $tmp_required[$index],
-				'field_input_type' => $this->File_model->field_input_type,
-				'field_validation' => $this->File_model->field_validation,
-				'field_needs_lang' => $this->File_model->field_needs_lang,
-				);
-
-				if($tmp_field_needs_lang[$index] == 1)
-				{
-					$tmp_meta["lang_ISO_639_3"] = $this->File_model->temp_lang;
-				}
-
-				$form_meta["$fd_id"] = $tmp_meta;
-
-			}
-
-			if ($form_valid)
-			{
-				// update user
-				$updated = $this->File_model->update_media();
-				if($updated)
-				{
-
-					$this->File_model->scope = 'media';
-					$this->File_model->update_title();
-					
-					$this->File_model->metadata = $form_meta;
-					$this->File_model->update_metadata();
-					
-					if(count($this->File_model->messages) == 0)
+					//is the field required?
+					if($tmp_required[$index] == 1)
 					{
-						$this->File_model->messages[] = sprintf($this->cms_labels['update_success'],$this->File_model->file_uri);
+						$tmp_valid[] = 'required';
+					}
+	
+					// get field validation
+					if($tmp_validation[$index] != '')
+					{
+						$tmp_valid[] = $tmp_validation[$index];
+					}
+					
+					$lbl_name = $tmp_field_ref_name[$index];
+					
+					// load label
+		
+					$this->File_model->label_scope = 'field';
+					$this->File_model->temp_id = $fd_id;
+		
+					if($this->File_model->load_label())
+					{
+						$lbl_name = $this->File_model->label;
+					}
+	
+					$concat_valid = implode('|', $tmp_valid);
+	
+					if($concat_valid != '')
+					{
+						$this->form_validation->set_rules('value_'.$fd_id, $lbl_name, $concat_valid);
+					}
+	
+				}
+			}
+	
+			// validate and process if all valid
+			$form_is_valid = $this->form_validation->run();
+
+			$this->File_model->media_id = $this->input->post('media_id');
+			$this->File_model->file_uri = $this->input->post('file_uri');
+			$this->File_model->external = $this->input->post('external');
+			$this->File_model->mime_type = $this->input->post('mime_type');
+			$this->File_model->date_created = $this->input->post('date_created');
+			$this->File_model->publish = $this->input->post('publish');
+
+			$this->File_model->temp_lang = $this->input->post('meta_lang');
+			$this->File_model->title_id = $this->input->post('title_id');
+			$this->File_model->title = $this->input->post('title');
+			$this->File_model->subtitle = $this->input->post('subtitle');
+			$this->File_model->keywords = $this->input->post('keywords');
+
+			$tmp_field_id = $this->input->post('field_id');
+			$tmp_field_name = $this->input->post('field_name');
+			$tmp_meta_id = $this->input->post('meta_id');
+			$tmp_required = $this->input->post('required');
+			$tmp_field_needs_lang = $this->input->post('field_needs_lang');
+
+			if ($form_is_valid)
+			{
+				// update media
+				if($this->File_model->update_media())
+				{
+
+					$this->File_model->title_rel_id = $this->File_model->media_id;
+					$this->File_model->scope = 'media';
+
+					if(!$this->File_model->update_title())
+					{
+						$this->File_model->messages[] = $this->cms_labels['title_update_failure'];
 					}
 
+					// build metadata
+
+					$form_meta = array();
+					if(is_array($tmp_field_id) && count($tmp_field_id) > 0)
+					{
+						foreach($tmp_field_id as $index => $fd_id)
+						{
+							$val_lbl = 'value_'.$fd_id;
+							$value = $this->input->post($val_lbl);
+							if(is_array($value))
+							{
+								$value = implode('|',$value);
+							}
+	
+							$value = decode_html_entities($value);
+							
+							$this->File_model->temp_id = $fd_id;
+							$this->File_model->load_field();
+							
+							$tmp_meta = array(
+							'meta_id' => $tmp_meta_id[$index],
+							'scope' => $this->File_model->scope,
+							'rel_id' => $this->File_model->media_id,
+							'field_id' => $this->File_model->field_id,
+							'field_ref_name' => $this->File_model->field_ref_name,
+							'value' => $value,
+							'lang_ISO_639_3' => '',
+							'required' => $tmp_required[$index],
+							'field_input_type' => $this->File_model->field_input_type,
+							'field_validation' => $this->File_model->field_validation,
+							'field_needs_lang' => $this->File_model->field_needs_lang,
+							);
+	
+							if($tmp_field_needs_lang[$index] == 1)
+							{
+								$tmp_meta["lang_ISO_639_3"] = $this->File_model->temp_lang;
+							}
+	
+							$form_meta["$fd_id"] = $tmp_meta;
+			
+						}
+					}
+
+					$this->File_model->metadata = $form_meta;
+
+					$this->File_model->update_metadata();
+
 				}
-						
+				
+				if(count($this->File_model->messages) == 0)
+				{
+					$this->File_model->messages[] = sprintf($this->cms_labels['media_update_success'],$this->File_model->title);
+				}
+				
 			}
 			else
 			{
-				$this->User_model->messages[] = validation_errors();
+				$this->File_model->messages[] = validation_errors();
 			}
-
 
 		}		
 	}

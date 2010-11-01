@@ -87,6 +87,8 @@ $().ready(function(){
 	/* Jquery / TinyMCE integration */
 	var dir = jQuery.url.attr("directory");
 	var root = dir.replace(/^(.*)\/cms\/.*$/,'$1');
+	var root = root.replace(/^\/index\.php(.*)$/,'$1');
+	
 	var RTEwidth = $('textarea.richtext').width();
 	
 	if (RTEwidth < 350) {

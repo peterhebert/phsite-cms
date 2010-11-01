@@ -34,6 +34,7 @@ $title_tag = implode(' | ',$header_titles);
 			if (isset($msg)){
 				echo "<div class=\"msg\">{$msg}</div>\n";
 			}
+
 			if (isset($form)){
 				echo $form;
 			}

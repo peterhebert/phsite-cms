@@ -194,6 +194,10 @@ class Parser extends MY_Controller {
 		{
 			$this->view = 'display';
 		}
+
+		// load mime icon extensions
+		$this->config->load('mime_info');
+		$this->data['mime_icons'] = $this->config->item('mime_icons');
 				
 		$this->load->view($this->view,$this->data);		
 

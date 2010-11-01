@@ -898,7 +898,7 @@ class File_model extends MY_Model {
 
 	function load_type_by_mime()
 	{
-		$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->mime_type);
+		$mime_cat = preg_replace('#^([a-z]+)/?(.*)$#','$1',$this->mime_type);
 
 		$this->db->where('scope','media');
 		$this->db->where('type_uri_name',$mime_cat);

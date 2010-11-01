@@ -139,7 +139,7 @@ class Content extends MY_Controller
 
 		$this->Content_model->simple_list();
 
-		$total = $this->Content_model->content_count;
+		$total = $this->Content_model->result_count;
 
 		$end = $this->Content_model->page * $limit;
 		$start = $end - $limit + 1;
@@ -260,7 +260,7 @@ class Content extends MY_Controller
 			$html .= "\t</thead>\r";
 			$html .= "\t<tbody>\r";
 			
-			foreach($this->Content_model->content_list as $item)
+			foreach($this->Content_model->result_list as $item)
 			{
 	
 				// determine edit uri
@@ -545,7 +545,6 @@ class Content extends MY_Controller
 
 		$html = form_open($action, $form_options);
 		$html .= form_hidden('content_id',$this->Content_model->content_id);
-		$html .= form_hidden('title_id',$this->Content_model->title_id);
 		$html .= form_hidden('my_url',site_url($my_url));
 
 		$html .= "<div class=\"align-labels label-normal\">\r";
@@ -554,33 +553,7 @@ class Content extends MY_Controller
 
 		$html .= form_fieldset('Content');
 		
-		$form_options = $this->Content_model->langs_dropdown();
-		$html .= "<p>";
-		$html .=  form_label($this->cms_labels['language'], 'content_lang');
-		$html .=  form_dropdown('content_lang', $form_options, $this->Content_model->temp_lang);
-		$html .= "</p>\n";
-
-		$form_options = array(
-		'id' => 'title',
-		'name' => 'title',
-		'class' => 'text',
-		'value' => $this->Content_model->title
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['title'],'title');
-		$html .= form_input($form_options);
-		$html .= "</p>";
-
-		$form_options = array(
-		'id' => 'subtitle',
-		'name' => 'subtitle',
-		'class' => 'text',
-		'value' => $this->Content_model->subtitle
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['subtitle'],'subtitle');
-		$html .= form_input($form_options);
-		$html .= "</p>";
+		$html .= $this->Content_model->build_form_titles();
 
 		// fields
 
@@ -714,17 +687,6 @@ class Content extends MY_Controller
 			$html .= "</p>\r";
 		}
 
-		$form_options = array(
-		'id' => 'keywords',
-		'name' => 'keywords',
-		'class' => 'textarea',
-		'value' => $this->Content_model->keywords
-		);
-		$html .= "<p>";
-		$html .= form_label($this->cms_labels['keywords'],'keywords');
-		$html .=  form_textarea($form_options);
-		$html .= "</p>\r";
-
 		$html .= form_fieldset_close();
 		$html .= "</div>\r";
 
@@ -849,7 +811,6 @@ class Content extends MY_Controller
 			$this->load->config('mime_info');
 			$this->lang->load('mime', $this->Content_model->lang_CI_Name);
 			$mime_labels = $this->lang->line('mime');
-			$mime_icons = $this->config->item('mime_icons');
 			
 			if(count($this->Content_model->attachments) > 0)
 			{
@@ -886,7 +847,7 @@ class Content extends MY_Controller
 							$html .= "</div>";
 						}
 	
-						if(in_array($ext,$mime_icons))
+						if(in_array($ext,$this->mime_icons))
 						{
 							$html .= "<span class=\"file ext_{$ext}\">";
 						}
@@ -931,7 +892,6 @@ class Content extends MY_Controller
 			}
 	
 			$html .= form_fieldset_close();
-
 
 		}
 		
@@ -1227,14 +1187,12 @@ class Content extends MY_Controller
 		$custom_header .= "</style>\r";
 		$custom_header .= "\r";
 		$this->data['custom_header'] = $custom_header;
-		
+
 		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
 	function _form_attachments()
 	{
-		$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
-
 		$this->Content_model->content_id = $this->uri->segment(4);
 		$this->Content_model->load_content();
 		$this->File_model->temp_lang = $this->Content_model->temp_lang;
@@ -1280,7 +1238,6 @@ class Content extends MY_Controller
 			$html .= "\t</thead>\r";
 			$html .= "\t<tbody>\r";
 
-			$mime_icon_exts = array('ai', 'doc', 'docx', 'eps', 'gz', 'gzip', 'odb', 'odf', 'odg', 'odm', 'odp', 'ods', 'odt', 'pdf', 'pps', 'ppsx', 'ppt', 'pptx', 'ps', 'ram', 'rm', 'sit', 'sldx', 'swf', 'tar', 'tgz', 'wp', 'wp5', 'wp5', 'wp6', 'wpd', 'wpd', 'wpl', 'xls', 'xlsx', 'zip');
 			foreach ($this->Content_model->attachments as $file)
 			{
 				$this->File_model->reset_media_vars();
@@ -1317,7 +1274,7 @@ class Content extends MY_Controller
 					$html .= "</div>";
 				}
 	
-				if(in_array($ext,$mime_icon_exts))
+				if(in_array($ext,$this->mime_icons))
 				{
 					$html .= "<span class=\"icon ext_{$ext}\">";
 				}
@@ -1354,6 +1311,7 @@ class Content extends MY_Controller
 		}
 		$html .= form_fieldset_close();
 		$this->File_model->media_list = $now_attached;
+
 		// media browser
 		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);
@@ -1362,6 +1320,25 @@ class Content extends MY_Controller
 		// get filter for list
 		$params = $this->uri->uri_to_assoc(3);
 		$html .= form_fieldset($this->cms_labels['media']);
+		$this->File_model->reset_media_vars();
+
+		// matching title
+		$title_match = $this->input->post('title');
+		if(array_key_exists('title',$params))
+		{
+			$title_match = urldecode($params['title']);
+		}
+		if ($title_match !== FALSE)
+		{
+			$params['title'] = $this->input->xss_clean($title_match);
+		}
+		
+		// omit currently attached IDs
+		if (count($now_attached) > 0)
+		{
+			$params['omit'] = $now_attached;
+		}
+		
 
 		$base_url = '/cms/content/attachments/'.$this->Content_model->content_id;
 		$html .= $this->_media_form_table($params,$base_url,false,$this->cms_labels['attach']);

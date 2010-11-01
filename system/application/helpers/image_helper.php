@@ -800,5 +800,145 @@ if ( ! function_exists('html5_media'))
 		return $code;	
 	}
 }
+
+
+if ( ! function_exists('external_player'))
+{
+	// player for external sites (YouTube, Vimeo, etc)
+	function external_player($url,$params=array())
+	{
+		$info = parse_url($url);
+		$hostA = explode('.',$info['host']);
+		$host = '';
+		$id = '';
+		$html = '';
+		$valid_hosts = array('youtube','vimeo');
+		foreach($hostA as $part)
+		{
+			$match = strtolower($part);
+			if(in_array($match,$valid_hosts))
+			{
+				$host = $match;
+			}
+		}
+		
+		switch($host)
+		{
+		// YouTube
+		case 'youtube':
+			if($info['path'] == '/watch')
+			{
+				$id = preg_replace('#^(.*)v=([^&]+)(.*)$#','$2',$info['query']);
+			}
+			else
+			{
+				$id = preg_replace('#^/v/([^&]+)(.*)$#','$1',$info['path']);
+			}
+			
+			if(!array_key_exists('width',$params))
+			{
+				$params['width'] = 640;
+			}
+			if(!array_key_exists('height',$params))
+			{
+				$params['height'] = 385;
+			}
+			else
+			{
+				$params['height'] = $params['height'] + 25;
+
+			}
+			$params['src'] = 'http://www.youtube.com/embed/'.$id;
+			$params['frameborder'] = 0;
+			$params['type'] = 'text/html';
+			$params['class'] = 'youtube-player';
+			
+			break;
+		case 'vimeo':
+			$path = trim($info['path'],'/');
+			if(is_numeric($path))
+			{
+				$id = $path;
+			}
+			else if(array_key_exists('fragment',$info) && is_numeric($info['fragment']))
+			{
+				$id = $info['fragment'];
+			}
+			else
+			{
+				$id = preg_replace('#^(.*)/([0-9]*)$#','$2',$info['path']);
+			}
+
+			$params['src'] = 'http://player.vimeo.com/video/'.$id;
+			$params['frameborder'] = 0;
+
+			if(!array_key_exists('width',$params))
+			{
+				$params['width'] = 400;
+			}
+			if(!array_key_exists('height',$params))
+			{
+				$params['height'] = 225;
+			}
+			
+			break;
+		default:
+			break;
+		}
+
+		if(count($params) > 0)
+		{
+			$html = '<iframe';
+			foreach($params as $param => $val)
+			{
+				$html .= " {$param}=\"{$val}\"";
+			}
+			$html .= "></iframe>\r";
+		}
+		
+		return $html;
+	}
+}
+
+
+/*
+<iframe 
+src="http://player.vimeo.com/video/9436189" 
+width="400" height="225" frameborder="0"></iframe>
+
+http://vimeo.com/16094710
+
+Array
+(
+    [scheme] => http
+    [host] => vimeo.com
+    [path] => /16094710
+)
+
+http://vimeo.com/staffpicks#16027313
+Array
+(
+    [scheme] => http
+    [host] => vimeo.com
+    [path] => /staffpicks
+    [fragment] => 16027313
+)
+
+http://vimeo.com/groups/stopmotion/videos/16101179
+Array
+(
+    [scheme] => http
+    [host] => vimeo.com
+    [path] => /groups/stopmotion/videos/16101179
+)
+
+
+
+
+<iframe class="youtube-player" type="text/html" width="640" height="385" src="http://www.youtube.com/embed/VIDEO_ID" frameborder="0">
+</iframe>
+*/
+
+
 /* End of file image_helper.php */
 /* Location: ./system/application/helpers/image_helper.php */
