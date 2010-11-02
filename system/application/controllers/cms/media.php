@@ -447,7 +447,11 @@ class Media extends MY_Controller {
 	
 				if($this->File_model->mime_type != '')
 				{
-					$this->File_model->load_type_by_mime();
+					$mime_cat = preg_replace('#^([a-z]+)/?(.*)$#','$1',$this->File_model->mime_type);
+					if(in_array($mime_cat,$this->File_model->mime_categories))
+					{
+						$this->File_model->load_type_by_mime();
+					}
 					$this->File_model->scope = 'types';
 					$this->File_model->temp_id = $this->File_model->type_id;
 					$this->File_model->list_fields_related();
@@ -508,7 +512,10 @@ class Media extends MY_Controller {
 			$html .=  form_input($form_options);
 			$html .= "</p>\r";
 
-			$form_options = $this->File_model->mime_categories;
+			// load mime cat language
+			$this->File_model->lang_load();
+			$this->lang->load('mime', $this->File_model->lang_CI_Name);
+			$form_options = $this->lang->line('mime_cat');
 	
 			$html .= "<p>";
 			$html .=  form_label($this->cms_labels['mime'], 'mime_type');
