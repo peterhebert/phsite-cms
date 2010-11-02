@@ -984,7 +984,7 @@ class Content extends MY_Controller
 				}
 
 				$this->Content_model->title_id = $this->input->post('title_id');
-				$this->Content_model->temp_lang = $this->input->post('content_lang');
+				$this->Content_model->temp_lang = $this->input->post('meta_lang');
 				$this->Content_model->title = $this->input->post('title');
 				$this->Content_model->subtitle = $this->input->post('subtitle');
 				$this->Content_model->keywords = csv_normalize($this->input->post('keywords'));
