@@ -36,7 +36,13 @@ if (isset($html_header)) {
 				foreach($attachments as $att)
 				{
 					// embed media or link to file
-					$orig_path = $img_path_orig.$att['file_uri'];
+					$orig_path = '';
+					if($att['external'] == 0)
+					{
+						$orig_path .= $img_path_orig;
+					}
+					$orig_path .= $att['file_uri'];
+					
 
 					// if local image, do thumbnail
 					if ($att['mime_cat'] == 'image' && $att['external'] == 0)
@@ -61,7 +67,7 @@ if (isset($html_header)) {
 
 
 
-					if(in_array($att['ext'],$mime_icons))
+					if(array_key_exists('ext',$att) && in_array($att['ext'],$mime_icons))
 					{
 						echo "<span class=\"file ext_{$att['ext']}\">";
 					}
@@ -78,7 +84,7 @@ if (isset($html_header)) {
 					echo anchor($orig_path, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 					echo "</span><br />\r";
 
-					if(array_key_exists($att['ext'],$mime_labels))
+					if(array_key_exists('ext',$att) && array_key_exists($att['ext'],$mime_labels))
 					{
 						echo $mime_labels[$att['ext']];
 					}
@@ -89,33 +95,6 @@ if (isset($html_header)) {
 
 					echo "</p>\r";
 					echo "</div>\r";
-/*
-
-
-					Array
-					(
-						[0] => Array
-								(
-									[a_id] => 2
-									[content_id] => 2
-									[media_id] => 1
-									[file_uri] => /hockey/20030101_Friday-night-hockey_Goalie-Pete-3.JPG
-									[external] => 0
-									[mime_type] => image/jpeg
-									[mime_cat] => image
-									[ext] => jpg
-									[filename] => 20030101_Friday-night-hockey_Goalie-Pete-3.JPG
-									[date_created] => 2003-01-01 12:04:25
-									[publish] => 1
-									[title] => Goalie Pete 3
-									[uri_title] => goalie-pete-3
-									[subtitle] => 
-									[keywords] => goalie, Hockey, Peter Hebert, sports
-								)
-											
-					)
-					*/
-
 				}
 			}
 

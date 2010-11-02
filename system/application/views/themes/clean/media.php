@@ -70,30 +70,38 @@ if(isset($html_header))
 				echo "<h2 class=\"align-center\">{$media['subtitle']}</h2>\r";
 			}
 
-			if($media['external'] == 1)
+			// embedding
+			if($media['external'] == 1 && is_video_link($media['file_uri']))
 			{
-				$src = $media['file_uri'];
+				echo external_player($media['file_uri']);
 			}
 			else
 			{
-				$src = $media['rel_path'];
-			}
-			
-			if(in_array($media['mime_type'],$image_types))
-			{
-				echo "<div class=\"image image-center align-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
-				echo view_image($media['server_path'],$this->Site_model->img_size_lg);
-				echo "</div>\r";
-			}
-			
-			if (in_array($media['mime_type'],$playable_types))
-			{
-				$params = array(
-				'src' => $src
-				);
-				echo "<div class=\"image image-center align-center\">";
-				echo media_player_object($params);
-				echo "</div>\r";
+				if($media['external'] == 1)
+				{
+					$src = $media['file_uri'];
+				}
+				else
+				{
+					$src = $media['rel_path'];
+				}
+				
+				if(in_array($media['mime_type'],$image_types))
+				{
+					echo "<div class=\"image image-center align-center\" style=\"width: {$this->Site_model->img_size_lg}px\">";
+					echo view_image($media['server_path'],$this->Site_model->img_size_lg);
+					echo "</div>\r";
+				}
+				
+				if (in_array($media['mime_type'],$playable_types))
+				{
+					$params = array(
+					'src' => $src
+					);
+					echo "<div class=\"image image-center align-center\">";
+					echo media_player_object($params);
+					echo "</div>\r";
+				}
 			}
 
 			if(isset($media['description']))
@@ -108,6 +116,7 @@ if(isset($html_header))
 			{
 				echo "<p>{$cms_labels['keywords']} : {$media['keyword_links']}</p>\r";
 			}
+
 			// download link
 			if(isset($media['external']) && $media['external'] == 0) 
 			{

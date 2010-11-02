@@ -802,6 +802,16 @@ if ( ! function_exists('html5_media'))
 }
 
 
+if ( ! function_exists('is_video_link'))
+{
+	// test link for matching video sites (YouTube, Vimeo, etc)
+	function is_video_link($url)
+	{
+		$matches = preg_match('#^http://([a-z\.]*)([youtube|vimeo]{1})\.([a-z]*)/?#',$url);
+		return $matches;
+	}
+}
+
 if ( ! function_exists('external_player'))
 {
 	// player for external sites (YouTube, Vimeo, etc)

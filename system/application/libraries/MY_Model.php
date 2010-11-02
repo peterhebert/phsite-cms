@@ -1477,6 +1477,34 @@ class MY_Model extends Model {
 
 		$this->result_list = $result_list;
 	}
+
+	function find_by_uri_title()
+	{
+		// set vars based upon scope
+		$table = 'c_'.$this->scope;
+		$id = $table.'.'.$this->scope.'_id';
+		$result_list = array();
+		$found = FALSE;
+		
+		$this->db->where("{$table}.site_id", $this->site_id);
+		
+		if($this->temp_value != '')
+		{
+			$this->db->where('c_titles.uri_title', $this->temp_value);
+		}
+
+		$this->db->where('c_titles.scope', $this->scope);
+		$this->db->join('c_titles', "{$id} = c_titles.rel_id", 'left');
+		$query = $this->db->get($table);
+
+		$this->result_count = 0;
+		if($query->num_rows() > 0)
+		{
+			$found = $query->row_array();
+		}
+
+		return $found;
+	}
 	
 }
 // END MY_Model class

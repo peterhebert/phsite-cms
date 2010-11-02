@@ -57,4 +57,4 @@ if(isset($media['author']['name_last'] ) && isset($media['author']['name_first']
 }
 
 ?>
-<meta name="generator" content="phSite CMS" />
+<meta name="generator" content="<?php echo $cms_labels['phsite_cms']; ?>" />

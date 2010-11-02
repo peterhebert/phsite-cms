@@ -124,10 +124,22 @@ class Image extends MY_Controller {
 		}
 		else
 		{
-			$this->output->set_status_header('404');
-			$this->data['header'] = $this->cms_labels['server_error_404_header'];
-			$this->data['message'] = sprintf($this->cms_labels['server_error_404_media'],$this->File_model->file_uri);
-			$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
+			$this->File_model->temp_value = trim($this->File_model->file_uri,'/');
+			$title_exists = $this->File_model->find_by_uri_title();
+			if($title_exists)
+			{
+				$this->data['media'] = $title_exists;
+				
+				$this->view = 'themes/'.$this->Site_model->theme.'/media';
+			}
+			else
+			{
+				$this->output->set_status_header('404');
+				$this->data['header'] = $this->cms_labels['server_error_404_header'];
+				$this->data['message'] = sprintf($this->cms_labels['server_error_404_media'],$this->File_model->file_uri);
+				$this->view = 'themes/'.$this->Site_model->theme.'/error_404';
+			}
+
 		}
 
 		$header_view = 'themes/'.$this->Site_model->theme.'/inc_header_media';
