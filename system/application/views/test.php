@@ -1,63 +1,89 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>Test</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link href="/assets/css/base.css" rel="stylesheet" type="text/css" />
-<link href="/assets/css/simple.css" rel="stylesheet" type="text/css" />
-<link href="/assets/css/confirm.css" rel="stylesheet" type="text/css" />
-</head>
-<body>
-<!--<div id="modal-screen" class="modal"></div>
-<div id="dialog-confirm-delete" class="dialog">
-	<div class="dialog-box">
-		<button class="dialog-cancel-top">X</button>
-		<h6>Delete Confirmation</h6>
-		<div class="dialog-body">
-			<p>These items will be permanently deleted and cannot be recovered. Are you sure you want to delete them?</p>
-			<p class="align-right">
-				<button id="dialog-cancel">Cancel</button>
-				<button id="dialog-confirm">Delete selected items</button>
-			</p>
-		</div>
-	</div>
-</div>
---><div id="page">
-	<div class="page-wrap block" id="breadcrumb"> <a href="http://phsite.local/cms">phSite CMS</a> : Media </div>
-	<div class="page-wrap block">
-		<h1>Test</h1>
-<?php
-if (isset($msg))
-{
-echo $msg;
-}
-?>
-<div id="confirm-dialog"><h2>Confirm Override</h2>
-	<p>A modal dialog override of the JavaScript confirm function. Demonstrates the use of <code>onShow</code> as well as how to display a modal dialog confirmation instead of the default JavaScript confirm dialog.</p>
-	<form id="myform" method="post" action="/test">
-		<input type="hidden" name="select[]" value="1" />
-		<input type="hidden" name="select[]" value="9" />
-		<input type="button" name="confirm" class="confirm" value="Demo" />
-	</form>
-</div>
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+	<channel>
+		<title><?php echo $feed['title']; ?></title>
+		<link><?php echo $feed['uri']; ?></link>
+		<?php
+		// copyright
+		if(isset($feed['description']) && $feed['description'] != '')
+		{
+			echo "<description><![CDATA[".$feed['description']."]]></description>\r";
+		}
+		// language
+		if(isset($feed['language']) && $feed['language'] != '')
+		{
+			echo "\t\t<language>".$feed['language']."</language>\r";
+		}
+		// copyright
+		if(isset($feed['copyright']) && $feed['copyright'] != '')
+		{
+			echo "\t\t<copyright><![CDATA[".$feed['copyright']."]]></copyright>\r";
+		}
+		// publish date
+		if(isset($feed['date_created_rss']) && $feed['date_created_rss'] != '')
+		{
+			echo "\t\t<pubDate>".$feed['date_created_rss']."</pubDate>\r";
+		}
+		// last updated
+		if(isset($feed['date_updated']) && $feed['date_updated'] != '')
+		{
+			echo "\t\t<lastBuildDate>".$feed['date_updated']."</lastBuildDate>\r";
+		}
+		// editor
+		if(isset($feed['editor']) && is_array($feed['editor']))
+		{
+			echo "\t\t<managingEditor>{$feed['editor']['email']} ({$feed['editor']['name_first']} {$feed['editor']['name_last']})</managingEditor>\r";
+		}
+		// webmaster
+		if(isset($feed['webmaster']) && is_array($feed['webmaster']))
+		{
+			echo "\t\t<webMaster>{$feed['webmaster']['email']} ({$feed['webmaster']['name_first']} {$feed['webmaster']['name_last']})</webMaster>\r";
+		}
+		// generator
+		if(isset($cms_labels['phsite_cms']))
+		{
+			echo "\t\t<generator>".$cms_labels['phsite_cms']."</generator>\r";
+		}
+		?>
+		<docs>http://cyber.law.harvard.edu/rss/rss.html</docs>
+		
+		<?php
+		if(isset($items))
+		{
+			foreach ($items as $item)
+			{
+				echo "\t\t<item>";
+				echo "\t\t\t<title>".$item['title']."</title>\r";
 
+				// description
+				if(isset($item['description']) && $item['description'] != '')
+				{
+					echo "\t\t\t<description><![CDATA[".$item['link']."]]></description>\r";
+				}
+				// item URI
+				if(isset($item['uri']) && $item['uri'] != '')
+				{
+					echo "\t\t\t<guid>".$item['uri']."</guid>\r";
+				}
+				// author
+				if(isset($item['author']) && is_array($item['author']))
+				{
+					echo "\t\t<author>{$item['author']['email']} ({$item['author']['name_first']} {$item['author']['name_last']})</author>\r";
+				}
 
-<div id="confirm">
-	<div class="header"><span>Delete  Media Confirmation</span></div>
-	<p class="message"></p>
-	<div class="buttons">
-		<div class="no simplemodal-close">Cancel</div><div class="yes">Delete selected items</div>
-	</div>
-</div>
+				// publish date
+				if(isset($item['date_created']) && $item['date_created'] != '')
+				{
+					echo "\t\t\t<pubDate>".$item['date_created']."</pubDate>\r";
+				}
+				if(isset($item['enclosure']) && is_array($item['enclosure']))
+				{
+					echo "\t\t\t<enclosure url=\"{$item['enclosure']['uri']}\" length=\"{$item['enclosure']['bytes']}\" type=\"{$item['enclosure']['mime_type']}\" />\r";
+				}
 
-
-
-
-	</div>
-	<div class="page-wrap block" id="footer"><a href="http://phsite.peterhebert.com" rel="external" title="Visit the phsite website in a new window">phSite CMS</a> &copy; 2009 <a href="http://www.peterhebert.com/">Peter Hebert</a>. Licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" title="Read the text of the MIT License"><abbr title="Massachusetts institute of technology">MIT</abbr> License</a>.</div>
-</div>
-<script type="text/javascript" src="/assets/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/assets/js/admin_ui/jquery.simplemodal-1.3.3.min.js"></script>
-<script type="text/javascript" src="/assets/js/admin_ui/confirm.js"></script>
-</body>
-</html>
+				echo"</item>\r";
+			}
+		}
+		?>
+	</channel>
+</rss>

@@ -673,5 +673,16 @@ if ( ! function_exists('sort_array_multi'))
 	}
 }
 
+if ( ! function_exists('excerpt'))
+{
+	function excerpt($text, $length = 200)
+	{
+		if(strlen($text) > $length) {
+			$text = substr($text, 0, strpos($text, ' ', $length));
+		}
+	
+		return $text;
+	}
+}
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */

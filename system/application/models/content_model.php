@@ -1004,6 +1004,7 @@ class Content_model extends MY_Model {
 	function list_attachments()
     {
 		$this->db->where('content_id', $this->content_id);
+		$this->db->join('c_media', 'r_attachments.media_id = c_media.media_id', 'left');
 		$query = $this->db->get('r_attachments');
 
 		$this->attachments = array();

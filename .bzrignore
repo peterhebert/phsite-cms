@@ -10,3 +10,4 @@ assets/js/tinymce/jscripts/tiny_mce/themes/advanced/skins/thebigreason/ui.css
 system/application/controllers/cms/install-2.php
 system/application/controllers/test.php
 system/application/controllers/test.php
+system/application/views/feeds/itunes.php
