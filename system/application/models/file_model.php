@@ -92,7 +92,6 @@ class File_model extends MY_Model {
 	
 				if($ignore <= 0) {
 					
-					//$this->reset_media_vars();
 					$this->file_uri = preg_replace("#^".$this->dir_base."(.*)$#","$1",$newpath);
 					$file_index = $this->file_uri;
 					

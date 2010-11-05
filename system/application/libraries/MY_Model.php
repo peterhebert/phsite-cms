@@ -829,8 +829,6 @@ class MY_Model extends Model {
 		return FALSE;
     }
 
-
-
 	// metadata functions
 	function load_metadata()
     {

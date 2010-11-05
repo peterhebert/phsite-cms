@@ -181,6 +181,11 @@ class Feed extends MY_Controller {
 
 			// attachments become enclosures
 			$this->Content_model->content_id = $result['content_id'];
+			$this->Content_model->limit = '';
+			if($this->params['type'] == 'rss')
+			{
+				$this->Content_model->limit = 1;
+			}
 			$this->Content_model->list_attachments();
 
 			if(count($this->Content_model->attachments) > 0)
@@ -188,27 +193,57 @@ class Feed extends MY_Controller {
 				$attachments = array();
 				foreach($this->Content_model->attachments as $media)
 				{
-					if($media['external'] == 0)
+					$this->File_model->reset_media_vars();
+	
+					if($this->File_model->external == 0)
 					{
-	
 						$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$media['file_uri'];
-	
 						// get file size in bytes and formatted
 						if(file_exists($fullpath))
 						{
-							$tmp_array = array();
-
-							$tmp_array['uri'] = 'http://'.$_SERVER['HTTP_HOST'].BASE_PATH.MEDIA_PATH_ORIG.$media['file_uri'];
-							$tmp_array['filesize_bytes'] = filesize($fullpath);
-							$tmp_array['mime_type'] = $media['mime_type'];
-
-							$attachments[] = $tmp_array;
-						}
+							$tmp_array = $media;
 	
+							$tmp_array['uri'] = 'http://'.$_SERVER['HTTP_HOST'].BASE_PATH.MEDIA_PATH_ORIG.$media['file_uri'];
+							$tmp_array['mime_type'] = $media['mime_type'];
+							$tmp_array['date_created'] = $media['date_created'];
+			
+							$this->File_model->temp_id = $media['media_id'];
+							$this->File_model->temp_lang = $this->Content_model->temp_lang;
+							$this->File_model->load_title();
+							$tmp_array['title'] = $this->File_model->title;
+							$tmp_array['uri_title'] = $this->File_model->uri_title;
+							$tmp_array['subtitle'] = $this->File_model->subtitle;
+							$tmp_array['keywords'] = $this->File_model->keywords;
+	
+							$bytes = filesize($fullpath);
+							$tmp_array['filesize_bytes'] = $bytes;
+
+							$this->File_model->scope = 'media';
+							$this->File_model->temp_lang = $this->Content_model->temp_lang;
+							$this->File_model->temp_id = $media['media_id'];
+							$this->File_model->load_metadata();
+							$file_meta = $this->File_model->metadata;
+							if(count($file_meta) > 0)
+							{
+								foreach($file_meta as $file_info)
+								{
+									if($file_info['value'] != '')
+									{
+										$tmp_array[$file_info['field_ref_name']] = $file_info['value'];
+									}
+								}
+							}
+							
+							$attachments[$media['file_uri']] = $tmp_array;
+							unset($tmp_array);
+						}
+						
 					}
+	
 				}
 	
 				$item['attachments'] = $attachments;
+				unset($attachments);
 			}
 
 			$this->items[] = $item;

@@ -1003,15 +1003,19 @@ class Content_model extends MY_Model {
 	// attachments
 	function list_attachments()
     {
+
+		$this->db->select('r_attachments.a_id, r_attachments.content_id, c_media.*');
+
 		$this->db->where('content_id', $this->content_id);
 		$this->db->join('c_media', 'r_attachments.media_id = c_media.media_id', 'left');
 		$query = $this->db->get('r_attachments');
 
 		$this->attachments = array();
 		if ($query->num_rows() > 0)
-		{
+		{			
 			$this->attachments = $query->result_array();
 		}
+
 	}
 
 	function remove_attachments()

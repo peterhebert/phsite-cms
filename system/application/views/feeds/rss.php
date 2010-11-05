@@ -90,10 +90,8 @@ if(isset($items))
 		// enclosures
 		if(isset($item['attachments']) && is_array($item['attachments']))
 		{
-			foreach($item['attachments'] as $file)
-			{
-				echo "\t\t\t<enclosure url=\"{$file['uri']}\" length=\"{$file['filesize_bytes']}\" type=\"{$file['mime_type']}\" />\r";
-			}
+			$file = $item['attachments'][0];
+			echo "\t\t\t<enclosure url=\"{$file['uri']}\" length=\"{$file['filesize_bytes']}\" type=\"{$file['mime_type']}\" />\r";
 		}
 
 		echo"\t\t</item>\r";
@@ -101,6 +99,8 @@ if(isset($items))
 }
 ?>
 	
+
+
 
 </channel>
 </rss>

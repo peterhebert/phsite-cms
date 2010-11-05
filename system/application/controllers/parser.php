@@ -648,6 +648,7 @@ class Parser extends MY_Controller {
 		$this->data['total_children'] = $this->Content_model->content_count;
 
 		$this->data['page'] = $this->Content_model->page;
+
 		$this->data['limit'] = $this->Content_model->limit;
 		
 		// number of pages
@@ -860,24 +861,25 @@ class Parser extends MY_Controller {
 		$ll = $this->lang->line('file_size_abbr');
 
 		$this->Content_model->list_attachments();
+
 		if(count($this->Content_model->attachments) > 0)
 		{
-
 			foreach($this->Content_model->attachments as $media)
 			{
 				$this->File_model->reset_media_vars();
 				$tmp_array = $media;
-				$this->File_model->temp_id = $media['media_id'];
-				$this->File_model->load_media();
-				$tmp_array['file_uri'] = $this->File_model->file_uri;
-				$tmp_array['external'] = $this->File_model->external;
-				$tmp_array['mime_type'] = $this->File_model->mime_type;
-				$tmp_array['mime_cat'] = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
-				$tmp_array['extension'] = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
-				$tmp_array['filename'] = basename($this->File_model->file_uri);
+				
+				$tmp_array['file_uri'] = $media['file_uri'];
+				$tmp_array['external'] = $media['external'];
+				$tmp_array['mime_type'] = $media['mime_type'];
+				$tmp_array['mime_cat'] = preg_replace('#^([a-z]+)/(.*)$#','$1',$media['mime_type']);
+				$tmp_array['extension'] = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$media['file_uri']));
+				$tmp_array['filename'] = basename($media['file_uri']);
 
-				$tmp_array['date_created'] = $this->File_model->date_created;
-				$tmp_array['publish'] = $this->File_model->publish;
+				$tmp_array['date_created'] = $media['date_created'];
+				$tmp_array['publish'] = $media['publish'];
+
+				$this->File_model->temp_id = $media['media_id'];
 				$this->File_model->temp_lang = $this->Content_model->temp_lang;
 				$this->File_model->load_title();
 				$tmp_array['title'] = $this->File_model->title;
@@ -887,10 +889,10 @@ class Parser extends MY_Controller {
 
 				if($this->File_model->external == 0)
 				{
-					$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
-					$tmp_array['path_basename'] = ROOT_REL.MEDIA_PATH_ORIG.basename($this->File_model->file_uri);
+					$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$media['file_uri'];
+					$tmp_array['path_basename'] = ROOT_REL.MEDIA_PATH_ORIG.basename($media['file_uri']);
 					$tmp_array['server_path'] = $fullpath;
-					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($this->File_model->file_uri);
+					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($media['file_uri']);
 					// get file size in bytes and formatted
 					if(file_exists($fullpath))
 					{
@@ -917,7 +919,7 @@ class Parser extends MY_Controller {
 					}
 				}
 
-				$attachments[$this->File_model->file_uri] = $tmp_array;
+				$attachments[$media['file_uri']] = $tmp_array;
 				unset($tmp_array);
 			}
 		}

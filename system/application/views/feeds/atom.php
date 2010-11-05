@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
 	<title><?php echo $feed['title']; ?></title>
-	<link href="<?php echo $feed['uri']; ?>" />
+	<link href="<?php echo $feed['uri']; ?>"/>
 <?php
 if(isset($feed['atom_id']) && $feed['atom_id'] != '')
 {
@@ -61,7 +61,7 @@ if(isset($items))
 		// item URI
 		if(isset($item['uri']) && $item['uri'] != '')
 		{
-			echo "\t\t<link href=\"{$item['uri']}\" />\r";
+			echo "\t\t<link href=\"{$item['uri']}\"/>\r";
 		}
 		// author
 		if(isset($item['author']) && is_array($item['author']))
@@ -80,12 +80,22 @@ if(isset($items))
 			echo "\t\t<updated>".$item['date_updated']."</updated>\r";
 		}
 
-		echo "\t</entry>\r";
+		// enclosures
+		if(isset($item['attachments']) && is_array($item['attachments']))
+		{
+			foreach($item['attachments'] as $file)
+			{
+				echo "<link rel=\"enclosure\" href=\"{$file['uri']}\" length=\"{$file['filesize_bytes']}\" type=\"{$file['mime_type']}\" title=\"{$file['title']}\"/>\r";
+			}
+		}
 
+		/// atom GUID
 		if(isset($item['atom_id']) && $item['atom_id'] != '')
 		{
 			echo "\t<id>{$item['atom_id']}</id>\r";
 		}
+		echo "\t</entry>\r";
+
 	}
 }
 ?>
