@@ -88,9 +88,9 @@ if(isset($items))
 			echo "\t\t\t<pubDate>".$item['date_created']."</pubDate>\r";
 		}
 		// enclosures
-		if(isset($item['attachments']) && is_array($item['attachments']))
+		if(isset($item['attachments']) && count($item['attachments']) > 0)
 		{
-			$file = $item['attachments'][0];
+			$file = array_shift($item['attachments']);
 			echo "\t\t\t<enclosure url=\"{$file['uri']}\" length=\"{$file['filesize_bytes']}\" type=\"{$file['mime_type']}\" />\r";
 		}
 
@@ -99,6 +99,7 @@ if(isset($items))
 }
 ?>
 	
+
 
 
 
