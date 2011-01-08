@@ -522,8 +522,14 @@ class Parser extends MY_Controller {
 		$content_vars['content_id'] = $this->Content_model->content_id;
 		$content_vars['parent_id'] = $this->Content_model->parent_id;
 		$content_vars['type_id'] = $this->Content_model->type_id;
-
 		$content_vars['type_uri_name'] = $this->Content_model->type_uri_name;
+
+		// get the syndication feed URIs if index
+		if($this->Content_model->is_index == 1) {
+			$content_vars['syndication_rss'] = site_url('feed/rss/'.$this->Content_model->lang_ISO_639_3.'/id/'.$this->Content_model->content_id);
+			$content_vars['syndication_atom'] = site_url('feed/atom/'.$this->Content_model->lang_ISO_639_3.'/id/'.$this->Content_model->content_id);
+		}
+
 		$content_vars['title'] = $this->Content_model->title;
 		if($this->Content_model->subtitle != '') {
 			$content_vars['subtitle'] = $this->Content_model->subtitle;

@@ -108,7 +108,6 @@ class MY_Controller extends Controller {
 
 		if(!$installed)
 		{
-			//redirect('cms/install');
 			$this->data['header'] = 'DB error';
 			$this->data['message'] = 'cannot establish database connection';
 			$this->load->view('error_404',$this->data);
@@ -126,7 +125,8 @@ class MY_Controller extends Controller {
 		{
 			$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
 		}
-		$site_meta['lang'] = $this->Site_model->temp_lang;
+		$this->Site_model->lang_load();
+		$site_meta['lang'] = $this->Site_model->lang_ISO_639_3;
 		$this->data['theme_path'] = BASE_PATH.'/system/application/views/themes/'.$this->Site_model->theme.'/';
 
 		// get site title
@@ -155,7 +155,10 @@ class MY_Controller extends Controller {
 		{
 			$tmp_site_dates = $tmp_cr_yr;
 		}
-		
+
+		// site-wide syndication feed links
+		$site_meta['syndication_rss'] = site_url('feed/rss/'.$this->Site_model->lang_ISO_639_3);
+		$site_meta['syndication_atom'] = site_url('feed/atom/'.$this->Site_model->lang_ISO_639_3);
 
 		$site_meta['updated'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone);
 		$site_meta['updated_W3C'] = convert_time($this->Site_model->site_date_updated, $this->Site_model->site_timezone, "Y-m-d");

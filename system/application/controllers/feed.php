@@ -21,6 +21,7 @@ class Feed extends MY_Controller {
 		$this->load->helper('timezone');
 		$this->load->helper('xml');
 		$this->load->helper('url');
+		$this->load->helper('image');
 	}
 	
     function index()
@@ -107,7 +108,37 @@ class Feed extends MY_Controller {
 				{
 					$this->feed[$field['field_ref_name']] = $field['value'];
 				}
+
+				// feed image
+				if($field['value'] != '' && $field['field_ref_name'] == 'image-poster')
+				{
+					$this->File_model->temp_id = $field['value'];
+					$this->File_model->load_media();
+					$cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
+					if($this->File_model->external == 0 && $cat == 'image')
+					{
+						$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$this->File_model->file_uri;
+						if(file_exists($fullpath))
+						{
+							$img_params = array();
+							$thumb_uri = view_image($fullpath,$this->Site_model->img_size_th,$img_params,FALSE,TRUE);
+							$this->File_model->temp_lang = $this->Content_model->lang_ISO_639_3;
+							$this->File_model->load_title();
+							
+							$thumb_full = ROOT_REL.'/'.$thumb_uri;
+							$dims = getimagesize($thumb_full);
+							$this->feed['image'] = array(
+							'uri' => 'http://'.$_SERVER['HTTP_HOST'].'/'.BASE_PATH.$thumb_uri,
+							'title' => $this->File_model->title,
+							'width' => $dims[0],
+							'height' => $dims[1],
+							);
+						}
+					}
+				}
+
 			}
+
 			$date_updated = $this->Content_model->date_updated;
 
 			// load feed author info
@@ -177,6 +208,7 @@ class Feed extends MY_Controller {
 				{
 					$item[$field['field_ref_name']] = $field['value'];
 				}
+
 			}
 
 			// attachments become enclosures

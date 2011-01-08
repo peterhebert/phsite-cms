@@ -45,6 +45,17 @@ if(isset($cms_labels['phsite_cms']))
 	echo "\t\t<generator>".$cms_labels['phsite_cms']."</generator>\r";
 }
 echo "\t\t<docs>http://cyber.law.harvard.edu/rss/rss.html</docs>\r";
+// feed image
+if(isset($feed['image']) && is_array($feed['image']))
+{
+	echo "\t\t<image>\r";
+	echo "\t\t\t<url>{$feed['image']['uri']}</url>\r";
+	echo "\t\t\t<title>{$feed['image']['title']}</title>\r";
+	echo "\t\t\t<link>{$feed['uri']}</link>\r";
+	echo "\t\t\t<width>{$feed['image']['width']}</width>\r";
+	echo "\t\t\t<height>{$feed['image']['height']}</height>\r";
+	echo "\t\t</image>\r";
+}
 
 if(isset($items))
 {
@@ -87,6 +98,17 @@ if(isset($items))
 		{
 			echo "\t\t\t<pubDate>".$item['date_created']."</pubDate>\r";
 		}
+		// item image
+		if(isset($item['image']) && is_array($item['image']))
+		{
+			echo "\t\t<image>\r";
+			echo "\t\t\t<url>{$item['image']['uri']}</url>\r";
+			echo "\t\t\t<title>{$item['image']['title']}</title>\r";
+			echo "\t\t\t<link>{$item['uri']}</link>\r";
+			echo "\t\t\t<width>{$item['image']['width']}</width>\r";
+			echo "\t\t\t<height>{$item['image']['height']}</height>\r";
+			echo "\t\t</image>\r";
+		}
 		// enclosures
 		if(isset($item['attachments']) && count($item['attachments']) > 0)
 		{
@@ -98,10 +120,5 @@ if(isset($items))
 	}
 }
 ?>
-	
-
-
-
-
 </channel>
 </rss>

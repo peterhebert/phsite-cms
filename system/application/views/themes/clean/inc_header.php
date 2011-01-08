@@ -59,8 +59,25 @@ if(isset($content['author']['name_last'] ) && isset($content['author']['name_fir
 	$creator = $content['author']['name_last'].', '.$content['author']['name_first'];
 	echo "<meta name=\"dc.creator\" content=\"{$creator}\" />\r";
 }
-
+if(isset($content['syndication_rss']))
+{
+	echo "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{$content['title']}\" href=\"{$content['syndication_rss']}\" />\r";
+}
+if(isset($content['syndication_atom']))
+{
+	echo "<link rel=\"alternate\" type=\"application/atom+xml\" title=\"{$content['title']}\" href=\"{$content['syndication_atom']}\" />\r";
+}
+if(isset($site['syndication_rss']))
+{
+	$sitewide_rss = sprintf($cms_labels['sitewide_rss'],$site['title']);
+	echo "<link rel=\"alternate\" type=\"application/rss+xml\" title=\"{$sitewide_rss}\" href=\"{$site['syndication_rss']}\" />\r";
+}
+if(isset($site['syndication_atom']))
+{
+	$sitewide_atom = sprintf($cms_labels['sitewide_atom'],$site['title']);
+	echo "<link rel=\"alternate\" type=\"application/atom+xml\" title=\"{$sitewide_atom}\" href=\"{$site['syndication_atom']}\" />\r";
+}
 ?>
-<meta name="generator" content="phSite CMS" />
+<meta name="generator" content="<?php echo $cms_labels['phsite_cms']; ?>" />
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/jquery-min.js"></script>
 <script type="text/javascript" src="<?php echo BASE_PATH; ?>/assets/js/admin_ui/jquery_external_links.js"></script>
