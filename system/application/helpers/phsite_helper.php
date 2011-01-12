@@ -165,14 +165,13 @@ if ( ! function_exists('convert_uri'))
 			$separator = '-';
 		}
 	
-		$newstring = strtolower($string);
+		$search = array('Ç','Æ','Œ','Á','É','Í','Ó','Ú','À','È','Ì','Ò','Ù','Ä','Ë','Ï','Ö','Ü','Ÿ','Â','Ê','Î','Ô','Û','Å','E','I','Ø','U','ç','æ','œ','á','é','í','ó','ú','à','è','ì','ò','ù','ä','ë','ï','ö','ü','ÿ','â','ê','î','ô','û','å','e','i','ø','u');
+		$replace = array('c','ae','oe','a','e','i','o','u','a','e','i','o','u','a','e','i','o','u','y','a','e','i','o','u','a','e','i','o','u','c','ae','oe','a','e','i','o','u','a','e','i','o','u','a','e','i','o','u','y','a','e','i','o','u','a','e','i','o','u');
 	
-		$search = explode(",","ç,æ,œ,á,é,í,ó,ú,à,è,ì,ò,ù,ä,ë,ï,ö,ü,ÿ,â,ê,î,ô,û,å,e,i,ø,u");
-		$replace = explode(",","c,ae,oe,a,e,i,o,u,a,e,i,o,u,a,e,i,o,u,y,a,e,i,o,u,a,e,i,o,u");
+		$new =  str_replace($search, $replace, $string);
+		$newstring = strtolower($new);
 	
-		$newstring = str_replace($search, $replace, $newstring);
-	
-		if($dirs == TRUE) {
+		if($dirs) {
 			$findRegEx = "([^A-Za-z0-9/]+)";
 		} else {
 			$findRegEx = "([^A-Za-z0-9]+)";
