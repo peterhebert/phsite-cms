@@ -497,6 +497,7 @@ class MY_Controller extends Controller {
 					$attachment_links = array();
 					foreach($attached_to as $page)
 					{
+						$this->Content_model->title_id = NULL;
 						$this->Content_model->title = '';
 						$this->Content_model->temp_id = $page['content_id'];
 						$this->Content_model->load_title();
