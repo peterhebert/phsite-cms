@@ -897,7 +897,7 @@ class Parser extends MY_Controller {
 				{
 					$fullpath = ROOT_REL.MEDIA_PATH_ORIG.$media['file_uri'];
 					$p_base = ROOT_REL.MEDIA_PATH_ORIG.'/'.basename($media['file_uri']);
-					$tmp_array['path_basename'] = _('#/+#','/',$p_base);
+					$tmp_array['path_basename'] = preg_replace('#/+#','/',$p_base);
 					$tmp_array['server_path'] = $fullpath;
 					$tmp_array['server_directory'] = ROOT_REL.MEDIA_PATH_ORIG.dirname($media['file_uri']);
 					// get file size in bytes and formatted
