@@ -259,13 +259,15 @@ if ( ! function_exists('encode_entities'))
 	function encode_entities($text,$textarea=FALSE) {
 
 		// entities in pre / code blocks
-		$patterns[] = '!(<pre.*?>)(.*?)</pre>!ise';
-		$patterns[] = '!(<code.*?>)(.*?)</code>!ise';
+		$patterns[] = '!(<[pre|code].*?>)(.*?)(</[pre|code]+>)!is';
 
-		$replacements[] =  " '$1' .  stripslashes( htmlentities( '$2' ) ) . '</pre>' ";
-		$replacements[] =  " '$1' .  stripslashes( htmlentities( '$2' ) ) . '</code>' ";
-		
-		$text = preg_replace($patterns,$replacements,$text);
+        $text = preg_replace_callback(
+            $patterns,
+            function ($matches) {
+                return $matches[1] . stripslashes( htmlentities ( $matches[2] ) ) . $matches[3];
+            },
+            $text
+        );
 
 		// now do full string entity encode FOR TEXTAREA ONLY
 		if($textarea)
