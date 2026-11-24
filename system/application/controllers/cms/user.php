@@ -738,7 +738,7 @@ class User extends MY_Controller
 			$params = array(
 			'name'        => "order[]",
 			'id'          => "order[]",
-			'value'       => $field['order'],
+			'value'       => $field['sort_order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
@@ -776,7 +776,7 @@ class User extends MY_Controller
 			$temp_rels = $this->input->post('rf_id');
 			$temp_exists = $this->input->post('exists');
 			$temp_required = $this->input->post('required');
-			$temp_order = $this->input->post('order');
+			$temp_order = $this->input->post('sort_order');
 
 			$field_updates = array();
 			foreach($temp_fields as $index => $id)
@@ -787,7 +787,7 @@ class User extends MY_Controller
 				'rf_rel_id' => $this->Site_model->site_id,
 				'exists' => FALSE,
 				'required' => 0,
-				'order' => $temp_order[$index],
+				'sort_order' => $temp_order[$index],
 				);
 				
 				if(is_array($temp_exists) && in_array($id,$temp_exists)){

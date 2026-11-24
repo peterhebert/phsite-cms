@@ -383,7 +383,7 @@ class Install extends Controller
 			if ($form_valid)
 			{
 	
-				if($this->input->post('site_date_created') == '' || $this->input->post('site_date_created') == '0000-00-00 00:00:00')
+				if($this->input->post('site_date_created') == '' || $this->input->post('site_date_created') == NULL)
 				{
 					$this->site_date_created = date('Y-m-d H:i:s');
 				}

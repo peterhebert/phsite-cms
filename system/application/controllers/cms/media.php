@@ -572,7 +572,7 @@ class Media extends MY_Controller {
 			}
 		}
 
-		if($this->File_model->date_created == '0000-00-00 00:00:00')
+		if($this->File_model->date_created == NULL)
 		{
 			$this->File_model->date_created = '';
 		}

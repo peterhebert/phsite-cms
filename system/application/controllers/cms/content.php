@@ -721,13 +721,13 @@ class Content extends MY_Controller
 		$html .= "</p>\n";
 
 		$form_options = array(
-		'id' => 'content_order',
-		'name' => 'content_order',
+		'id' => 'sort_order',
+		'name' => 'sort_order',
 		'class' => 'tiny_input',
-		'value' => $this->Content_model->content_order
+		'value' => $this->Content_model->sort_order
 		);
 		$html .= "<p>";
-		$html .=  form_label($this->cms_labels['order'], 'content_order');
+		$html .=  form_label($this->cms_labels['order'], 'sort_order');
 		$html .=  form_input($form_options);
 		$html .= "</p>\n";
 
@@ -754,11 +754,11 @@ class Content extends MY_Controller
 	
 		}
 
-		if($this->Content_model->date_created == '0000-00-00 00:00:00' || preg_match('#^-(.*)$#',$this->Content_model->date_created))
+		if($this->Content_model->date_created == NULL || preg_match('#^-(.*)$#',$this->Content_model->date_created))
 		{
 			$this->Content_model->date_created = '';
 		}
-		if($this->Content_model->date_end_expiry == '0000-00-00 00:00:00' || preg_match('#^-(.*)$#',$this->Content_model->date_end_expiry))
+		if($this->Content_model->date_end_expiry == NULL || preg_match('#^-(.*)$#',$this->Content_model->date_end_expiry))
 		{
 			$this->Content_model->date_end_expiry = '';
 		}
@@ -917,7 +917,7 @@ class Content extends MY_Controller
 			$this->form_validation->set_rules('user_id', $this->cms_labels['author'], 'required|is_natural_no_zero');
 			$this->form_validation->set_rules('parent_id', $this->cms_labels['parent'], 'required|is_natural');
 			$this->form_validation->set_rules('title', $this->cms_labels['title'], 'required');
-			$this->form_validation->set_rules('content_order', $this->cms_labels['order'], 'is_natural');
+			$this->form_validation->set_rules('sort_order', $this->cms_labels['order'], 'is_natural');
 
 			$tmp_field_id = $this->input->post('field_id');
 			$tmp_field_ref_name = $this->input->post('field_ref_name');
@@ -977,10 +977,10 @@ class Content extends MY_Controller
 				$this->Content_model->date_end_expiry = $this->input->post('date_end_expiry');
 				$this->Content_model->publish = $this->input->post('publish');
 				$this->Content_model->show_in_nav = $this->input->post('show_in_nav');
-				$this->Content_model->content_order = $this->input->post('content_order');
-				if($this->Content_model->content_order == '')
+				$this->Content_model->sort_order = $this->input->post('sort_order');
+				if($this->Content_model->sort_order == '')
 				{
-					$this->Content_model->content_order = 0;
+					$this->Content_model->sort_order = 0;
 				}
 
 				$this->Content_model->title_id = $this->input->post('title_id');
@@ -1443,7 +1443,7 @@ class Content extends MY_Controller
 	
 	function _form_sort()
 	{
-		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 		$this->Content_model->limit = '';
 		$this->Content_model->sort_by = '';
 		$this->Content_model->list_content();
@@ -1487,7 +1487,7 @@ class Content extends MY_Controller
 			$params = array(
 			'name'        => "order[]",
 			'id'          => "order[]",
-			'value'       => $child['order'],
+			'value'       => $child['sort_order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
@@ -1524,7 +1524,7 @@ class Content extends MY_Controller
 
 			$this->form_validation->set_rules('parent_id', $this->cms_labels['id'], 'required');
 			$this->form_validation->set_rules('content_id', $this->cms_labels['title'], 'required');
-			$this->form_validation->set_rules('order', $this->cms_labels['order'], 'required');
+			$this->form_validation->set_rules('sort_order', $this->cms_labels['order'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
 			
@@ -1532,7 +1532,7 @@ class Content extends MY_Controller
 			{
 
 				$temp_ids = $this->input->post('content_id');
-				$temp_order = $this->input->post('order');
+				$temp_order = $this->input->post('sort_order');
 				$temp_titles = $this->input->post('title');
 				$updates = array();
 	
@@ -1540,7 +1540,7 @@ class Content extends MY_Controller
 				{
 					$temp_content = array(
 					'content_id' => $id,
-					'order' => $temp_order[$index],
+					'sort_order' => $temp_order[$index],
 					'title' => $temp_titles[$index],
 					);
 					

@@ -2,7 +2,7 @@
 class Content_model extends MY_Model {
 
 	// 'c_content' variables
-	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish, $show_in_nav, $content_order;
+	var $content_id, $user_id, $parent_id, $date_created, $date_end_expiry, $date_updated, $publish, $show_in_nav, $sort_order;
 
 	// list variables
 	var $content_list = array(), $content_metadata = array(), $content_meta_fields = array(), $attachments = array();
@@ -119,7 +119,7 @@ class Content_model extends MY_Model {
 		}
 		$this->db->where('site_id', $this->site_id);
 		
-		if($this->sort_by == 'date_created' || $this->sort_by == 'order' )
+		if($this->sort_by == 'date_created' || $this->sort_by == 'sort_order' )
 		{
 			$this->db->order_by($this->sort_by, $this->sort_dir);
 		}
@@ -143,7 +143,7 @@ class Content_model extends MY_Model {
 				'date_updated' => $row->date_updated,
 				'publish' => $row->publish,
 				'show_in_nav' => $row->show_in_nav,
-				'order' => $row->order,
+				'sort_order' => $row->sort_order,
 				'type_label' => '',
 				'title_id' => '',
 				'scope' => '',
@@ -315,7 +315,7 @@ class Content_model extends MY_Model {
 				$this->date_updated = $row->date_updated;
 				$this->publish = $row->publish;
 				$this->show_in_nav = $row->show_in_nav;
-				$this->content_order = $row->order;
+				$this->sort_order = $row->sort_order;
 			}
 
 			// now get type name
@@ -403,9 +403,13 @@ class Content_model extends MY_Model {
 		$this->scope = 'content';
 		$this->load_type();
 		
-		if($this->date_created == '' || $this->date_created == '0000-00-00 00:00:00')
+		if($this->date_created == '' || $this->date_created == NULL)
 		{
 			$this->date_created = date('Y-m-d H:i:s');
+		}
+
+		if('' === $this->date_end_expiry) {
+			$this->date_end_expiry = NULL;
 		}
 
 		$data = array(
@@ -417,7 +421,7 @@ class Content_model extends MY_Model {
 		'date_end_expiry' => $this->date_end_expiry,
 		'publish' => $this->publish,
 		'show_in_nav' => $this->show_in_nav,
-		'order' => $this->content_order,
+		'sort_order' => $this->sort_order,
 		);
 
 		if($this->content_id == '') {
@@ -715,7 +719,7 @@ class Content_model extends MY_Model {
 			$this->db->where('publish', 1);
 		}
 
-		if($this->sort_by == 'date_created' || $this->sort_by == 'order' )
+		if($this->sort_by == 'date_created' || $this->sort_by == 'sort_order' )
 		{
 			$this->db->order_by($this->sort_by, $this->sort_dir);
 		}
@@ -738,7 +742,7 @@ class Content_model extends MY_Model {
 				'date_updated' => $row->date_updated,
 				'publish' => $row->publish,
 				'show_in_nav' => $row->show_in_nav,
-				'order' => $row->order,
+				'sort_order' => $row->sort_order,
                 );
 
 
@@ -994,7 +998,7 @@ class Content_model extends MY_Model {
     {
 		$this->db->where('scope', $this->scope);
 		$this->db->where('rel_id', $this->temp_id);
-		$this->db->group_by("lang_ISO_639_3");
+		// $this->db->group_by("lang_ISO_639_3");
 		$query = $this->db->get('c_titles');
 
 		$this->lang_mode = $query->num_rows();
@@ -1092,7 +1096,7 @@ class Content_model extends MY_Model {
 			foreach($this->temp_value as $child)
 			{
 				$data = array(
-				'order' => $child['order'],
+				'sort_order' => $child['sort_order'],
 				);
 				$this->db->where('content_id', $child['content_id']);
 				// update

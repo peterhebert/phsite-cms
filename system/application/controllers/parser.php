@@ -104,7 +104,7 @@ class Parser extends MY_Controller {
 
 				// get top-level menu
 				$this->Content_model->reset_vars();
-				$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+				$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 				$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
 				$this->data['top_menu'] = $top_menu;
 
@@ -611,7 +611,7 @@ class Parser extends MY_Controller {
 		$this->Content_model->type_id = '';
 		$this->Content_model->limit = '';
 
-		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 		$menu = $this->Content_model->get_children(true,true);
 		$this->data['menu'] = $menu;
 
@@ -682,7 +682,7 @@ class Parser extends MY_Controller {
 		
 		// get top-level menu
 		$this->Content_model->reset_vars();
-		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 		$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
 		$this->data['top_menu'] = $top_menu;
 	}
@@ -709,7 +709,7 @@ class Parser extends MY_Controller {
 			$this->view = 'themes/'.$this->Site_model->theme.'/home';
 			$this->data['breadcrumb_links'] = array($this->cms_labels['home']);
 
-			$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+			$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 			$this->Content_model->limit = '';
 			$menu = $this->Content_model->get_descendant_content();
 			$this->data['menu'] = $menu;
@@ -940,7 +940,7 @@ class Parser extends MY_Controller {
 		$dates['date_created'] = convert_time($created, $this->Site_model->site_timezone);
 		$dates['date_created_W3C'] = convert_time($created, $this->Site_model->site_timezone, "Y-m-d");
 
-		if($end != '0000-00-00 00:00:00')
+		if($end != NULL)
 		{
 			$dates['date_end_expiry'] = convert_time($end, $this->Site_model->site_timezone);
 			$dates['date_expiry_RFC850'] = convert_time($end, 'UTC',DATE_RFC850);

@@ -14,3 +14,11 @@ system/application/views/feeds/itunes.php
 
 # configuration
 system/application/config/database.php
+
+# sql dumps
+*.sql
+*.sql.gz
+
+php.ini
+
+.lando.yml

@@ -431,7 +431,7 @@ class MY_Model extends Model {
 			'list_id' => $fd['list_id'],
 			'rf_id' => '',
 			'required' => '',
-			'order' => ''
+			'sort_order' => ''
 			);
 			
 			$field_list_final["$key"] = $temp_field;
@@ -444,7 +444,7 @@ class MY_Model extends Model {
 			{
 				$field_list_final[$index]['rf_id'] = $fd['rf_id'];
 				$field_list_final[$index]['required'] = $fd['required'];
-				$field_list_final[$index]['order'] = $fd['order'];
+				$field_list_final[$index]['sort_order'] = $fd['sort_order'];
 			}
 		}
 		$this->field_list = $field_list_final;
@@ -480,7 +480,7 @@ class MY_Model extends Model {
 		}
 		$this->db->join('s_fields', 'r_fields.field_id = s_fields.field_id', 'left');
 
-		$this->db->order_by("order");
+		$this->db->order_by("sort_order");
 		$query = $this->db->get('r_fields');
 
 		if ($query->num_rows() > 0)
@@ -511,7 +511,7 @@ class MY_Model extends Model {
 				'field_allow_multiple' => $row->field_allow_multiple,
 				'list_id' => $row->list_id,
 				'required' => $row->required,
-				'order' => $row->order,
+				'sort_order' => $row->sort_order,
 				'meta_id' => '',
 				'rel_id' => '',
 				'value' => '',
@@ -601,7 +601,7 @@ class MY_Model extends Model {
 			'field_id' => $field['field_id'],
 			'field_ref_name' => '',
 			'required' => $field['required'],
-			'order' => $field['order'],
+			'sort_order' => $field['sort_order'],
 			);
 			
 			if($this->field_id != '')

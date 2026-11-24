@@ -85,7 +85,7 @@ class Search extends MY_Controller {
 	{
 		// get top-level menu
 		$this->Content_model->reset_vars();
-		$this->Content_model->sort_order = array('order' => 'asc', 'title' => 'asc');
+		$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 		$top_menu = $this->Content_model->get_descendant_content(0,FALSE);
 		$this->data['top_menu'] = $top_menu;
 	}	

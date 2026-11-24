@@ -14,35 +14,35 @@ class MY_Form_validation extends CI_Form_validation {
 	/**
 	 * Constructor
 	 *
-	 */	
+	 */
 	function MY_Form_validation($rules = array())
-	{	
+	{
 		parent::CI_Form_validation($rules);
 	}
-	
+
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Alpha-numeric with spaces, underscores and dashes
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function alpha_num_spaces($str)
 	{
-		return ( ! preg_match("/^([-a-z0-9_-\s])+$/i", $str)) ? FALSE : TRUE;
+		 return ( ! preg_match("/^([-a-z0-9_ \s-])+$/i", $str)) ? FALSE : TRUE;
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * directory exists
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function path_dir($str)
 	{
 		$valid = FALSE;
@@ -51,7 +51,7 @@ class MY_Form_validation extends CI_Form_validation {
 		{
 			$valid = TRUE;
 		}
-		
+
 		return $valid;
 	}
 
@@ -61,7 +61,7 @@ class MY_Form_validation extends CI_Form_validation {
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function path_file($str)
 	{
 		$valid = FALSE;
@@ -70,7 +70,7 @@ class MY_Form_validation extends CI_Form_validation {
 		{
 			$valid = TRUE;
 		}
-		
+
 		return $valid;
 	}
 
@@ -80,11 +80,11 @@ class MY_Form_validation extends CI_Form_validation {
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function uri_exists($uri)
 	{
 		$valid = is_uri($uri);
-		
+
 		if($valid)
 		{
 			$uri_clean = str_replace(' ','%20',$uri);
@@ -97,19 +97,19 @@ class MY_Form_validation extends CI_Form_validation {
 				$valid = FALSE;
 			}
 		}
-		
+
 		return $valid;
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Valid date format
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function is_date($str)
 	{
 		$delim = array('\\', '/');
@@ -119,18 +119,18 @@ class MY_Form_validation extends CI_Form_validation {
 			return TRUE;
 		} else {
 			return FALSE;
-		}		
+		}
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * Convert to MySQL date format
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	string
-	 */	
+	 */
 	function convert_date($str)
 	{
 		$delim = array('\\', '/');
@@ -141,18 +141,18 @@ class MY_Form_validation extends CI_Form_validation {
 			return $date;
 		} else {
 			return FALSE;
-		}		
+		}
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * is a valid timezone?
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	string
-	 */	
+	 */
 	function is_timezone($str)
 	{
 		$timezone_identifiers = DateTimeZone::listIdentifiers();
@@ -161,14 +161,14 @@ class MY_Form_validation extends CI_Form_validation {
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	/**
 	 * is a valid iso 639-3 language?
 	 *
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 
 	function is_lang($str)
 	{
@@ -182,11 +182,11 @@ class MY_Form_validation extends CI_Form_validation {
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function is_uri($str)
 	{
 		$pattern = "|^http(s)?:\/\/([a-zA-Z0-9-_]+)\.?([a-zA-Z]{2,})([a-zA-Z0-9-_\+% \.\/]+)([a-zA-Z0-9-_\+\.\/\?=&]+)$|";
-		
+
 		return ( ! preg_match($pattern, $str)) ? FALSE : TRUE;
 	}
 
@@ -197,11 +197,11 @@ class MY_Form_validation extends CI_Form_validation {
 	 * @access	public
 	 * @param	string
 	 * @return	bool
-	 */	
+	 */
 	function is_phone($str)
 	{
 		$pattern = "/^[\(\)\+0-9A-Z\.[:blank:]-]+(ext)?[\(\)\+0-9A-Z\.[:blank:]-]+$/";
-		return preg_match( $pattern  ,  $str );	
+		return preg_match( $pattern  ,  $str );
 	}
 }
 

@@ -7,13 +7,13 @@ $config['installer_langs'] = array(
 
 // default table definitions
 $config['tables'] = array(
-'c_content' => array('content_id', 'site_id', 'user_id', 'parent_id', 'type_id', 'type_uri_name', 'date_created', 'date_end_expiry', 'date_updated', 'publish', 'show_in_nav', 'order'),
+'c_content' => array('content_id', 'site_id', 'user_id', 'parent_id', 'type_id', 'type_uri_name', 'date_created', 'date_end_expiry', 'date_updated', 'publish', 'show_in_nav', 'sort_order'),
 'c_media' => array('media_id', 'site_id', 'file_uri', 'external', 'mime_type', 'date_created', 'publish'),
 'c_metadata' => array('meta_id', 'site_id', 'scope', 'rel_id', 'field_id', 'field_ref_name', 'value', 'lang_ISO_639_3', 'date_updated'),
 'c_titles' => array('title_id', 'site_id', 'scope', 'rel_id', 'title', 'uri_title', 'subtitle', 'keywords', 'lang_ISO_639_3', 'date_updated'),
 'ISO_639_LANG' => array('ISO_639_3', 'ISO_639_2B', 'ISO_639_2T', 'ISO_639_1', 'Scope', 'Type', 'Ref_Name', 'Inverted_Name', 'Native_Name', 'CI_Name', 'activated'),
 'r_attachments' => array('a_id', 'content_id', 'media_id'),
-'r_fields' => array('rf_id', 'scope', 'rf_rel_id', 'rf_rel_ref_name', 'field_id', 'field_ref_name', 'required', 'order'),
+'r_fields' => array('rf_id', 'scope', 'rf_rel_id', 'rf_rel_ref_name', 'field_id', 'field_ref_name', 'required', 'sort_order'),
 'r_list_vals' => array('val_id', 'list_id', 'list_ref_name', 'value', 'label', 'lang_ISO_639_3'),
 'r_sites_users' => array('rel_id', 'site_id', 'user_id', 'admin'),
 's_fields' => array('field_id', 'field_ref_name', 'field_input_type', 'field_validation', 'field_needs_lang', 'list_id', 'field_allow_multiple'),

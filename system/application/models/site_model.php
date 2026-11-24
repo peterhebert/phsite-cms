@@ -153,8 +153,8 @@ class Site_model extends MY_Model {
 			'field_validation' => $fd['field_validation'],
 			'field_needs_lang' => $fd['field_needs_lang'],
 			'rf_id' => '',
-			'required' => '',
-			'order' => ''
+			'required' => 0,
+			'sort_order' => 0
 			);
 	
 			$this->db->where('scope',$this->scope);
@@ -166,7 +166,7 @@ class Site_model extends MY_Model {
 				$row = $query->row();
 				$temp_field['rf_id'] = $row->rf_id;
 				$temp_field['required'] = $row->required;
-				$temp_field['order'] = $row->order;
+				$temp_field['sort_order'] = $row->sort_order;
 			}
 			$field_info[] = $temp_field;
 			 

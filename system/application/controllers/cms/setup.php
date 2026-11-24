@@ -8,12 +8,12 @@ class Setup extends MY_Controller
 		$this->load->helper('form');
 		$this->load->model('Content_model');
 		$this->load->model('File_model');
-		$this->load->library('form_validation');		
-	
+		$this->load->library('form_validation');
+
 		$this->_authenticate();
 		$this->menu_order = array('setup','content','media');
 	}
-	
+
 	function index()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
@@ -58,7 +58,7 @@ class Setup extends MY_Controller
 		$this->data['title_h1'] = $this->cms_labels['site_prefs'];
 
 		$this->load->model('User_model');
-		$this->_process_site_preferences();		
+		$this->_process_site_preferences();
 
 		$this->Site_model->load_site();
 		$this->Site_model->temp_lang = $this->Site_model->site_default_lang;
@@ -88,17 +88,17 @@ class Setup extends MY_Controller
 		$form_options['0'] = $this->cms_labels['auto_generate'];
 
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
-		
+
 		$this->Content_model->list_content(0, TRUE);
-		
+
 		$homePages = $this->Content_model->content_list;
 		foreach($homePages as $row) {
 			$form_options["{$row['content_id']}"] = $row['title'];
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['home_page'], 'home_content_id');
-		$html .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);		
+		$html .= form_dropdown('home_content_id', $form_options, $this->Site_model->home_content_id);
 		$html .= "</p>\r";
 
 		// list of content types for auto-generating home page 'recent content'
@@ -118,7 +118,7 @@ class Setup extends MY_Controller
 		$html .= form_label($this->cms_labels['home_content_type'], 'home_content_type');
 		$html .= form_dropdown('home_content_type', $form_options, $this->Site_model->home_content_type);
 		$html .= "</p>\r";
-		
+
 		$html .= "<p class=\"indent-wide\">";
 		$html .= $this->cms_labels['home_content_type_explain'];
 		$html .= "</p>\r";
@@ -126,10 +126,10 @@ class Setup extends MY_Controller
 		// now list themes
 
 		$this->Site_model->list_themes();
-		
+
 		$html .= "<div class=\"row\">";
 		$html .= form_label($this->cms_labels['theme'], 'theme');
-		
+
 		$html .= "<span class=\"float w7\">";
 		foreach($this->Site_model->site_themes as $uri => $theme_info)
 		{
@@ -138,16 +138,16 @@ class Setup extends MY_Controller
 			{
 				$checked = TRUE;
 			}
-					
+
 			$form_options = array(
 			'name'        => 'theme',
 			'value'       => $uri,
 			'checked'     => $checked,
 			);
-		
+
 			$html .= "<label class=\"column\" style=\"width: ".$this->Site_model->img_size_sm."px; text-align: left\">";
 			$path_thumb = ROOT_REL.'/system/application/views/themes/'.$uri.'/_theme_info/'.$uri.'.jpg';
-			
+
 			if(file_exists($path_thumb))
 			{
 				$alt = sprintf($this->cms_labels['theme_screenshot'],$theme_info['title']);
@@ -159,7 +159,7 @@ class Setup extends MY_Controller
 			$html .= ' <strong>'.anchor($theme_info['website'], $theme_info['title'], array('rel' => 'external'))."</strong><br />\r";
 			$html .= $this->cms_labels['author'].' : '.mailto($theme_info['email'], $theme_info['author'], array('title' => $this->cms_labels['email_author']))."<br />\r";
 			$html .= $theme_info['description']."</label> ";
-			
+
 		}
 		$html .= "</span>\r";
 		$html .= "</div>\r";
@@ -167,31 +167,31 @@ class Setup extends MY_Controller
 		$form_options = timezone_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['timezone'], 'site_timezone');
-		$html .= form_dropdown('site_timezone', $form_options, $this->Site_model->site_timezone);		
+		$html .= form_dropdown('site_timezone', $form_options, $this->Site_model->site_timezone);
 		$html .= "</p>\r";
 
 		$form_options = $this->Site_model->langs_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['default_lang'], 'site_default_lang');
-		$html .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);		
+		$html .= form_dropdown('site_default_lang', $form_options, $this->Site_model->site_default_lang);
 		$html .= "</p>\r";
 
 		$this->Content_model->temp_lang = $this->Site_model->temp_lang;
 		$form_options = $this->Content_model->types_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['default_content_type'], 'default_content_type');
-		$html .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);		
+		$html .= form_dropdown('default_content_type', $form_options, $this->Site_model->default_content_type);
 		$html .= "</p>\r";
 
 		$form_options = $this->User_model->get_list_dropdown(0,1);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['webmaster'], 'site_admin_id');
-		$html .= form_dropdown('site_admin_id', $form_options, $this->Site_model->site_admin_id);		
+		$html .= form_dropdown('site_admin_id', $form_options, $this->Site_model->site_admin_id);
 		$html .= "</p>\r";
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['editor'], 'site_editor_id');
-		$html .= form_dropdown('site_editor_id', $form_options, $this->Site_model->site_editor_id);		
+		$html .= form_dropdown('site_editor_id', $form_options, $this->Site_model->site_editor_id);
 		$html .= "</p>\r";
 
 		$form_options = array(
@@ -307,7 +307,7 @@ class Setup extends MY_Controller
 				$this->Site_model->messages[] = validation_errors();
 			} else {
 
-				if($this->input->post('site_date_created') != '' && $this->input->post('site_date_created') != '0000-00-00 00:00:00')
+				if($this->input->post('site_date_created') != '' && $this->input->post('site_date_created') != NULL)
 				{
 					$this->Site_model->site_date_created = $this->input->post('site_date_created');
 				}
@@ -362,11 +362,11 @@ class Setup extends MY_Controller
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['site_metadata'];
 
-		$this->_process_site_metadata();		
+		$this->_process_site_metadata();
 		$this->data['form'] = $this->_form_site_metadata();
-		
+
 		$msg = $this->Site_model->_output_messages();
-		
+
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -376,7 +376,7 @@ class Setup extends MY_Controller
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
-	
+
 	function _form_site_metadata()
 	{
 		// first determine lang
@@ -402,7 +402,7 @@ class Setup extends MY_Controller
 		$form_options = $this->Site_model->langs_dropdown();
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['language'], 'site_meta_lang');
-		$html .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->temp_lang);		
+		$html .= form_dropdown('site_meta_lang', $form_options, $this->Site_model->temp_lang);
 		$html .= "</p>\r";
 
 		$form_options = array(
@@ -516,7 +516,7 @@ class Setup extends MY_Controller
 						$dir_vals[$the_dir['file_uri']] = $the_dir['file_uri'];
 					}
 				}
-				
+
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				unset($dir_vals);
 				break;
@@ -567,7 +567,7 @@ class Setup extends MY_Controller
 		}
 
 		$html .= "</div>\r";
-		
+
 		$html .= "<p class=\"indent-normal\">";
 		$html .= form_submit('submit', 'Save');
 		$html .= "</p>\n";
@@ -575,14 +575,14 @@ class Setup extends MY_Controller
 		$html .= form_close();
 		return $html;
 	}
-	
+
 	function _site_meta_menu()
     {
 		$menu = '';
-		
+
 		if($this->Site_model->site_id != '')
 		{
-		
+
 			// list active languages
 			$lang_links = array();
 			$this->Site_model->list_langs();
@@ -600,12 +600,12 @@ class Setup extends MY_Controller
 				}
 				$lang_links[] = anchor($temp_link,$temp_txt);
 			}
-	
+
 			$menu .=  "<ul>\r";
 			$menu .=  "<li>".$this->cms_labels['edit_by_lang']."\r";
 			$menu .= ul($lang_links);
 			$menu .=  "</li>\r";
-	
+
 			$del_base = 'cms/setup/site_meta_delete/';
 			if($this->Site_model->temp_lang != '')
 			{
@@ -643,7 +643,7 @@ class Setup extends MY_Controller
 			$this->Site_model->scope = 'site';
 			$this->Site_model->temp_id = $this->input->post('site_id');
 			$this->Site_model->list_fields_related();
-			
+
 			$meta_fields = $this->Site_model->field_list;
 			foreach($meta_fields as $fd)
 			{
@@ -658,12 +658,12 @@ class Setup extends MY_Controller
 				{
 					$tmp_valid[] = $fd['field_validation'];
 				}
-				
+
 				$lbl_name = $fd['field_ref_name'];
-	
+
 				$this->Site_model->label_scope = 'field';
 				$this->Site_model->temp_id = $fd['field_id'];
-	
+
 				if($this->Site_model->load_label())
 				{
 					$lbl_name = $this->Site_model->label;
@@ -680,7 +680,7 @@ class Setup extends MY_Controller
 
 			// run validation and load field values
 			$form_is_valid = $this->form_validation->run();
-			
+
 			if ($form_is_valid)
 			{
 				$this->Site_model->site_id = $this->input->post('site_id');
@@ -690,23 +690,23 @@ class Setup extends MY_Controller
 				$this->Site_model->title = $this->input->post('title');
 				$this->Site_model->subtitle = $this->input->post('subtitle');
 				$this->Site_model->keywords = csv_normalize($this->input->post('keywords'));
-	
+
 				$tmp_field_id = $this->input->post('field_id');
 				$tmp_field_name = $this->input->post('field_name');
 				$tmp_meta_id = $this->input->post('meta_id');
 				$tmp_required = $this->input->post('required');
 				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
-			
+
 				$this->Site_model->scope = 'site';
 				$form_meta = array();
 				foreach($tmp_field_id as $index => $fd_id)
 				{
 					$val_lbl = 'value_'.$fd_id;
 					$value = html_entity_decode($this->input->post($val_lbl),ENT_COMPAT,"UTF-8");
-					
+
 					$this->Site_model->temp_id = $fd_id;
 					$this->Site_model->load_field();
-					
+
 					$tmp_meta = array(
 					'meta_id' => $tmp_meta_id[$index],
 					'scope' => $this->Site_model->scope,
@@ -719,14 +719,14 @@ class Setup extends MY_Controller
 					'field_validation' => $this->Site_model->field_validation,
 					'field_needs_lang' => $this->Site_model->field_needs_lang,
 					);
-	
+
 					$form_meta["$fd_id"] = $tmp_meta;
-	
+
 				}
-				
+
 				$this->Site_model->metadata = $form_meta;
 
-				// update site metadata 
+				// update site metadata
 				$this->Site_model->update_title();
 				$this->Site_model->update_metadata();
 
@@ -750,9 +750,9 @@ class Setup extends MY_Controller
 
 		$this->Content_model->list_fields();
 		$temp_list = $this->Content_model->field_list;
-		
+
 		$fields = array();
-		
+
 		foreach($temp_list as $field)
 		{
 			$this->Content_model->reset_label();
@@ -763,7 +763,7 @@ class Setup extends MY_Controller
 			$lbl = $this->Content_model->load_label();
 
 			$uri = "cms/setup/field_edit/id/".$field['field_id'];
-		
+
 			if($lbl) {
 				$uri .= "/lang/".$this->Content_model->temp_lang;
 				$text = $this->Content_model->label;
@@ -771,9 +771,9 @@ class Setup extends MY_Controller
 				$text = $field['field_ref_name'];
 			}
 			$attr = array('title' => sprintf($this->cms_labels['edit_field'],$text));
-			
+
 			$fields[] = anchor($uri,$text,$attr);
-		
+
 		}
 
 		$html = '<p>'. anchor("cms/setup/field_edit/",$this->cms_labels['new_field'])."</p>\r";
@@ -783,7 +783,7 @@ class Setup extends MY_Controller
 		$breadcrumb[] = $this->cms_labels['setup'];
 		$breadcrumb[] = $this->cms_labels['data_structure'];
 		$breadcrumb[] = $this->cms_labels['fields'];
-		
+
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$title_tag[] = $this->cms_labels['fields'];
@@ -792,7 +792,7 @@ class Setup extends MY_Controller
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag).' ';
 		$this->data['title_h1'] = $this->cms_labels['fields'];
-		
+
 		$this->_load_cms_menus();
 
 		$this->load->view('cms/cms_form_2col',$this->data);
@@ -853,15 +853,15 @@ class Setup extends MY_Controller
 			$uri .= '/id/'.$this->Content_model->field_id;
 		}
 		$this->Content_model->temp_value = $uri;
-		
+
 		$sidebar .= $this->Content_model->lang_meta_menu();
 		$this->data['sidebar'] = $sidebar;
 
 		$this->data['custom_js'] = "<script type=\"text/javascript\" src=\"".BASE_PATH."/assets/js/admin_ui/field_edit.js\"></script>\r";
 
-		
+
 		$msg = $this->Content_model->_output_messages();
-		
+
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
@@ -873,7 +873,7 @@ class Setup extends MY_Controller
 	}
 
 	function _load_field_data_types()
-	{	
+	{
 		$user_lang = $this->session->userdata('default_lang');
 
 		if($user_lang)
@@ -886,7 +886,7 @@ class Setup extends MY_Controller
 		}
 
 		$this->Site_model->lang_load();
-		
+
 		// load validation rules and input types from language files
 		$load_lang = $this->Site_model->lang_CI_Name;
 		if($load_lang == '')
@@ -908,7 +908,7 @@ class Setup extends MY_Controller
 			$action .= "/id/".$this->Content_model->field_id;
 		}
 		$action .= "/lang/".$this->Content_model->temp_lang;
-		
+
 		$attributes = array('name' => "field_editor", 'id' => "field_editor");
 		$hidden = array(
 		'field_id'  => $this->Content_model->field_id,
@@ -922,24 +922,27 @@ class Setup extends MY_Controller
 		// main data
 		$html .= form_fieldset($this->cms_labels['field_info']);
 		$html .= "\r";
-		
+
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['ref_name'], 'field_ref_name');
-		$html .= form_input('field_ref_name',$this->Content_model->field_ref_name); 
+		$html .= form_input('field_ref_name',$this->Content_model->field_ref_name);
 		$html .= "</p>\r";
-		
+
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['input_type'], 'field_input_type');
-		$html .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type); 
+		$html .= form_dropdown('field_input_type', $this->Content_model->input_types, $this->Content_model->field_input_type);
 		$html .= "</p>\r";
 
 		// get all possible value lists
 		$this->Content_model->reset_label();
 		$form_options = array(0 => $this->cms_labels['none']);
 		$val_list = $this->Content_model->value_lists_all();
-		foreach($val_list as $list)
-		{
-			$form_options[$list['list_id']] = $list['label'];
+
+		if(false !== $val_list && is_array($val_list)) {
+    		foreach($val_list as $list)
+    		{
+    			$form_options[$list['list_id']] = $list['label'];
+    		}
 		}
 
 		if($this->Content_model->list_id == '')
@@ -953,11 +956,11 @@ class Setup extends MY_Controller
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['list'], 'list_id');
-		$html .= form_dropdown('list_id', $form_options, $this->Content_model->list_id); 
+		$html .= form_dropdown('list_id', $form_options, $this->Content_model->list_id);
 		$html .= "</p>\r";
 
 		$form_options = array(0 => $this->cms_labels['no'], 1 => $this->cms_labels['yes']);
-		
+
 		if($this->Content_model->field_allow_multiple == '')
 		{
 			$allow_multiple = 0;
@@ -987,7 +990,7 @@ class Setup extends MY_Controller
 
 		$html .= form_fieldset_close("\r");
 
-		
+
 		// metadata
 		$html .= form_fieldset($this->cms_labels['field_metadata']);
 		$html .= "\r";
@@ -995,7 +998,7 @@ class Setup extends MY_Controller
 		$form_options = $this->Content_model->langs_dropdown();
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['language'], 'field_lang');
-		$html .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang); 
+		$html .= form_dropdown('field_lang', $form_options, $this->Content_model->temp_lang);
 		$html .= "</p>\r";
 
 		$this->Content_model->reset_label();
@@ -1009,7 +1012,7 @@ class Setup extends MY_Controller
 
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['field_label'], 'field_label');
-		$html .= form_input('field_label',$this->Content_model->label); 
+		$html .= form_input('field_label',$this->Content_model->label);
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 
@@ -1018,19 +1021,19 @@ class Setup extends MY_Controller
 		$html .= "\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['data_type'], 'validation_string');
-		$html .= form_dropdown('validation_string', $this->Content_model->data_types, $this->Content_model->validation_string); 
+		$html .= form_dropdown('validation_string', $this->Content_model->data_types, $this->Content_model->validation_string);
 		$html .= "</p>\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['exact_length'], 'validation_exact');
-		$html .= form_input('validation_exact',$this->Content_model->validation_exact); 
+		$html .= form_input('validation_exact',$this->Content_model->validation_exact);
 		$html .= "</p>\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['min_length'], 'validation_min');
-		$html .= form_input('validation_min',$this->Content_model->validation_min); 
+		$html .= form_input('validation_min',$this->Content_model->validation_min);
 		$html .= "</p>\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['max_length'], 'validation_max');
-		$html .= form_input('validation_max',$this->Content_model->validation_max); 
+		$html .= form_input('validation_max',$this->Content_model->validation_max);
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 
@@ -1065,13 +1068,13 @@ class Setup extends MY_Controller
 			$this->form_validation->set_rules('field_label', $this->cms_labels['field_label'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
-		
+
 			// run validation rules
 			if ($form_is_valid)
 			{
 
 				$this->Content_model->field_id = $this->input->post('field_id');
-				$this->Content_model->field_ref_name = $this->input->post('field_ref_name');	
+				$this->Content_model->field_ref_name = $this->input->post('field_ref_name');
 				$this->Content_model->field_input_type = $this->input->post('field_input_type');
 
 				$this->Content_model->field_needs_lang = $this->input->post('field_needs_lang');
@@ -1086,24 +1089,24 @@ class Setup extends MY_Controller
 					$this->Content_model->field_allow_multiple = 0;
 				}
 
-				$this->Content_model->validation_string = $this->input->post('validation_string');	
-				$this->Content_model->validation_exact = $this->input->post('validation_exact');	
-				$this->Content_model->validation_min = $this->input->post('validation_min');	
-				$this->Content_model->validation_max = $this->input->post('validation_max');	
-				$this->Content_model->list_id = $this->input->post('list_id');	
+				$this->Content_model->validation_string = $this->input->post('validation_string');
+				$this->Content_model->validation_exact = $this->input->post('validation_exact');
+				$this->Content_model->validation_min = $this->input->post('validation_min');
+				$this->Content_model->validation_max = $this->input->post('validation_max');
+				$this->Content_model->list_id = $this->input->post('list_id');
 
-				$this->Content_model->label_id = $this->input->post('label_id');	
+				$this->Content_model->label_id = $this->input->post('label_id');
 				$this->Content_model->label = $this->input->post('field_label');
 				$this->Content_model->label_scope = 'field';
 				$this->Content_model->label_rel_id = $this->input->post('field_id');
 				$this->Content_model->label_rel_name = $this->Content_model->field_ref_name;
-				$this->Content_model->temp_lang = $this->input->post('field_lang');	
+				$this->Content_model->temp_lang = $this->input->post('field_lang');
 
 				$success_field = $this->Content_model->update_field();
 				if($success_field)
 				{
 					$this->Content_model->label_rel_id = $this->Content_model->field_id;
-					
+
 					$success_meta = $this->Content_model->update_label();
 					if(!$success_meta)
 					{
@@ -1123,7 +1126,7 @@ class Setup extends MY_Controller
 			}
 			else
 			{
-				$this->Content_model->messages[] = validation_errors(); 
+				$this->Content_model->messages[] = validation_errors();
 			}
 		}
 
@@ -1147,16 +1150,16 @@ class Setup extends MY_Controller
 		$this->data['title_h1'] = $this->cms_labels['site_meta_fields'];
 
 		$this->_process_meta_fields();
-		
+
 		$this->data['form'] = $this->_form_meta_fields();
 
 		$msg = $this->Site_model->_output_messages();
-		
+
 		if($msg)
 		{
 			$this->data['msg'] = $msg;
 		}
-		
+
 		$this->load->view('cms/cms_form',$this->data);
 	}
 
@@ -1172,7 +1175,7 @@ class Setup extends MY_Controller
 		// fields
 
 		$this->Site_model->list_site_meta_fields();
-		
+
 		$fieldCount = count($this->Site_model->field_list);
 		$fieldNo = 1;
 
@@ -1185,7 +1188,7 @@ class Setup extends MY_Controller
 		$html .= "<th id=\"fd_order\">".$this->cms_labels['order']."</th>\r";
 		$html .= "</tr>\r";
 		$html .= "</thead>\r";
-		
+
 		$html .= "<tbody>\r";
 
 		foreach($this->Site_model->field_list as $field)
@@ -1218,7 +1221,7 @@ class Setup extends MY_Controller
 			'value'       => $field['field_id'],
 			'checked'     => $exists
 			);
-	
+
 			$chk_exist = form_checkbox($params);
 
 			$params = array(
@@ -1231,15 +1234,15 @@ class Setup extends MY_Controller
 			$chk_req = form_checkbox($params);
 
 			$params = array(
-			'name'        => "order[]",
-			'id'          => "order[]",
-			'value'       => $field['order'],
+			'name'        => "sort_order[]",
+			'id'          => "sort_order[]",
+			'value'       => $field['sort_order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
 
 			$input_order = form_input($params);
-			
+
 			$html .= "<tr>\r";
 			$html .= "<th headers=\"fd_name\" id=\"row_{$fieldNo}\">".$row_header."</th>\r";
 			$html .= "<td headers=\"fd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
@@ -1270,7 +1273,7 @@ class Setup extends MY_Controller
 			$temp_rels = $this->input->post('rf_id');
 			$temp_exists = $this->input->post('exists');
 			$temp_required = $this->input->post('required');
-			$temp_order = $this->input->post('order');
+			$temp_order = $this->input->post('sort_order');
 
 			$field_updates = array();
 			foreach($temp_fields as $index => $id)
@@ -1281,9 +1284,9 @@ class Setup extends MY_Controller
 				'rf_rel_id' => $this->Site_model->site_id,
 				'exists' => FALSE,
 				'required' => 0,
-				'order' => $temp_order[$index],
+				'sort_order' => intval($temp_order[$index]),
 				);
-				
+
 				if(is_array($temp_exists) && in_array($id,$temp_exists)){
 					$temp_field['exists'] = TRUE;
 				}
@@ -1291,7 +1294,7 @@ class Setup extends MY_Controller
 				if(is_array($temp_required) && in_array($id,$temp_required)){
 					$temp_field['required'] = 1;
 				}
-				
+
 				$field_updates[] = $temp_field;
 			}
 
@@ -1300,7 +1303,7 @@ class Setup extends MY_Controller
 			$this->Site_model->update_fields_related();
 
 		}
-		
+
 	}// end _process_meta_fields()
 
 	function languages()
@@ -1337,7 +1340,7 @@ class Setup extends MY_Controller
 
 		$action = "cms/setup/languages";
 		$attributes = array('name' => "search_langs", 'id' => "search_langs");
-		
+
 		// search for lang matches
 		$html = form_open($action,$attributes)."\r";
 		$html .= "<p class=\"align-labels\">";
@@ -1353,7 +1356,7 @@ class Setup extends MY_Controller
 		$html .= form_submit('search_submit', $this->cms_labels['search']);
 		$html .= "</p>\n";
 		$html .= form_close();
-		
+
 		// enable or disable - list of enabled languages
 		$attributes = array('name' => "langform", 'id' => "langform");
 		$active = array();
@@ -1375,7 +1378,7 @@ class Setup extends MY_Controller
 			$html .= "<p class=\"align-labels\">";
 			$html .= form_label($this->Site_model->label);
 			$html .= "<span class=\"radiogroup\">";
-			
+
 			foreach($matches as $lang)
 			{
 				$params = array(
@@ -1392,7 +1395,7 @@ class Setup extends MY_Controller
 				}
 				$html .= "</label> ";
 			}
-			
+
 			$html .= "</span></p>\r";
 		}
 
@@ -1486,9 +1489,9 @@ class Setup extends MY_Controller
 		$this->Content_model->scope = 'content';
 		$this->Content_model->list_types();
 		$temp_list = $this->Content_model->type_list;
-		
+
 		$types = array();
-		
+
 		foreach($temp_list as $type)
 		{
 			$this->Content_model->label_id = '';
@@ -1502,7 +1505,7 @@ class Setup extends MY_Controller
 			$lbl = $this->Content_model->load_label();
 
 			$uri = "cms/setup/content_type_edit/id/".$type['type_id'];
-		
+
 			if($lbl) {
 				$uri .= "/lang/".$this->Content_model->temp_lang;
 				$text = $this->Content_model->label;
@@ -1510,9 +1513,9 @@ class Setup extends MY_Controller
 				$text = $type['type_uri_name'];
 			}
 			$attr = array('title' => sprintf($this->cms_labels['content_type_edit'],$text));
-			
+
 			$types[] = anchor($uri,$text,$attr);
-		
+
 		}
 
 		$html = '<p>'. anchor("cms/setup/content_type_edit/",$this->cms_labels['content_type_new'])."</p>\r";
@@ -1520,10 +1523,10 @@ class Setup extends MY_Controller
 		$this->data['form'] = $html;
 
 		$this->_load_cms_menus();
-		
+
 		$this->load->view('cms/cms_form_2col',$this->data);
 	}
-	
+
 	function content_type_edit()
 	{
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
@@ -1566,13 +1569,13 @@ class Setup extends MY_Controller
 			$sidebar = "<h3>".$this->cms_labels['edit_by_lang']."</h3>";
 			$this->Site_model->list_langs();
 			$enabled = $this->Site_model->lang_list;
-			
+
 			$lang_links = array();
 			foreach($enabled as $tmp_lang)
 			{
-	
+
 				$action = "/cms/setup/content_type_edit/id/".$this->Content_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
-	
+
 				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
 			}
 
@@ -1609,7 +1612,7 @@ class Setup extends MY_Controller
 			$this->Content_model->temp_id = $this->Content_model->type_id;
 			$this->Content_model->load_label();
 		}
-		
+
 		$langs = $this->Content_model->langs_dropdown();
 
 		$action = "/cms/setup/content_type_edit";
@@ -1627,7 +1630,7 @@ class Setup extends MY_Controller
 		'type_id' => $this->Content_model->type_id,
 		'label_id' => $this->Content_model->label_id
 		);
-		
+
 		$html = form_open($action,$attributes,$hidden)."\r";
 
 		$html .= "<div class=\"align-labels label-wide\">\r";
@@ -1636,7 +1639,7 @@ class Setup extends MY_Controller
 		$html .= form_fieldset($this->cms_labels['general_info']);
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['type_uri_name'], 'type_uri_name');
-		$html .= form_input('type_uri_name',$this->Content_model->type_uri_name); 
+		$html .= form_input('type_uri_name',$this->Content_model->type_uri_name);
 		$html .= "</p>\r";
 		$html .= "<p class=\"indent-wide\">".$this->cms_labels['note_type_uri_name']."</p>\r";
 
@@ -1652,7 +1655,7 @@ class Setup extends MY_Controller
 		{
 			$form_options['checked'] = TRUE;
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['content_type_is_index'], 'is_index');
 		$html .= form_checkbox($form_options);
@@ -1663,7 +1666,7 @@ class Setup extends MY_Controller
 		$parent_types = $this->Content_model->index_types_dropdown();
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['content_type_parent'], 'parent_type');
-		$html .= form_dropdown('parent_type', $parent_types, $this->Content_model->parent_type); 
+		$html .= form_dropdown('parent_type', $parent_types, $this->Content_model->parent_type);
 		$html .= "</p>\r";
 
 		// index on home page?
@@ -1678,7 +1681,7 @@ class Setup extends MY_Controller
 		{
 			$form_options['checked'] = TRUE;
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['content_type_home'], 'index_home');
 		$html .= form_checkbox($form_options);
@@ -1690,12 +1693,12 @@ class Setup extends MY_Controller
 		'value'       => 1,
 		'checked'     => FALSE,
 		);
-		
+
 		if($this->Content_model->index_rss == 1)
 		{
 			$form_options['checked'] = TRUE;
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['content_type_rss'], 'index_rss');
 		$html .= form_checkbox($form_options);
@@ -1707,12 +1710,12 @@ class Setup extends MY_Controller
 		'value'       => 1,
 		'checked'     => FALSE,
 		);
-		
+
 		if($this->Content_model->menu_children == 1)
 		{
 			$form_options['checked'] = TRUE;
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_label($this->cms_labels['menu_children'], 'menu_children');
 		$html .= form_checkbox($form_options);
@@ -1726,12 +1729,12 @@ class Setup extends MY_Controller
 		$html .= "\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['language'], 'type_lang');
-		$html .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang); 
+		$html .= form_dropdown('type_lang', $langs, $this->Content_model->temp_lang);
 		$html .= "</p>\r";
-		
+
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['type_label'], 'label');
-		$html .= form_input('label',$this->Content_model->label); 
+		$html .= form_input('label',$this->Content_model->label);
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 
@@ -1787,7 +1790,7 @@ class Setup extends MY_Controller
 			'value'       => $field['field_id'],
 			'checked'     => $exists
 			);
-	
+
 			$chk_exist = form_checkbox($params);
 
 			$params = array(
@@ -1802,13 +1805,13 @@ class Setup extends MY_Controller
 			$params = array(
 			'name'        => "order[]",
 			'id'          => "order[]",
-			'value'       => $field['order'],
+			'value'       => $field['sort_order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
 
 			$input_order = form_input($params);
-			
+
 			$html .= "<tr>\r";
 			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\" class=\"align-left\">".$row_header."</th>\r";
 			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
@@ -1843,7 +1846,7 @@ class Setup extends MY_Controller
 			$this->form_validation->set_rules('label', $this->cms_labels['type_label'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
-			
+
 			// get values from form post data
 			$this->Content_model->type_id = $this->input->post('type_id');
 			$this->Content_model->type_uri_name = $this->input->post('type_uri_name');
@@ -1866,8 +1869,8 @@ class Setup extends MY_Controller
 				$temp_rels = $this->input->post('rf_id');
 				$temp_exists = $this->input->post('exists');
 				$temp_required = $this->input->post('required');
-				$temp_order = $this->input->post('order');
-	
+				$temp_order = $this->input->post('sort_order');
+
 				$field_updates = array();
 				foreach($temp_fields as $index => $id)
 				{
@@ -1878,17 +1881,17 @@ class Setup extends MY_Controller
 					'rf_rel_ref_name' => $this->Content_model->type_uri_name,
 					'exists' => FALSE,
 					'required' => 0,
-					'order' => $temp_order[$index],
+					'sort_order' => $temp_order[$index],
 					);
-					
+
 					if(is_array($temp_exists) && in_array($id,$temp_exists)){
 						$temp_field['exists'] = TRUE;
 					}
-	
+
 					if(is_array($temp_required) && in_array($id,$temp_required)){
 						$temp_field['required'] = 1;
 					}
-					
+
 					$field_updates[] = $temp_field;
 				}
 
@@ -1897,13 +1900,13 @@ class Setup extends MY_Controller
 				{
 
 					// put content type in array
-	
+
 					foreach($field_updates as $index => $id)
 					{
 						$field_updates[$index]['rf_rel_id'] = $this->Content_model->type_id;
 						$field_updates[$index]['rf_rel_ref_name'] = $this->Content_model->type_uri_name;
 					}
-	
+
 					$this->Content_model->field_list = $field_updates;
 					$this->Content_model->scope = 'types';
 					$this->Content_model->update_fields_related();
@@ -1934,14 +1937,14 @@ class Setup extends MY_Controller
 			{
 				$this->Content_model->messages[] = validation_errors();
 			}
-			
+
 			if(count($this->Content_model->messages) == 0)
 			{
 				$this->Content_model->messages[] = $this->cms_labels['content_type_update_success'];
 			}
-			
+
 		}
-		
+
 	}
 
 // media types
@@ -1966,7 +1969,7 @@ class Setup extends MY_Controller
 		$temp_list = $this->File_model->type_list;
 
 		$types = array();
-		
+
 		foreach($temp_list as $type)
 		{
 			$this->File_model->label_id = '';
@@ -1980,7 +1983,7 @@ class Setup extends MY_Controller
 			$lbl = $this->File_model->load_label();
 
 			$uri = "cms/setup/media_type_edit/id/".$type['type_id'];
-		
+
 			if($lbl) {
 				$uri .= "/lang/".$this->File_model->temp_lang;
 				$text = $this->File_model->label;
@@ -1988,9 +1991,9 @@ class Setup extends MY_Controller
 				$text = $type['type_uri_name'];
 			}
 			$attr = array('title' => sprintf($this->cms_labels['media_type_edit'],$text));
-			
+
 			$types[] = anchor($uri,$text,$attr);
-		
+
 		}
 
 		$this->_load_cms_menus();
@@ -2041,13 +2044,13 @@ class Setup extends MY_Controller
 
 			$this->Site_model->list_langs();
 			$enabled = $this->Site_model->lang_list;
-			
+
 			$lang_links = array();
 			foreach($enabled as $tmp_lang)
 			{
-	
+
 				$action = "/cms/setup/media_type_edit/id/".$this->File_model->type_id."/lang/".$tmp_lang['ISO_639_3'];
-	
+
 				$lang_links[] = anchor($action,$tmp_lang['Ref_Name']);
 			}
 
@@ -2066,7 +2069,7 @@ class Setup extends MY_Controller
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
-	
+
 	function _form_media_type()
 	{
 		if($this->File_model->type_id != '')
@@ -2101,13 +2104,13 @@ class Setup extends MY_Controller
 		'type_uri_name' => $this->File_model->type_uri_name,
 		'label_id' => $this->File_model->label_id,
 		);
-		
+
 		$html = form_open($action,$attributes,$hidden)."\r";
 
 		// main data
 		$html .= "<h2>\r";
 		$tmp_editing = sprintf($this->cms_labels['media_type_editing'],$this->File_model->type_uri_name);
-		$html .= $tmp_editing; 
+		$html .= $tmp_editing;
 		$html .= "</h2>\r";
 
 		$html .= "<div class=\"align-labels label-normal\">\r";
@@ -2118,19 +2121,19 @@ class Setup extends MY_Controller
 		$html .= "\r";
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['language'], 'type_lang');
-		$html .= form_dropdown('type_lang', $options, $this->File_model->temp_lang); 
+		$html .= form_dropdown('type_lang', $options, $this->File_model->temp_lang);
 		$html .= "</p>\r";
-		
+
 		$options = array(
 		'name'        => 'label',
 		'id'          => 'label',
 		'value'       => $this->File_model->label,
 		'class'   => 'text',
 		);
-		
+
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['type_label'], 'label');
-		$html .= form_input($options); 
+		$html .= form_input($options);
 		$html .= "</p>\r";
 		$html .= form_fieldset_close("\r");
 		$html .= "</div>\r";
@@ -2167,7 +2170,7 @@ class Setup extends MY_Controller
 			$row_header .= form_hidden('rf_id[]', $field['rf_id']);
 
 			$tmp_label = $field['field_ref_name'];
-			
+
 			// get label for field
 			$this->File_model->reset_label();
 			$this->File_model->label_scope = 'field';
@@ -2194,7 +2197,7 @@ class Setup extends MY_Controller
 			'value'       => $field['field_id'],
 			'checked'     => $exists
 			);
-	
+
 			$chk_exist = form_checkbox($params);
 
 
@@ -2210,13 +2213,13 @@ class Setup extends MY_Controller
 			$params = array(
 			'name'        => "order[]",
 			'id'          => "order[]",
-			'value'       => $field['order'],
+			'value'       => $field['sort_order'],
 			'maxlength'   => '3',
 			'size'        => '3'
 			);
 
 			$input_order = form_input($params);
-			
+
 			$html .= "<tr>\r";
 			$html .= "<th headers=\"hd_name\" id=\"row_{$fieldNo}\" class=\"align-left\">".$row_header."</th>\r";
 			$html .= "<td headers=\"hd_exists row_{$fieldNo}\">".$chk_exist."</td>\r";
@@ -2251,7 +2254,7 @@ class Setup extends MY_Controller
 			$this->form_validation->set_rules('label', $this->cms_labels['type_label'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
-			
+
 			// get values from form post data
 			$this->File_model->type_id = $this->input->post('type_id');
 			$this->File_model->type_uri_name = $this->input->post('type_uri_name');
@@ -2263,8 +2266,8 @@ class Setup extends MY_Controller
 				$temp_rels = $this->input->post('rf_id');
 				$temp_exists = $this->input->post('exists');
 				$temp_required = $this->input->post('required');
-				$temp_order = $this->input->post('order');
-	
+				$temp_order = $this->input->post('sort_order');
+
 				$field_updates = array();
 				foreach($temp_fields as $index => $id)
 				{
@@ -2275,24 +2278,24 @@ class Setup extends MY_Controller
 					'rf_rel_ref_name' => $this->File_model->type_uri_name,
 					'exists' => FALSE,
 					'required' => 0,
-					'order' => $temp_order[$index],
+					'sort_order' => $temp_order[$index],
 					);
-					
+
 					if(is_array($temp_exists) && in_array($id,$temp_exists)){
 						$temp_field['exists'] = TRUE;
 					}
-	
+
 					if(is_array($temp_required) && in_array($id,$temp_required)){
 						$temp_field['required'] = 1;
 					}
-					
+
 					$field_updates[] = $temp_field;
 				}
 
 				$this->File_model->field_list = $field_updates;
 				$this->File_model->scope = 'types';
 				$this->File_model->update_fields_related();
-				
+
 				// update type label
 				$this->File_model->label_scope = 'types';
 				$this->File_model->label_rel_id = $this->File_model->type_id;
@@ -2300,7 +2303,7 @@ class Setup extends MY_Controller
 				$this->File_model->label_id = $this->input->post('label_id');
 				$this->File_model->label = $this->input->post('label');
 				$this->File_model->temp_lang = $this->input->post('type_lang');
-				
+
 				if(!$this->File_model->update_label())
 				{
 					$this->File_model->messages[] = sprintf($this->cms_labels['update_failure'],$this->cms_labels['type_label']);
@@ -2312,14 +2315,14 @@ class Setup extends MY_Controller
 			{
 				$this->File_model->messages[] = validation_errors();
 			}
-			
+
 			if(count($this->File_model->messages) == 0)
 			{
 				$this->File_model->messages[] = $this->cms_labels['media_type_update_success'];
 			}
-			
+
 		}
-		
+
 	}
 
 	function lists()
@@ -2336,11 +2339,11 @@ class Setup extends MY_Controller
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['lists'];
-		
+
 		$lists = $this->Content_model->value_lists_all();
 		if($lists)
 		{
-			
+
 			foreach($lists as $list)
 			{
 				$label = $list['list_ref_name'];
@@ -2350,17 +2353,17 @@ class Setup extends MY_Controller
 					$label = $list['label'];
 				}
 				$edit_links[] = anchor($link,$label);
-				
+
 			}
 			$html = '<p>'. anchor("cms/setup/list_edit/",$this->cms_labels['new_list'])."</p>\r";
 			$html .= ul($edit_links);
-			
+
 		}
 		else
 		{
 			$html = '<p>'.$this->cms_labels['no_lists']."</p>\r";
 		}
-		
+
 		$this->data['form'] = $html;
 		$this->_load_cms_menus();
 
@@ -2383,7 +2386,7 @@ class Setup extends MY_Controller
 		$title_tag[] = $this->cms_labels['phsite_cms'];
 		$this->data['title_tag'] = implode(' | ',$title_tag);
 		$this->data['title_h1'] = $this->cms_labels['list_edit'];
-		
+
 		$this->_process_list_edit();
 		$this->_form_list_edit();
 
@@ -2396,7 +2399,7 @@ class Setup extends MY_Controller
 
 		$this->load->view('cms/cms_form',$this->data);
 	}
-	
+
 	function _form_list_edit()
 	{
 		$params = $this->uri->uri_to_assoc(4);
@@ -2415,7 +2418,7 @@ class Setup extends MY_Controller
 		}
 		$this->Content_model->lang_load();
 		$this->Content_model->load_value_list();
-		
+
 		$action = $this->uri->uri_string();
 		$attributes = array('name' => "list_editor", 'id' => "list_editor");
 		$hidden = array('list_id' => $this->Content_model->list_id);
@@ -2424,7 +2427,7 @@ class Setup extends MY_Controller
 
 		$html .= "<p class=\"align-labels label-normal\">\r";
 		$html .= form_label($this->cms_labels['ref_name'], 'list_ref_name');
-		$html .= form_input('list_ref_name',$this->Content_model->list_ref_name); 
+		$html .= form_input('list_ref_name',$this->Content_model->list_ref_name);
 		$html .= "</p>\r";
 
 		$html .= form_fieldset_close("\r");
@@ -2437,12 +2440,12 @@ class Setup extends MY_Controller
 		$form_options = $this->Content_model->langs_dropdown();
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['language'], 'list_lang');
-		$html .= form_dropdown('list_lang', $form_options, $this->Content_model->temp_lang); 
+		$html .= form_dropdown('list_lang', $form_options, $this->Content_model->temp_lang);
 		$html .= "</p>\r";
-		
+
 		$html .= "<p>\r";
 		$html .= form_label($this->cms_labels['label'], 'label');
-		$html .= form_input('label',$this->Content_model->label); 
+		$html .= form_input('label',$this->Content_model->label);
 		$html .= "</p>\r";
 
 		$html .= "<div>\r";
@@ -2463,7 +2466,7 @@ class Setup extends MY_Controller
 		{
 			$html .= "<tr>\r";
 			$html .= form_hidden('val_ids[]', $value['val_id']);
-			
+
 			$form_options = array(
 			'size'        => '13',
 			'name'        => 'list_values[]',
@@ -2471,7 +2474,7 @@ class Setup extends MY_Controller
 			'value'       => $value['value'],
 			);
 			$html .= "<td>";
-			$html .= form_input($form_options); 
+			$html .= form_input($form_options);
 			$html .= "</td>\r";
 
 			$form_options = array(
@@ -2481,7 +2484,7 @@ class Setup extends MY_Controller
 			'value'       => $value['label'],
 			);
 			$html .= "<td>";
-			$html .= form_input($form_options); 
+			$html .= form_input($form_options);
 			$html .= "</td>\r";
 
 			$html .= "</tr>\r";
@@ -2492,14 +2495,14 @@ class Setup extends MY_Controller
 			$i++;
 
 			$html .= "<tr>\r";
-			
+
 			$form_options = array(
 			'size'        => '13',
 			'name'        => 'new_values[]',
 			'id'          => 'new_values[]',
 			);
 			$html .= "<td>";
-			$html .= form_input($form_options); 
+			$html .= form_input($form_options);
 			$html .= "</td>\r";
 
 			$form_options = array(
@@ -2508,7 +2511,7 @@ class Setup extends MY_Controller
 			'id'          => 'new_labels[]',
 			);
 			$html .= "<td>";
-			$html .= form_input($form_options); 
+			$html .= form_input($form_options);
 			$html .= "</td>\r";
 
 			$html .= "</tr>\r";
@@ -2530,7 +2533,7 @@ class Setup extends MY_Controller
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\n";
 		$html .= form_close();
-		
+
 		$this->data['form'] = $html;
 
 		// construct sidebar lang links
@@ -2540,7 +2543,7 @@ class Setup extends MY_Controller
 
 			$this->Site_model->list_langs();
 			$enabled = $this->Site_model->lang_list;
-			
+
 			$lang_links = array();
 			foreach($enabled as $tmp_lang)
 			{
@@ -2566,32 +2569,32 @@ class Setup extends MY_Controller
 			$this->form_validation->set_rules('list_lang', $this->cms_labels['language'], 'required|is_lang');
 
 			$form_is_valid = $this->form_validation->run();
-			
+
 			// get values from form post data
 			$this->Content_model->list_id = $this->input->post('list_id');
 			$this->Content_model->list_ref_name = $this->input->post('list_ref_name');
 			$this->Content_model->temp_lang = $this->input->post('list_lang');
 			$this->Content_model->label = $this->input->post('label');
-			
+
 			$val_ids = $this->input->post('val_ids');
 			$list_values = $this->input->post('list_values');
 			$list_labels = $this->input->post('list_labels');
 
 			$new_values = $this->input->post('new_values');
 			$new_labels = $this->input->post('new_labels');
-			
+
 			$list_values_final = array();
 
 			if ($form_is_valid)
 			{
-				// update list 
+				// update list
 				if($this->Content_model->update_list())
 				{
 					$this->Content_model->label_scope = 'list';
 					$this->Content_model->label_rel_id = $this->Content_model->list_id;
 					$this->Content_model->label_rel_name = $this->Content_model->list_ref_name;
 
-					// update label 
+					// update label
 					if($this->Content_model->update_label())
 					{
 						if(!is_array($val_ids))
@@ -2606,7 +2609,7 @@ class Setup extends MY_Controller
 						{
 							$list_labels = array($list_labels);
 						}
-						
+
 						// update list values
 						foreach($val_ids as $index => $v_id)
 						{
@@ -2619,22 +2622,22 @@ class Setup extends MY_Controller
 								if($list_values[$index] == '')
 								{
 									$this->Content_model->debugging[] = sprintf($this->cms_labels['list_missing_value'],$v_id);
-									
+
 								}
 								if($list_labels[$index] == '')
 								{
 									$this->Content_model->debugging[] = sprintf($this->cms_labels['list_missing_label'],$v_id);
 								}
 							}
-		
+
 							$tmp_vals = array(
 							'val_id' => $v_id,
 							'value' => $list_values[$index],
 							'label' => $list_labels[$index],
 							);
-							
+
 							$list_values_final[] = $tmp_vals;
-							
+
 						}
 						foreach($new_values as $index => $val)
 						{
@@ -2645,37 +2648,37 @@ class Setup extends MY_Controller
 								'value' => $val,
 								'label' => $new_labels[$index],
 								);
-								
+
 								$list_values_final[] = $tmp_vals;
 							}
 						}
-						
-		
+
+
 						if(count($this->Content_model->messages) == 0)
 						{
 							$this->Content_model->value_list = $list_values_final;
 							$this->Content_model->update_list_vals();
 						}
-						
+
 					}
-				
+
 				}
-				
+
 
 			}
 			else
 			{
 				$this->Content_model->messages[] = validation_errors();
 			}
-			
+
 			if(count($this->Content_model->messages) == 0)
 			{
 				$tmp_msg = sprintf($this->cms_labels['update_success'],$this->Content_model->list_ref_name);
 				$this->Content_model->messages[] = $tmp_msg;
 			}
-			
+
 		}
-		
+
 	}
 
 }
