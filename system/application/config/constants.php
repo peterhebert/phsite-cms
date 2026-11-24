@@ -59,7 +59,7 @@ define('BASE_PATH',preg_replace("#^(.*)/index.php(.*)#", "$1", $_SERVER['PHP_SEL
 // document root relative path to media files
 define('MEDIA_PATH_ORIG', '/media/originals');
 define('MEDIA_PATH_CACHE', '/media/cache');
-define('PHSITE_CMS_VERSION', "0.3.1");
+define('PHSITE_CMS_VERSION', "0.3.2");
 
 // development mode for CMS admin panel
 // TRUE = use individual uncompressed js and css files, show debugging messages
