@@ -64,7 +64,7 @@ define('PHSITE_CMS_VERSION', "0.3.1");
 // development mode for CMS admin panel
 // TRUE = use individual uncompressed js and css files, show debugging messages
 // FALSE = use concatenated and minified js and css files
-define('DEV_MODE', TRUE);
+define('DEV_MODE', FALSE);
 
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */

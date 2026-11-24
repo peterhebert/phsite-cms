@@ -22,3 +22,5 @@ system/application/config/database.php
 php.ini
 
 .lando.yml
+
+zzz_work/
