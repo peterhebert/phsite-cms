@@ -3,7 +3,7 @@ class Content extends MY_Controller
 {
 	var $whichform;
 	var $selected;
-	
+
 	function Content()
 	{
 		parent::Controller();
@@ -45,12 +45,12 @@ class Content extends MY_Controller
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 
 		$this->custom_js[] = "<script type=\"text/javascript\" src=\"/assets/js/admin_ui/select_checkboxes.js\"></script>";
-		
+
 		$confirm_delete = "<script type=\"text/javascript\">\r";
 		$confirm_delete .= "/* <![CDATA[ */\r";
 		$confirm_delete .= "$().ready(function(){\r";
 		$confirm_delete .= "\tvar deleteText = '".$this->cms_labels['delete_confirm_multiple']."';\r";
-		
+
 		$confirm_delete .= "\t$(\"input[name='submit']\").click(function(){\r";
 		$confirm_delete .= "\t\tvar action = $(\"select[name='action']\").val();\r";
 		$confirm_delete .= "\t\tif(action == 'delete') {\r";
@@ -67,7 +67,7 @@ class Content extends MY_Controller
 		$confirm_delete .= "});\r";
 		$confirm_delete .= "/* ]]> */\r";
 		$confirm_delete .= "</script>";
-		
+
 		$this->custom_js[] = $confirm_delete;
 		$this->data['custom_js'] = implode("\r",$this->custom_js);
 		$msg = $this->Content_model->_output_messages();
@@ -76,7 +76,7 @@ class Content extends MY_Controller
 			$this->data['msg'] = $msg;
 		}
 		$this->_load_cms_menus();
-	
+
 		$this->load->view('cms/cms_form_2col',$this->data);
 	}
 
@@ -143,7 +143,7 @@ class Content extends MY_Controller
 
 		$end = $this->Content_model->page * $limit;
 		$start = $end - $limit + 1;
-		
+
 		if($end > $total || $end == 0)
 		{
 			$end = $total;
@@ -163,7 +163,7 @@ class Content extends MY_Controller
 		);
 		$html = form_open($action, $attributes);
 		$html .= form_hidden('confirm', '')."\r";
-		
+
 		$html .= "<div class=\"form-filter\">\r";
 
 		$form_options = array(
@@ -172,7 +172,7 @@ class Content extends MY_Controller
 		'value'       => $title_match,
 		'class'       => 'small_input',
 		);
-		
+
 		$html .=  form_label($this->cms_labels['title_contains'], 'title');
 		$html .=  form_input($form_options);
 		unset($form_options);
@@ -199,7 +199,7 @@ class Content extends MY_Controller
 		$form_options = array(10 => 10, 20 => 20, 30 => 30, 40 => 40, 50 => 50);
 		$form_options[$this->Content_model->limit] = $this->Content_model->limit;
 		asort($form_options);
-		
+
 		$html .=  form_label($this->cms_labels['results_per_page'], 'limit');
 		$html .=  form_dropdown('limit', $form_options, $this->Content_model->limit);
 		$html .= form_submit('filter', $this->cms_labels['results_filter']);
@@ -249,6 +249,7 @@ class Content extends MY_Controller
 			$html .= "\t\t\t<th scope=\"col\" id=\"authors\">{$this->cms_labels['author']}</th>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"created\">{$this->cms_labels['date_created']}</th>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"published\">{$this->cms_labels['published']}</th>\r";
+			$html .= "\t\t\t<th scope=\"col\" id=\"language\">{$this->cms_labels['language']}</th>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"navved\">{$this->cms_labels['show_in_nav']}</th>\r";
 			$html .= "\t\t\t<th scope=\"col\" id=\"actions\">{$this->cms_labels['select']}\r";
 			$html .= "<ul class=\"option-list\">\r";
@@ -259,10 +260,10 @@ class Content extends MY_Controller
 			$html .= "\t\t</tr>\r";
 			$html .= "\t</thead>\r";
 			$html .= "\t<tbody>\r";
-			
+
 			foreach($this->Content_model->result_list as $item)
 			{
-	
+
 				// determine edit uri
 				$edit_uri = 'cms/content/edit/id/'.$item['content_id'];
 				if($this->Content_model->temp_lang != '')
@@ -270,30 +271,30 @@ class Content extends MY_Controller
 					$edit_uri .= '/lang/'.$this->Content_model->temp_lang;
 				}
 				$cid = $item['content_id'];
-	
+
 				$html .= "\t\t\t<th id=\"content-{$cid}\" headers=\"content-ids\">";
 				$html .= anchor($edit_uri, $item['title'], array('title' => sprintf($this->cms_labels['edit_this'],$item['title'])));
 				$html .= "</th>\r";
-	
+
 				// get type label
 				$this->Content_model->label = '';
 				$this->Content_model->label_id = '';
 				$this->Content_model->temp_id = $item['type_id'];
 				$this->Content_model->label_scope = 'types';
 				$this->Content_model->load_label();
-	
+
 				$type_name = $item['type_uri_name'];
 				if($this->Content_model->label != '')
 				{
 					$type_name = $this->Content_model->label;
 				}
 				$html .= "\t\t\t<td headers=\"content-{$cid} types\">".$type_name."</td>\r";
-	
+
 				// author info
 				$this->User_model->temp_id = $item['user_id'];
 				$this->User_model->load_user();
 				$name = $this->User_model->name_last.', '.$this->User_model->name_first;
-	
+
 				if($this->session->userdata('admin') == 1)
 				{
 					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".anchor('cms/user/edit/id/'.$item['user_id'],$name,array('title' => $this->cms_labels['user_edit']))."</td>\r";
@@ -302,33 +303,41 @@ class Content extends MY_Controller
 				{
 					$html .= "\t\t\t<td headers=\"content-{$cid} authors\">".$name."</td>\r";
 				}
-	
+
 				$html .= "\t\t\t<td headers=\"content-{$cid} created\">".$item['date_created']."</td>\r";
-	
+
 				$options = array($this->cms_labels['no'],$this->cms_labels['yes']);
 				$html .= "\t\t\t<td headers=\"content-{$cid} published\">";
 				$html .= $options[$item['publish']];
 				$html .= "</td>\r";
-	
+
+				// get language name
+				$this->Content_model->temp_lang = $item['lang_ISO_639_3'] ? $item['lang_ISO_639_3'] : $this->Site_model->site_default_lang;
+				$lang_native_name = $this->Content_model->get_lang_native_name();
+
+				$html .= "\t\t\t<td headers=\"content-{$cid} language\">";
+				$html .= $lang_native_name;
+				$html .= "</td>\r";
+
 				$html .= "\t\t\t<td headers=\"content-{$cid} navved\">";
 				$html .= $options[$item['show_in_nav']];
 				$html .= "</td>\r";
-	
+
 				$html .= "\t\t\t<td headers=\"content-{$cid} actions\">";
-	
+
 				$options = array(
 				'name'        => "select[]",
 				'value'       => $item['content_id'],
 				);
-				
+
 				$html .= form_checkbox($options);
 				$html .= "</td>\r";
 				$html .= "\t\t</tr>\r";
 			}
-	
+
 			$html .= "\t</tbody>\r";
 			$html .= "</table>\r";
-	
+
 			$form_options = array(
 			''=>'',
 			'delete' => $this->cms_labels['delete'],
@@ -341,10 +350,10 @@ class Content extends MY_Controller
 			$html .=  form_label($this->cms_labels['with_selected'].' : ', 'action', array('class' => 'inline'));
 			$html .=  form_dropdown('action', $form_options);
 			$html .= "&nbsp; ";
-	
+
 			$html .= form_submit('submit', $this->cms_labels['submit']);
 			$html .= "</p>\n";
-	
+
 			$html .= form_close();
 		}
 
@@ -358,7 +367,7 @@ class Content extends MY_Controller
 		'id' => 'confirm_delete'
 		);
 		$html = form_open($action, $attributes);
-		
+
 		foreach($this->selected as $cid)
 		{
 			$html .= form_hidden('select[]', $cid);
@@ -369,7 +378,7 @@ class Content extends MY_Controller
 		'name'        => "confirm",
 		'value'       => 1,
 		);
-		
+
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['delete_confirm_multiple'], 'confirm',array('class' => 'inline'))."?<br />\r";
 		$html .= form_checkbox($params);
@@ -381,13 +390,13 @@ class Content extends MY_Controller
 		$html .= form_close();
 
 		$this->data['form'] = $html;
-	
+
 	}
 
 	function _process_manage()
 	{
 		$select = $this->input->post('select');
-		
+
 		if($select !== FALSE && is_array($select))
 		{
 			$this->selected = $select;
@@ -472,7 +481,7 @@ class Content extends MY_Controller
 		}
 
 		$this->_process_edit();
-		
+
 		$params = $this->uri->uri_to_assoc(4);
 		if( array_key_exists('id',$params) && $this->Content_model->content_id == '')
 		{
@@ -494,7 +503,7 @@ class Content extends MY_Controller
 		$this->Content_model->temp_value = $this->Content_model->temp_lang;
 
 		$this->Content_model->load_content_form();
-		
+
 		$this->_form_edit();
 
 		$msg = $this->Content_model->_output_messages();
@@ -509,7 +518,7 @@ class Content extends MY_Controller
 		$this->data['breadcrumb'] = implode(' : ',$breadcrumb);
 		$this->data['title_tag'] = $this->cms_labels['content_editor'];
 		$this->data['title_h1'] = $this->cms_labels['content_editor'];
-		
+
 		$this->data['sidebar'] = $this->_content_meta_menu();
 		$this->_load_cms_menus();
 
@@ -537,7 +546,7 @@ class Content extends MY_Controller
 		{
 			$form_options['class'] = 'collapsible new';
 		}
-		
+
 		if($this->Content_model->temp_lang != '')
 		{
 			$action .= '/lang/'.$this->Content_model->temp_lang;
@@ -548,11 +557,11 @@ class Content extends MY_Controller
 		$html .= form_hidden('my_url',site_url($my_url));
 
 		$html .= "<div class=\"align-labels label-normal\">\r";
-		
+
 		// CONTENT fieldset
 
 		$html .= form_fieldset('Content');
-		
+
 		$html .= $this->Content_model->build_form_titles();
 
 		// fields
@@ -634,7 +643,7 @@ class Content extends MY_Controller
 						$dir_vals[$the_dir['file_uri']] = $the_dir['file_uri'];
 					}
 				}
-				
+
 				$html .= form_dropdown($form_options['name'], $dir_vals, $fd['value']);
 				unset($dir_vals);
 				break;
@@ -697,7 +706,7 @@ class Content extends MY_Controller
 
 		$this->Content_model->scope = 'content';
 		$form_options = $this->Content_model->types_dropdown();
-		
+
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['content_type'], 'type_id');
 		$html .=  form_dropdown('type_id', $form_options, $this->Content_model->type_id);
@@ -708,7 +717,7 @@ class Content extends MY_Controller
 		$html .=  form_label($this->cms_labels['parent'], 'parent_id');
 		$html .=  form_dropdown('parent_id', $form_options, $this->Content_model->parent_id);
 		$html .= "</p>\n";
-	
+
 		$form_options = array(1 => $this->cms_labels['yes'], 0 => $this->cms_labels['no']);
 		$html .= "<p>";
 		$html .=  form_label($this->cms_labels['publish'], 'publish');
@@ -740,7 +749,7 @@ class Content extends MY_Controller
 		// convert dates to user timezone
 		$sys_zone = date_default_timezone_get();
 		$usr_zone = $this->session->userdata('timezone');
-		
+
 		if($usr_zone !== FALSE && $usr_zone != $sys_zone)
 		{
 			if($this->Content_model->date_created != '')
@@ -751,7 +760,7 @@ class Content extends MY_Controller
 			{
 				$this->Content_model->date_end_expiry = convert_time($this->Content_model->date_end_expiry, $usr_zone);
 			}
-	
+
 		}
 
 		if($this->Content_model->date_created == NULL || preg_match('#^-(.*)$#',$this->Content_model->date_created))
@@ -793,7 +802,7 @@ class Content extends MY_Controller
 
 			$this->Content_model->list_attachments();
 			$this->Content_model->lang_load();
-	
+
 			$html .= form_fieldset($this->cms_labels['attachments']);
 			if(count($this->Content_model->attachments) > 0)
 			{
@@ -803,15 +812,15 @@ class Content extends MY_Controller
 			{
 				$tmp_txt = $this->cms_labels['attachments_add'];
 			}
-	
+
 			$html .= "<p>";
 			$html .= anchor('cms/content/attachments/'.$this->Content_model->content_id, $tmp_txt);
 			$html .= "</p>\r";
-	
+
 			$this->load->config('mime_info');
 			$this->lang->load('mime', $this->Content_model->lang_CI_Name);
 			$mime_labels = $this->lang->line('mime');
-			
+
 			if(count($this->Content_model->attachments) > 0)
 			{
 				$html .= "<div class=\"block margins\">\r";
@@ -820,23 +829,23 @@ class Content extends MY_Controller
 					$html .= "<div class=\"column\">\r";
 					$this->File_model->reset_media_vars();
 					$this->File_model->temp_id = $att['media_id'];
-	
+
 					if($this->File_model->load_media())
 					{
 						$this->File_model->load_title();
-						
+
 						// determine edit uri
 						$edit_uri = 'cms/media/edit/id/'.$this->File_model->media_id;
 						if($this->File_model->temp_lang != '')
 						{
 							$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 						}
-	
+
 						$mime_cat = preg_replace('#^([a-z]+)/(.*)$#','$1',$this->File_model->mime_type);
 						$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
-	
+
 						$filename = basename($this->File_model->file_uri);
-	
+
 						// if local image, do thumbnail
 						if($mime_cat == 'image' && $this->File_model->external == 0)
 						{
@@ -846,7 +855,7 @@ class Content extends MY_Controller
 							$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 							$html .= "</div>";
 						}
-	
+
 						if(in_array($ext,$this->mime_icons))
 						{
 							$html .= "<span class=\"file ext_{$ext}\">";
@@ -859,15 +868,15 @@ class Content extends MY_Controller
 						{
 							$html .= "<span class=\"file\">";
 						}
-	
+
 						if($this->File_model->title != '' && $this->File_model->title != $filename)
 						{
 							$filename = $this->File_model->title;
 						}
-	
+
 						$html .= anchor($edit_uri, $filename, array('title' => sprintf($this->cms_labels['edit_this'],$filename)));
 						$html .= "</span><br />\r";
-	
+
 						if(array_key_exists($ext,$mime_labels))
 						{
 							$html .= $mime_labels[$ext];
@@ -876,13 +885,13 @@ class Content extends MY_Controller
 						{
 							$html .= $this->File_model->mime_type;
 						}
-	
+
 					}
 					$html .= "</div>";
-	
+
 				}
 				$html .= "</div>";
-	
+
 			}
 			else
 			{
@@ -890,11 +899,11 @@ class Content extends MY_Controller
 				$html .= $this->cms_labels['attachments_none'];
 				$html .= "</p>\r";
 			}
-	
+
 			$html .= form_fieldset_close();
 
 		}
-		
+
 		$html .= "<p>";
 		$html .= form_submit('submit', $this->cms_labels['save']);
 		$html .= "</p>\n";
@@ -910,7 +919,7 @@ class Content extends MY_Controller
 		// if form submitted, process data
 		if($this->input->post('submit') != '')
 		{
-			$this->load->library('form_validation');		
+			$this->load->library('form_validation');
 
 			// set validation rules
 			$this->form_validation->set_rules('type_id', $this->cms_labels['content_type'], 'required|is_natural_no_zero');
@@ -942,14 +951,14 @@ class Content extends MY_Controller
 				{
 					$tmp_valid[] = $tmp_validation[$index];
 				}
-				
+
 				$lbl_name = $tmp_field_ref_name[$index];
-				
+
 				// load label
-	
+
 				$this->Content_model->label_scope = 'field';
 				$this->Content_model->temp_id = $fd_id;
-	
+
 				if($this->Content_model->load_label())
 				{
 					$lbl_name = $this->Content_model->label;
@@ -992,14 +1001,14 @@ class Content extends MY_Controller
 				$this->Content_model->temp_id = $this->input->post('type_id');
 				$this->Content_model->scope = 'content';
 				$this->Content_model->load_type();
-	
+
 				$tmp_field_id = $this->input->post('field_id');
 				$tmp_field_name = $this->input->post('field_name');
 				$tmp_meta_id = $this->input->post('meta_id');
 				$tmp_required = $this->input->post('required');
 				$tmp_field_needs_lang = $this->input->post('field_needs_lang');
 
-				
+
 				// first update content object, then title, then field metadata
 				if($this->Content_model->update_content())
 				{
@@ -1010,7 +1019,7 @@ class Content extends MY_Controller
 					{
 						$this->Content_model->messages[] = $this->cms_labels['title_update_failure'];
 					}
-					
+
 					// build metadata
 
 					$form_meta = array();
@@ -1024,10 +1033,10 @@ class Content extends MY_Controller
 						}
 
 						$value = decode_html_entities($value);
-						
+
 						$this->Content_model->temp_id = $fd_id;
 						$this->Content_model->load_field();
-						
+
 						$tmp_meta = array(
 						'meta_id' => $tmp_meta_id[$index],
 						'scope' => $this->Content_model->scope,
@@ -1048,7 +1057,7 @@ class Content extends MY_Controller
 						}
 
 						$form_meta["$fd_id"] = $tmp_meta;
-		
+
 					}
 
 					$this->Content_model->metadata = $form_meta;
@@ -1061,10 +1070,10 @@ class Content extends MY_Controller
 						$my_url = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$this->Content_model->temp_lang;
 						redirect($my_url);
 					}
-					
+
 				}
 
-				
+
 			}
 			else
 			{
@@ -1078,10 +1087,10 @@ class Content extends MY_Controller
 	function _content_meta_menu()
     {
 		$menu = '';
-		
+
 		if($this->Content_model->content_id != '')
 		{
-		
+
 			// list active languages
 			$lang_links = array();
 			$this->Content_model->list_langs();
@@ -1093,9 +1102,9 @@ class Content extends MY_Controller
 					$this->Content_model->temp_lang = $llang['ISO_639_3'];
 					$this->Content_model->temp_id = $this->Content_model->content_id;
 					$this->Content_model->load_title();
-	
+
 					$temp_link = 'cms/content/edit/id/'.$this->Content_model->content_id.'/lang/'.$llang['ISO_639_3'];
-	
+
 					if($llang['Native_Name'] != '')
 					{
 						$temp_txt = $llang['Native_Name'];
@@ -1104,27 +1113,27 @@ class Content extends MY_Controller
 					{
 						$temp_txt = $llang['Ref_Name'];
 					}
-					
-	
+
+
 					if($this->Content_model->title != '')
 					{
 						$temp_txt = $this->Content_model->title." ($temp_txt)";
 					}
-	
-					
+
+
 					$lang_links[] = anchor($temp_link,$temp_txt);
 				}
 			}
 
 			$this->Content_model->scope = 'content';
 			$this->Content_model->temp_id = $this->Content_model->content_id;
-			$this->Content_model->temp_lang = $this->Content_model->temp_value;			
+			$this->Content_model->temp_lang = $this->Content_model->temp_value;
 			$my_uri = $this->Content_model->generate_uri();
 			$sort_uri = '/cms/content/sort_content/id/'.$this->Content_model->content_id.'/lang/'.$this->Content_model->temp_lang;
 
 			$my_link = anchor($my_uri,$this->cms_labels['view_content'], array('title' => $this->cms_labels['view_content_title'], 'rel' => 'external'));
 			$sort_link = anchor($sort_uri,$this->cms_labels['sort_children'], array('title' => sprintf($this->cms_labels['sort_children_of'],$this->Content_model->title)));
-			
+
 			$menu .= '<h3>'.sprintf($this->cms_labels['options'],$this->cms_labels['editor'])."</h3>\r";
 			$menu .=  "<ul>\r";
 			$menu .=  "<li>".$my_link."</li>\r";
@@ -1178,7 +1187,7 @@ class Content extends MY_Controller
 
 		$width = round(($this->Site_model->img_size_sm/15)+2.5,3);
 		$height = round(($this->Site_model->img_size_th/15)+2.5,3);
-		
+
 		$custom_header = "<style type=\"text/css\">\r";
 		$custom_header .= "/* <![CDATA[ */\r";
 		$custom_header .= "ul.thumbnails li { min-height: {$height}em; }\r";
@@ -1200,7 +1209,7 @@ class Content extends MY_Controller
 		$this->lang->load('mime', $this->File_model->lang_CI_Name);
 		$mime_cat_labels = $this->lang->line('mime_cat');
 		$mime_labels = $this->lang->line('mime');
-		
+
 		$return_uri = 'cms/content/edit/id/'.$this->Content_model->content_id;
 
 		$breadcrumb[] = anchor("cms",$this->cms_labels['phsite_cms']);
@@ -1212,7 +1221,7 @@ class Content extends MY_Controller
 		$html = "<p>";
 		$html .=  anchor($return_uri,sprintf($this->cms_labels['return_to'],$this->Content_model->title));
 		$html .= "</p>\r";
-		
+
 		$this->File_model->list_files(TRUE,TRUE,TRUE);
 
 		$this->Content_model->list_attachments();
@@ -1255,14 +1264,14 @@ class Content extends MY_Controller
 				$filename = basename($this->File_model->file_uri);
 				$ext = strtolower(preg_replace('#^(.*)\.([a-zA-Z0-9]+)$#','$2',$this->File_model->file_uri));
 				$mid = $this->File_model->media_id;
-	
+
 				// determine edit uri
 				$edit_uri = 'cms/media/edit/id/'.$this->File_model->media_id;
 				if($this->File_model->temp_lang != '')
 				{
 					$edit_uri .= '/lang/'.$this->File_model->temp_lang;
 				}
-	
+
 				$html .= "\t\t\t<th id=\"file-{$mid}\" headers=\"files\">";
 				if($mime_cat == 'image' && $this->File_model->external == 0)
 				{
@@ -1273,7 +1282,7 @@ class Content extends MY_Controller
 					$html .= anchor($edit_uri, $thumb, array('title' => sprintf($this->cms_labels['edit_this'],$filename)))."<br />\r";
 					$html .= "</div>";
 				}
-	
+
 				if(in_array($ext,$this->mime_icons))
 				{
 					$html .= "<span class=\"icon ext_{$ext}\">";
@@ -1300,7 +1309,7 @@ class Content extends MY_Controller
 				'name'        => "remove[]",
 				'value'       => $file['a_id'],
 				);
-				
+
 				$html .= form_checkbox($options);
 
 				$html .= "</td>\r";
@@ -1332,13 +1341,13 @@ class Content extends MY_Controller
 		{
 			$params['title'] = $this->input->xss_clean($title_match);
 		}
-		
+
 		// omit currently attached IDs
 		if (count($now_attached) > 0)
 		{
 			$params['omit'] = $now_attached;
 		}
-		
+
 
 		$base_url = '/cms/content/attachments/'.$this->Content_model->content_id;
 		$html .= $this->_media_form_table($params,$base_url,false,$this->cms_labels['attach']);
@@ -1386,7 +1395,7 @@ class Content extends MY_Controller
 	{
 
 		$this->_process_sort();
-		
+
 		$params = $this->uri->uri_to_assoc(4);
 		if( array_key_exists('id',$params) && $params['id'] != '')
 		{
@@ -1407,7 +1416,7 @@ class Content extends MY_Controller
 		}
 
 		$this->_form_sort();
-		
+
 		$msg = $this->Content_model->_output_messages();
 		if($msg)
 		{
@@ -1433,21 +1442,21 @@ class Content extends MY_Controller
 
 		$this->data['title_tag'] = $this->cms_labels['sort_children'];
 		$this->data['title_h1'] = $title;
-		
+
 		$this->data['sidebar'] = $this->_content_meta_menu();
 		$this->_load_cms_menus();
 
 		$this->load->view('cms/cms_form_2col',$this->data);
 
 	}
-	
+
 	function _form_sort()
 	{
 		$this->Content_model->sort_order = array('sort_order' => 'asc', 'title' => 'asc');
 		$this->Content_model->limit = '';
 		$this->Content_model->sort_by = '';
 		$this->Content_model->list_content();
-		
+
 		$action = "/cms/content/sort_content";
 		if($this->Content_model->parent_id != '')
 		{
@@ -1462,7 +1471,7 @@ class Content extends MY_Controller
 		$hidden = array(
 		'parent_id' => $this->Content_model->parent_id,
 		);
-		
+
 		$html = form_open($action,$attributes,$hidden)."\r";
 
 		$html .= "<div class=\"align-labels label-wide\">\r";
@@ -1483,7 +1492,7 @@ class Content extends MY_Controller
 			$row_header = form_hidden('content_id[]', $child['content_id']);
 			$row_header .= form_hidden('title[]', $child['title']);
 			$row_header .= $child['title'];
-	
+
 			$params = array(
 			'name'        => "order[]",
 			'id'          => "order[]",
@@ -1493,7 +1502,7 @@ class Content extends MY_Controller
 			);
 
 			$input_order = form_input($params);
-			
+
 			$html .= "<tr>\r";
 			$html .= "<th headers=\"hd_title\" id=\"row_{$child['content_id']}\" class=\"align-left\">".$row_header."</th>\r";
 			$html .= "<td headers=\"hd_order row_{$child['content_id']}\">".$input_order."</td>\r";
@@ -1513,7 +1522,7 @@ class Content extends MY_Controller
 
 		$this->data['form'] = $html;
 	}
-	
+
 	function _process_sort()
 	{
 
@@ -1527,7 +1536,7 @@ class Content extends MY_Controller
 			$this->form_validation->set_rules('sort_order', $this->cms_labels['order'], 'required');
 
 			$form_is_valid = $this->form_validation->run();
-			
+
 			if ($form_is_valid)
 			{
 
@@ -1535,7 +1544,7 @@ class Content extends MY_Controller
 				$temp_order = $this->input->post('sort_order');
 				$temp_titles = $this->input->post('title');
 				$updates = array();
-	
+
 				foreach($temp_ids as $index => $id)
 				{
 					$temp_content = array(
@@ -1543,13 +1552,13 @@ class Content extends MY_Controller
 					'sort_order' => $temp_order[$index],
 					'title' => $temp_titles[$index],
 					);
-					
+
 					$updates[] = $temp_content;
 				}
 
 				$this->Content_model->temp_value = $updates;
 				$updated = $this->Content_model->update_order();
-				
+
 				if($updated)
 				{
 					$this->Content_model->messages[] = $this->cms_labels['sort_update_success'];
@@ -1559,8 +1568,8 @@ class Content extends MY_Controller
 			{
 				$this->Content_model->messages[] = validation_errors();
 			}
-			
-			
+
+
 		}
 
 	}

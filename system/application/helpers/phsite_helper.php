@@ -647,33 +647,7 @@ if ( ! function_exists('email_user_info'))
 
 if ( ! function_exists('sort_array_multi'))
 {
-// 	function sort_array_multi($data,$sort=array('date' => 'desc'))
-// 	{
-//
-// 		$date = array();
-// 		$order = array();
-// 		$title = array();
-// 		// Obtain a list of columns
-// 		foreach ($data as $key => $row) {
-// 			$date[$key]  = $row['date_created'];
-// 			$order[$key] = $row['order'];
-// 			$title[$key] = $row['title'];
-// 		}
-//
-// 		$txt = 'array_multisort(';
-// 		// generate sort order
-// 		foreach ($sort as $key => $dir) {
-// 			$txt .= '$'.$key.', SORT_'.strtoupper($dir).', ';
-// 		}
-// 		$txt .= '$data);';
-//
-// 		eval($txt);
-//
-// 		return $data;
-//
-// 	}
-
-function sort_array_multi($data,$sort=array('date' => 'desc'))
+    function sort_array_multi($data,$sort=array('date' => 'desc'))
 	{
 
     if(is_array($data) && 0 < count($data)) {
@@ -722,5 +696,8 @@ if ( ! function_exists('excerpt'))
 		return $text;
 	}
 }
+
+
+
 /* End of file phsite_helper.php */
 /* Location: ./system/application/helpers/phsite_helper.php */
