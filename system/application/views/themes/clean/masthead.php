@@ -43,7 +43,7 @@ if(isset($other_langs) && count($other_langs) > 0)
 		}
 	}
 	$languages = implode(' | ', $langlinks);
-	echo "\t<div class=\"wrap\" id=\"languages\">{$cms_labels['languages_other']} : {$languages}</div>\r";
+	echo "\t<div class=\"wrap margin-v\" id=\"languages\">{$cms_labels['languages_other']} : {$languages}</div>\r";
 }
 ?>
 <!-- end breadcrumb-->

@@ -231,6 +231,8 @@ body *:first-child {margin-top: 0;}
 	.padded { padding: 0.75em }
 	.pad-h { padding: 0 0.75em }
 	.pad-v { padding: 0.75em 0}
+	.margin-h { margin-inline: 0.75em }
+	.margin-v { margin-block: 0.75em }
 	
 	/* alignment */
 	
